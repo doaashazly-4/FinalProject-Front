@@ -1,0 +1,4 @@
+/* Login Component - Tailwind Overrides */
+:host {
+  @apply block;
+}

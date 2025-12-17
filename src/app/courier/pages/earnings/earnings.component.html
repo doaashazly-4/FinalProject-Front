@@ -1,0 +1,93 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div>
+    <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">الأرباح</h1>
+    <p class="text-gray-600 mt-1">تتبع أرباحك ومدفوعاتك</p>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="flex justify-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent"></div>
+  </div>
+
+  <div *ngIf="!isLoading && earnings" class="space-y-6">
+    <!-- Main Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-gradient-to-br from-primary-green to-secondary-teal rounded-2xl p-6 text-white">
+        <div class="flex items-center justify-between mb-4">
+          <p class="text-white/80">أرباح اليوم</p>
+          <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+            <i class="bi bi-calendar-day text-xl"></i>
+          </div>
+        </div>
+        <p class="text-4xl font-black">{{ earnings.today }}</p>
+        <p class="text-white/70 text-sm">جنيه مصري</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
+          <p class="text-gray-500">هذا الأسبوع</p>
+          <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+            <i class="bi bi-calendar-week text-blue-600 text-xl"></i>
+          </div>
+        </div>
+        <p class="text-3xl font-black text-primary-dark">{{ earnings.thisWeek }}</p>
+        <p class="text-gray-500 text-sm">جنيه مصري</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
+          <p class="text-gray-500">هذا الشهر</p>
+          <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+            <i class="bi bi-calendar-month text-purple-600 text-xl"></i>
+          </div>
+        </div>
+        <p class="text-3xl font-black text-primary-dark">{{ earnings.thisMonth }}</p>
+        <p class="text-gray-500 text-sm">جنيه مصري</p>
+      </div>
+    </div>
+
+    <!-- Secondary Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-500 text-sm">أرباح معلقة</p>
+            <p class="text-2xl font-black text-yellow-600 mt-1">{{ earnings.pending }} ج.م</p>
+            <p class="text-xs text-gray-500 mt-2">ستُضاف بعد إتمام المهام</p>
+          </div>
+          <div class="w-16 h-16 rounded-2xl bg-yellow-100 flex items-center justify-center">
+            <i class="bi bi-hourglass-split text-yellow-600 text-2xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-500 text-sm">إجمالي الأرباح</p>
+            <p class="text-2xl font-black text-primary-dark mt-1">{{ earnings.totalEarned }} ج.م</p>
+            <p class="text-xs text-gray-500 mt-2">منذ بداية العمل</p>
+          </div>
+          <div class="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center">
+            <i class="bi bi-cash-stack text-emerald-600 text-2xl"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="bg-gradient-to-l from-blue-50 to-cyan-50 rounded-2xl p-5 border border-blue-100">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+          <i class="bi bi-info-circle text-blue-600 text-xl"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-blue-800">كيف تزيد أرباحك؟</h3>
+          <p class="text-blue-600 text-sm mt-1">أكمل المزيد من المهام واحصل على تقييمات عالية لزيادة فرصك في الحصول على مهام أكثر</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

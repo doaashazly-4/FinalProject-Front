@@ -1,0 +1,205 @@
+<!-- Hero Section -->
+<section id="home" class="relative min-h-screen flex items-center overflow-hidden pt-24 pb-16 lg:pt-32 lg:pb-20">
+  <!-- Background Image with Overlay -->
+  <div class="absolute inset-0 z-0">
+    <img src="/assets/Images/pexels-norma-mortenson-4393668.jpg" alt="توصيل سريع" class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-br from-primary-dark/95 to-secondary-teal/90"></div>
+  </div>
+  
+  <div class="container mx-auto px-4 lg:px-8 relative z-10">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <!-- Content -->
+      <div class="text-white" [@fadeInLeft]>
+        <!-- Badge -->
+        <div class="inline-flex items-center gap-2 px-6 py-3 bg-primary-green/20 backdrop-blur-md border border-primary-green/40 rounded-full mb-8 shadow-lg">
+          <i class="bi bi-lightning-charge-fill text-accent-gold text-lg"></i>
+          <span class="text-primary-green font-bold">خدمة توصيل رائدة</span>
+        </div>
+        
+        <!-- Title -->
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-6">
+          توصيل سريع
+          <span class="block bg-gradient-to-l from-accent-gold to-accent-gold-dark bg-clip-text text-transparent">ومضمون</span>
+          لجميع احتياجاتك
+        </h1>
+        
+        <!-- Description -->
+        <p class="text-lg md:text-xl text-white/90 leading-relaxed mb-10 max-w-xl">
+          نحن نقدم خدمة توصيل سريعة وموثوقة لجميع منتجاتك. 
+          اطلب الآن واحصل على توصيل مجاني للطلبات التي تزيد عن 100 ريال
+        </p>
+        
+        <!-- Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 mb-12" [@fadeInUp]>
+          <a routerLink="/register" 
+             class="flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-br from-primary-green to-primary-green-dark text-white font-bold text-lg rounded-2xl shadow-green-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <i class="bi bi-cart-plus"></i>
+            <span>اطلب الآن</span>
+          </a>
+          <a routerLink="/available-couriers" 
+             class="flex items-center justify-center gap-3 px-8 py-4 bg-white/10 backdrop-blur-md border-2 border-white/30 text-white font-bold text-lg rounded-2xl hover:bg-white/20 hover:-translate-y-1 transition-all duration-300">
+            <i class="bi bi-truck"></i>
+            <span>الموصلون المتاحون</span>
+          </a>
+        </div>
+        
+        <!-- Stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" [@slideInUp]>
+          <div *ngFor="let stat of stats" 
+               class="flex items-center gap-4 p-5 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl hover:bg-white/20 hover:-translate-y-2 transition-all duration-300">
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-green/30 to-secondary-teal/30 border border-primary-green/30 flex items-center justify-center">
+              <i [class]="'bi ' + stat.icon + ' text-primary-green text-2xl'"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-black text-white">{{ stat.value }}</h3>
+              <p class="text-sm text-white/75">{{ stat.label }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Hero Image -->
+      <div class="relative hidden lg:block" [@fadeInRight]>
+        <div class="relative">
+          <img src="/assets/Images/pexels-rdne-7362949.jpg" alt="توصيل" 
+               class="w-full rounded-3xl shadow-2xl border-4 border-white/20">
+          
+          <!-- Floating Badges -->
+          <div class="absolute -top-5 right-5 flex items-center gap-2 px-5 py-3 bg-white rounded-full shadow-xl animate-float">
+            <i class="bi bi-lightning-charge text-primary-green text-lg"></i>
+            <span class="font-bold text-primary-dark">توصيل سريع</span>
+          </div>
+          <div class="absolute -bottom-5 left-5 flex items-center gap-2 px-5 py-3 bg-white rounded-full shadow-xl animate-float" style="animation-delay: 1.5s">
+            <i class="bi bi-shield-check text-primary-green text-lg"></i>
+            <span class="font-bold text-primary-dark">آمن ومضمون</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Services Section -->
+<section id="services" class="py-20 lg:py-28 bg-white">
+  <div class="container mx-auto px-4 lg:px-8">
+    <!-- Section Header -->
+    <div class="text-center mb-16" [@fadeInUp]>
+      <span class="section-badge mb-4">خدماتنا</span>
+      <h2 class="section-title">خدماتنا المميزة</h2>
+      <p class="section-description">نقدم لك أفضل خدمات التوصيل بأعلى معايير الجودة والسرعة</p>
+    </div>
+    
+    <!-- Services Grid -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" [@slideInCards]>
+      <div *ngFor="let service of services" 
+           class="group bg-white p-8 rounded-3xl border-2 border-gray-100 shadow-sm hover:shadow-dark hover:border-primary-green hover:-translate-y-3 transition-all duration-300 text-center relative overflow-hidden">
+        <!-- Top Border Animation -->
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-l from-primary-green to-secondary-teal scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-right"></div>
+        
+        <!-- Icon -->
+        <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary-green to-secondary-teal flex items-center justify-center shadow-green group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+          <i [class]="'bi ' + service.icon + ' text-white text-3xl'"></i>
+        </div>
+        
+        <h3 class="text-xl font-bold text-primary-dark mb-4">{{ service.title }}</h3>
+        <p class="text-gray-600 leading-relaxed">{{ service.description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Section -->
+<section id="how-it-works" class="py-20 lg:py-28 bg-gradient-to-br from-gray-50 to-gray-100">
+  <div class="container mx-auto px-4 lg:px-8">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <!-- Image -->
+      <div class="order-2 lg:order-1" [@fadeInLeft]>
+        <img src="/assets/Images/Dropshipping model-bro.png" alt="كيف يعمل" 
+             class="w-full rounded-3xl shadow-dark-lg hover:scale-[1.02] transition-transform duration-300">
+      </div>
+      
+      <!-- Steps -->
+      <div class="order-1 lg:order-2">
+        <div class="text-center lg:text-right mb-12" [@fadeInUp]>
+          <span class="section-badge mb-4">كيف يعمل</span>
+          <h2 class="section-title">كيف يعمل نظامنا</h2>
+          <p class="section-description lg:mx-0">عملية بسيطة وسريعة في 3 خطوات فقط</p>
+        </div>
+        
+        <div class="space-y-6" [@fadeInRight]>
+          <div *ngFor="let step of steps" 
+               class="group flex items-start gap-5 p-6 bg-white rounded-2xl border-2 border-gray-100 shadow-sm hover:shadow-lg hover:border-primary-green hover:translate-x-2 transition-all duration-300" [@scaleIn]>
+            <!-- Step Number -->
+            <div class="w-16 h-16 flex-shrink-0 rounded-xl bg-gradient-to-br from-primary-green to-secondary-teal flex items-center justify-center shadow-green group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+              <span class="text-2xl font-black text-white">{{ step.number }}</span>
+            </div>
+            <!-- Content -->
+            <div>
+              <h4 class="text-xl font-bold text-primary-dark mb-2">{{ step.title }}</h4>
+              <p class="text-gray-600 leading-relaxed">{{ step.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-20 lg:py-28 bg-white">
+  <div class="container mx-auto px-4 lg:px-8">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <!-- Features List -->
+      <div class="order-2 lg:order-1">
+        <div class="text-center lg:text-right mb-12" [@fadeInLeft]>
+          <span class="section-badge mb-4">لماذا نحن</span>
+          <h2 class="section-title">لماذا تختارنا؟</h2>
+        </div>
+        
+        <div class="space-y-5">
+          <div *ngFor="let feature of features" 
+               class="group flex items-start gap-5 p-5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-transparent hover:bg-white hover:border-primary-green hover:shadow-lg hover:translate-x-2 transition-all duration-300" [@fadeInUp]>
+            <!-- Icon -->
+            <div class="w-14 h-14 flex-shrink-0 rounded-xl bg-gradient-to-br from-primary-green to-secondary-teal flex items-center justify-center shadow-green">
+              <i [class]="'bi ' + feature.icon + ' text-white text-xl'"></i>
+            </div>
+            <!-- Content -->
+            <div>
+              <h5 class="text-lg font-bold text-primary-dark mb-1">{{ feature.title }}</h5>
+              <p class="text-gray-600 text-sm leading-relaxed">{{ feature.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Image -->
+      <div class="order-1 lg:order-2" [@fadeInRight]>
+        <img src="/assets/Images/Successful purchase-cuate.png" alt="مميزات" 
+             class="w-full rounded-3xl shadow-dark-lg hover:scale-[1.02] transition-transform duration-300">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="relative py-20 lg:py-28 overflow-hidden">
+  <!-- Background -->
+  <div class="absolute inset-0 z-0">
+    <img src="/assets/Images/pexels-artempodrez-5025669.jpg" alt="CTA" class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-br from-primary-dark/95 to-secondary-teal/90"></div>
+  </div>
+  
+  <div class="container mx-auto px-4 lg:px-8 relative z-10">
+    <div class="text-center text-white" [@fadeInUp]>
+      <h2 class="text-3xl md:text-4xl lg:text-5xl font-black mb-6">جاهز للبدء؟</h2>
+      <p class="text-xl md:text-2xl text-white/90 mb-10 max-w-2xl mx-auto">
+        انضم إلى آلاف العملاء الراضين واحصل على أفضل تجربة توصيل
+      </p>
+      <a routerLink="/register" 
+         class="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-br from-primary-green to-primary-green-dark text-white font-bold text-lg rounded-2xl shadow-green-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        <span>ابدأ التسوق الآن</span>
+        <i class="bi bi-arrow-left"></i>
+      </a>
+    </div>
+  </div>
+</section>

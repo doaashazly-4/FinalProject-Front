@@ -1,0 +1,145 @@
+<div class="products-page">
+  <!-- رأس الصفحة -->
+  <header class="head">
+    <div class="head-left">
+      <p class="overline">المنتجات</p>
+      <h2>إدارة المنتجات</h2>
+    </div>
+    <div class="head-right">
+      <button class="btn-primary" routerLink="/supplier/products/add">
+        <i class="bi bi-plus-circle"></i>
+        إضافة منتج جديد
+      </button>
+    </div>
+  </header>
+
+  <!-- إحصائيات سريعة -->
+  <section class="stats-cards">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: #4CAF50;">
+        <i class="bi bi-box-seam"></i>
+      </div>
+      <div>
+        <p class="stat-label">إجمالي المنتجات</p>
+        <h3 class="stat-value">{{ stats.total }}</h3>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background: #2196F3;">
+        <i class="bi bi-check-circle"></i>
+      </div>
+      <div>
+        <p class="stat-label">المنتجات النشطة</p>
+        <h3 class="stat-value">{{ stats.active }}</h3>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background: #FF9800;">
+        <i class="bi bi-exclamation-triangle"></i>
+      </div>
+      <div>
+        <p class="stat-label">منخفضة المخزون</p>
+        <h3 class="stat-value">{{ stats.lowStock }}</h3>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background: #F44336;">
+        <i class="bi bi-x-circle"></i>
+      </div>
+      <div>
+        <p class="stat-label">نفذ من المخزون</p>
+        <h3 class="stat-value">{{ stats.outOfStock }}</h3>
+      </div>
+    </div>
+  </section>
+
+  <!-- أدوات البحث والتصفية -->
+  <section class="filters">
+    <div class="search-box">
+      <i class="bi bi-search"></i>
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (ngModelChange)="filterProducts()"
+        placeholder="ابحث عن منتج..."
+      />
+    </div>
+    <div class="filter-options">
+      <select [(ngModel)]="selectedCategory" (ngModelChange)="filterProducts()">
+        <option value="all">جميع الفئات</option>
+        <option value="electronics">إلكترونيات</option>
+        <option value="clothing">ملابس</option>
+        <option value="food">مواد غذائية</option>
+        <option value="books">كتب</option>
+      </select>
+      <button class="btn-secondary">
+        <i class="bi bi-filter"></i>
+        المزيد من الفلاتر
+      </button>
+    </div>
+  </section>
+
+  <!-- قائمة المنتجات -->
+  <section class="products-list">
+    <div class="table-header">
+      <div class="header-cell">الصورة</div>
+      <div class="header-cell">اسم المنتج</div>
+      <div class="header-cell">الوصف</div>
+      <div class="header-cell">السعر</div>
+      <div class="header-cell">الكمية</div>
+      <div class="header-cell">الحالة</div>
+      <div class="header-cell">الإجراءات</div>
+    </div>
+
+    <div class="table-body">
+      <div class="product-row" *ngFor="let product of filteredProducts">
+        <div class="product-image">
+          <img [src]="product.imageUrl || 'assets/images/default-product.png'" 
+               [alt]="product.name"
+               class="product-img">
+        </div>
+        <div class="product-name">
+          <strong>{{ product.name }}</strong>
+          <small>{{ product.category }}</small>
+        </div>
+        <div class="product-description">
+          {{ product.description | slice:0:50 }}{{ product.description.length > 50 ? '...' : '' }}
+        </div>
+        <div class="product-price">
+          {{ product.price | currency:'EGP':'symbol':'1.2-2' }}
+        </div>
+        <div class="product-quantity">
+          <span class="stock-badge" [ngClass]="getStockStatus(product.quantity)">
+            {{ getStockText(product.quantity) }}
+          </span>
+        </div>
+        <div class="product-status">
+          <span class="status-badge" [ngClass]="product.status">
+            {{ getStatusText(product.status) }}
+          </span>
+        </div>
+        <div class="product-actions">
+          <button class="btn-icon" [routerLink]="['/supplier/products/edit', product.id]">
+            <i class="bi bi-pencil"></i>
+          </button>
+          <button class="btn-icon btn-danger" (click)="deleteProduct(product.id)">
+            <i class="bi bi-trash"></i>
+          </button>
+          <button class="btn-icon" [routerLink]="['/supplier/products/view', product.id]">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- إذا لم توجد منتجات -->
+    <div class="empty-state" *ngIf="filteredProducts.length === 0">
+      <i class="bi bi-box"></i>
+      <h3>لا توجد منتجات</h3>
+      <p>لم تقم بإضافة أي منتجات بعد</p>
+      <button class="btn-primary" routerLink="/supplier/products/add">
+        إضافة منتج جديد
+      </button>
+    </div>
+  </section>
+</div>

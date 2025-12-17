@@ -1,0 +1,4 @@
+/* Footer Component - Tailwind Overrides */
+:host {
+  @apply block;
+}

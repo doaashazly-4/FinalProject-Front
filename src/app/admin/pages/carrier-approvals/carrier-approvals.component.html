@@ -1,0 +1,286 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">موافقات المناديب</h1>
+      <p class="text-gray-600 mt-1">مراجعة طلبات تسجيل المناديب الجدد والموافقة عليها أو رفضها</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="px-4 py-2 bg-orange-100 text-orange-700 rounded-xl font-bold text-sm">
+        <i class="bi bi-hourglass-split ml-2"></i>
+        {{ pendingCarriers.length }} طلب معلق
+      </span>
+      <button (click)="loadPendingCarriers()" 
+              class="p-2 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+              [disabled]="isLoading">
+        <i class="bi bi-arrow-clockwise text-lg" [class.animate-spin]="isLoading"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl flex items-center gap-3 animate-fade-in">
+    <i class="bi bi-check-circle-fill text-2xl"></i>
+    <span class="font-medium">{{ successMessage }}</span>
+    <button (click)="clearMessages()" class="mr-auto text-green-600 hover:text-green-800">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl flex items-center gap-3 animate-fade-in">
+    <i class="bi bi-exclamation-circle-fill text-2xl"></i>
+    <span class="font-medium">{{ errorMessage }}</span>
+    <button (click)="clearMessages()" class="mr-auto text-red-600 hover:text-red-800">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4"></div>
+      <p class="text-gray-500">جاري تحميل طلبات المناديب...</p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading" class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <!-- Carriers List -->
+    <div class="xl:col-span-1">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-4 border-b border-gray-100 bg-gray-50">
+          <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+            <i class="bi bi-people text-primary-green"></i>
+            طلبات التسجيل
+          </h2>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="pendingCarriers.length === 0" class="p-8 text-center">
+          <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+            <i class="bi bi-check-circle text-green-500 text-4xl"></i>
+          </div>
+          <h3 class="font-bold text-gray-700 mb-2">لا توجد طلبات معلقة</h3>
+          <p class="text-gray-500 text-sm">جميع طلبات المناديب تمت مراجعتها</p>
+        </div>
+
+        <!-- Carriers List -->
+        <div *ngIf="pendingCarriers.length > 0" class="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
+          <div *ngFor="let carrier of pendingCarriers"
+               (click)="selectCarrier(carrier)"
+               class="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+               [class.bg-primary-green]="selectedCarrier?.id === carrier.id"
+               [class.bg-opacity-10]="selectedCarrier?.id === carrier.id"
+               [class.border-r-4]="selectedCarrier?.id === carrier.id"
+               [class.border-primary-green]="selectedCarrier?.id === carrier.id">
+            <div class="flex items-center gap-4">
+              <!-- Avatar -->
+              <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center flex-shrink-0">
+                <i class="bi text-orange-600 text-2xl" [ngClass]="getVehicleIcon(carrier.vehicleType)"></i>
+              </div>
+              
+              <div class="flex-1 min-w-0">
+                <h3 class="font-bold text-primary-dark truncate">{{ carrier.name }}</h3>
+                <p class="text-sm text-gray-500 truncate">{{ carrier.phone }}</p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-xs text-gray-400">
+                    <i class="bi bi-clock ml-1"></i>
+                    {{ getTimeSinceApplication(carrier.appliedAt) }}
+                  </span>
+                  <span class="px-2 py-0.5 bg-orange-100 text-orange-600 text-xs font-bold rounded-full">
+                    {{ getVehicleTypeArabic(carrier.vehicleType) }}
+                  </span>
+                </div>
+              </div>
+
+              <i class="bi bi-chevron-left text-gray-400"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Carrier Details -->
+    <div class="xl:col-span-2">
+      <!-- No Selection State -->
+      <div *ngIf="!selectedCarrier" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+        <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
+          <i class="bi bi-person-badge text-gray-400 text-4xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-700 mb-2">اختر طلب للمراجعة</h3>
+        <p class="text-gray-500">اضغط على أحد الطلبات من القائمة لعرض التفاصيل</p>
+      </div>
+
+      <!-- Selected Carrier Details -->
+      <div *ngIf="selectedCarrier" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <!-- Header -->
+        <div class="p-6 bg-gradient-to-br from-primary-dark to-primary-dark-light text-white">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-20 h-20 rounded-2xl bg-white/20 flex items-center justify-center">
+                <i class="bi text-4xl" [ngClass]="getVehicleIcon(selectedCarrier.vehicleType)"></i>
+              </div>
+              <div>
+                <h2 class="text-2xl font-black">{{ selectedCarrier.name }}</h2>
+                <p class="text-white/70">{{ selectedCarrier.email }}</p>
+                <p class="text-white/70">{{ selectedCarrier.phone }}</p>
+              </div>
+            </div>
+            <button (click)="closeDetails()" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
+              <i class="bi bi-x-lg text-xl"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Details Content -->
+        <div class="p-6 space-y-6">
+          <!-- Basic Info -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 bg-gray-50 rounded-xl">
+              <p class="text-sm text-gray-500 mb-1">نوع المركبة</p>
+              <p class="font-bold text-primary-dark flex items-center gap-2">
+                <i class="bi text-primary-green" [ngClass]="getVehicleIcon(selectedCarrier.vehicleType)"></i>
+                {{ getVehicleTypeArabic(selectedCarrier.vehicleType) }}
+              </p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-xl">
+              <p class="text-sm text-gray-500 mb-1">رقم الرخصة</p>
+              <p class="font-bold text-primary-dark">{{ selectedCarrier.licenseNumber }}</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-xl">
+              <p class="text-sm text-gray-500 mb-1">الحد الأقصى للوزن</p>
+              <p class="font-bold text-primary-dark">{{ selectedCarrier.maxWeight }} كجم</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-xl">
+              <p class="text-sm text-gray-500 mb-1">تاريخ التقديم</p>
+              <p class="font-bold text-primary-dark">{{ formatDate(selectedCarrier.appliedAt) }}</p>
+            </div>
+          </div>
+
+          <!-- Address -->
+          <div class="p-4 bg-gray-50 rounded-xl">
+            <p class="text-sm text-gray-500 mb-1">العنوان</p>
+            <p class="font-bold text-primary-dark">{{ selectedCarrier.address }}</p>
+          </div>
+
+          <!-- Documents Section -->
+          <div>
+            <h3 class="text-lg font-bold text-primary-dark mb-4 flex items-center gap-2">
+              <i class="bi bi-file-earmark-image text-primary-green"></i>
+              المستندات والصور
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <!-- Profile Photo -->
+              <div class="text-center">
+                <div (click)="openImageViewer(selectedCarrier.photoUrl || '', 'الصورة الشخصية')"
+                     class="w-full aspect-square rounded-xl bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-primary-green hover:bg-primary-green/5 transition-all overflow-hidden">
+                  <img *ngIf="selectedCarrier.photoUrl" [src]="selectedCarrier.photoUrl" alt="الصورة الشخصية" class="w-full h-full object-cover">
+                  <i *ngIf="!selectedCarrier.photoUrl" class="bi bi-person text-4xl text-gray-400"></i>
+                </div>
+                <p class="text-sm text-gray-600 mt-2">الصورة الشخصية</p>
+              </div>
+
+              <!-- ID Photo -->
+              <div class="text-center">
+                <div (click)="openImageViewer(selectedCarrier.idPhotoUrl || '', 'صورة البطاقة')"
+                     class="w-full aspect-square rounded-xl bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-primary-green hover:bg-primary-green/5 transition-all overflow-hidden">
+                  <img *ngIf="selectedCarrier.idPhotoUrl" [src]="selectedCarrier.idPhotoUrl" alt="صورة البطاقة" class="w-full h-full object-cover">
+                  <i *ngIf="!selectedCarrier.idPhotoUrl" class="bi bi-credit-card-2-front text-4xl text-gray-400"></i>
+                </div>
+                <p class="text-sm text-gray-600 mt-2">صورة البطاقة</p>
+              </div>
+
+              <!-- License Front -->
+              <div class="text-center">
+                <div (click)="openImageViewer(selectedCarrier.licensePhotoFront || '', 'رخصة القيادة (الأمام)')"
+                     class="w-full aspect-square rounded-xl bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-primary-green hover:bg-primary-green/5 transition-all overflow-hidden">
+                  <img *ngIf="selectedCarrier.licensePhotoFront" [src]="selectedCarrier.licensePhotoFront" alt="رخصة القيادة" class="w-full h-full object-cover">
+                  <i *ngIf="!selectedCarrier.licensePhotoFront" class="bi bi-file-earmark text-4xl text-gray-400"></i>
+                </div>
+                <p class="text-sm text-gray-600 mt-2">رخصة القيادة (أمام)</p>
+              </div>
+
+              <!-- License Back -->
+              <div class="text-center">
+                <div (click)="openImageViewer(selectedCarrier.licensePhotoBack || '', 'رخصة القيادة (الخلف)')"
+                     class="w-full aspect-square rounded-xl bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-primary-green hover:bg-primary-green/5 transition-all overflow-hidden">
+                  <img *ngIf="selectedCarrier.licensePhotoBack" [src]="selectedCarrier.licensePhotoBack" alt="رخصة القيادة خلف" class="w-full h-full object-cover">
+                  <i *ngIf="!selectedCarrier.licensePhotoBack" class="bi bi-file-earmark text-4xl text-gray-400"></i>
+                </div>
+                <p class="text-sm text-gray-600 mt-2">رخصة القيادة (خلف)</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200">
+            <button (click)="approveCarrier(selectedCarrier)"
+                    [disabled]="isProcessing"
+                    class="flex-1 py-4 px-6 bg-gradient-to-br from-green-500 to-green-600 text-white font-bold rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+              <i class="bi bi-check-circle text-xl"></i>
+              <span *ngIf="!isProcessing">قبول الطلب</span>
+              <span *ngIf="isProcessing">جاري المعالجة...</span>
+            </button>
+            <button (click)="openRejectModal(selectedCarrier)"
+                    [disabled]="isProcessing"
+                    class="flex-1 py-4 px-6 bg-gradient-to-br from-red-500 to-red-600 text-white font-bold rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+              <i class="bi bi-x-circle text-xl"></i>
+              <span>رفض الطلب</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rejection Modal -->
+<div *ngIf="showRejectModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <!-- Overlay -->
+  <div class="absolute inset-0 bg-black/50" (click)="closeRejectModal()"></div>
+  
+  <!-- Modal -->
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in">
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+        <i class="bi bi-x-circle text-red-500 text-3xl"></i>
+      </div>
+      <h3 class="text-xl font-bold text-primary-dark">رفض طلب المندوب</h3>
+      <p class="text-gray-600 mt-2">{{ carrierToReject?.name }}</p>
+    </div>
+
+    <div class="mb-6">
+      <label class="block text-sm font-bold text-gray-700 mb-2">سبب الرفض *</label>
+      <textarea [(ngModel)]="rejectionReason"
+                rows="4"
+                placeholder="اكتب سبب رفض الطلب (سيتم إرساله للمندوب)..."
+                class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"></textarea>
+    </div>
+
+    <div class="flex gap-3">
+      <button (click)="closeRejectModal()"
+              class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors">
+        إلغاء
+      </button>
+      <button (click)="confirmReject()"
+              [disabled]="!rejectionReason.trim() || isProcessing"
+              class="flex-1 py-3 px-4 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+        <span *ngIf="!isProcessing">تأكيد الرفض</span>
+        <span *ngIf="isProcessing">جاري المعالجة...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Image Viewer Modal -->
+<div *ngIf="showImageViewer" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90" (click)="closeImageViewer()">
+  <div class="relative max-w-4xl w-full" (click)="$event.stopPropagation()">
+    <button (click)="closeImageViewer()" 
+            class="absolute -top-12 left-0 text-white hover:text-gray-300 transition-colors">
+      <i class="bi bi-x-lg text-3xl"></i>
+    </button>
+    <p class="absolute -top-12 right-0 text-white font-bold">{{ currentImageTitle }}</p>
+    <img [src]="currentImage" [alt]="currentImageTitle" class="w-full rounded-2xl shadow-2xl">
+  </div>
+</div>
+

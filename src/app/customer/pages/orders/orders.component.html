@@ -1,0 +1,33 @@
+<div class="orders-page">
+  <header class="orders-head">
+    <div>
+      <p class="overline">إدارة الطلبات</p>
+      <h2>جميع طلباتك في مكان واحد</h2>
+    </div>
+    <div class="filters">
+      <button class="chip" [class.active]="filter === 'الكل'" (click)="filter = 'الكل'">الكل</button>
+      <button class="chip" [class.active]="filter === 'جارٍ التنفيذ'" (click)="filter = 'جارٍ التنفيذ'">جارٍ التنفيذ</button>
+      <button class="chip" [class.active]="filter === 'مكتمل'" (click)="filter = 'مكتمل'">مكتمل</button>
+      <button class="chip" [class.active]="filter === 'ملغي'" (click)="filter = 'ملغي'">ملغي</button>
+    </div>
+  </header>
+
+  <div class="orders-grid">
+    <div class="order-card" *ngFor="let order of filteredOrders()">
+      <div class="order-card-head">
+        <div class="order-id">{{ order.id }}</div>
+        <div class="status" [ngClass]="order.status">{{ order.status }}</div>
+      </div>
+      <p class="dest">{{ order.destination }}</p>
+      <div class="order-meta">
+        <span><i class="bi bi-calendar-event"></i> {{ order.date }}</span>
+        <span><i class="bi bi-currency-dollar"></i> {{ order.amount | currency:'EGP':'symbol':'1.0-0' }}</span>
+      </div>
+      <div class="order-actions">
+        <button class="ghost">تفاصيل</button>
+        <button class="primary">تتبع</button>
+      </div>
+    </div>
+  </div>
+</div>
+

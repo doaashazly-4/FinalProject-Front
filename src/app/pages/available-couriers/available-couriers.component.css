@@ -1,0 +1,4 @@
+/* Available Couriers Component - Tailwind Overrides */
+:host {
+  @apply block;
+}

@@ -1,0 +1,84 @@
+<!-- Delivery Proof Modal -->
+<div *ngIf="isVisible" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <!-- Overlay -->
+  <div class="absolute inset-0 bg-black/50" (click)="closeModal()"></div>
+
+  <!-- Modal -->
+  <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div class="p-6">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-primary-dark">إثبات التسليم</h2>
+        <button (click)="closeModal()" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+          <i class="bi bi-x text-gray-500 text-xl"></i>
+        </button>
+      </div>
+
+      <!-- Photos Section -->
+      <div class="mb-6">
+        <h3 class="font-semibold text-gray-800 mb-3">التقاط الصور (1-3 صور) <span class="text-red-500">*</span></h3>
+        <div class="grid grid-cols-3 gap-3 mb-3">
+          <div *ngFor="let preview of photoPreviews; let i = index"
+               class="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 border-primary-green">
+            <img [src]="preview" alt="Proof photo" class="w-full h-full object-cover">
+            <button (click)="removePhoto(i)"
+                    class="absolute top-1 right-1 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 transition-colors">
+              <i class="bi bi-x"></i>
+            </button>
+          </div>
+          <button *ngIf="photoPreviews.length < 3"
+                  (click)="takePhoto()"
+                  class="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-primary-green hover:text-primary-green transition-colors bg-gray-50">
+            <i class="bi bi-camera text-3xl mb-2"></i>
+            <span class="text-xs font-medium">إضافة صورة</span>
+          </button>
+        </div>
+        <p class="text-xs text-gray-500">التقط صورة للطرد والعميل لإثبات التسليم (إلزامي)</p>
+      </div>
+
+      <!-- OTP Section (for COD/high-value) -->
+      <div *ngIf="requiresOTP" class="mb-6">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold text-gray-800">رمز التحقق (OTP) <span class="text-red-500">*</span></h3>
+          <button (click)="sendOTP()"
+                  class="px-3 py-1.5 bg-primary-green text-white rounded-lg text-xs font-semibold hover:bg-primary-green-dark transition-colors">
+            <i class="bi bi-send ml-1"></i>
+            إرسال OTP
+          </button>
+        </div>
+        <input type="text"
+               [(ngModel)]="otp"
+               placeholder="أدخل رمز OTP المرسل للعميل"
+               maxlength="6"
+               class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-green focus:border-primary-green text-center text-lg font-bold tracking-widest">
+        <p class="text-xs text-gray-500 mt-2">
+          <i class="bi bi-info-circle ml-1"></i>
+          رمز OTP إلزامي للطلبات COD أو عالية القيمة. تم إرساله إلى هاتف العميل.
+        </p>
+      </div>
+
+      <!-- COD Amount Display -->
+      <div *ngIf="job?.codAmount > 0" class="mb-6 p-4 bg-green-50 rounded-xl">
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-gray-600">مبلغ COD المحصل:</span>
+          <span class="font-bold text-green-700">{{ job.codAmount }} ج.م</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex gap-3">
+        <button (click)="cancel()"
+                class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors">
+          إلغاء
+        </button>
+        <button (click)="submitProof()"
+                [disabled]="isSubmitting || photoPreviews.length === 0 || (requiresOTP && !otp)"
+                class="flex-1 py-3 px-4 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+          <span *ngIf="isSubmitting" class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent ml-2"></span>
+          <span *ngIf="!isSubmitting">تأكيد التسليم</span>
+          <span *ngIf="isSubmitting">جاري المعالجة...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

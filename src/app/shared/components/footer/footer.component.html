@@ -1,0 +1,123 @@
+<footer class="relative overflow-hidden bg-primary-dark text-white pt-16 pb-8">
+  <!-- Background Effect -->
+  <div class="absolute inset-0 opacity-50">
+    <div class="absolute top-0 right-1/4 w-96 h-96 bg-primary-green/10 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-secondary-teal/10 rounded-full blur-3xl"></div>
+  </div>
+  
+  <div class="container mx-auto px-4 lg:px-8 relative z-10">
+    <!-- Top Section -->
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 pb-10 border-b border-white/10">
+      <!-- Brand -->
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-green to-secondary-teal flex items-center justify-center shadow-green text-2xl">
+          🚀
+        </div>
+        <div>
+          <h3 class="text-2xl font-black">توصيل</h3>
+          <p class="text-white/60 text-sm">توصيل أسرع · موثوقية أعلى · تجربة أفضل</p>
+        </div>
+      </div>
+      
+      <!-- CTA -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
+        <h4 class="font-bold text-lg">جاهز للانضمام؟</h4>
+        <a routerLink="/register" 
+           class="w-full sm:w-auto text-center px-8 py-3 rounded-xl bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold shadow-green hover:shadow-green-lg hover:-translate-y-1 transition-all duration-300">
+          ابدأ مجانًا
+        </a>
+      </div>
+    </div>
+    
+    <!-- Links Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-10 py-10">
+      <!-- Quick Links -->
+      <div>
+        <h5 class="font-bold text-lg mb-6 relative inline-block after:content-[''] after:absolute after:bottom-[-8px] after:right-0 after:w-10 after:h-0.5 after:bg-gradient-to-l after:from-primary-green after:to-secondary-teal after:rounded-full">
+          روابط سريعة
+        </h5>
+        <ul class="space-y-3">
+          <li>
+            <a routerLink="/home" class="text-white/70 hover:text-primary-green hover:-translate-x-1 inline-block transition-all duration-200">
+              الرئيسية
+            </a>
+          </li>
+          <li>
+            <a href="#services" class="text-white/70 hover:text-primary-green hover:-translate-x-1 inline-block transition-all duration-200">
+              خدماتنا
+            </a>
+          </li>
+          <li>
+            <a href="#how-it-works" class="text-white/70 hover:text-primary-green hover:-translate-x-1 inline-block transition-all duration-200">
+              كيف يعمل
+            </a>
+          </li>
+          <li>
+            <a routerLink="/register" class="text-white/70 hover:text-primary-green hover:-translate-x-1 inline-block transition-all duration-200">
+              التسجيل
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Services -->
+      <div>
+        <h5 class="font-bold text-lg mb-6 relative inline-block after:content-[''] after:absolute after:bottom-[-8px] after:right-0 after:w-10 after:h-0.5 after:bg-gradient-to-l after:from-primary-green after:to-secondary-teal after:rounded-full">
+          الخدمات
+        </h5>
+        <ul class="space-y-3">
+          <li class="text-white/70">توصيل سريع</li>
+          <li class="text-white/70">تتبع مباشر</li>
+          <li class="text-white/70">دعم على مدار الساعة</li>
+          <li class="text-white/70">تأمين الشحنات</li>
+        </ul>
+      </div>
+      
+      <!-- Contact -->
+      <div class="col-span-2 md:col-span-1">
+        <h5 class="font-bold text-lg mb-6 relative inline-block after:content-[''] after:absolute after:bottom-[-8px] after:right-0 after:w-10 after:h-0.5 after:bg-gradient-to-l after:from-primary-green after:to-secondary-teal after:rounded-full">
+          تواصل معنا
+        </h5>
+        <ul class="space-y-3 mb-6">
+          <li class="text-white/70 flex items-center gap-2">
+            <i class="bi bi-geo-alt text-primary-green"></i>
+            القاهرة، جمهورية مصر العربية
+          </li>
+          <li class="text-white/70 flex items-center gap-2">
+            <i class="bi bi-telephone text-primary-green"></i>
+            +20 10 123 4567
+          </li>
+          <li class="text-white/70 flex items-center gap-2">
+            <i class="bi bi-envelope text-primary-green"></i>
+            info&#64;pickgo.com
+          </li>
+        </ul>
+        
+        <!-- Social Links -->
+        <div class="flex gap-3">
+          <a href="#" class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-primary-green/20 hover:border-primary-green hover:text-primary-green hover:-translate-y-1 transition-all duration-300">
+            <i class="bi bi-facebook"></i>
+          </a>
+          <a href="#" class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-primary-green/20 hover:border-primary-green hover:text-primary-green hover:-translate-y-1 transition-all duration-300">
+            <i class="bi bi-twitter"></i>
+          </a>
+          <a href="#" class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-primary-green/20 hover:border-primary-green hover:text-primary-green hover:-translate-y-1 transition-all duration-300">
+            <i class="bi bi-instagram"></i>
+          </a>
+          <a href="#" class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-primary-green/20 hover:border-primary-green hover:text-primary-green hover:-translate-y-1 transition-all duration-300">
+            <i class="bi bi-linkedin"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Bottom Section -->
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4 pt-6 border-t border-white/10">
+      <p class="text-white/60 text-sm">© 2024 PickGo. جميع الحقوق محفوظة.</p>
+      <div class="flex gap-6">
+        <a href="#" class="text-white/60 text-sm hover:text-primary-green transition-colors duration-200">سياسة الخصوصية</a>
+        <a href="#" class="text-white/60 text-sm hover:text-primary-green transition-colors duration-200">شروط الاستخدام</a>
+      </div>
+    </div>
+  </div>
+</footer>

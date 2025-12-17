@@ -1,0 +1,48 @@
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
+/* Custom scrollbar */
+.max-h-\[600px\]::-webkit-scrollbar {
+  width: 6px;
+}
+
+.max-h-\[600px\]::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.max-h-\[600px\]::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.max-h-\[600px\]::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* Image hover effect */
+.aspect-square:hover img {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+.aspect-square img {
+  transition: transform 0.3s ease;
+}
+

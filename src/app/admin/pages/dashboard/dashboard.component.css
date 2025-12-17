@@ -1,0 +1,4 @@
+/* Dashboard Component Styles */
+:host {
+  @apply block;
+}

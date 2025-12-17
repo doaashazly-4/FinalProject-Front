@@ -1,0 +1,16 @@
+/* Chart animations */
+.h-48 > div > div:last-child {
+  animation: growUp 0.5s ease-out;
+}
+
+@keyframes growUp {
+  from {
+    height: 0;
+  }
+}
+
+/* Table hover effects */
+tbody tr:hover {
+  background-color: #f9fafb;
+}
+

@@ -1,0 +1,180 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div>
+    <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">الدعم والمساعدة</h1>
+    <p class="text-gray-600 mt-1">تواصل معنا لأي استفسارات أو مشاكل</p>
+  </div>
+
+  <!-- Contact Options -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-lg hover:border-primary-green/30 transition-all duration-300">
+      <div class="w-12 h-12 rounded-xl bg-primary-green/10 flex items-center justify-center mb-4">
+        <i class="bi bi-telephone text-primary-green text-xl"></i>
+      </div>
+      <h3 class="font-bold text-primary-dark mb-2">خط الدعم للمناديب</h3>
+      <p class="text-gray-500 text-sm mb-3">متاح على مدار الساعة</p>
+      <a href="tel:+201234567891" class="text-primary-green font-semibold hover:underline">01234567891</a>
+    </div>
+
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-lg hover:border-primary-green/30 transition-all duration-300">
+      <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center mb-4">
+        <i class="bi bi-whatsapp text-green-600 text-xl"></i>
+      </div>
+      <h3 class="font-bold text-primary-dark mb-2">جروب المناديب</h3>
+      <p class="text-gray-500 text-sm mb-3">للتواصل السريع</p>
+      <a href="https://wa.me/201234567891" target="_blank" class="text-green-600 font-semibold hover:underline">انضم للجروب</a>
+    </div>
+
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-lg hover:border-primary-green/30 transition-all duration-300">
+      <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center mb-4">
+        <i class="bi bi-exclamation-triangle text-red-600 text-xl"></i>
+      </div>
+      <h3 class="font-bold text-primary-dark mb-2">حالات الطوارئ</h3>
+      <p class="text-gray-500 text-sm mb-3">للحوادث والمشاكل العاجلة</p>
+      <a href="tel:+201234567892" class="text-red-600 font-semibold hover:underline">01234567892</a>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- New Ticket Form -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-5 border-b border-gray-100 bg-gray-50/50">
+        <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+          <i class="bi bi-plus-circle text-primary-green"></i>
+          فتح تذكرة جديدة
+        </h2>
+      </div>
+      <div class="p-5">
+        <form (ngSubmit)="submitTicket()" class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">عنوان التذكرة *</label>
+            <input type="text" 
+                   [(ngModel)]="newTicket.subject" 
+                   name="subject"
+                   class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary-green focus:ring-2 focus:ring-primary-green/20 outline-none transition-all"
+                   placeholder="وصف مختصر للمشكلة"
+                   required>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">تفاصيل المشكلة *</label>
+            <textarea [(ngModel)]="newTicket.message" 
+                      name="message"
+                      rows="4"
+                      class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary-green focus:ring-2 focus:ring-primary-green/20 outline-none transition-all resize-none"
+                      placeholder="اشرح المشكلة بالتفصيل..."
+                      required></textarea>
+          </div>
+          
+          <!-- Photo Upload Section -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">إضافة صور (اختياري)</label>
+            <div class="grid grid-cols-3 gap-3 mb-2">
+              <div *ngFor="let preview of newTicket.photoPreviews; let i = index"
+                   class="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 border-primary-green">
+                <img [src]="preview" alt="Ticket photo" class="w-full h-full object-cover">
+                <button (click)="removePhoto(i)"
+                        class="absolute top-1 right-1 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 transition-colors">
+                  <i class="bi bi-x"></i>
+                </button>
+              </div>
+              <button *ngIf="newTicket.photoPreviews.length < 3"
+                      (click)="addPhoto()"
+                      type="button"
+                      class="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-primary-green hover:text-primary-green transition-colors bg-gray-50">
+                <i class="bi bi-camera text-3xl mb-2"></i>
+                <span class="text-xs font-medium">إضافة صورة</span>
+              </button>
+            </div>
+            <p class="text-xs text-gray-500">يمكنك إضافة صور للمشكلة (3 صور كحد أقصى)</p>
+          </div>
+          
+          <button type="submit" 
+                  [disabled]="isSubmitting"
+                  class="w-full py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl shadow-green hover:shadow-green-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+            <span *ngIf="isSubmitting" class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent ml-2"></span>
+            <i class="bi bi-send ml-2"></i>
+            <span *ngIf="!isSubmitting">إرسال التذكرة</span>
+            <span *ngIf="isSubmitting">جاري الإرسال...</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tickets List -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-5 border-b border-gray-100 bg-gray-50/50">
+        <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+          <i class="bi bi-ticket-perforated text-primary-green"></i>
+          تذاكري
+        </h2>
+      </div>
+      <div class="p-4">
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="flex justify-center py-8">
+          <div class="animate-spin rounded-full h-10 w-10 border-4 border-primary-green border-t-transparent"></div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!isLoading && tickets.length === 0" class="text-center py-8">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+            <i class="bi bi-inbox text-gray-400 text-2xl"></i>
+          </div>
+          <p class="text-gray-500">لا توجد تذاكر سابقة</p>
+        </div>
+
+        <!-- Tickets -->
+        <div *ngIf="!isLoading && tickets.length > 0" class="space-y-3">
+          <div *ngFor="let ticket of tickets" 
+               class="p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-primary-green/30 transition-all">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1">
+                <p class="text-xs text-gray-500 mb-1">#{{ ticket.id }}</p>
+                <h4 class="font-bold text-primary-dark">{{ ticket.subject }}</h4>
+              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-bold"
+                    [ngClass]="{
+                      'bg-yellow-100 text-yellow-700': ticket.status === 'open',
+                      'bg-blue-100 text-blue-700': ticket.status === 'in_progress',
+                      'bg-green-100 text-green-700': ticket.status === 'resolved',
+                      'bg-gray-100 text-gray-700': ticket.status === 'closed'
+                    }">
+                {{ getStatusText(ticket.status) }}
+              </span>
+            </div>
+            <div class="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-500">
+              <span>آخر تحديث: {{ formatDate(ticket.updatedAt) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ Section -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="p-5 border-b border-gray-100 bg-gray-50/50">
+      <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+        <i class="bi bi-question-circle text-primary-green"></i>
+        الأسئلة الشائعة للمناديب
+      </h2>
+    </div>
+    <div class="p-5 space-y-4">
+      <div class="p-4 bg-gray-50 rounded-xl">
+        <h4 class="font-bold text-primary-dark mb-2">كيف أحصل على مهام جديدة؟</h4>
+        <p class="text-gray-600 text-sm">تأكد من أنك متصل (أونلاين) وستظهر لك المهام المتاحة في منطقتك تلقائياً.</p>
+      </div>
+      <div class="p-4 bg-gray-50 rounded-xl">
+        <h4 class="font-bold text-primary-dark mb-2">ماذا أفعل إذا لم أجد المُستلم؟</h4>
+        <p class="text-gray-600 text-sm">اتصل بالمُستلم أولاً، وإذا لم يرد يمكنك تحديد حالة "فشل التسليم" مع ذكر السبب.</p>
+      </div>
+      <div class="p-4 bg-gray-50 rounded-xl">
+        <h4 class="font-bold text-primary-dark mb-2">متى أستلم أرباحي؟</h4>
+        <p class="text-gray-600 text-sm">يتم تحويل الأرباح أسبوعياً كل يوم أحد إلى حسابك المسجل.</p>
+      </div>
+      <div class="p-4 bg-gray-50 rounded-xl">
+        <h4 class="font-bold text-primary-dark mb-2">كيف أزيد تقييمي؟</h4>
+        <p class="text-gray-600 text-sm">الالتزام بالمواعيد، التعامل الراقي مع العملاء، والحفاظ على الشحنات يرفع تقييمك.</p>
+      </div>
+    </div>
+  </div>
+</div>

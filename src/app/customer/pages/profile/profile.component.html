@@ -1,0 +1,78 @@
+<div class="profile-page">
+  <header class="profile-head">
+    <div>
+      <p class="overline">بيانات العميل</p>
+      <h2>إدارة الملف الشخصي</h2>
+      <p class="muted">حدّث بياناتك وحافظ على معلومات التوصيل محدثة</p>
+    </div>
+  </header>
+
+  <form class="profile-form" (ngSubmit)="save()">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>الاسم</label>
+        <input [(ngModel)]="profile.name" name="name" required>
+      </div>
+      <div class="form-group">
+        <label>البريد الإلكتروني</label>
+        <input [(ngModel)]="profile.email" name="email" type="email" required>
+      </div>
+      <div class="form-group">
+        <label>رقم الهاتف</label>
+        <input [(ngModel)]="profile.phone" name="phone" required>
+      </div>
+      <div class="form-group">
+        <label>المدينة</label>
+        <input [(ngModel)]="profile.city" name="city">
+      </div>
+      <div class="form-group full">
+        <label>العنوان</label>
+        <input [(ngModel)]="profile.address" name="address">
+      </div>
+    </div>
+
+    <div class="plan-box">
+      <div>
+        <p class="overline">الباقة</p>
+        <h4>{{ profile.plan || 'عادي' }}</h4>
+        <p class="muted">استفد من خصومات الشحن والدعم المميز</p>
+      </div>
+      <button type="button" class="secondary">تحديث الباقة</button>
+    </div>
+
+    <!-- Become Supplier Section -->
+    <div class="bg-gradient-to-br from-primary-green/10 to-secondary-teal/10 rounded-2xl p-6 border-2 border-primary-green/20 mb-6">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h3 class="text-xl font-black text-primary-dark mb-2 flex items-center gap-2">
+            <i class="bi bi-shop text-primary-green"></i>
+            ابدأ بإرسال الطرود
+          </h3>
+          <p class="text-gray-600">هل تريد أن تصبح مُرسل؟ ابدأ في إرسال الطرود وكسب المال!</p>
+        </div>
+        <button type="button"
+                (click)="requestSupplierUpgrade()"
+                [disabled]="isRequestingUpgrade"
+                class="px-6 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl shadow-green hover:shadow-green-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all whitespace-nowrap">
+          <span *ngIf="!isRequestingUpgrade" class="flex items-center gap-2">
+            <i class="bi bi-arrow-left"></i>
+            <span>أصبح مُرسل</span>
+          </span>
+          <span *ngIf="isRequestingUpgrade" class="flex items-center gap-2">
+            <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+            <span>جاري المعالجة...</span>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="primary" [disabled]="isSaving">
+        <span *ngIf="!isSaving">حفظ التعديلات</span>
+        <span *ngIf="isSaving">جاري الحفظ...</span>
+      </button>
+      <button type="button" class="ghost">إلغاء</button>
+    </div>
+  </form>
+</div>
+

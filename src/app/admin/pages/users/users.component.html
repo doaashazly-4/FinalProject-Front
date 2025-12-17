@@ -1,0 +1,332 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">إدارة المستخدمين</h1>
+      <p class="text-gray-600 mt-1">البحث عن المستخدمين وإدارة حساباتهم</p>
+    </div>
+    <button (click)="refresh()" 
+            class="px-4 py-2 bg-primary-green text-white rounded-xl font-bold hover:bg-secondary-teal transition-colors flex items-center gap-2"
+            [disabled]="isLoading">
+      <i class="bi bi-arrow-clockwise" [class.animate-spin]="isLoading"></i>
+      <span>تحديث</span>
+    </button>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl flex items-center gap-3">
+    <i class="bi bi-check-circle-fill text-2xl"></i>
+    <span class="font-medium">{{ successMessage }}</span>
+    <button (click)="clearMessages()" class="mr-auto"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div *ngIf="errorMessage" class="p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl flex items-center gap-3">
+    <i class="bi bi-exclamation-circle-fill text-2xl"></i>
+    <span class="font-medium">{{ errorMessage }}</span>
+    <button (click)="clearMessages()" class="mr-auto"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <!-- Search & Filters -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-4">
+    <!-- Search Bar -->
+    <div class="relative">
+      <i class="bi bi-search absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      <input type="text" 
+             [(ngModel)]="searchQuery"
+             (ngModelChange)="onSearch()"
+             placeholder="ابحث بالاسم أو البريد الإلكتروني أو رقم الهاتف..."
+             class="w-full pr-12 pl-12 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent text-lg">
+      <button *ngIf="searchQuery" 
+              (click)="clearSearch()"
+              class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+        <i class="bi bi-x-circle"></i>
+      </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-4">
+      <!-- Role Filters -->
+      <div class="flex flex-wrap gap-2">
+        <button *ngFor="let roleFilter of roleFilters"
+                (click)="setFilter(roleFilter.value)"
+                class="px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2"
+                [class.bg-primary-green]="filter === roleFilter.value"
+                [class.text-white]="filter === roleFilter.value"
+                [class.bg-gray-100]="filter !== roleFilter.value"
+                [class.text-gray-700]="filter !== roleFilter.value"
+                [class.hover:bg-gray-200]="filter !== roleFilter.value">
+          {{ roleFilter.label }}
+          <span class="px-2 py-0.5 rounded-full text-xs"
+                [class.bg-white]="filter === roleFilter.value"
+                [class.bg-opacity-30]="filter === roleFilter.value"
+                [class.bg-gray-200]="filter !== roleFilter.value">
+            {{ roleFilter.count }}
+          </span>
+        </button>
+      </div>
+
+      <!-- Status Filter -->
+      <select [(ngModel)]="statusFilter" (ngModelChange)="applyFilters()"
+              class="px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-green">
+        <option *ngFor="let status of statusFilters" [value]="status.value">{{ status.label }}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4"></div>
+      <p class="text-gray-500">جاري تحميل المستخدمين...</p>
+    </div>
+  </div>
+
+  <!-- Users List -->
+  <div *ngIf="!isLoading" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="p-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+      <h2 class="text-lg font-bold text-primary-dark">
+        <i class="bi bi-people text-primary-green ml-2"></i>
+        قائمة المستخدمين ({{ filteredUsers.length }})
+      </h2>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredUsers.length === 0" class="p-12 text-center">
+      <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+        <i class="bi bi-search text-gray-400 text-4xl"></i>
+      </div>
+      <h3 class="font-bold text-gray-700 mb-2">لا توجد نتائج</h3>
+      <p class="text-gray-500 text-sm">لم يتم العثور على مستخدمين يطابقون معايير البحث</p>
+    </div>
+
+    <!-- Users Table -->
+    <div *ngIf="filteredUsers.length > 0" class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">المستخدم</th>
+            <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">الدور</th>
+            <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">الحالة</th>
+            <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">تاريخ التسجيل</th>
+            <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">الطلبات</th>
+            <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let user of filteredUsers" class="hover:bg-gray-50 transition-colors">
+            <!-- User Info -->
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white"
+                     [ngClass]="getRoleIconBg(user.role)">
+                  <i class="bi text-xl" [ngClass]="getRoleIcon(user.role)"></i>
+                </div>
+                <div>
+                  <p class="font-bold text-primary-dark">{{ user.name }}</p>
+                  <p class="text-sm text-gray-500">{{ user.email }}</p>
+                  <p *ngIf="user.phone" class="text-sm text-gray-400">{{ user.phone }}</p>
+                </div>
+              </div>
+            </td>
+
+            <!-- Role -->
+            <td class="px-6 py-4 text-center">
+              <span class="px-3 py-1 rounded-full text-xs font-bold" [ngClass]="getRoleClass(user.role)">
+                {{ getRoleText(user.role) }}
+              </span>
+            </td>
+
+            <!-- Status -->
+            <td class="px-6 py-4 text-center">
+              <span class="px-3 py-1 rounded-full text-xs font-bold border" [ngClass]="getStatusClass(user.status)">
+                {{ user.status }}
+              </span>
+            </td>
+
+            <!-- Join Date -->
+            <td class="px-6 py-4 text-center text-sm text-gray-600">
+              {{ formatDate(user.joined) }}
+            </td>
+
+            <!-- Orders Count -->
+            <td class="px-6 py-4 text-center">
+              <span class="font-bold text-primary-dark">{{ user.ordersCount || 0 }}</span>
+            </td>
+
+            <!-- Actions -->
+            <td class="px-6 py-4">
+              <div class="flex items-center justify-center gap-2">
+                <!-- View -->
+                <button (click)="viewUser(user)"
+                        class="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
+                        title="عرض التفاصيل">
+                  <i class="bi bi-eye"></i>
+                </button>
+
+                <!-- Block/Unblock -->
+                <button *ngIf="user.status !== 'محظور'"
+                        (click)="openBlockModal(user)"
+                        class="p-2 bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200 transition-colors"
+                        title="حظر المستخدم">
+                  <i class="bi bi-slash-circle"></i>
+                </button>
+                <button *ngIf="user.status === 'محظور'"
+                        (click)="unblockUser(user)"
+                        class="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors"
+                        title="إلغاء الحظر">
+                  <i class="bi bi-check-circle"></i>
+                </button>
+
+                <!-- Delete -->
+                <button (click)="openDeleteModal(user)"
+                        class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                        title="حذف المستخدم">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- User Details Modal -->
+<div *ngIf="showUserModal && selectedUser" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50" (click)="closeUserModal()"></div>
+  
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+    <!-- Header -->
+    <div class="p-6 bg-gradient-to-br from-primary-dark to-primary-dark-light text-white">
+      <div class="flex items-center gap-4">
+        <div class="w-16 h-16 rounded-xl flex items-center justify-center"
+             [ngClass]="getRoleIconBg(selectedUser.role)">
+          <i class="bi text-3xl" [ngClass]="getRoleIcon(selectedUser.role)"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-black">{{ selectedUser.name }}</h2>
+          <p class="text-white/70">{{ selectedUser.email }}</p>
+        </div>
+      </div>
+      <button (click)="closeUserModal()" class="absolute top-4 left-4 p-2 hover:bg-white/10 rounded-lg">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="p-6 space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="p-4 bg-gray-50 rounded-xl">
+          <p class="text-sm text-gray-500">الدور</p>
+          <p class="font-bold text-primary-dark">{{ getRoleText(selectedUser.role) }}</p>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl">
+          <p class="text-sm text-gray-500">الحالة</p>
+          <span class="px-3 py-1 rounded-full text-xs font-bold border" [ngClass]="getStatusClass(selectedUser.status)">
+            {{ selectedUser.status }}
+          </span>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl">
+          <p class="text-sm text-gray-500">تاريخ التسجيل</p>
+          <p class="font-bold text-primary-dark">{{ formatDate(selectedUser.joined) }}</p>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl">
+          <p class="text-sm text-gray-500">عدد الطلبات</p>
+          <p class="font-bold text-primary-dark">{{ selectedUser.ordersCount || 0 }}</p>
+        </div>
+      </div>
+
+      <div *ngIf="selectedUser.phone" class="p-4 bg-gray-50 rounded-xl">
+        <p class="text-sm text-gray-500">رقم الهاتف</p>
+        <p class="font-bold text-primary-dark">{{ selectedUser.phone }}</p>
+      </div>
+
+      <div *ngIf="selectedUser.lastActivity" class="p-4 bg-gray-50 rounded-xl">
+        <p class="text-sm text-gray-500">آخر نشاط</p>
+        <p class="font-bold text-primary-dark">{{ formatDate(selectedUser.lastActivity) }}</p>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="p-6 border-t border-gray-200 flex gap-3">
+      <button (click)="closeUserModal()"
+              class="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors">
+        إغلاق
+      </button>
+      <button *ngIf="selectedUser.status !== 'محظور'"
+              (click)="openBlockModal(selectedUser); closeUserModal()"
+              class="flex-1 py-3 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-colors">
+        <i class="bi bi-slash-circle ml-2"></i>
+        حظر
+      </button>
+      <button *ngIf="selectedUser.status === 'محظور'"
+              (click)="unblockUser(selectedUser); closeUserModal()"
+              class="flex-1 py-3 bg-green-500 text-white font-bold rounded-xl hover:bg-green-600 transition-colors">
+        <i class="bi bi-check-circle ml-2"></i>
+        إلغاء الحظر
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Block User Modal -->
+<div *ngIf="showBlockModal && userToAction" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50" (click)="closeBlockModal()"></div>
+  
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-orange-100 flex items-center justify-center">
+        <i class="bi bi-slash-circle text-orange-500 text-3xl"></i>
+      </div>
+      <h3 class="text-xl font-bold text-primary-dark">حظر المستخدم</h3>
+      <p class="text-gray-600 mt-2">{{ userToAction.name }}</p>
+    </div>
+
+    <div class="mb-6">
+      <label class="block text-sm font-bold text-gray-700 mb-2">سبب الحظر (اختياري)</label>
+      <textarea [(ngModel)]="blockReason" rows="3" placeholder="اكتب سبب الحظر..."
+                class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"></textarea>
+    </div>
+
+    <div class="flex gap-3">
+      <button (click)="closeBlockModal()"
+              class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors">
+        إلغاء
+      </button>
+      <button (click)="confirmBlock()"
+              [disabled]="isProcessing"
+              class="flex-1 py-3 px-4 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-colors disabled:opacity-50">
+        {{ isProcessing ? 'جاري الحظر...' : 'تأكيد الحظر' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete User Modal -->
+<div *ngIf="showDeleteModal && userToAction" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50" (click)="closeDeleteModal()"></div>
+  
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+        <i class="bi bi-trash text-red-500 text-3xl"></i>
+      </div>
+      <h3 class="text-xl font-bold text-primary-dark">حذف المستخدم</h3>
+      <p class="text-gray-600 mt-2">هل أنت متأكد من حذف "{{ userToAction.name }}"؟</p>
+      <p class="text-red-500 text-sm mt-2">هذا الإجراء لا يمكن التراجع عنه</p>
+    </div>
+
+    <div class="flex gap-3">
+      <button (click)="closeDeleteModal()"
+              class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors">
+        إلغاء
+      </button>
+      <button (click)="confirmDelete()"
+              [disabled]="isProcessing"
+              class="flex-1 py-3 px-4 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50">
+        {{ isProcessing ? 'جاري الحذف...' : 'تأكيد الحذف' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,342 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">تقارير النظام</h1>
+      <p class="text-gray-600 mt-1">مراقبة أداء النظام والعمليات والإيرادات</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <!-- Period Toggle -->
+      <div class="flex bg-gray-100 rounded-xl p-1">
+        <button (click)="changePeriod('today')"
+                [class.bg-white]="selectedPeriod === 'today'"
+                [class.shadow-sm]="selectedPeriod === 'today'"
+                [class.text-primary-green]="selectedPeriod === 'today'"
+                [class.font-bold]="selectedPeriod === 'today'"
+                class="px-4 py-2 rounded-lg text-sm transition-all">
+          اليوم
+        </button>
+        <button (click)="changePeriod('week')"
+                [class.bg-white]="selectedPeriod === 'week'"
+                [class.shadow-sm]="selectedPeriod === 'week'"
+                [class.text-primary-green]="selectedPeriod === 'week'"
+                [class.font-bold]="selectedPeriod === 'week'"
+                class="px-4 py-2 rounded-lg text-sm transition-all">
+          أسبوع
+        </button>
+        <button (click)="changePeriod('month')"
+                [class.bg-white]="selectedPeriod === 'month'"
+                [class.shadow-sm]="selectedPeriod === 'month'"
+                [class.text-primary-green]="selectedPeriod === 'month'"
+                [class.font-bold]="selectedPeriod === 'month'"
+                class="px-4 py-2 rounded-lg text-sm transition-all">
+          شهر
+        </button>
+      </div>
+      
+      <!-- Export Button -->
+      <button (click)="openExportModal()"
+              class="px-4 py-2 bg-primary-green text-white rounded-xl font-bold hover:bg-secondary-teal transition-colors flex items-center gap-2">
+        <i class="bi bi-download"></i>
+        <span class="hidden sm:inline">تصدير التقرير</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl flex items-center gap-3">
+    <i class="bi bi-check-circle-fill text-2xl"></i>
+    <span class="font-medium">{{ successMessage }}</span>
+    <button (click)="clearMessages()" class="mr-auto"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div *ngIf="errorMessage" class="p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl flex items-center gap-3">
+    <i class="bi bi-exclamation-circle-fill text-2xl"></i>
+    <span class="font-medium">{{ errorMessage }}</span>
+    <button (click)="clearMessages()" class="mr-auto"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4"></div>
+      <p class="text-gray-500">جاري تحميل التقرير...</p>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && systemReport" class="space-y-6">
+    <!-- Main Stats Grid -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Total Orders -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+            <i class="bi bi-box-seam text-white text-2xl"></i>
+          </div>
+          <span class="px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1"
+                [ngClass]="getTrendClass(systemReport.totalOrdersChange)">
+            <i class="bi" [ngClass]="getTrendIcon(systemReport.totalOrdersChange)"></i>
+            {{ systemReport.totalOrdersChange }}%
+          </span>
+        </div>
+        <p class="text-3xl font-black text-primary-dark">{{ formatNumber(systemReport.totalOrders) }}</p>
+        <p class="text-gray-500 text-sm mt-1">إجمالي الطلبات</p>
+      </div>
+
+      <!-- Active Carriers -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+            <i class="bi bi-truck text-white text-2xl"></i>
+          </div>
+          <span class="px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1"
+                [ngClass]="getTrendClass(systemReport.activeCarriersChange)">
+            <i class="bi" [ngClass]="getTrendIcon(systemReport.activeCarriersChange)"></i>
+            {{ systemReport.activeCarriersChange }}
+          </span>
+        </div>
+        <p class="text-3xl font-black text-primary-dark">{{ formatNumber(systemReport.activeCarriers) }}</p>
+        <p class="text-gray-500 text-sm mt-1">المناديب النشطون</p>
+      </div>
+
+      <!-- Revenue -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+            <i class="bi bi-cash-stack text-white text-2xl"></i>
+          </div>
+          <span class="px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1"
+                [ngClass]="getTrendClass(systemReport.revenueChange)">
+            <i class="bi" [ngClass]="getTrendIcon(systemReport.revenueChange)"></i>
+            {{ systemReport.revenueChange }}%
+          </span>
+        </div>
+        <p class="text-3xl font-black text-primary-dark">{{ formatCurrency(systemReport.totalRevenue) }}</p>
+        <p class="text-gray-500 text-sm mt-1">الإيرادات</p>
+      </div>
+
+      <!-- Failed Deliveries -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
+            <i class="bi bi-x-circle text-white text-2xl"></i>
+          </div>
+          <span class="px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1"
+                [ngClass]="getTrendClass(-systemReport.failedDeliveriesChange)">
+            <i class="bi" [ngClass]="getTrendIcon(-systemReport.failedDeliveriesChange)"></i>
+            {{ absValue(systemReport.failedDeliveriesChange) }}
+          </span>
+        </div>
+        <p class="text-3xl font-black text-primary-dark">{{ formatNumber(systemReport.failedDeliveries) }}</p>
+        <p class="text-gray-500 text-sm mt-1">توصيلات فاشلة</p>
+      </div>
+    </div>
+
+    <!-- Secondary Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-gradient-to-br from-primary-dark to-primary-dark-light rounded-2xl p-5 text-white">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+            <i class="bi bi-hourglass-split"></i>
+          </div>
+          <span class="text-white/70 text-sm">طلبات معلقة</span>
+        </div>
+        <p class="text-3xl font-black">{{ systemReport.pendingApprovals }}</p>
+      </div>
+
+      <div class="bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl p-5 text-white">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+            <i class="bi bi-exclamation-triangle"></i>
+          </div>
+          <span class="text-white/70 text-sm">نزاعات مفتوحة</span>
+        </div>
+        <p class="text-3xl font-black">{{ systemReport.openDisputes }}</p>
+      </div>
+
+      <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-5 text-white">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+            <i class="bi bi-check2-circle"></i>
+          </div>
+          <span class="text-white/70 text-sm">توصيلات مكتملة</span>
+        </div>
+        <p class="text-3xl font-black">{{ formatNumber(systemReport.completedDeliveries) }}</p>
+      </div>
+
+      <div class="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl p-5 text-white">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+            <i class="bi bi-clock"></i>
+          </div>
+          <span class="text-white/70 text-sm">متوسط وقت التوصيل</span>
+        </div>
+        <p class="text-3xl font-black">{{ systemReport.avgDeliveryTime }}</p>
+      </div>
+    </div>
+
+    <!-- Daily Stats Chart -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-6 border-b border-gray-100 bg-gray-50">
+        <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+          <i class="bi bi-graph-up text-primary-green"></i>
+          إحصائيات الطلبات اليومية - {{ getPeriodLabel() }}
+        </h2>
+      </div>
+
+      <div class="p-6">
+        <!-- Simple Bar Chart -->
+        <div class="flex items-end justify-between gap-2 h-48">
+          <div *ngFor="let stat of dailyStats" class="flex-1 flex flex-col items-center">
+            <div class="w-full flex flex-col items-center gap-2">
+              <span class="text-xs font-bold text-primary-dark">{{ stat.orders }}</span>
+              <div class="w-full bg-gradient-to-t from-primary-green to-secondary-teal rounded-t-lg transition-all duration-500"
+                   [style.height.%]="getBarHeight(stat.orders)"></div>
+            </div>
+            <span class="text-xs text-gray-500 mt-2 text-center">{{ formatDate(stat.date) }}</span>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="flex flex-wrap justify-center gap-6 mt-6 pt-6 border-t border-gray-100">
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-primary-green"></div>
+            <span class="text-sm text-gray-600">الطلبات</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily Stats Table -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-6 border-b border-gray-100 bg-gray-50">
+        <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+          <i class="bi bi-table text-primary-green"></i>
+          تفاصيل الإحصائيات اليومية
+        </h2>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">التاريخ</th>
+              <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">الطلبات</th>
+              <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">الإيرادات</th>
+              <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">توصيلات مكتملة</th>
+              <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">توصيلات فاشلة</th>
+              <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">نسبة النجاح</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <tr *ngFor="let stat of dailyStats" class="hover:bg-gray-50 transition-colors">
+              <td class="px-6 py-4 text-sm font-medium text-primary-dark">{{ formatDate(stat.date) }}</td>
+              <td class="px-6 py-4 text-center">
+                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-bold">{{ stat.orders }}</span>
+              </td>
+              <td class="px-6 py-4 text-center text-sm font-bold text-green-600">{{ formatCurrency(stat.revenue) }}</td>
+              <td class="px-6 py-4 text-center">
+                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-bold">{{ stat.completedDeliveries }}</span>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-bold">{{ stat.failedDeliveries }}</span>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <span class="text-sm font-bold"
+                      [class.text-green-600]="(stat.completedDeliveries / (stat.completedDeliveries + stat.failedDeliveries) * 100) >= 90"
+                      [class.text-yellow-600]="(stat.completedDeliveries / (stat.completedDeliveries + stat.failedDeliveries) * 100) >= 70 && (stat.completedDeliveries / (stat.completedDeliveries + stat.failedDeliveries) * 100) < 90"
+                      [class.text-red-600]="(stat.completedDeliveries / (stat.completedDeliveries + stat.failedDeliveries) * 100) < 70">
+                  {{ (stat.completedDeliveries / (stat.completedDeliveries + stat.failedDeliveries) * 100).toFixed(1) }}%
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Export Modal -->
+<div *ngIf="showExportModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50" (click)="closeExportModal()"></div>
+  
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-primary-green/10 flex items-center justify-center">
+        <i class="bi bi-download text-primary-green text-3xl"></i>
+      </div>
+      <h3 class="text-xl font-bold text-primary-dark">تصدير التقرير</h3>
+      <p class="text-gray-600 mt-2">اختر خيارات التصدير</p>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-2">نوع التقرير</label>
+        <select [(ngModel)]="exportType" 
+                class="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-green">
+          <option value="daily">تقرير يومي</option>
+          <option value="weekly">تقرير أسبوعي</option>
+          <option value="monthly">تقرير شهري</option>
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">من تاريخ</label>
+          <input type="date" [(ngModel)]="exportStartDate"
+                 class="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-green">
+        </div>
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">إلى تاريخ</label>
+          <input type="date" [(ngModel)]="exportEndDate"
+                 class="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-green">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-2">صيغة الملف</label>
+        <div class="grid grid-cols-3 gap-3">
+          <button (click)="exportFormat = 'excel'"
+                  [class.border-primary-green]="exportFormat === 'excel'"
+                  [class.bg-primary-green]="exportFormat === 'excel'"
+                  [class.bg-opacity-10]="exportFormat === 'excel'"
+                  class="p-3 border-2 rounded-xl text-center transition-all">
+            <i class="bi bi-file-earmark-excel text-2xl" [class.text-primary-green]="exportFormat === 'excel'"></i>
+            <p class="text-sm font-bold mt-1">Excel</p>
+          </button>
+          <button (click)="exportFormat = 'pdf'"
+                  [class.border-primary-green]="exportFormat === 'pdf'"
+                  [class.bg-primary-green]="exportFormat === 'pdf'"
+                  [class.bg-opacity-10]="exportFormat === 'pdf'"
+                  class="p-3 border-2 rounded-xl text-center transition-all">
+            <i class="bi bi-file-earmark-pdf text-2xl" [class.text-primary-green]="exportFormat === 'pdf'"></i>
+            <p class="text-sm font-bold mt-1">PDF</p>
+          </button>
+          <button (click)="exportFormat = 'csv'"
+                  [class.border-primary-green]="exportFormat === 'csv'"
+                  [class.bg-primary-green]="exportFormat === 'csv'"
+                  [class.bg-opacity-10]="exportFormat === 'csv'"
+                  class="p-3 border-2 rounded-xl text-center transition-all">
+            <i class="bi bi-file-earmark-text text-2xl" [class.text-primary-green]="exportFormat === 'csv'"></i>
+            <p class="text-sm font-bold mt-1">CSV</p>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex gap-3 mt-6">
+      <button (click)="closeExportModal()"
+              class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors">
+        إلغاء
+      </button>
+      <button (click)="exportReport()"
+              [disabled]="isExporting"
+              class="flex-1 py-3 px-4 bg-primary-green text-white font-bold rounded-xl hover:bg-secondary-teal transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+        <i class="bi bi-download" *ngIf="!isExporting"></i>
+        <span>{{ isExporting ? 'جاري التصدير...' : 'تصدير' }}</span>
+      </button>
+    </div>
+  </div>
+</div>
+

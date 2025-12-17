@@ -1,0 +1,359 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">إدارة النزاعات</h1>
+      <p class="text-gray-600 mt-1">مراجعة الشكاوى والنزاعات من المُرسلين والمناديب والعملاء</p>
+    </div>
+    <button (click)="loadDisputes()" 
+            class="px-4 py-2 bg-primary-green text-white rounded-xl font-bold hover:bg-secondary-teal transition-colors flex items-center gap-2"
+            [disabled]="isLoading">
+      <i class="bi bi-arrow-clockwise" [class.animate-spin]="isLoading"></i>
+      <span>تحديث</span>
+    </button>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
+      <p class="text-3xl font-black text-primary-dark">{{ stats.total }}</p>
+      <p class="text-sm text-gray-500">إجمالي النزاعات</p>
+    </div>
+    <div class="bg-yellow-50 rounded-xl p-4 border border-yellow-200 text-center">
+      <p class="text-3xl font-black text-yellow-600">{{ stats.pending }}</p>
+      <p class="text-sm text-yellow-700">قيد الانتظار</p>
+    </div>
+    <div class="bg-blue-50 rounded-xl p-4 border border-blue-200 text-center">
+      <p class="text-3xl font-black text-blue-600">{{ stats.inReview }}</p>
+      <p class="text-sm text-blue-700">قيد المراجعة</p>
+    </div>
+    <div class="bg-green-50 rounded-xl p-4 border border-green-200 text-center">
+      <p class="text-3xl font-black text-green-600">{{ stats.resolved }}</p>
+      <p class="text-sm text-green-700">تم الحل</p>
+    </div>
+    <div class="bg-red-50 rounded-xl p-4 border border-red-200 text-center">
+      <p class="text-3xl font-black text-red-600">{{ stats.escalated }}</p>
+      <p class="text-sm text-red-700">مُصعّد</p>
+    </div>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl flex items-center gap-3">
+    <i class="bi bi-check-circle-fill text-2xl"></i>
+    <span class="font-medium">{{ successMessage }}</span>
+    <button (click)="clearMessages()" class="mr-auto"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div *ngIf="errorMessage" class="p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl flex items-center gap-3">
+    <i class="bi bi-exclamation-circle-fill text-2xl"></i>
+    <span class="font-medium">{{ errorMessage }}</span>
+    <button (click)="clearMessages()" class="mr-auto"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+    <div class="flex flex-wrap gap-4">
+      <div class="flex-1 min-w-[150px]">
+        <label class="block text-sm font-bold text-gray-700 mb-2">الحالة</label>
+        <select [(ngModel)]="statusFilter" (ngModelChange)="applyFilters()" 
+                class="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-green">
+          <option value="all">الكل</option>
+          <option value="pending">قيد الانتظار</option>
+          <option value="in_review">قيد المراجعة</option>
+          <option value="resolved">تم الحل</option>
+          <option value="escalated">مُصعّد</option>
+        </select>
+      </div>
+      <div class="flex-1 min-w-[150px]">
+        <label class="block text-sm font-bold text-gray-700 mb-2">الأولوية</label>
+        <select [(ngModel)]="priorityFilter" (ngModelChange)="applyFilters()" 
+                class="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-green">
+          <option value="all">الكل</option>
+          <option value="urgent">عاجلة</option>
+          <option value="high">عالية</option>
+          <option value="medium">متوسطة</option>
+          <option value="low">منخفضة</option>
+        </select>
+      </div>
+      <div class="flex-1 min-w-[150px]">
+        <label class="block text-sm font-bold text-gray-700 mb-2">نوع النزاع</label>
+        <select [(ngModel)]="typeFilter" (ngModelChange)="applyFilters()" 
+                class="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-green">
+          <option value="all">الكل</option>
+          <option value="not_delivered">لم يتم التسليم</option>
+          <option value="damaged">تلف المنتج</option>
+          <option value="wrong_item">منتج خاطئ</option>
+          <option value="late_delivery">تأخر التوصيل</option>
+          <option value="other">أخرى</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4"></div>
+      <p class="text-gray-500">جاري تحميل النزاعات...</p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading" class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <!-- Disputes List -->
+    <div class="xl:col-span-1">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-4 border-b border-gray-100 bg-gray-50">
+          <h2 class="text-lg font-bold text-primary-dark">
+            <i class="bi bi-exclamation-triangle text-orange-500 ml-2"></i>
+            قائمة النزاعات ({{ filteredDisputes.length }})
+          </h2>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="filteredDisputes.length === 0" class="p-8 text-center">
+          <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+            <i class="bi bi-check-circle text-green-500 text-4xl"></i>
+          </div>
+          <h3 class="font-bold text-gray-700 mb-2">لا توجد نزاعات</h3>
+          <p class="text-gray-500 text-sm">لا توجد نزاعات تطابق معايير البحث</p>
+        </div>
+
+        <!-- Disputes List -->
+        <div *ngIf="filteredDisputes.length > 0" class="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
+          <div *ngFor="let dispute of filteredDisputes"
+               (click)="selectDispute(dispute)"
+               class="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+               [class.bg-primary-green]="selectedDispute?.id === dispute.id"
+               [class.bg-opacity-10]="selectedDispute?.id === dispute.id"
+               [class.border-r-4]="selectedDispute?.id === dispute.id"
+               [class.border-primary-green]="selectedDispute?.id === dispute.id">
+            <div class="flex items-start gap-3">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                   [ngClass]="getPriorityClass(dispute.priority)">
+                <i class="bi text-xl" [ngClass]="getDisputeTypeIcon(dispute.type)"></i>
+              </div>
+              
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="font-bold text-primary-dark text-sm">{{ dispute.id }}</span>
+                  <span class="px-2 py-0.5 text-xs font-bold rounded-full" [ngClass]="getStatusClass(dispute.status)">
+                    {{ getStatusArabic(dispute.status) }}
+                  </span>
+                </div>
+                <p class="text-sm text-gray-600 truncate">{{ getDisputeTypeArabic(dispute.type) }}</p>
+                <p class="text-xs text-gray-400 mt-1">
+                  <i class="bi bi-person ml-1"></i>
+                  {{ dispute.complainantName }} ({{ getComplainantTypeArabic(dispute.complainantType) }})
+                </p>
+              </div>
+
+              <span class="px-2 py-1 text-xs font-bold rounded-full" [ngClass]="getPriorityClass(dispute.priority)">
+                {{ getPriorityArabic(dispute.priority) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dispute Details -->
+    <div class="xl:col-span-2">
+      <!-- No Selection State -->
+      <div *ngIf="!selectedDispute" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+        <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
+          <i class="bi bi-file-earmark-text text-gray-400 text-4xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-700 mb-2">اختر نزاع للمراجعة</h3>
+        <p class="text-gray-500">اضغط على أحد النزاعات من القائمة لعرض التفاصيل</p>
+      </div>
+
+      <!-- Selected Dispute Details -->
+      <div *ngIf="selectedDispute" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <!-- Header -->
+        <div class="p-6 bg-gradient-to-br from-orange-500 to-red-500 text-white">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-3 mb-2">
+                <span class="text-2xl font-black">{{ selectedDispute.id }}</span>
+                <span class="px-3 py-1 bg-white/20 rounded-full text-sm font-bold">
+                  {{ getStatusArabic(selectedDispute.status) }}
+                </span>
+                <span class="px-3 py-1 bg-white/20 rounded-full text-sm font-bold">
+                  {{ getPriorityArabic(selectedDispute.priority) }}
+                </span>
+              </div>
+              <p class="text-white/80">طلب رقم: {{ selectedDispute.orderId }}</p>
+            </div>
+            <button (click)="closeDetails()" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
+              <i class="bi bi-x-lg text-xl"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Details Content -->
+        <div class="p-6 space-y-6">
+          <!-- Complainant Info -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="p-4 bg-gray-50 rounded-xl">
+              <p class="text-sm text-gray-500 mb-1">مقدم الشكوى</p>
+              <p class="font-bold text-primary-dark">{{ selectedDispute.complainantName }}</p>
+              <p class="text-sm text-gray-500">{{ getComplainantTypeArabic(selectedDispute.complainantType) }}</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-xl">
+              <p class="text-sm text-gray-500 mb-1">نوع النزاع</p>
+              <p class="font-bold text-primary-dark flex items-center gap-2">
+                <i class="bi" [ngClass]="getDisputeTypeIcon(selectedDispute.type)"></i>
+                {{ getDisputeTypeArabic(selectedDispute.type) }}
+              </p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-xl">
+              <p class="text-sm text-gray-500 mb-1">تاريخ الإنشاء</p>
+              <p class="font-bold text-primary-dark">{{ formatDate(selectedDispute.createdAt) }}</p>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+            <h4 class="font-bold text-yellow-800 mb-2 flex items-center gap-2">
+              <i class="bi bi-chat-left-text"></i>
+              وصف المشكلة
+            </h4>
+            <p class="text-yellow-900">{{ selectedDispute.description }}</p>
+          </div>
+
+          <!-- Proof Photos -->
+          <div *ngIf="selectedDispute.proofPhotos && selectedDispute.proofPhotos.length > 0">
+            <h4 class="font-bold text-primary-dark mb-3 flex items-center gap-2">
+              <i class="bi bi-images text-primary-green"></i>
+              صور الإثبات
+            </h4>
+            <div class="flex gap-4 flex-wrap">
+              <div *ngFor="let photo of selectedDispute.proofPhotos"
+                   (click)="openImageViewer(photo)"
+                   class="w-24 h-24 rounded-xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity border-2 border-gray-200">
+                <img [src]="photo" alt="صورة إثبات" class="w-full h-full object-cover">
+              </div>
+            </div>
+          </div>
+
+          <!-- Status History -->
+          <div *ngIf="selectedDispute.statusHistory && selectedDispute.statusHistory.length > 0">
+            <h4 class="font-bold text-primary-dark mb-3 flex items-center gap-2">
+              <i class="bi bi-clock-history text-primary-green"></i>
+              سجل الحالة
+            </h4>
+            <div class="space-y-3">
+              <div *ngFor="let history of selectedDispute.statusHistory" 
+                   class="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+                <div class="w-3 h-3 rounded-full bg-primary-green mt-1.5"></div>
+                <div class="flex-1">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-primary-dark">{{ getStatusArabic(history.status) }}</span>
+                    <span class="text-xs text-gray-500">{{ formatDate(history.changedAt) }}</span>
+                  </div>
+                  <p class="text-sm text-gray-600">{{ history.notes }}</p>
+                  <p class="text-xs text-gray-400 mt-1">بواسطة: {{ history.changedBy }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Resolution (if resolved) -->
+          <div *ngIf="selectedDispute.status === 'resolved' && selectedDispute.resolution" 
+               class="p-4 bg-green-50 border border-green-200 rounded-xl">
+            <h4 class="font-bold text-green-800 mb-2 flex items-center gap-2">
+              <i class="bi bi-check-circle"></i>
+              الحل المتخذ
+            </h4>
+            <p class="text-green-900 mb-2">{{ selectedDispute.resolution }}</p>
+            <span class="px-3 py-1 bg-green-200 text-green-800 rounded-full text-sm font-bold">
+              {{ getResolutionTypeArabic(selectedDispute.resolutionType || '') }}
+            </span>
+          </div>
+
+          <!-- Action Buttons -->
+          <div *ngIf="selectedDispute.status !== 'resolved'" class="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200">
+            <button (click)="openResolutionModal()"
+                    [disabled]="isProcessing"
+                    class="flex-1 py-4 px-6 bg-gradient-to-br from-green-500 to-green-600 text-white font-bold rounded-xl hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+              <i class="bi bi-check-circle text-xl"></i>
+              <span>حل النزاع</span>
+            </button>
+            <button *ngIf="selectedDispute.status !== 'escalated'"
+                    (click)="escalateDispute()"
+                    [disabled]="isProcessing"
+                    class="flex-1 py-4 px-6 bg-gradient-to-br from-orange-500 to-red-500 text-white font-bold rounded-xl hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+              <i class="bi bi-arrow-up-circle text-xl"></i>
+              <span>تصعيد للإدارة</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Resolution Modal -->
+<div *ngIf="showResolutionModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50" (click)="closeResolutionModal()"></div>
+  
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+        <i class="bi bi-check-circle text-green-500 text-3xl"></i>
+      </div>
+      <h3 class="text-xl font-bold text-primary-dark">حل النزاع</h3>
+      <p class="text-gray-600 mt-2">{{ selectedDispute?.id }}</p>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-2">نوع الحل *</label>
+        <select [(ngModel)]="resolutionType" 
+                class="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500">
+          <option value="no_action">بدون إجراء</option>
+          <option value="refund">استرداد كامل</option>
+          <option value="partial_refund">استرداد جزئي</option>
+          <option value="reassign">إعادة تعيين المندوب</option>
+          <option value="penalize_carrier">معاقبة المندوب</option>
+        </select>
+      </div>
+
+      <div *ngIf="resolutionType === 'partial_refund'">
+        <label class="block text-sm font-bold text-gray-700 mb-2">مبلغ الاسترداد (ج.م) *</label>
+        <input type="number" [(ngModel)]="refundAmount" min="0" placeholder="أدخل المبلغ"
+               class="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500">
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-2">ملاحظات الحل *</label>
+        <textarea [(ngModel)]="resolutionNotes" rows="4" placeholder="اكتب تفاصيل الحل..."
+                  class="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"></textarea>
+      </div>
+    </div>
+
+    <div class="flex gap-3 mt-6">
+      <button (click)="closeResolutionModal()"
+              class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors">
+        إلغاء
+      </button>
+      <button (click)="resolveDispute()"
+              [disabled]="!resolutionNotes.trim() || isProcessing"
+              class="flex-1 py-3 px-4 bg-green-500 text-white font-bold rounded-xl hover:bg-green-600 transition-colors disabled:opacity-50">
+        {{ isProcessing ? 'جاري المعالجة...' : 'تأكيد الحل' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Image Viewer Modal -->
+<div *ngIf="showImageViewer" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90" (click)="closeImageViewer()">
+  <div class="relative max-w-4xl w-full" (click)="$event.stopPropagation()">
+    <button (click)="closeImageViewer()" class="absolute -top-12 left-0 text-white hover:text-gray-300">
+      <i class="bi bi-x-lg text-3xl"></i>
+    </button>
+    <img [src]="currentImage" alt="صورة إثبات" class="w-full rounded-2xl shadow-2xl">
+  </div>
+</div>
+

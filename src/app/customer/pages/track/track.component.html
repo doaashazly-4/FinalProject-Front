@@ -1,0 +1,284 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div>
+    <a routerLink="/customer/dashboard" class="inline-flex items-center gap-2 text-gray-500 hover:text-primary-green transition-colors mb-4">
+      <i class="bi bi-arrow-right"></i>
+      <span>العودة للوحة التحكم</span>
+    </a>
+    <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">تتبع الشحنة</h1>
+    <p class="text-gray-600 mt-1">تابع حالة شحنتك الواردة</p>
+  </div>
+
+  <!-- Search Box -->
+  <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+    <div class="flex flex-col sm:flex-row gap-4">
+      <div class="flex-1">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">رقم التتبع</label>
+        <div class="relative">
+          <i class="bi bi-search absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <input type="text" 
+                 [(ngModel)]="trackingNumber"
+                 (keyup.enter)="search()"
+                 placeholder="أدخل رقم التتبع (مثال: PKG-2024-001)"
+                 class="w-full pr-12 pl-4 py-4 rounded-xl border-2 border-gray-200 focus:border-primary-green focus:ring-2 focus:ring-primary-green/20 outline-none transition-all text-lg">
+        </div>
+        <p *ngIf="error" class="mt-2 text-sm text-red-500">{{ error }}</p>
+      </div>
+      <div class="flex items-end">
+        <button (click)="search()" 
+                [disabled]="isLoading"
+                class="w-full sm:w-auto px-8 py-4 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl shadow-green hover:shadow-green-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300">
+          <span *ngIf="!isLoading" class="flex items-center gap-2">
+            <i class="bi bi-geo-alt"></i>
+            تتبع
+          </span>
+          <span *ngIf="isLoading" class="flex items-center gap-2">
+            <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+            جاري البحث...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-center py-12">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4"></div>
+      <p class="text-gray-500">جاري البحث عن الشحنة...</p>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div *ngIf="!isLoading && selectedDelivery" class="space-y-6">
+    <!-- Near Delivery Alert -->
+    <div *ngIf="selectedDelivery.status === 'out_for_delivery'" 
+         class="bg-gradient-to-l from-cyan-500 to-blue-500 rounded-2xl p-6 text-white">
+      <div class="flex items-center gap-4">
+        <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
+          <i class="bi bi-geo-alt-fill text-3xl animate-bounce"></i>
+        </div>
+        <div class="flex-1">
+          <h2 class="text-xl font-bold mb-1">المندوب قريب منك!</h2>
+          <p class="text-white/90">استعد لاستلام شحنتك - المندوب في منطقتك الآن</p>
+        </div>
+        <button *ngIf="selectedDelivery.courierPhone" 
+                (click)="callCourier()"
+                class="px-6 py-3 bg-white text-blue-600 rounded-xl font-bold hover:bg-blue-50 transition-colors">
+          <i class="bi bi-telephone ml-2"></i>
+          اتصل بالمندوب
+        </button>
+      </div>
+    </div>
+
+    <!-- Real-time Map (if in transit) -->
+    <div *ngIf="carrierLocation && ['in_transit', 'out_for_delivery', 'picked_up'].includes(selectedDelivery.status)"
+         class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-5 border-b border-gray-100 bg-gradient-to-l from-blue-50 to-indigo-50">
+        <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+          <i class="bi bi-geo-alt text-blue-600"></i>
+          موقع المندوب الآن (تتبع مباشر)
+        </h2>
+      </div>
+      <div class="p-5">
+        <div class="aspect-video bg-gray-100 rounded-xl mb-4 flex items-center justify-center relative overflow-hidden">
+          <iframe *ngIf="mapUrl" 
+                  [src]="mapUrl" 
+                  class="w-full h-full border-0 rounded-xl"
+                  allowfullscreen>
+          </iframe>
+          <div *ngIf="!mapUrl" class="text-center text-gray-500">
+            <i class="bi bi-map text-4xl mb-2"></i>
+            <p>جاري تحميل الخريطة...</p>
+          </div>
+        </div>
+        <p class="text-sm text-gray-600 text-center">
+          <i class="bi bi-clock ml-1"></i>
+          آخر تحديث: {{ formatDate(carrierLocation.timestamp) }}
+        </p>
+        <a [href]="mapUrl" target="_blank"
+           class="block mt-3 text-center text-primary-green font-semibold hover:underline">
+          <i class="bi bi-box-arrow-up-right ml-1"></i>
+          فتح في Google Maps
+        </a>
+      </div>
+    </div>
+
+    <!-- Delivery Overview Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-6 border-b border-gray-100 bg-gradient-to-br from-primary-green/5 to-secondary-teal/5">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-green to-secondary-teal flex items-center justify-center shadow-green">
+              <i class="bi bi-box-arrow-in-down text-white text-2xl"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-black text-primary-dark">{{ selectedDelivery.trackingNumber }}</h2>
+              <p class="text-gray-600">{{ selectedDelivery.description }}</p>
+            </div>
+          </div>
+          <span class="px-5 py-2 rounded-full text-sm font-bold self-start lg:self-center"
+                [ngClass]="getStatusClass(selectedDelivery.status)">
+            {{ getStatusText(selectedDelivery.status) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="p-6" *ngIf="!['cancelled', 'failed_delivery', 'returned'].includes(selectedDelivery.status)">
+        <div class="relative">
+          <div class="absolute top-5 left-0 right-0 h-1 bg-gray-200 rounded-full"></div>
+          <div class="absolute top-5 left-0 h-1 bg-gradient-to-l from-primary-green to-secondary-teal rounded-full transition-all duration-500"
+               [style.width]="getStatusProgress() + '%'"></div>
+          
+          <div class="relative flex justify-between">
+            <div *ngFor="let step of statusSteps" class="flex flex-col items-center" style="width: 60px;">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 z-10"
+                   [ngClass]="{
+                     'bg-gradient-to-br from-primary-green to-secondary-teal text-white shadow-green': isStepCompleted(step),
+                     'bg-white border-2 border-primary-green text-primary-green animate-pulse': isStepCurrent(step) && !isStepCompleted(step),
+                     'bg-gray-100 text-gray-400': !isStepCompleted(step) && !isStepCurrent(step)
+                   }">
+                <i *ngIf="isStepCompleted(step) && !isStepCurrent(step)" class="bi bi-check"></i>
+                <i *ngIf="!isStepCompleted(step) || isStepCurrent(step)" [ngClass]="step.icon"></i>
+              </div>
+              <span class="mt-2 text-xs font-medium text-center leading-tight"
+                    [ngClass]="isStepCompleted(step) ? 'text-primary-dark' : 'text-gray-400'">
+                {{ step.label }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Status -->
+      <div *ngIf="['cancelled', 'failed_delivery', 'returned'].includes(selectedDelivery.status)" 
+           class="p-6 bg-red-50 border-b border-red-100">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+            <i class="bi bi-exclamation-triangle text-red-600 text-xl"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-red-800">{{ getStatusText(selectedDelivery.status) }}</h3>
+            <p class="text-sm text-red-600">تواصل مع المُرسل أو الدعم للمزيد من المعلومات</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Cards Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Sender Info -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-4 border-b border-gray-100 bg-gray-50/50">
+          <h3 class="font-bold text-primary-dark flex items-center gap-2">
+            <i class="bi bi-person text-primary-green"></i>
+            المُرسل
+          </h3>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-bold text-primary-dark">{{ selectedDelivery.senderName }}</p>
+              <p *ngIf="selectedDelivery.senderPhone" class="text-sm text-gray-500">{{ selectedDelivery.senderPhone }}</p>
+            </div>
+            <button *ngIf="selectedDelivery.senderPhone" 
+                    (click)="callSender()"
+                    class="w-10 h-10 rounded-full bg-primary-green/10 text-primary-green hover:bg-primary-green hover:text-white flex items-center justify-center transition-colors">
+              <i class="bi bi-telephone"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delivery Details -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-4 border-b border-gray-100 bg-gray-50/50">
+          <h3 class="font-bold text-primary-dark flex items-center gap-2">
+            <i class="bi bi-info-circle text-primary-green"></i>
+            تفاصيل الشحنة
+          </h3>
+        </div>
+        <div class="p-4 space-y-3">
+          <div class="flex justify-between">
+            <span class="text-gray-500 text-sm">الوزن</span>
+            <span class="font-medium text-primary-dark">{{ selectedDelivery.weight }} كجم</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500 text-sm">تاريخ الإنشاء</span>
+            <span class="font-medium text-primary-dark">{{ formatDate(selectedDelivery.createdAt) }}</span>
+          </div>
+          <div *ngIf="selectedDelivery.estimatedDelivery && selectedDelivery.status !== 'delivered'" class="flex justify-between">
+            <span class="text-gray-500 text-sm">التوصيل المتوقع</span>
+            <span class="font-medium text-primary-green">{{ formatDate(selectedDelivery.estimatedDelivery) }}</span>
+          </div>
+          <div class="flex items-center gap-2 pt-2">
+            <span *ngIf="selectedDelivery.isFragile" class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
+              <i class="bi bi-exclamation-diamond ml-1"></i>قابل للكسر
+            </span>
+            <span *ngIf="selectedDelivery.requiresSignature" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+              <i class="bi bi-pen ml-1"></i>يتطلب توقيعك
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delivery Address -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-4 border-b border-gray-100 bg-gray-50/50">
+          <h3 class="font-bold text-primary-dark flex items-center gap-2">
+            <i class="bi bi-geo-alt text-primary-green"></i>
+            عنوان التسليم
+          </h3>
+        </div>
+        <div class="p-4">
+          <p class="font-medium text-primary-dark">{{ selectedDelivery.deliveryAddress }}</p>
+          <a routerLink="/customer/profile" class="inline-flex items-center gap-1 mt-3 text-sm text-primary-green hover:underline">
+            <i class="bi bi-pencil"></i>
+            تعديل العنوان
+          </a>
+        </div>
+      </div>
+
+      <!-- Courier Info -->
+      <div *ngIf="selectedDelivery.courierName" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-4 border-b border-gray-100 bg-blue-50">
+          <h3 class="font-bold text-blue-800 flex items-center gap-2">
+            <i class="bi bi-truck text-blue-600"></i>
+            المندوب
+          </h3>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                <i class="bi bi-person text-blue-600 text-xl"></i>
+              </div>
+              <div>
+                <p class="font-bold text-primary-dark">{{ selectedDelivery.courierName }}</p>
+                <p *ngIf="selectedDelivery.courierPhone" class="text-sm text-gray-500">{{ selectedDelivery.courierPhone }}</p>
+              </div>
+            </div>
+            <button *ngIf="selectedDelivery.courierPhone" 
+                    (click)="callCourier()" 
+                    class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-medium text-sm hover:bg-blue-200 transition-colors">
+              <i class="bi bi-telephone ml-1"></i>
+              اتصال
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Results -->
+  <div *ngIf="!isLoading && searchPerformed && !selectedDelivery && !error" 
+       class="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
+    <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
+      <i class="bi bi-search text-gray-400 text-4xl"></i>
+    </div>
+    <h3 class="text-xl font-bold text-gray-800 mb-2">لم يتم العثور على الشحنة</h3>
+    <p class="text-gray-500">تأكد من رقم التتبع وحاول مرة أخرى</p>
+  </div>
+</div>
+

@@ -1,0 +1,314 @@
+<!-- Hero Section -->
+<section class="relative min-h-screen flex items-center overflow-hidden">
+  <!-- Background Image with Overlay -->
+  <div class="absolute inset-0">
+    <img src="/assets/Images/pexels-norma-mortenson-4393668.jpg" alt="خلفية" class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-br from-dark-blue/95 via-dark-teal/90 to-dark-blue/95"></div>
+  </div>
+  
+  <!-- Animated Shapes -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-20 right-10 w-72 h-72 bg-bright-green/20 rounded-full blur-3xl animate-pulse"></div>
+    <div class="absolute bottom-20 left-10 w-96 h-96 bg-gold/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-dark-teal/20 rounded-full blur-3xl"></div>
+  </div>
+
+  <div class="container mx-auto px-4 lg:px-8 relative z-10 py-20">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <!-- Content -->
+      <div class="text-center lg:text-right" [@fadeInLeft]>
+        <!-- Badge -->
+        <div class="inline-flex items-center gap-3 px-6 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-full mb-8">
+          <i class="bi bi-lightning-charge-fill text-gold text-xl"></i>
+          <span class="text-white font-bold">خدمة توصيل رائدة في المملكة</span>
+        </div>
+        
+        <!-- Title -->
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white leading-tight mb-6">
+          توصيل سريع
+          <span class="block mt-2 bg-gradient-to-r from-gold via-bright-green to-gold bg-clip-text text-transparent">
+            ومضمون
+          </span>
+          <span class="block text-3xl sm:text-4xl lg:text-5xl mt-4 text-white/90">لجميع احتياجاتك</span>
+        </h1>
+        
+        <!-- Description -->
+        <p class="text-lg sm:text-xl text-white/80 leading-relaxed mb-10 max-w-xl mx-auto lg:mx-0 lg:mr-0">
+          نحن نقدم خدمة توصيل سريعة وموثوقة لجميع منتجاتك. 
+          اطلب الآن واحصل على توصيل مجاني للطلبات التي تزيد عن 100 ريال
+        </p>
+        
+        <!-- Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12" [@fadeInUp]>
+          <a routerLink="/login" 
+             class="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-bright-green text-white rounded-2xl font-bold text-lg shadow-lg hover:bg-dark-teal hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <i class="bi bi-box-arrow-in-left text-xl group-hover:scale-110 transition-transform"></i>
+            <span>تسجيل الدخول</span>
+          </a>
+          <a routerLink="/available-couriers" 
+             class="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-white/10 backdrop-blur-md border-2 border-white/30 text-white rounded-2xl font-bold text-lg hover:bg-white/20 hover:-translate-y-1 transition-all duration-300">
+            <i class="bi bi-truck text-xl group-hover:scale-110 transition-transform"></i>
+            <span>المندوبون المتاحون</span>
+          </a>
+        </div>
+        
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-4 max-w-lg mx-auto lg:mx-0" [@slideInUp]>
+          <div *ngFor="let stat of stats" 
+               class="text-center p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 hover:bg-white/15 hover:-translate-y-1 transition-all duration-300">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-white/20 flex items-center justify-center">
+              <i [class]="'bi ' + stat.icon + ' text-bright-green text-xl'"></i>
+            </div>
+            <h3 class="text-2xl sm:text-3xl font-black text-white mb-1">{{ stat.value }}</h3>
+            <p class="text-white/70 text-sm font-medium">{{ stat.label }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Hero Image -->
+      <div class="relative hidden lg:block" [@fadeInRight]>
+        <div class="relative">
+          <img src="/assets/Images/pexels-rdne-7362949.jpg" alt="توصيل سريع" 
+               class="w-full rounded-3xl shadow-2xl border-4 border-white/20">
+          
+          <!-- Floating Cards -->
+          <div class="absolute -top-6 -right-6 flex items-center gap-3 px-5 py-3 bg-white rounded-2xl shadow-xl animate-bounce" style="animation-duration: 3s">
+            <div class="w-10 h-10 rounded-full bg-bright-green flex items-center justify-center">
+              <i class="bi bi-lightning-charge text-white"></i>
+            </div>
+            <div class="text-right">
+              <p class="font-bold text-dark-blue">توصيل سريع</p>
+              <p class="text-sm text-gray-500">خلال 30 دقيقة</p>
+            </div>
+          </div>
+          
+          <div class="absolute -bottom-6 -left-6 flex items-center gap-3 px-5 py-3 bg-white rounded-2xl shadow-xl animate-bounce" style="animation-duration: 3s; animation-delay: 1.5s">
+            <div class="w-10 h-10 rounded-full bg-gold flex items-center justify-center">
+              <i class="bi bi-shield-check text-dark-blue"></i>
+            </div>
+            <div class="text-right">
+              <p class="font-bold text-dark-blue">آمن 100%</p>
+              <p class="text-sm text-gray-500">ضمان التسليم</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Scroll Indicator -->
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/50 animate-bounce">
+    <i class="bi bi-chevron-double-down text-3xl"></i>
+  </div>
+</section>
+
+<!-- Services Section -->
+<section id="services" class="py-20 lg:py-28 bg-white">
+  <div class="container mx-auto px-4 lg:px-8">
+    <!-- Header -->
+    <div class="text-center mb-16" [@fadeInUp]>
+      <span class="inline-block px-6 py-2 bg-bright-green/10 text-bright-green rounded-full font-bold text-sm uppercase tracking-wider mb-4">خدماتنا</span>
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-dark-blue mb-4">خدماتنا المميزة</h2>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">نقدم لك أفضل خدمات التوصيل بأعلى معايير الجودة والسرعة</p>
+    </div>
+    
+    <!-- Services Grid -->
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8" [@slideInCards]>
+      <div *ngFor="let service of services" 
+           class="group bg-white p-8 rounded-3xl border-2 border-gray-100 shadow-md hover:shadow-2xl hover:border-bright-green hover:-translate-y-4 transition-all duration-300 text-center relative overflow-hidden">
+        <!-- Hover Gradient -->
+        <div class="absolute inset-0 bg-gradient-to-br from-bright-green/5 to-dark-teal/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        
+        <!-- Icon -->
+        <div class="relative mb-8">
+          <div class="w-24 h-24 mx-auto rounded-2xl bg-gradient-to-br from-bright-green to-dark-teal flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+            <i [class]="'bi ' + service.icon + ' text-white text-4xl'"></i>
+          </div>
+        </div>
+        
+        <h4 class="relative text-xl font-bold text-dark-blue mb-4">{{ service.title }}</h4>
+        <p class="relative text-gray-600 leading-relaxed">{{ service.description }}</p>
+        
+        <!-- Bottom Accent -->
+        <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-bright-green to-dark-teal scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Section -->
+<section id="how-it-works" class="py-20 lg:py-28 bg-gray-50">
+  <div class="container mx-auto px-4 lg:px-8">
+    <!-- Header -->
+    <div class="text-center mb-16" [@fadeInUp]>
+      <span class="inline-block px-6 py-2 bg-gold/10 text-gold rounded-full font-bold text-sm uppercase tracking-wider mb-4">كيف يعمل</span>
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-dark-blue mb-4">كيف يعمل نظامنا</h2>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">عملية بسيطة وسريعة في 3 خطوات فقط</p>
+    </div>
+    
+    <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <!-- Image -->
+      <div [@fadeInLeft]>
+        <img src="/assets/Images/Dropshipping model-bro.png" alt="كيف يعمل" 
+             class="w-full max-w-lg mx-auto rounded-3xl">
+      </div>
+      
+      <!-- Steps -->
+      <div class="space-y-6" [@fadeInRight]>
+        <div *ngFor="let step of steps" 
+             class="group flex items-start gap-6 p-6 bg-white rounded-2xl border-2 border-gray-100 shadow-md hover:shadow-xl hover:border-bright-green transition-all duration-300" [@scaleIn]>
+          <!-- Number -->
+          <div class="flex-shrink-0">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-bright-green to-dark-teal flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+              <span class="text-2xl sm:text-3xl font-black text-white">{{ step.number }}</span>
+            </div>
+          </div>
+          
+          <div class="flex-1">
+            <h4 class="text-xl font-bold text-dark-blue mb-2">{{ step.title }}</h4>
+            <p class="text-gray-600 leading-relaxed">{{ step.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-20 lg:py-28 bg-white">
+  <div class="container mx-auto px-4 lg:px-8">
+    <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <!-- Content -->
+      <div class="order-2 lg:order-1">
+        <div class="mb-10 text-center lg:text-right" [@fadeInLeft]>
+          <span class="inline-block px-6 py-2 bg-dark-teal/10 text-dark-teal rounded-full font-bold text-sm uppercase tracking-wider mb-4">لماذا نحن</span>
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-dark-blue">لماذا تختارنا؟</h2>
+        </div>
+        
+        <div class="space-y-5">
+          <div *ngFor="let feature of features" 
+               class="group flex items-start gap-5 p-5 bg-gray-50 rounded-2xl border-2 border-gray-100 hover:border-bright-green hover:shadow-lg transition-all duration-300" [@fadeInUp]>
+            <!-- Icon -->
+            <div class="w-14 h-14 flex-shrink-0 rounded-xl bg-gradient-to-br from-dark-teal to-dark-blue flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
+              <i [class]="'bi ' + feature.icon + ' text-white text-xl'"></i>
+            </div>
+            
+            <div class="flex-1">
+              <h5 class="text-lg font-bold text-dark-blue mb-1">{{ feature.title }}</h5>
+              <p class="text-gray-600 leading-relaxed text-sm sm:text-base">{{ feature.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Image -->
+      <div class="order-1 lg:order-2" [@fadeInRight]>
+        <img src="/assets/Images/Successful purchase-cuate.png" alt="شراء ناجح" 
+             class="w-full max-w-lg mx-auto rounded-3xl">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-20 lg:py-28 bg-gray-50">
+  <div class="container mx-auto px-4 lg:px-8">
+    <!-- Header -->
+    <div class="text-center mb-16" [@fadeInUp]>
+      <span class="inline-block px-6 py-2 bg-bright-green/10 text-bright-green rounded-full font-bold text-sm uppercase tracking-wider mb-4">آراء العملاء</span>
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-dark-blue mb-4">ماذا يقول عملاؤنا</h2>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">نفخر بثقة عملائنا ورضاهم عن خدماتنا</p>
+    </div>
+    
+    <!-- Testimonials Grid -->
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div *ngFor="let testimonial of testimonials" 
+           class="bg-white p-8 rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 relative">
+        <!-- Quote Icon -->
+        <div class="absolute top-6 left-6 text-bright-green/20 text-6xl">
+          <i class="bi bi-quote"></i>
+        </div>
+        
+        <!-- Stars -->
+        <div class="flex gap-1 mb-4">
+          <i class="bi bi-star-fill text-gold" *ngFor="let star of [1,2,3,4,5]"></i>
+        </div>
+        
+        <p class="text-gray-600 leading-relaxed mb-6 relative z-10">"{{ testimonial.comment }}"</p>
+        
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-bright-green to-dark-teal flex items-center justify-center text-white font-bold text-lg">
+            {{ testimonial.name.charAt(0) }}
+          </div>
+          <div>
+            <h5 class="font-bold text-dark-blue">{{ testimonial.name }}</h5>
+            <p class="text-sm text-gray-500">{{ testimonial.role }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="relative py-20 lg:py-28 overflow-hidden">
+  <!-- Background -->
+  <div class="absolute inset-0 bg-gradient-to-br from-dark-blue via-dark-teal to-dark-blue"></div>
+  <div class="absolute inset-0">
+    <img src="/assets/Images/pexels-artempodrez-5025669.jpg" alt="خلفية" class="w-full h-full object-cover opacity-10">
+  </div>
+  
+  <!-- Animated Shapes -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-10 right-10 w-64 h-64 bg-bright-green/20 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-10 left-10 w-64 h-64 bg-gold/20 rounded-full blur-3xl"></div>
+  </div>
+  
+  <div class="container mx-auto px-4 lg:px-8 relative z-10">
+    <div class="flex flex-col lg:flex-row items-center justify-between gap-10 text-center lg:text-right" [@fadeInUp]>
+      <div class="text-white">
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black mb-4">جاهز للبدء؟</h2>
+        <p class="text-xl sm:text-2xl text-white/80">
+          انضم إلى آلاف العملاء الراضين واحصل على أفضل تجربة توصيل
+        </p>
+      </div>
+      
+      <div class="flex flex-col sm:flex-row gap-4">
+        <a routerLink="/role-selection" 
+           class="group inline-flex items-center justify-center gap-3 px-10 py-5 bg-gold text-dark-blue font-bold text-lg rounded-2xl shadow-xl hover:bg-yellow-400 hover:-translate-y-1 transition-all duration-300">
+          <span>انضم كمُرسل أو مندوب</span>
+          <i class="bi bi-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+        </a>
+        <a routerLink="/login" 
+           class="group inline-flex items-center justify-center gap-3 px-10 py-5 bg-white/10 backdrop-blur-md border-2 border-white/30 text-white font-bold text-lg rounded-2xl hover:bg-white/20 hover:-translate-y-1 transition-all duration-300">
+          <span>تسجيل الدخول</span>
+          <i class="bi bi-box-arrow-in-left"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Partners Section -->
+<section class="py-16 bg-white border-t border-gray-100">
+  <div class="container mx-auto px-4 lg:px-8">
+    <p class="text-center text-gray-500 font-medium mb-8">شركاؤنا في النجاح</p>
+    <div class="flex flex-wrap justify-center items-center gap-8 lg:gap-16 opacity-60">
+      <div class="w-24 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+        <span class="font-bold text-gray-400">Partner 1</span>
+      </div>
+      <div class="w-24 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+        <span class="font-bold text-gray-400">Partner 2</span>
+      </div>
+      <div class="w-24 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+        <span class="font-bold text-gray-400">Partner 3</span>
+      </div>
+      <div class="w-24 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+        <span class="font-bold text-gray-400">Partner 4</span>
+      </div>
+      <div class="w-24 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+        <span class="font-bold text-gray-400">Partner 5</span>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,344 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div>
+    <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">تتبع الشحنات</h1>
+    <p class="text-gray-600 mt-1">تابع حالة شحناتك في الوقت الفعلي</p>
+  </div>
+
+  <!-- Search Box -->
+  <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+    <div class="flex flex-col sm:flex-row gap-4">
+      <div class="flex-1 relative">
+        <i class="bi bi-search absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <input type="text"
+               [(ngModel)]="trackingNumber"
+               (keyup.enter)="searchParcel()"
+               class="input pr-12"
+               placeholder="أدخل رقم التتبع (مثال: PKG-2024-001)">
+      </div>
+      <button (click)="searchParcel()"
+              [disabled]="isSearching"
+              class="px-8 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl shadow-green hover:shadow-green-lg disabled:opacity-50 transition-all">
+        <span *ngIf="!isSearching">
+          <i class="bi bi-search ml-2"></i>
+          تتبع
+        </span>
+        <span *ngIf="isSearching" class="flex items-center gap-2">
+          <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+          جاري البحث...
+        </span>
+      </button>
+    </div>
+    
+    <p *ngIf="errorMessage" class="text-red-500 text-sm mt-3">
+      <i class="bi bi-exclamation-circle ml-1"></i>
+      {{ errorMessage }}
+    </p>
+  </div>
+
+  <!-- Parcel Details -->
+  <div *ngIf="parcel" class="space-y-6">
+    
+    <!-- Status Card -->
+    <div class="bg-gradient-to-br from-primary-dark to-primary-dark-light rounded-2xl p-6 text-white">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <p class="text-white/60 text-sm">رقم التتبع</p>
+          <h2 class="text-2xl font-black tracking-wider">{{ parcel.trackingNumber }}</h2>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="px-4 py-2 rounded-xl font-bold text-sm" [ngClass]="getStatusClass(parcel.status)">
+            <i class="bi ml-2" [ngClass]="getStatusIcon(parcel.status)"></i>
+            {{ getStatusText(parcel.status) }}
+          </span>
+          <span *ngIf="parcel.priority === 'urgent'" class="px-3 py-2 bg-red-500 text-white text-sm font-bold rounded-xl">
+            <i class="bi bi-lightning-charge-fill ml-1"></i>
+            عاجل
+          </span>
+        </div>
+      </div>
+      
+      <!-- Progress Bar -->
+      <div class="bg-white/10 rounded-full h-3 overflow-hidden mb-2">
+        <div class="bg-primary-green h-full rounded-full transition-all duration-500"
+             [style.width.%]="getProgressPercentage()"></div>
+      </div>
+      <p class="text-white/60 text-sm text-left">{{ getProgressPercentage() }}% مكتمل</p>
+    </div>
+
+    <!-- Live Tracking & Map Placeholder (UC-SUP-04) -->
+    <div *ngIf="shouldShowLiveTracking()" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-5 border-b border-gray-100 bg-blue-50 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+          <h3 class="font-bold text-blue-800">التتبع المباشر</h3>
+        </div>
+        <span *ngIf="lastUpdated" class="text-blue-600 text-sm">
+          آخر تحديث: {{ formatTime(lastUpdated.toISOString()) }}
+        </span>
+      </div>
+      
+      <!-- Map Placeholder -->
+      <div class="h-64 bg-gray-100 flex items-center justify-center relative">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-green-50"></div>
+        <div class="relative text-center">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-white shadow-lg flex items-center justify-center">
+            <i class="bi bi-geo-alt-fill text-primary-green text-3xl"></i>
+          </div>
+          <p class="text-gray-600 font-medium">خريطة التتبع المباشر</p>
+          <p class="text-gray-400 text-sm">سيتم عرض موقع المندوب هنا</p>
+        </div>
+      </div>
+      
+      <!-- Carrier Info -->
+      <div *ngIf="carrierLocation" class="p-5 bg-gray-50">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-xl bg-blue-100 flex items-center justify-center">
+            <i class="bi bi-truck text-blue-600 text-2xl"></i>
+          </div>
+          <div class="flex-1">
+            <p class="font-bold text-primary-dark">{{ carrierLocation.carrierName }}</p>
+            <p class="text-sm text-gray-500">يتحرك بسرعة {{ carrierLocation.speed }} كم/س</p>
+          </div>
+          <div class="text-left">
+            <p class="text-sm text-gray-500">الوصول المتوقع</p>
+            <p class="font-bold text-primary-green text-lg">{{ carrierLocation.estimatedArrival }}</p>
+          </div>
+          <a *ngIf="parcel.courierPhone"
+             [href]="'tel:' + parcel.courierPhone"
+             class="w-12 h-12 rounded-xl bg-primary-green flex items-center justify-center text-white hover:shadow-lg transition-all">
+            <i class="bi bi-telephone-fill text-xl"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline (UC-SUP-04) -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-5 border-b border-gray-100 bg-gray-50">
+        <h3 class="font-bold text-primary-dark flex items-center gap-2">
+          <i class="bi bi-clock-history text-primary-green"></i>
+          سجل الحالات
+        </h3>
+      </div>
+      
+      <div class="p-5">
+        <div *ngIf="timeline.length === 0" class="text-center py-8">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+            <i class="bi bi-clock text-gray-400 text-2xl"></i>
+          </div>
+          <p class="text-gray-500">لا توجد تحديثات حالياً</p>
+        </div>
+        
+        <div *ngIf="timeline.length > 0" class="relative">
+          <!-- Timeline Line -->
+          <div class="absolute right-6 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+          
+          <!-- Timeline Events -->
+          <div *ngFor="let event of timeline; let i = index; let last = last" class="relative flex gap-4 pb-6" [class.pb-0]="last">
+            <!-- Icon -->
+            <div class="relative z-10 w-12 h-12 rounded-full flex items-center justify-center shadow-md"
+                 [ngClass]="isTimelineEventCompleted(event) ? 'bg-primary-green text-white' : 'bg-gray-200 text-gray-400'">
+              <i class="bi" [ngClass]="getStatusIcon(event.status)"></i>
+            </div>
+            
+            <!-- Content -->
+            <div class="flex-1 pt-2">
+              <div class="flex items-start justify-between">
+                <div>
+                  <p class="font-bold text-primary-dark">{{ event.title }}</p>
+                  <p class="text-gray-600 text-sm mt-1">{{ event.description }}</p>
+                  <p *ngIf="event.location" class="text-gray-500 text-sm mt-1">
+                    <i class="bi bi-geo-alt ml-1"></i>
+                    {{ event.location }}
+                  </p>
+                </div>
+                <div class="text-left text-sm">
+                  <p class="text-gray-500">{{ formatDate(event.timestamp) }}</p>
+                  <p class="text-gray-400">{{ formatTime(event.timestamp) }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Parcel Details Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Receiver Info -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h3 class="font-bold text-primary-dark mb-4 flex items-center gap-2">
+          <i class="bi bi-person text-blue-500"></i>
+          بيانات المستلم
+        </h3>
+        <div class="space-y-3">
+          <div>
+            <p class="text-gray-500 text-sm">الاسم</p>
+            <p class="font-medium text-primary-dark">{{ parcel.receiverName }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500 text-sm">رقم الهاتف</p>
+            <p class="font-medium text-primary-dark" dir="ltr">{{ parcel.receiverPhone }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500 text-sm">عنوان التسليم</p>
+            <p class="font-medium text-primary-dark">{{ parcel.deliveryAddress }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Package Info -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h3 class="font-bold text-primary-dark mb-4 flex items-center gap-2">
+          <i class="bi bi-box-seam text-purple-500"></i>
+          تفاصيل الشحنة
+        </h3>
+        <div class="space-y-3">
+          <div>
+            <p class="text-gray-500 text-sm">الوصف</p>
+            <p class="font-medium text-primary-dark">{{ parcel.description }}</p>
+          </div>
+          <div class="flex gap-6">
+            <div>
+              <p class="text-gray-500 text-sm">COD</p>
+              <p class="font-bold text-green-600 text-lg">{{ formatCurrency(parcel.codAmount) }}</p>
+            </div>
+            <div>
+              <p class="text-gray-500 text-sm">رسوم التوصيل</p>
+              <p class="font-bold text-primary-green text-lg">{{ formatCurrency(parcel.deliveryFee) }}</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span *ngIf="parcel.isFragile" class="px-3 py-1 bg-amber-100 text-amber-700 text-sm rounded-lg">
+              <i class="bi bi-exclamation-triangle ml-1"></i>
+              قابل للكسر
+            </span>
+            <span *ngIf="parcel.requiresSignature" class="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-lg">
+              <i class="bi bi-pencil-square ml-1"></i>
+              يتطلب توقيع
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Carrier Info & Rating (for delivered orders - UC-SUP-05) -->
+    <div *ngIf="parcel.courierName" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-xl bg-blue-100 flex items-center justify-center">
+            <i class="bi bi-person-fill text-blue-600 text-2xl"></i>
+          </div>
+          <div>
+            <p class="text-gray-500 text-sm">المندوب</p>
+            <p class="font-bold text-primary-dark text-lg">{{ parcel.courierName }}</p>
+            <p *ngIf="parcel.courierPhone" class="text-gray-500 text-sm" dir="ltr">{{ parcel.courierPhone }}</p>
+          </div>
+        </div>
+        
+        <!-- Rating Display or Button -->
+        <div *ngIf="parcel.carrierRating" class="text-center">
+          <p class="text-gray-500 text-sm">تقييمك</p>
+          <div class="flex items-center gap-1 mt-1">
+            <i *ngFor="let star of [1,2,3,4,5]"
+               class="bi text-xl"
+               [ngClass]="star <= parcel.carrierRating! ? 'bi-star-fill text-amber-400' : 'bi-star text-gray-300'"></i>
+          </div>
+        </div>
+        
+        <button *ngIf="canRate()"
+                (click)="openRatingModal()"
+                class="px-6 py-3 bg-amber-100 text-amber-700 font-bold rounded-xl hover:bg-amber-200 transition-colors">
+          <i class="bi bi-star ml-2"></i>
+          تقييم المندوب
+        </button>
+      </div>
+    </div>
+
+    <!-- Failed Attempts -->
+    <div *ngIf="parcel.failedAttempts && parcel.failedAttempts.length > 0" 
+         class="bg-red-50 border border-red-200 rounded-2xl p-5">
+      <h3 class="font-bold text-red-700 mb-4 flex items-center gap-2">
+        <i class="bi bi-exclamation-triangle"></i>
+        محاولات التسليم الفاشلة
+      </h3>
+      <div class="space-y-3">
+        <div *ngFor="let attempt of parcel.failedAttempts" class="bg-white rounded-xl p-4 border border-red-100">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="font-bold text-red-700">المحاولة {{ attempt.attemptNumber }}</p>
+              <p class="text-red-600 mt-1">{{ attempt.reason }}</p>
+              <p *ngIf="attempt.notes" class="text-gray-500 text-sm mt-1">{{ attempt.notes }}</p>
+            </div>
+            <p class="text-gray-500 text-sm">{{ formatDateTime(attempt.timestamp) }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!parcel && !isSearching && !errorMessage" class="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
+    <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-primary-green/10 flex items-center justify-center">
+      <i class="bi bi-geo-alt text-primary-green text-4xl"></i>
+    </div>
+    <h3 class="text-xl font-bold text-primary-dark mb-2">تتبع شحنتك</h3>
+    <p class="text-gray-500 mb-6">أدخل رقم التتبع أعلاه لمعرفة حالة شحنتك</p>
+    <a routerLink="/supplier/shipments" class="text-primary-green font-semibold hover:text-secondary-teal">
+      أو اختر من قائمة الشحنات ←
+    </a>
+  </div>
+</div>
+
+<!-- Rating Modal -->
+<div *ngIf="showRatingModal" 
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+  <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl text-center">
+    <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-amber-100 flex items-center justify-center">
+      <i class="bi bi-star-fill text-amber-500 text-3xl"></i>
+    </div>
+    
+    <h2 class="text-xl font-black text-primary-dark mb-2">قيّم المندوب</h2>
+    <p class="text-gray-500 mb-6">كيف كانت تجربتك مع {{ parcel?.courierName }}؟</p>
+    
+    <!-- Stars -->
+    <div class="flex items-center justify-center gap-2 mb-6">
+      <button *ngFor="let star of [1,2,3,4,5]"
+              (click)="setRating(star)"
+              (mouseenter)="ratingHover = star"
+              (mouseleave)="ratingHover = 0"
+              class="text-4xl transition-transform hover:scale-110">
+        <i class="bi"
+           [ngClass]="(ratingHover || rating) >= star ? 'bi-star-fill text-amber-400' : 'bi-star text-gray-300'"></i>
+      </button>
+    </div>
+    
+    <!-- Rating Text -->
+    <p *ngIf="rating > 0" class="text-gray-600 mb-4">
+      {{ rating === 5 ? 'ممتاز!' : rating === 4 ? 'جيد جداً' : rating === 3 ? 'جيد' : rating === 2 ? 'مقبول' : 'سيء' }}
+    </p>
+    
+    <!-- Review -->
+    <textarea [(ngModel)]="ratingReview"
+              rows="3"
+              class="input resize-none mb-6"
+              placeholder="أضف تعليقاً (اختياري)..."></textarea>
+    
+    <div class="flex gap-3">
+      <button (click)="closeRatingModal()"
+              class="flex-1 px-4 py-3 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition-colors">
+        إلغاء
+      </button>
+      <button (click)="submitRating()"
+              [disabled]="rating === 0 || isSubmittingRating"
+              class="flex-1 px-4 py-3 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 disabled:opacity-50 transition-all">
+        <span *ngIf="!isSubmittingRating">إرسال التقييم</span>
+        <span *ngIf="isSubmittingRating" class="flex items-center justify-center gap-2">
+          <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+          جاري...
+        </span>
+      </button>
+    </div>
+  </div>
+</div>

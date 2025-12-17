@@ -1,0 +1,207 @@
+<div class="space-y-6" *ngIf="job && !isLoading">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">{{ job.trackingNumber }}</h1>
+      <p class="text-gray-600 mt-1">{{ job.description }}</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="px-3 py-1 rounded-full text-sm font-bold" [ngClass]="getStatusClass(job.status)">
+        {{ getStatusText(job.status) }}
+      </span>
+      <div class="text-left">
+        <p class="font-bold text-primary-green">{{ job.courierEarning }} ج.م</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Route Map -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="p-5 border-b border-gray-100 bg-gradient-to-l from-blue-50 to-indigo-50">
+      <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+        <i class="bi bi-geo-alt text-blue-600"></i>
+        مسار التوصيل
+      </h2>
+    </div>
+    <div class="p-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Pickup Location -->
+        <div class="p-4 bg-gray-50 rounded-xl space-y-3">
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <i class="bi bi-arrow-up-circle text-blue-600"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-xs text-gray-500">الاستلام من</p>
+              <p class="font-medium text-primary-dark">{{ job.senderName }}</p>
+              <p class="text-sm text-gray-600">{{ job.pickupAddress }}</p>
+              <button (click)="callSender(job.senderPhone)" class="mt-2 text-sm text-blue-600 hover:underline">
+                <i class="bi bi-telephone ml-1"></i>{{ job.senderPhone }}
+              </button>
+            </div>
+          </div>
+          <button (click)="navigateToPickup()"
+                  class="w-full py-3 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl font-bold hover:shadow-lg transition-all">
+            <i class="bi bi-geo-alt ml-2"></i>
+            تنقل للاستلام
+          </button>
+        </div>
+
+        <!-- Delivery Location -->
+        <div class="p-4 bg-gray-50 rounded-xl space-y-3">
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+              <i class="bi bi-arrow-down-circle text-green-600"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-xs text-gray-500">التسليم إلى</p>
+              <p class="font-medium text-primary-dark">{{ job.receiverName }}</p>
+              <p class="text-sm text-gray-600">{{ job.deliveryAddress }}</p>
+              <button (click)="callReceiver(job.receiverPhone)" class="mt-2 text-sm text-green-600 hover:underline">
+                <i class="bi bi-telephone ml-1"></i>{{ job.receiverPhone }}
+              </button>
+            </div>
+          </div>
+          <button (click)="navigateToDropoff()"
+                  class="w-full py-3 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl font-bold hover:shadow-lg transition-all">
+            <i class="bi bi-geo-alt ml-2"></i>
+            تنقل للتسليم
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Details -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="p-5 border-b border-gray-100 bg-gray-50/50">
+      <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+        <i class="bi bi-box-seam text-primary-green"></i>
+        تفاصيل الطلب
+      </h2>
+    </div>
+    <div class="p-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-3">
+          <div class="flex justify-between">
+            <span class="text-gray-600">الوزن:</span>
+            <span class="font-medium">{{ job.weight }} كجم</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">قيمة COD:</span>
+            <span class="font-medium text-primary-green">{{ job.codAmount }} ج.م</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">المنتجات:</span>
+            <span class="font-medium">{{ job.items }}</span>
+          </div>
+        </div>
+        <div class="space-y-3">
+          <div *ngIf="job.isFragile" class="flex items-center gap-2">
+            <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium">
+              <i class="bi bi-exclamation-diamond ml-1"></i>قابل للكسر
+            </span>
+          </div>
+          <div *ngIf="job.requiresSignature" class="flex items-center gap-2">
+            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+              <i class="bi bi-pen ml-1"></i>يتطلب توقيع
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="p-5 space-y-4">
+      <!-- Call Customer Button -->
+      <button (click)="callCustomer()"
+              class="w-full py-4 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold text-lg hover:shadow-green-lg transition-all flex items-center justify-center gap-3">
+        <i class="bi bi-telephone-fill text-2xl"></i>
+        <span>اتصال بالعميل</span>
+      </button>
+
+      <!-- Status Update Buttons -->
+      <div class="flex gap-3 flex-wrap">
+        <button *ngIf="job.status === 'accepted'"
+                (click)="markPickedUp()"
+                class="flex-1 py-3 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl font-bold hover:shadow-lg transition-all">
+          <i class="bi bi-box-arrow-up ml-2"></i>
+          تم الاستلام (Picked Up)
+        </button>
+        <button *ngIf="job.status === 'picked_up'"
+                (click)="markOutForDelivery()"
+                class="flex-1 py-3 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl font-bold hover:shadow-lg transition-all">
+          <i class="bi bi-truck ml-2"></i>
+          في الطريق (Out For Delivery)
+        </button>
+        <button *ngIf="job.status === 'out_for_delivery' || job.status === 'in_transit'"
+                (click)="completeDelivery()"
+                class="flex-1 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold hover:shadow-lg transition-all">
+          <i class="bi bi-check-circle ml-2"></i>
+          تأكيد التسليم (Deliver)
+        </button>
+
+        <!-- Report Issue -->
+        <button routerLink="/courier/support"
+                class="px-6 py-3 bg-orange-100 text-orange-700 rounded-xl font-bold hover:bg-orange-200 transition-colors">
+          <i class="bi bi-exclamation-triangle ml-2"></i>
+          الإبلاغ عن مشكلة
+        </button>
+      </div>
+
+      <!-- Unable to Deliver Options -->
+      <div *ngIf="['accepted', 'picked_up', 'out_for_delivery', 'in_transit'].includes(job.status)"
+           class="pt-4 border-t border-gray-100">
+        <h3 class="font-bold text-gray-800 mb-3">في حالة عدم القدرة على التسليم:</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button (click)="unableToDeliver('no_answer')"
+                  class="p-3 bg-red-50 text-red-700 rounded-xl font-medium hover:bg-red-100 transition-colors text-sm">
+            <i class="bi bi-x-circle ml-2"></i>
+            لا يوجد رد
+          </button>
+          <button (click)="unableToDeliver('refused')"
+                  class="p-3 bg-red-50 text-red-700 rounded-xl font-medium hover:bg-red-100 transition-colors text-sm">
+            <i class="bi bi-hand-thumbs-down ml-2"></i>
+            رفض الاستلام
+          </button>
+          <button (click)="unableToDeliver('wrong_address')"
+                  class="p-3 bg-red-50 text-red-700 rounded-xl font-medium hover:bg-red-100 transition-colors text-sm">
+            <i class="bi bi-geo-alt ml-2"></i>
+            عنوان خاطئ
+          </button>
+          <button (click)="unableToDeliver('damaged')"
+                  class="p-3 bg-red-50 text-red-700 rounded-xl font-medium hover:bg-red-100 transition-colors text-sm">
+            <i class="bi bi-exclamation-triangle ml-2"></i>
+            تالف
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delivery Proof Modal -->
+<app-delivery-proof
+  [isVisible]="showProofModal"
+  [job]="job"
+  (onComplete)="onProofComplete($event)"
+  (onCancel)="onProofCancel()">
+</app-delivery-proof>
+
+<!-- Failed Delivery Modal -->
+<app-failed-delivery-proof
+  [isVisible]="showFailedModal"
+  [job]="job"
+  (onSubmit)="onFailedSubmit($event)"
+  (onCancel)="onFailedCancel()">
+</app-failed-delivery-proof>
+
+<!-- Loader -->
+<div *ngIf="isLoading" class="flex justify-center items-center py-20">
+  <div class="text-center">
+    <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4"></div>
+    <p class="text-gray-500">جاري تحميل تفاصيل المهمة...</p>
+  </div>
+</div>

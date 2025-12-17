@@ -1,0 +1,419 @@
+<div class="max-w-4xl mx-auto">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-3 mb-2">
+      <a routerLink="/supplier/dashboard" class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
+        <i class="bi bi-arrow-right"></i>
+      </a>
+      <div>
+        <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">طلب شحن جديد</h1>
+        <p class="text-gray-600">أدخل تفاصيل الشحنة لإنشاء طلب توصيل</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress Steps -->
+  <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
+    <div class="flex items-center justify-between">
+      <div *ngFor="let step of [1, 2, 3]; let i = index" 
+           class="flex items-center"
+           [class.flex-1]="i < 2">
+        <!-- Step Circle -->
+        <div class="flex flex-col items-center">
+          <button (click)="goToStep(step)"
+                  [disabled]="step > currentStep"
+                  class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg transition-all duration-300"
+                  [ngClass]="{
+                    'bg-primary-green text-white shadow-green': currentStep === step,
+                    'bg-green-100 text-green-600': currentStep > step,
+                    'bg-gray-100 text-gray-400': currentStep < step
+                  }">
+            <i *ngIf="currentStep > step" class="bi bi-check-lg"></i>
+            <span *ngIf="currentStep <= step">{{ step }}</span>
+          </button>
+          <span class="text-xs mt-2 font-medium hidden sm:block"
+                [ngClass]="currentStep >= step ? 'text-primary-dark' : 'text-gray-400'">
+            {{ step === 1 ? 'العناوين' : step === 2 ? 'المستلم' : 'تفاصيل الطرد' }}
+          </span>
+        </div>
+        
+        <!-- Connector Line -->
+        <div *ngIf="i < 2" 
+             class="flex-1 h-1 mx-4 rounded-full transition-all duration-300"
+             [ngClass]="currentStep > step ? 'bg-primary-green' : 'bg-gray-200'">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Container -->
+  <form [formGroup]="shipmentForm" (ngSubmit)="onSubmit()">
+    
+    <!-- Step 1: Addresses -->
+    <div *ngIf="currentStep === 1" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 rounded-xl bg-primary-green/10 flex items-center justify-center">
+          <i class="bi bi-geo-alt-fill text-primary-green text-xl"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-primary-dark">عناوين الشحن</h2>
+          <p class="text-gray-500 text-sm">حدد عنوان الاستلام والتسليم</p>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <!-- Pickup Address -->
+        <div>
+          <label class="block text-sm font-bold text-primary-dark mb-2">
+            <i class="bi bi-building ml-2 text-primary-green"></i>
+            عنوان الاستلام (موقعك)
+          </label>
+          <div class="relative">
+            <textarea formControlName="pickupAddress"
+                      rows="2"
+                      class="input resize-none"
+                      [ngClass]="{'input-error': hasError('pickupAddress')}"
+                      placeholder="أدخل عنوان الاستلام التفصيلي"></textarea>
+            <button *ngIf="profile?.address" 
+                    type="button"
+                    (click)="shipmentForm.patchValue({pickupAddress: profile?.address || ''})"
+                    class="absolute top-2 left-2 px-3 py-1 bg-primary-green/10 text-primary-green text-xs font-bold rounded-lg hover:bg-primary-green/20">
+              استخدم العنوان المحفوظ
+            </button>
+          </div>
+          <p *ngIf="hasError('pickupAddress')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('pickupAddress') }}</p>
+        </div>
+
+        <!-- Delivery Address -->
+        <div>
+          <label class="block text-sm font-bold text-primary-dark mb-2">
+            <i class="bi bi-geo-fill ml-2 text-red-500"></i>
+            عنوان التسليم (وجهة الشحنة)
+          </label>
+          <textarea formControlName="deliveryAddress"
+                    rows="2"
+                    class="input resize-none"
+                    [ngClass]="{'input-error': hasError('deliveryAddress')}"
+                    placeholder="أدخل عنوان التسليم التفصيلي (المنطقة، الشارع، العمارة، الشقة)"></textarea>
+          <p *ngIf="hasError('deliveryAddress')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('deliveryAddress') }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Receiver Info -->
+    <div *ngIf="currentStep === 2" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+          <i class="bi bi-person-fill text-blue-600 text-xl"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-primary-dark">بيانات المستلم</h2>
+          <p class="text-gray-500 text-sm">أدخل بيانات الشخص الذي سيستلم الشحنة</p>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <!-- Receiver Name -->
+        <div>
+          <label class="block text-sm font-bold text-primary-dark mb-2">
+            اسم المستلم *
+          </label>
+          <input type="text" 
+                 formControlName="receiverName"
+                 class="input"
+                 [ngClass]="{'input-error': hasError('receiverName')}"
+                 placeholder="الاسم الكامل للمستلم">
+          <p *ngIf="hasError('receiverName')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('receiverName') }}</p>
+        </div>
+
+        <!-- Receiver Phone -->
+        <div>
+          <label class="block text-sm font-bold text-primary-dark mb-2">
+            رقم الهاتف *
+          </label>
+          <input type="tel" 
+                 formControlName="receiverPhone"
+                 class="input"
+                 [ngClass]="{'input-error': hasError('receiverPhone')}"
+                 placeholder="01xxxxxxxxx"
+                 dir="ltr">
+          <p *ngIf="hasError('receiverPhone')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('receiverPhone') }}</p>
+          <p class="text-gray-400 text-xs mt-1">سيتم الاتصال على هذا الرقم عند التسليم</p>
+        </div>
+
+        <!-- Receiver Email (Optional) -->
+        <div>
+          <label class="block text-sm font-bold text-primary-dark mb-2">
+            البريد الإلكتروني (اختياري)
+          </label>
+          <input type="email" 
+                 formControlName="receiverEmail"
+                 class="input"
+                 [ngClass]="{'input-error': hasError('receiverEmail')}"
+                 placeholder="email@example.com"
+                 dir="ltr">
+          <p *ngIf="hasError('receiverEmail')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('receiverEmail') }}</p>
+          <p class="text-gray-400 text-xs mt-1">سيتم إرسال إشعارات التتبع لهذا البريد</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Package Details -->
+    <div *ngIf="currentStep === 3" class="space-y-6">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+            <i class="bi bi-box-seam-fill text-purple-600 text-xl"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-primary-dark">تفاصيل الطرد</h2>
+            <p class="text-gray-500 text-sm">صف محتويات الشحنة وحدد الخيارات</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Description -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-bold text-primary-dark mb-2">
+              وصف الشحنة *
+            </label>
+            <input type="text" 
+                   formControlName="description"
+                   class="input"
+                   [ngClass]="{'input-error': hasError('description')}"
+                   placeholder="مثال: ملابس، إلكترونيات، مستندات...">
+            <p *ngIf="hasError('description')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('description') }}</p>
+          </div>
+
+          <!-- Weight -->
+          <div>
+            <label class="block text-sm font-bold text-primary-dark mb-2">
+              الوزن (كجم) *
+            </label>
+            <input type="number" 
+                   formControlName="weight"
+                   class="input"
+                   [ngClass]="{'input-error': hasError('weight')}"
+                   min="0.1"
+                   step="0.1"
+                   (change)="onWeightChange()">
+            <p *ngIf="hasError('weight')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('weight') }}</p>
+          </div>
+
+          <!-- Dimensions -->
+          <div>
+            <label class="block text-sm font-bold text-primary-dark mb-2">
+              الأبعاد (اختياري)
+            </label>
+            <input type="text" 
+                   formControlName="dimensions"
+                   class="input"
+                   placeholder="الطول × العرض × الارتفاع">
+          </div>
+
+          <!-- COD Amount -->
+          <div>
+            <label class="block text-sm font-bold text-primary-dark mb-2">
+              <i class="bi bi-cash ml-2 text-green-500"></i>
+              مبلغ الدفع عند الاستلام (COD)
+            </label>
+            <div class="relative">
+              <input type="number" 
+                     formControlName="codAmount"
+                     class="input pl-16"
+                     [ngClass]="{'input-error': hasError('codAmount')}"
+                     min="0"
+                     placeholder="0">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">ج.م</span>
+            </div>
+            <p class="text-gray-400 text-xs mt-1">اتركه 0 إذا كان الطلب مدفوع مسبقاً</p>
+          </div>
+
+          <!-- Priority -->
+          <div>
+            <label class="block text-sm font-bold text-primary-dark mb-2">
+              أولوية التوصيل *
+            </label>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="relative cursor-pointer">
+                <input type="radio" 
+                       formControlName="priority" 
+                       value="normal"
+                       (change)="onPriorityChange()"
+                       class="peer sr-only">
+                <div class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-primary-green peer-checked:bg-primary-green/5 transition-all">
+                  <div class="flex items-center gap-2">
+                    <i class="bi bi-clock text-gray-500 peer-checked:text-primary-green"></i>
+                    <span class="font-bold text-primary-dark">عادي</span>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">توصيل خلال 24 ساعة</p>
+                </div>
+              </label>
+              <label class="relative cursor-pointer">
+                <input type="radio" 
+                       formControlName="priority" 
+                       value="urgent"
+                       (change)="onPriorityChange()"
+                       class="peer sr-only">
+                <div class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-red-500 peer-checked:bg-red-50 transition-all">
+                  <div class="flex items-center gap-2">
+                    <i class="bi bi-lightning-charge-fill text-red-500"></i>
+                    <span class="font-bold text-primary-dark">عاجل</span>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">توصيل سريع (+20 ج.م)</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-bold text-primary-dark mb-2">
+              ملاحظات إضافية (اختياري)
+            </label>
+            <textarea formControlName="notes"
+                      rows="2"
+                      class="input resize-none"
+                      placeholder="أي تعليمات خاصة للمندوب..."></textarea>
+          </div>
+
+          <!-- Options -->
+          <div class="md:col-span-2 flex flex-wrap gap-4">
+            <label class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-gray-200 hover:border-primary-green/30 transition-colors">
+              <input type="checkbox" 
+                     formControlName="isFragile"
+                     class="w-5 h-5 rounded border-gray-300 text-primary-green focus:ring-primary-green">
+              <div class="flex items-center gap-2">
+                <i class="bi bi-exclamation-triangle text-amber-500"></i>
+                <span class="font-medium text-primary-dark">قابل للكسر</span>
+              </div>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-gray-200 hover:border-primary-green/30 transition-colors">
+              <input type="checkbox" 
+                     formControlName="requiresSignature"
+                     class="w-5 h-5 rounded border-gray-300 text-primary-green focus:ring-primary-green">
+              <div class="flex items-center gap-2">
+                <i class="bi bi-pencil-square text-blue-500"></i>
+                <span class="font-medium text-primary-dark">يتطلب توقيع</span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fee Summary -->
+      <div class="bg-gradient-to-br from-primary-dark to-primary-dark-light rounded-2xl p-6 text-white">
+        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+          <i class="bi bi-calculator"></i>
+          ملخص التكلفة
+        </h3>
+        
+        <div *ngIf="isCalculatingFee" class="text-center py-4">
+          <div class="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent mx-auto mb-2"></div>
+          <p class="text-white/70">جاري حساب التكلفة...</p>
+        </div>
+        
+        <div *ngIf="!isCalculatingFee && deliveryFee" class="space-y-3">
+          <div class="flex justify-between items-center py-2 border-b border-white/10">
+            <span class="text-white/70">رسوم التوصيل الأساسية</span>
+            <span>{{ deliveryFee.baseFee }} ج.م</span>
+          </div>
+          <div class="flex justify-between items-center py-2 border-b border-white/10">
+            <span class="text-white/70">رسوم المسافة ({{ deliveryFee.estimatedDistance }} كم)</span>
+            <span>{{ deliveryFee.distanceFee }} ج.م</span>
+          </div>
+          <div *ngIf="deliveryFee.weightFee > 0" class="flex justify-between items-center py-2 border-b border-white/10">
+            <span class="text-white/70">رسوم الوزن الزائد</span>
+            <span>{{ deliveryFee.weightFee }} ج.م</span>
+          </div>
+          <div *ngIf="deliveryFee.priorityFee > 0" class="flex justify-between items-center py-2 border-b border-white/10">
+            <span class="text-white/70">رسوم الأولوية (عاجل)</span>
+            <span class="text-red-400">{{ deliveryFee.priorityFee }} ج.م</span>
+          </div>
+          <div class="flex justify-between items-center py-3 text-lg font-bold">
+            <span>إجمالي رسوم التوصيل</span>
+            <span class="text-primary-green">{{ deliveryFee.totalFee }} ج.م</span>
+          </div>
+          <div class="flex justify-between items-center py-2 text-sm text-white/60">
+            <span>الوقت المتوقع للتوصيل</span>
+            <span>{{ deliveryFee.estimatedDuration }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="flex items-center justify-between mt-8">
+      <button *ngIf="currentStep > 1"
+              type="button"
+              (click)="prevStep()"
+              class="flex items-center gap-2 px-6 py-3 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition-colors">
+        <i class="bi bi-arrow-right"></i>
+        السابق
+      </button>
+      <div *ngIf="currentStep === 1"></div>
+
+      <button *ngIf="currentStep < totalSteps"
+              type="button"
+              (click)="nextStep()"
+              [disabled]="!validateCurrentStep()"
+              class="flex items-center gap-2 px-6 py-3 bg-primary-green text-white font-bold rounded-xl shadow-green hover:shadow-green-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+        التالي
+        <i class="bi bi-arrow-left"></i>
+      </button>
+
+      <button *ngIf="currentStep === totalSteps"
+              type="submit"
+              [disabled]="isSubmitting || shipmentForm.invalid"
+              class="flex items-center gap-2 px-8 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl shadow-green hover:shadow-green-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+        <span *ngIf="!isSubmitting">
+          <i class="bi bi-check-lg ml-2"></i>
+          إنشاء الطلب
+        </span>
+        <span *ngIf="isSubmitting" class="flex items-center gap-2">
+          <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+          جاري الإنشاء...
+        </span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Success Modal -->
+<div *ngIf="showSuccessModal" 
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+  <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl">
+    <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
+      <i class="bi bi-check-lg text-green-500 text-4xl"></i>
+    </div>
+    
+    <h2 class="text-2xl font-black text-primary-dark mb-2">تم إنشاء الطلب بنجاح!</h2>
+    <p class="text-gray-600 mb-4">رقم التتبع الخاص بك:</p>
+    
+    <div class="bg-gray-100 rounded-xl p-4 mb-6">
+      <p class="text-2xl font-black text-primary-green tracking-wider">{{ createdTrackingNumber }}</p>
+    </div>
+    
+    <p class="text-sm text-gray-500 mb-6">
+      يمكنك الآن تأكيد جاهزية الطرد للاستلام من صفحة الطلبات
+    </p>
+    
+    <div class="flex flex-col sm:flex-row gap-3">
+      <button (click)="trackShipment()" 
+              class="flex-1 px-4 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl hover:shadow-lg transition-all">
+        <i class="bi bi-geo-alt ml-2"></i>
+        تتبع الشحنة
+      </button>
+      <button (click)="createAnother()" 
+              class="flex-1 px-4 py-3 border-2 border-gray-200 text-primary-dark font-bold rounded-xl hover:bg-gray-50 transition-all">
+        <i class="bi bi-plus-lg ml-2"></i>
+        طلب جديد
+      </button>
+    </div>
+    
+    <button (click)="goToShipments()" 
+            class="mt-4 text-gray-500 hover:text-primary-dark text-sm font-medium">
+      الذهاب إلى قائمة الطلبات
+    </button>
+  </div>
+</div>

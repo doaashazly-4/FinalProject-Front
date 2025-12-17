@@ -1,0 +1,36 @@
+<div class="profile-page">
+  <header class="profile-head">
+    <p class="overline">بيانات الموصل</p>
+    <h2>تحديث الملف والمركبة</h2>
+  </header>
+
+  <form class="profile-form" (ngSubmit)="save()">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>الاسم</label>
+        <input [(ngModel)]="profile.name" name="name" required>
+      </div>
+      <div class="form-group">
+        <label>رقم الهاتف</label>
+        <input [(ngModel)]="profile.phone" name="phone" required>
+      </div>
+      <div class="form-group">
+        <label>نوع المركبة</label>
+        <input [(ngModel)]="profile.vehicle" name="vehicle">
+      </div>
+      <div class="form-group">
+        <label>لوحة المركبة</label>
+        <input [(ngModel)]="profile.plate" name="plate">
+      </div>
+      <div class="form-group">
+        <label>المدينة</label>
+        <input [(ngModel)]="profile.city" name="city">
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="primary">حفظ</button>
+      <button type="button" class="ghost">إلغاء</button>
+    </div>
+  </form>
+</div>
+

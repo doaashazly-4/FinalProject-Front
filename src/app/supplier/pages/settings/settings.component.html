@@ -1,0 +1,398 @@
+<div class="settings-page">
+  <!-- رأس الصفحة -->
+  <header class="head">
+    <div class="head-left">
+      <p class="overline">الإعدادات</p>
+      <h2>إعدادات المُرسل</h2>
+    </div>
+    <div class="head-right" *ngIf="!isLoading">
+      <span class="changes-count" *ngIf="changedFields.length > 0">
+        {{ changedFields.length }} تغيير{{ changedFields.length > 1 ? 'ات' : '' }} غير محفوظ{{ changedFields.length > 1 ? 'ة' : '' }}
+      </span>
+    </div>
+  </header>
+
+  <!-- حالة التحميل -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loading-spinner"></div>
+    <p>جاري حفظ الإعدادات...</p>
+  </div>
+
+  <!-- الأزرار الرئيسية -->
+  <div class="settings-actions" *ngIf="!isLoading">
+    <button class="btn-secondary" (click)="resetSettings()">
+      <i class="bi bi-arrow-clockwise"></i>
+      إعادة تعيين
+    </button>
+    <button class="btn-secondary" (click)="exportSettings()">
+      <i class="bi bi-download"></i>
+      تصدير الإعدادات
+    </button>
+    <label class="btn-secondary">
+      <i class="bi bi-upload"></i>
+      استيراد الإعدادات
+      <input type="file" accept=".json" (change)="importSettings($event)" hidden>
+    </label>
+  </div>
+
+  <!-- نموذج الإعدادات -->
+  <form class="settings-form" (ngSubmit)="saveSettings()" *ngIf="!isLoading">
+    
+    <!-- قسم إعدادات الحساب -->
+    <section class="settings-section">
+      <h3 class="section-title">
+        <i class="bi bi-person-badge"></i>
+        إعدادات الحساب
+      </h3>
+      <div class="form-grid">
+        <!-- Role Selection Dropdown -->
+        <div class="form-group role-selection-group">
+          <label>نوع الحساب</label>
+          <select 
+            [(ngModel)]="accountSettings.accountRole" 
+            name="accountRole"
+            (ngModelChange)="onFieldChange('accountRole', 'account')"
+            class="role-select">
+            <option *ngFor="let role of availableRoles" [value]="role.value">
+              {{ role.label }}
+            </option>
+          </select>
+          <p class="field-hint" *ngIf="accountSettings.accountRole === 'supplier'">
+            <i class="bi bi-send"></i>
+            كمُرسل: يمكنك إنشاء الشحنات وإرسال الطلبات وتتبعها
+          </p>
+          <p class="field-hint" *ngIf="accountSettings.accountRole === 'client'">
+            <i class="bi bi-cart"></i>
+            كعميل: يمكنك طلب المنتجات وتتبع الشحنات
+          </p>
+        </div>
+        <div class="form-group">
+          <label>اسم الشركة</label>
+          <input 
+            type="text" 
+            [(ngModel)]="accountSettings.companyName" 
+            name="companyName"
+            (ngModelChange)="onFieldChange('companyName', 'account')"
+            placeholder="اسم الشركة أو المؤسسة">
+        </div>
+        <div class="form-group">
+          <label>البريد الإلكتروني</label>
+          <input 
+            type="email" 
+            [(ngModel)]="accountSettings.email" 
+            name="email"
+            (ngModelChange)="onFieldChange('email', 'account')"
+            placeholder="البريد الإلكتروني">
+        </div>
+        <div class="form-group">
+          <label>رقم الهاتف</label>
+          <input 
+            type="tel" 
+            [(ngModel)]="accountSettings.phone" 
+            name="phone"
+            (ngModelChange)="onFieldChange('phone', 'account')"
+            placeholder="+966XXXXXXXXX">
+        </div>
+        <div class="form-group">
+          <label>العنوان</label>
+          <input 
+            type="text" 
+            [(ngModel)]="accountSettings.address" 
+            name="address"
+            (ngModelChange)="onFieldChange('address', 'account')"
+            placeholder="العنوان الكامل">
+        </div>
+        <div class="form-group">
+          <label>السجل التجاري</label>
+          <input 
+            type="text" 
+            [(ngModel)]="accountSettings.commercialRegister" 
+            name="commercialRegister"
+            (ngModelChange)="onFieldChange('commercialRegister', 'account')"
+            placeholder="رقم السجل التجاري">
+        </div>
+        <div class="form-group">
+          <label>الرقم الضريبي</label>
+          <input 
+            type="text" 
+            [(ngModel)]="accountSettings.taxNumber" 
+            name="taxNumber"
+            (ngModelChange)="onFieldChange('taxNumber', 'account')"
+            placeholder="الرقم الضريبي">
+        </div>
+      </div>
+    </section>
+
+    <!-- قسم إعدادات الشحن -->
+    <section class="settings-section">
+      <h3 class="section-title">
+        <i class="bi bi-truck"></i>
+        إعدادات الشحن والتوصيل
+      </h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>الوزن الافتراضي (كجم)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="shippingSettings.defaultWeight" 
+            name="defaultWeight"
+            (ngModelChange)="onFieldChange('defaultWeight', 'shipping')"
+            step="0.1" min="0.1">
+        </div>
+        <div class="form-group">
+          <label>رسوم القابل للكسر (ر.س)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="shippingSettings.fragileHandlingFee" 
+            name="fragileHandlingFee"
+            (ngModelChange)="onFieldChange('fragileHandlingFee', 'shipping')"
+            min="0">
+        </div>
+        <div class="form-group">
+          <label>تكلفة الشحن الافتراضية (ر.س)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="shippingSettings.defaultShipmentCost" 
+            name="defaultShipmentCost"
+            (ngModelChange)="onFieldChange('defaultShipmentCost', 'shipping')"
+            min="0">
+        </div>
+        <div class="form-group">
+          <label>وقت التوصيل</label>
+          <input 
+            type="text" 
+            [(ngModel)]="shippingSettings.deliveryTime" 
+            name="deliveryTime"
+            (ngModelChange)="onFieldChange('deliveryTime', 'shipping')"
+            placeholder="مثال: 2-3 أيام عمل">
+        </div>
+      </div>
+    </section>
+
+    <!-- قسم إعدادات الدفع -->
+    <section class="settings-section">
+      <h3 class="section-title">
+        <i class="bi bi-credit-card"></i>
+        إعدادات الدفع والفواتير
+      </h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>نوع الدفع الافتراضي</label>
+          <select 
+            [(ngModel)]="paymentSettings.defaultPaymentType" 
+            name="defaultPaymentType"
+            (ngModelChange)="onFieldChange('defaultPaymentType', 'payment')">
+            <option value="كاش عند الاستلام">كاش عند الاستلام</option>
+            <option value="بطاقة ائتمان">بطاقة ائتمان</option>
+            <option value="تحويل بنكي">تحويل بنكي</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>نسبة الضريبة (%)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="paymentSettings.taxRate" 
+            name="taxRate"
+            (ngModelChange)="onFieldChange('taxRate', 'payment')"
+            min="0" max="100" step="0.1">
+        </div>
+        <div class="toggle-group">
+          <label class="toggle">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="paymentSettings.autoGenerateInvoice" 
+              name="autoGenerateInvoice"
+              (ngModelChange)="onFieldChange('autoGenerateInvoice', 'payment')">
+            <span>إنشاء الفواتير تلقائياً</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- قسم إعدادات المنتجات -->
+    <section class="settings-section">
+      <h3 class="section-title">
+        <i class="bi bi-box-seam"></i>
+        إعدادات المنتجات والمخزون
+      </h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>حد المخزون المنخفض</label>
+          <input 
+            type="number" 
+            [(ngModel)]="productSettings.lowStockThreshold" 
+            name="lowStockThreshold"
+            (ngModelChange)="onFieldChange('lowStockThreshold', 'product')"
+            min="1">
+        </div>
+        <div class="form-group">
+          <label>الإشعار قبل انتهاء الصلاحية (أيام)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="productSettings.expiryNotificationDays" 
+            name="expiryNotificationDays"
+            (ngModelChange)="onFieldChange('expiryNotificationDays', 'product')"
+            min="1">
+        </div>
+        <div class="toggle-group">
+          <label class="toggle">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="productSettings.autoDisableExpired" 
+              name="autoDisableExpired"
+              (ngModelChange)="onFieldChange('autoDisableExpired', 'product')">
+            <span>تعطيل المنتجات منتهية الصلاحية تلقائياً</span>
+          </label>
+          <label class="toggle">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="productSettings.allowNegativeStock" 
+              name="allowNegativeStock"
+              (ngModelChange)="onFieldChange('allowNegativeStock', 'product')">
+            <span>السماح بالمخزون السالب</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- قسم إعدادات الإشعارات -->
+    <section class="settings-section">
+      <h3 class="section-title">
+        <i class="bi bi-bell"></i>
+        إعدادات الإشعارات
+      </h3>
+      <div class="toggle-group">
+        <label class="toggle">
+          <input 
+            type="checkbox" 
+            [(ngModel)]="notificationSettings.emailNotifications" 
+            name="emailNotifications"
+            (ngModelChange)="onFieldChange('emailNotifications', 'notifications')">
+          <span>الإشعارات البريدية</span>
+        </label>
+        <label class="toggle">
+          <input 
+            type="checkbox" 
+            [(ngModel)]="notificationSettings.lowStockAlerts" 
+            name="lowStockAlerts"
+            (ngModelChange)="onFieldChange('lowStockAlerts', 'notifications')">
+          <span>تنبيهات المخزون المنخفض</span>
+        </label>
+        <label class="toggle">
+          <input 
+            type="checkbox" 
+            [(ngModel)]="notificationSettings.newOrderAlerts" 
+            name="newOrderAlerts"
+            (ngModelChange)="onFieldChange('newOrderAlerts', 'notifications')">
+          <span>تنبيهات الطلبات الجديدة</span>
+        </label>
+        <label class="toggle">
+          <input 
+            type="checkbox" 
+            [(ngModel)]="notificationSettings.orderUpdates" 
+            name="orderUpdates"
+            (ngModelChange)="onFieldChange('orderUpdates', 'notifications')">
+          <span>تحديثات حالة الطلبات</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- قسم إعدادات الأمان -->
+    <section class="settings-section">
+      <h3 class="section-title">
+        <i class="bi bi-shield-check"></i>
+        إعدادات الأمان
+      </h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>مدة انتهاء الجلسة (دقيقة)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="securitySettings.sessionTimeout" 
+            name="sessionTimeout"
+            (ngModelChange)="onFieldChange('sessionTimeout', 'security')"
+            min="5" max="240">
+        </div>
+        <div class="form-group">
+          <label>مدة انتهاء كلمة المرور (يوم)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="securitySettings.passwordExpiryDays" 
+            name="passwordExpiryDays"
+            (ngModelChange)="onFieldChange('passwordExpiryDays', 'security')"
+            min="30" max="365">
+        </div>
+        <div class="toggle-group">
+          <label class="toggle">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="securitySettings.twoFactorAuth" 
+              name="twoFactorAuth"
+              (ngModelChange)="onFieldChange('twoFactorAuth', 'security')">
+            <span>المصادقة الثنائية</span>
+          </label>
+          <label class="toggle">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="securitySettings.loginAlerts" 
+              name="loginAlerts"
+              (ngModelChange)="onFieldChange('loginAlerts', 'security')">
+            <span>تنبيهات تسجيل الدخول</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- قسم إعدادات المظهر -->
+    <section class="settings-section">
+      <h3 class="section-title">
+        <i class="bi bi-palette"></i>
+        إعدادات المظهر
+      </h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>السمة</label>
+          <select 
+            [(ngModel)]="themeSettings.theme" 
+            name="theme"
+            (ngModelChange)="onFieldChange('theme', 'theme')">
+            <option value="light">فاتح</option>
+            <option value="dark">داكن</option>
+            <option value="auto">تلقائي</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>اللغة</label>
+          <select 
+            [(ngModel)]="themeSettings.language" 
+            name="language"
+            (ngModelChange)="onFieldChange('language', 'theme')">
+            <option value="ar">العربية</option>
+            <option value="en">الإنجليزية</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>المنطقة الزمنية</label>
+          <select 
+            [(ngModel)]="themeSettings.timezone" 
+            name="timezone"
+            (ngModelChange)="onFieldChange('timezone', 'theme')">
+            <option value="Africa/Cairo">القاهرة (توقيت مصر)</option>
+            <option value="UTC">توقيت عالمي</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- أزرار الحفظ -->
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="resetSettings()">
+        إلغاء
+      </button>
+      <button type="submit" class="btn-primary" [disabled]="changedFields.length === 0">
+        <i class="bi bi-save"></i>
+        حفظ الإعدادات
+      </button>
+    </div>
+  </form>
+</div>

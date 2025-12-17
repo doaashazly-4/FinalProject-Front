@@ -1,0 +1,504 @@
+.inventory-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* رأس الصفحة */
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.head h2 {
+  margin: 0.2rem 0 0;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.overline {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.btn-primary {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.3s;
+}
+
+.btn-primary:hover {
+  background: #0056b3;
+}
+
+/* إحصائيات المخزون */
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: white;
+}
+
+.stat-label {
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0 0 0.3rem 0;
+}
+
+.stat-value {
+  color: #0f172a;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+/* أدوات البحث والتصفية */
+.filters {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+}
+
+.search-box {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.search-box i {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 0.8rem 2.5rem 0.8rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: border 0.3s;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.filter-options {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-group label {
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.filter-group select {
+  padding: 0.6rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: white;
+  color: #334155;
+  cursor: pointer;
+  min-width: 150px;
+}
+
+.filter-group select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+/* جدول المخزون */
+.inventory-table {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr 1fr 0.8fr;
+  padding: 1rem;
+  background: #f8fafc;
+  font-weight: 800;
+  color: #0f172a;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.table-body {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr 1fr 0.8fr;
+  padding: 1rem;
+  align-items: center;
+  border-bottom: 1px solid #e2e8f0;
+  transition: background 0.2s;
+}
+
+.table-row:hover {
+  background: #f8fafc;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+/* تنسيقات الخلايا */
+.product-name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.product-name strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.product-name small {
+  color: #64748b;
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+
+.category-badge {
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: white;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.btn-icon:hover {
+  background: #f1f5f9;
+  color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-icon.btn-sm {
+  width: 28px;
+  height: 28px;
+  font-size: 0.8rem;
+}
+
+.quantity-value {
+  font-weight: 700;
+  color: #0f172a;
+  min-width: 30px;
+  text-align: center;
+}
+
+/* البادجات */
+.badge {
+  padding: 0.35rem 0.75rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-align: center;
+  display: inline-block;
+}
+
+.badge.in-stock {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.badge.low-stock {
+  background: #fef9c3;
+  color: #ca8a04;
+}
+
+.badge.out-of-stock {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.product-price,
+.product-value {
+  font-weight: 700;
+  color: #15803d;
+}
+
+.product-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+/* حالة فارغة */
+.empty-state {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: #64748b;
+}
+
+.empty-state i {
+  font-size: 3rem;
+  color: #cbd5e1;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  margin: 0 0 0.5rem 0;
+  color: #0f172a;
+  font-size: 1.2rem;
+}
+
+.empty-state p {
+  margin: 0 0 1.5rem 0;
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+/* ملخص المخزون */
+.inventory-summary {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.2rem;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+}
+
+.inventory-summary h4 {
+  margin: 0 0 1rem 0;
+  color: #0f172a;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.summary-label {
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.summary-value {
+  color: #0f172a;
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+/* تصميم متجاوب */
+@media (max-width: 1024px) {
+  .table-header,
+  .table-row {
+    grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr 1fr 0.8fr;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .head {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .stats-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .filter-options {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .filter-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .filter-group select {
+    width: 100%;
+  }
+  
+  .table-header {
+    display: none;
+  }
+  
+  .table-row {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    margin-bottom: 0.8rem;
+  }
+  
+  .product-name,
+  .product-category,
+  .product-quantity,
+  .stock-status,
+  .product-price,
+  .product-value,
+  .product-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .product-name::before {
+    content: 'المنتج:';
+    font-weight: 700;
+    color: #475569;
+  }
+  
+  .product-category::before {
+    content: 'الفئة:';
+    font-weight: 700;
+    color: #475569;
+  }
+  
+  .product-quantity::before {
+    content: 'الكمية:';
+    font-weight: 700;
+    color: #475569;
+  }
+  
+  .stock-status::before {
+    content: 'الحالة:';
+    font-weight: 700;
+    color: #475569;
+  }
+  
+  .product-price::before {
+    content: 'السعر:';
+    font-weight: 700;
+    color: #475569;
+  }
+  
+  .product-value::before {
+    content: 'القيمة:';
+    font-weight: 700;
+    color: #475569;
+  }
+  
+  .product-actions::before {
+    content: 'الإجراءات:';
+    font-weight: 700;
+    color: #475569;
+  }
+  
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .table-row {
+    padding: 0.8rem;
+  }
+}

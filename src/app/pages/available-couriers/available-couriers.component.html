@@ -1,0 +1,120 @@
+<!-- Hero Section -->
+<section class="relative min-h-[50vh] flex items-center py-20 lg:py-28">
+  <!-- Background -->
+  <div class="absolute inset-0 z-0">
+    <img src="/assets/Images/pexels-nix-photo-1109016-2101895.jpg" alt="الموصلون" class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-br from-primary-dark/95 to-secondary-teal/90"></div>
+  </div>
+  
+  <div class="container mx-auto px-4 lg:px-8 relative z-10">
+    <div class="text-center text-white max-w-3xl mx-auto">
+      <!-- Badge -->
+      <div class="inline-flex items-center gap-2 px-6 py-3 bg-primary-green/20 backdrop-blur-md border border-primary-green/40 rounded-full mb-8">
+        <i class="bi bi-truck text-primary-green text-lg"></i>
+        <span class="text-primary-green font-bold">الموصلون المتاحون</span>
+      </div>
+      
+      <h1 class="text-3xl md:text-4xl lg:text-5xl font-black mb-6">اختر الموصل الأنسب لطلبك</h1>
+      <p class="text-lg md:text-xl text-white/90 mb-10">
+        تصفح قائمتنا الموثوقة من الموصلين مع التقييمات، المناطق، وسرعة الإنجاز
+      </p>
+      
+      <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <a routerLink="/register" 
+           class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-br from-primary-green to-primary-green-dark text-white font-bold rounded-2xl shadow-green-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+          <i class="bi bi-person-plus"></i>
+          <span>إنشاء حساب</span>
+        </a>
+        <a routerLink="/login" 
+           class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border-2 border-white/30 text-white font-bold rounded-2xl hover:bg-white/20 hover:-translate-y-1 transition-all duration-300">
+          <i class="bi bi-box-arrow-in-right"></i>
+          <span>تسجيل الدخول</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Couriers List Section -->
+<section class="py-16 lg:py-24 bg-gradient-to-br from-gray-50 to-gray-100">
+  <div class="container mx-auto px-4 lg:px-8">
+    <!-- Header -->
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-12">
+      <div>
+        <h2 class="text-2xl lg:text-3xl font-black text-primary-dark mb-2">قائمة الموصلين</h2>
+        <p class="text-gray-600">التقييم، المنطقة، والحالة في لمحة</p>
+      </div>
+      
+      <!-- Filters -->
+      <div class="flex flex-wrap gap-2">
+        <button class="px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 bg-gradient-to-br from-primary-green to-secondary-teal text-white shadow-green">
+          كل المناطق
+        </button>
+        <button class="px-5 py-2.5 rounded-xl font-semibold bg-white text-gray-600 border border-gray-200 hover:border-primary-green hover:text-primary-green transition-all duration-300">
+          القاهرة
+        </button>
+        <button class="px-5 py-2.5 rounded-xl font-semibold bg-white text-gray-600 border border-gray-200 hover:border-primary-green hover:text-primary-green transition-all duration-300">
+          الإسكندرية
+        </button>
+        <button class="px-5 py-2.5 rounded-xl font-semibold bg-white text-gray-600 border border-gray-200 hover:border-primary-green hover:text-primary-green transition-all duration-300">
+          الجيزة
+        </button>
+        <button class="px-5 py-2.5 rounded-xl font-semibold bg-white text-gray-600 border border-gray-200 hover:border-primary-green hover:text-primary-green transition-all duration-300">
+          المنصورة
+        </button>
+      </div>
+    </div>
+
+    <!-- Couriers Grid -->
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div *ngFor="let c of couriers" 
+           class="group bg-white rounded-2xl overflow-hidden border-2 border-gray-100 shadow-sm hover:shadow-dark hover:border-primary-green hover:-translate-y-2 transition-all duration-300">
+        <!-- Image -->
+        <div class="relative h-48 overflow-hidden">
+          <img [src]="c.img" [alt]="c.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+          
+          <!-- Status Badge -->
+          <div class="absolute top-4 right-4 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold backdrop-blur-md"
+               [ngClass]="{'bg-primary-green/90 text-white': c.status === 'متاح', 'bg-amber-500/90 text-white': c.status !== 'متاح'}">
+            <span class="w-2 h-2 rounded-full animate-pulse"
+                  [ngClass]="{'bg-white': c.status === 'متاح', 'bg-amber-200': c.status !== 'متاح'}"></span>
+            <span>{{ c.status }}</span>
+          </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="p-5">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-lg font-bold text-primary-dark">{{ c.name }}</h3>
+            <div class="flex items-center gap-1 px-3 py-1 bg-accent-gold/10 rounded-full">
+              <i class="bi bi-star-fill text-accent-gold text-sm"></i>
+              <span class="text-sm font-bold text-accent-gold-dark">{{ c.rating }}</span>
+            </div>
+          </div>
+          
+          <div class="space-y-2 mb-5">
+            <div class="flex items-center gap-2 text-gray-600">
+              <i class="bi bi-geo-alt text-primary-green"></i>
+              <span>المنطقة: {{ c.area }}</span>
+            </div>
+            <div class="flex items-center gap-2 text-gray-600">
+              <i class="bi bi-check-circle text-primary-green"></i>
+              <span>طلبات منجزة: {{ c.completed | number }}</span>
+            </div>
+          </div>
+          
+          <div class="flex gap-3">
+            <button class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold hover:border-primary-green hover:text-primary-green transition-all duration-300">
+              <i class="bi bi-info-circle"></i>
+              <span>تفاصيل</span>
+            </button>
+            <button class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-br from-primary-green to-secondary-teal text-white font-semibold shadow-green hover:shadow-green-lg hover:-translate-y-0.5 transition-all duration-300">
+              <i class="bi bi-cart-plus"></i>
+              <span>اطلب</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

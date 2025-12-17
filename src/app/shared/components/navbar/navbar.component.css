@@ -1,0 +1,4 @@
+/* Navbar Component - Tailwind Overrides */
+:host {
+  @apply block;
+}

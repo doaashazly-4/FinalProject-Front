@@ -1,0 +1,170 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">مهامي</h1>
+      <p class="text-gray-600 mt-1">إدارة مهام التوصيل الخاصة بك</p>
+    </div>
+    <a routerLink="/courier/available-jobs" 
+       class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl shadow-green hover:shadow-green-lg hover:-translate-y-0.5 transition-all duration-300">
+      <i class="bi bi-plus-lg"></i>
+      <span>مهام جديدة</span>
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="flex gap-2">
+    <button (click)="setFilter('active')"
+            class="px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200"
+            [ngClass]="filter === 'active' ? 'bg-primary-green text-white shadow-green' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+      النشطة
+    </button>
+    <button (click)="setFilter('completed')"
+            class="px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200"
+            [ngClass]="filter === 'completed' ? 'bg-primary-green text-white shadow-green' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+      المكتملة
+    </button>
+    <button (click)="setFilter('all')"
+            class="px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200"
+            [ngClass]="filter === 'all' ? 'bg-primary-green text-white shadow-green' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+      الكل
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4"></div>
+      <p class="text-gray-500">جاري تحميل المهام...</p>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredJobs.length === 0" class="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
+    <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
+      <i class="bi bi-clipboard-x text-gray-400 text-4xl"></i>
+    </div>
+    <h3 class="text-xl font-bold text-gray-800 mb-2">
+      {{ filter === 'active' ? 'لا توجد مهام نشطة' : filter === 'completed' ? 'لا توجد مهام مكتملة' : 'لا توجد مهام' }}
+    </h3>
+    <p class="text-gray-500 mb-4">ابحث عن مهام جديدة للبدء</p>
+    <a routerLink="/courier/available-jobs" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-green text-white rounded-xl font-semibold">
+      <i class="bi bi-search"></i>
+      البحث عن مهام
+    </a>
+  </div>
+
+  <!-- Jobs List -->
+  <div *ngIf="!isLoading && filteredJobs.length > 0" class="space-y-4">
+    <div *ngFor="let job of filteredJobs" 
+         class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+         [ngClass]="{'border-blue-200 bg-blue-50/30': job.status === 'accepted' || job.status === 'picked_up'}">
+      
+      <div class="p-5">
+        <!-- Header -->
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <h3 class="font-bold text-primary-dark text-lg">{{ job.trackingNumber }}</h3>
+            <p class="text-gray-600">{{ job.description }}</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="px-3 py-1 rounded-full text-sm font-bold border"
+                  [ngClass]="getStatusClass(job.status)">
+              {{ getStatusText(job.status) }}
+            </span>
+            <div class="text-left">
+              <p class="font-bold text-primary-green">{{ job.courierEarning }} ج.م</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Route Info -->
+        <div class="p-4 bg-gray-50 rounded-xl mb-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <i class="bi bi-arrow-up-circle text-blue-600"></i>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500">الاستلام من</p>
+                <p class="font-medium text-primary-dark text-sm">{{ job.senderName }}</p>
+                <p class="text-xs text-gray-600">{{ job.pickupAddress }}</p>
+                <button (click)="callSender(job.senderPhone)" class="mt-1 text-xs text-blue-600 hover:underline">
+                  <i class="bi bi-telephone ml-1"></i>{{ job.senderPhone }}
+                </button>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                <i class="bi bi-arrow-down-circle text-green-600"></i>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500">التسليم إلى</p>
+                <p class="font-medium text-primary-dark text-sm">{{ job.receiverName }}</p>
+                <p class="text-xs text-gray-600">{{ job.deliveryAddress }}</p>
+                <button (click)="callReceiver(job.receiverPhone)" class="mt-1 text-xs text-green-600 hover:underline">
+                  <i class="bi bi-telephone ml-1"></i>{{ job.receiverPhone }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Details & Tags -->
+        <div class="flex flex-wrap gap-2 mb-4">
+          <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium">
+            <i class="bi bi-box ml-1"></i>{{ job.weight }} كجم
+          </span>
+          <span *ngIf="job.isFragile" class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium">
+            <i class="bi bi-exclamation-diamond ml-1"></i>قابل للكسر
+          </span>
+          <span *ngIf="job.requiresSignature" class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+            <i class="bi bi-pen ml-1"></i>يتطلب توقيع
+          </span>
+        </div>
+
+        <!-- Timeline Info -->
+        <div *ngIf="job.acceptedAt || job.pickedUpAt || job.deliveredAt" 
+             class="flex flex-wrap gap-4 text-xs text-gray-500 mb-4 pb-4 border-b border-gray-100">
+          <span *ngIf="job.acceptedAt">
+            <i class="bi bi-check ml-1"></i>قُبلت: {{ formatDate(job.acceptedAt) }}
+          </span>
+          <span *ngIf="job.pickedUpAt">
+            <i class="bi bi-box-arrow-up ml-1"></i>استُلمت: {{ formatDate(job.pickedUpAt) }}
+          </span>
+          <span *ngIf="job.deliveredAt">
+            <i class="bi bi-check-circle ml-1"></i>سُلمت: {{ formatDate(job.deliveredAt) }}
+          </span>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-3" *ngIf="getNextAction(job.status) as action">
+          <button [routerLink]="['/courier/delivery', job.id]"
+                  class="px-4 py-3 bg-blue-500 text-white rounded-xl font-bold hover:bg-blue-600 transition-all">
+            <i class="bi bi-geo-alt ml-2"></i>
+            تنقل
+          </button>
+          <button (click)="updateJobStatus(job, action.action)"
+                  class="flex-1 py-3 bg-gradient-to-br text-white rounded-xl font-bold hover:shadow-lg transition-all"
+                  [ngClass]="action.class">
+            <i class="bi ml-2"
+               [ngClass]="{'bi-box-arrow-up': action.action === 'picked_up',
+                           'bi-truck': action.action === 'in_transit',
+                           'bi-check-circle': action.action === 'delivered'}"></i>
+            {{ action.label }}
+          </button>
+          <button class="px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors">
+            <i class="bi bi-three-dots"></i>
+          </button>
+        </div>
+
+        <!-- Completed Status -->
+        <div *ngIf="job.status === 'delivered'" class="flex items-center justify-center gap-2 py-3 bg-green-50 rounded-xl">
+          <i class="bi bi-check-circle-fill text-green-600"></i>
+          <span class="font-semibold text-green-700">تم التسليم بنجاح</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,158 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">إدارة الشحنات</h1>
+      <p class="text-gray-600 mt-1">متابعة وإدارة جميع شحنات النظام</p>
+    </div>
+    <button (click)="refresh()" 
+            [disabled]="isLoading"
+            class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 disabled:opacity-50 transition-all duration-300">
+      <i class="bi bi-arrow-clockwise" [ngClass]="{'animate-spin': isLoading}"></i>
+      <span>تحديث</span>
+    </button>
+  </div>
+
+  <!-- Stats Summary -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-yellow-100 flex items-center justify-center">
+          <i class="bi bi-clock text-yellow-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">في الانتظار</p>
+          <p class="text-xl font-black text-primary-dark">{{ pendingCount }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+          <i class="bi bi-truck text-blue-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">قيد التوصيل</p>
+          <p class="text-xl font-black text-primary-dark">{{ inTransitCount }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
+          <i class="bi bi-check-circle text-green-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">تم التسليم</p>
+          <p class="text-xl font-black text-primary-dark">{{ deliveredCount }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
+          <i class="bi bi-x-circle text-red-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">فشل / ملغي</p>
+          <p class="text-xl font-black text-primary-dark">{{ failedCount }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Filters -->
+  <div class="flex gap-2 flex-wrap">
+    <button *ngFor="let statusFilter of statusFilters"
+            (click)="setFilter(statusFilter.value)"
+            class="px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200 whitespace-nowrap"
+            [ngClass]="filter === statusFilter.value 
+              ? 'bg-primary-green text-white shadow-green' 
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+      {{ statusFilter.label }}
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4"></div>
+      <p class="text-gray-500">جاري تحميل الشحنات...</p>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredOrders.length === 0" class="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
+    <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
+      <i class="bi bi-box text-gray-400 text-4xl"></i>
+    </div>
+    <h3 class="text-xl font-bold text-gray-800 mb-2">لا توجد شحنات</h3>
+    <p class="text-gray-500">لم يتم العثور على شحنات تطابق معايير البحث</p>
+  </div>
+
+  <!-- Orders List -->
+  <div *ngIf="!isLoading && filteredOrders.length > 0" class="space-y-4">
+    <div *ngFor="let order of filteredOrders" 
+         class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
+      <div class="p-5">
+        <!-- Header Row -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-primary-green/10 flex items-center justify-center">
+              <i class="bi bi-box-seam text-primary-green text-xl"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-primary-dark text-lg">{{ order.id }}</h3>
+              <p class="text-sm text-gray-500">{{ order.createdAt }}</p>
+            </div>
+          </div>
+          <span class="px-4 py-2 rounded-full text-sm font-bold border self-start sm:self-center"
+                [ngClass]="getStatusClass(order.status)">
+            {{ order.status }}
+          </span>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Customer Info -->
+          <div class="p-4 bg-gray-50 rounded-xl">
+            <p class="text-xs text-gray-500 mb-1">المُستلم</p>
+            <p class="font-medium text-primary-dark">{{ order.customer }}</p>
+          </div>
+
+          <!-- Sender Info -->
+          <div class="p-4 bg-gray-50 rounded-xl">
+            <p class="text-xs text-gray-500 mb-1">المُرسل</p>
+            <p class="font-medium text-primary-dark">{{ order.sender || 'غير محدد' }}</p>
+          </div>
+
+          <!-- Total -->
+          <div class="p-4 bg-gray-50 rounded-xl">
+            <p class="text-xs text-gray-500 mb-1">قيمة التوصيل</p>
+            <p class="font-bold text-primary-green">{{ order.total | currency:'EGP':'symbol':'1.0-0' }}</p>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <button *ngIf="canUpdateStatus(order.status)"
+                    (click)="updateOrderStatus(order)"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-primary-green text-white rounded-lg font-medium text-sm hover:bg-primary-green-dark transition-colors">
+              <i class="bi bi-arrow-up-circle"></i>
+              تحديث الحالة
+            </button>
+            <button class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm hover:bg-gray-200 transition-colors">
+              <i class="bi bi-eye"></i>
+              عرض التفاصيل
+            </button>
+          </div>
+          <div *ngIf="order.courier" class="flex items-center gap-2 text-sm text-gray-500">
+            <i class="bi bi-truck"></i>
+            <span>المندوب: {{ order.courier }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

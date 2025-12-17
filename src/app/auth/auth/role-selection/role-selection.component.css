@@ -1,0 +1,4 @@
+/* Role Selection Component - Tailwind Overrides */
+:host {
+  @apply block;
+}

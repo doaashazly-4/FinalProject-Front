@@ -1,0 +1,164 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">إدارة الطلبات</h1>
+      <p class="text-gray-600">متابعة وإدارة جميع طلبات المتجر</p>
+    </div>
+    <button (click)="loadOrders()" 
+            class="px-4 py-2 bg-primary-green text-white rounded-lg hover:bg-primary-green/90 transition-colors flex items-center gap-2">
+      <i class="bi bi-arrow-clockwise"></i>
+      تحديث
+    </button>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+          <i class="bi bi-bag text-blue-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">إجمالي الطلبات</p>
+          <p class="text-xl font-bold text-gray-800">{{ stats.total }}</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-lg bg-yellow-100 flex items-center justify-center">
+          <i class="bi bi-clock text-yellow-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">قيد الانتظار</p>
+          <p class="text-xl font-bold text-gray-800">{{ stats.pending }}</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
+          <i class="bi bi-check-circle text-green-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">تم التسليم</p>
+          <p class="text-xl font-bold text-gray-800">{{ stats.delivered }}</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center">
+          <i class="bi bi-currency-dollar text-emerald-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">الإيرادات</p>
+          <p class="text-xl font-bold text-gray-800">{{ formatCurrency(stats.totalRevenue) }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+    <div class="flex flex-col md:flex-row gap-4">
+      <!-- Search -->
+      <div class="flex-1">
+        <div class="relative">
+          <i class="bi bi-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <input type="text" 
+                 [(ngModel)]="searchTerm"
+                 (ngModelChange)="applyFilters()"
+                 placeholder="البحث برقم الطلب أو اسم العميل..."
+                 class="w-full pr-10 pl-4 py-2.5 rounded-lg border border-gray-200 focus:border-primary-green focus:ring-2 focus:ring-primary-green/20 outline-none transition-all">
+        </div>
+      </div>
+      
+      <!-- Status Filter -->
+      <div class="flex gap-2 flex-wrap">
+        <button *ngFor="let status of statuses"
+                (click)="setFilter(status.value)"
+                [class]="filter === status.value 
+                  ? 'px-4 py-2 rounded-lg bg-primary-green text-white font-medium transition-all' 
+                  : 'px-4 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 font-medium transition-all'">
+          {{ status.label }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent"></div>
+  </div>
+
+  <!-- Orders Table -->
+  <div *ngIf="!isLoading" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <!-- Empty State -->
+    <div *ngIf="filteredOrders.length === 0" class="text-center py-12">
+      <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+        <i class="bi bi-bag-x text-gray-400 text-3xl"></i>
+      </div>
+      <h3 class="text-lg font-medium text-gray-800 mb-1">لا توجد طلبات</h3>
+      <p class="text-gray-500">لم يتم العثور على طلبات تطابق معايير البحث</p>
+    </div>
+
+    <!-- Table -->
+    <div *ngIf="filteredOrders.length > 0" class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th class="text-right px-6 py-4 text-sm font-semibold text-gray-600">رقم الطلب</th>
+            <th class="text-right px-6 py-4 text-sm font-semibold text-gray-600">العميل</th>
+            <th class="text-right px-6 py-4 text-sm font-semibold text-gray-600">الوجهة</th>
+            <th class="text-right px-6 py-4 text-sm font-semibold text-gray-600">المبلغ</th>
+            <th class="text-right px-6 py-4 text-sm font-semibold text-gray-600">التاريخ</th>
+            <th class="text-right px-6 py-4 text-sm font-semibold text-gray-600">الحالة</th>
+            <th class="text-right px-6 py-4 text-sm font-semibold text-gray-600">الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let order of filteredOrders" class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4">
+              <span class="font-mono text-sm font-medium text-primary-green">{{ order.id }}</span>
+            </td>
+            <td class="px-6 py-4">
+              <span class="font-medium text-gray-800">{{ order.customer }}</span>
+            </td>
+            <td class="px-6 py-4">
+              <span class="text-gray-600">{{ order.destination }}</span>
+            </td>
+            <td class="px-6 py-4">
+              <span class="font-semibold text-gray-800">{{ formatCurrency(order.total) }}</span>
+            </td>
+            <td class="px-6 py-4">
+              <span class="text-gray-500 text-sm">{{ formatDate(order.createdAt) }}</span>
+            </td>
+            <td class="px-6 py-4">
+              <span class="px-3 py-1 rounded-full text-xs font-medium" [ngClass]="getStatusClass(order.status)">
+                {{ getStatusText(order.status) }}
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              <select (change)="updateStatus(order.id, $any($event.target).value)"
+                      [value]="order.status"
+                      class="px-3 py-1.5 rounded-lg border border-gray-200 text-sm focus:border-primary-green focus:ring-2 focus:ring-primary-green/20 outline-none">
+                <option value="pending">قيد الانتظار</option>
+                <option value="processing">قيد التجهيز</option>
+                <option value="ready">جاهز للتوصيل</option>
+                <option value="shipping">قيد التوصيل</option>
+                <option value="delivered">تم التسليم</option>
+                <option value="cancelled">ملغي</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+

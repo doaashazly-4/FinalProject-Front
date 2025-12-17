@@ -1,0 +1,137 @@
+<div class="login-page">
+  <div class="login-background">
+    <img src="/assets/Images/In no time-rafiki (1).png" alt="تسجيل الدخول" class="bg-image">
+    <div class="bg-overlay"></div>
+  </div>
+  
+  <div class="container">
+    <div class="row min-vh-100 align-items-center">
+      <div class="col-lg-6 d-none d-lg-block">
+        <div class="login-image-section">
+          <div class="image-wrapper">
+            <img src="/assets/Images/In no time-rafiki (1).png" alt="تسجيل الدخول" class="login-image">
+          </div>
+          <div class="image-content">
+            <h2>مرحباً بعودتك!</h2>
+            <p>سجل دخولك للوصول إلى حسابك والاستمتاع بخدماتنا المميزة</p>
+            <div class="features-list">
+              <div class="feature-item">
+                <i class="bi bi-shield-check"></i>
+                <span>حماية وأمان</span>
+              </div>
+              <div class="feature-item">
+                <i class="bi bi-lightning-charge"></i>
+                <span>وصول سريع</span>
+              </div>
+              <div class="feature-item">
+                <i class="bi bi-headset"></i>
+                <span>دعم فني متواصل</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-6">
+        <div class="login-form-section">
+          <div class="form-header">
+            <a routerLink="/home" class="logo-link">
+              <div class="logo-icon-login">
+                <i class="bi bi-truck"></i>
+              </div>
+              <span class="logo-text-login">توصيل</span>
+            </a>
+            <h1>تسجيل الدخول</h1>
+            <p>أدخل بياناتك للوصول إلى حسابك</p>
+          </div>
+          
+          <form class="login-form" (ngSubmit)="onSubmit()">
+            <div class="form-group-modern">
+              <label class="form-label-modern">
+                <i class="bi bi-envelope"></i>
+                البريد الإلكتروني
+              </label>
+              <input 
+                type="email" 
+                class="form-control-modern" 
+                [(ngModel)]="form.email" 
+                name="email"
+                placeholder="you@example.com"
+                required>
+            </div>
+
+            <div class="form-group-modern">
+              <label class="form-label-modern">
+                <i class="bi bi-lock"></i>
+                كلمة المرور
+              </label>
+              <div class="input-group-modern">
+                <input 
+                  [type]="showPassword ? 'text' : 'password'" 
+                  class="form-control-modern" 
+                  [(ngModel)]="form.password" 
+                  name="password"
+                  placeholder="••••••••"
+                  required>
+                <button 
+                  class="password-toggle" 
+                  type="button"
+                  (click)="togglePasswordVisibility()">
+                  <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                </button>
+              </div>
+            </div>
+
+          <div class="form-group-modern">
+            <label class="form-label-modern">
+              <i class="bi bi-info-circle"></i>
+              حسابات تجريبية جاهزة
+            </label>
+            <div class="demo-box">
+              <p class="demo-item">
+                <strong>عميل:</strong> customer&#64;test.com / 123456
+                <button type="button" class="btn-demo" (click)="fillDemo('customer')">تعبئة</button>
+              </p>
+              <p class="demo-item">
+                <strong>موصل:</strong> courier&#64;test.com / 123456
+                <button type="button" class="btn-demo" (click)="fillDemo('courier')">تعبئة</button>
+              </p>
+              <p class="demo-item">
+                <strong>مسؤول:</strong> admin&#64;test.com / 123456
+                <button type="button" class="btn-demo" (click)="fillDemo('admin')">تعبئة</button>
+              </p>
+              <small class="muted">اضغط "تعبئة" ثم سجل دخول.</small>
+            </div>
+          </div>
+
+            <div class="form-options">
+              <div class="remember-me">
+                <input type="checkbox" id="remember" [(ngModel)]="rememberMe" name="remember">
+                <label for="remember">تذكرني</label>
+              </div>
+              <a href="#" class="forgot-password">نسيت كلمة المرور؟</a>
+            </div>
+
+            <button type="submit" class="btn-submit-modern" [disabled]="isSubmitting">
+              <span *ngIf="!isSubmitting">
+                <i class="bi bi-box-arrow-in-right"></i>
+                تسجيل الدخول
+              </span>
+              <span *ngIf="isSubmitting">
+                <i class="bi bi-hourglass-split"></i>
+                جاري تسجيل الدخول...
+              </span>
+            </button>
+
+            <div class="form-footer">
+              <p>
+                ليس لديك حساب؟ 
+                <a routerLink="/register">إنشاء حساب جديد</a>
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

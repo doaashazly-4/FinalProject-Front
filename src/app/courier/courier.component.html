@@ -1,0 +1,119 @@
+<div class="grid lg:grid-cols-[280px_1fr] min-h-screen bg-gray-50">
+  <!-- Sidebar -->
+  <aside class="sidebar hidden lg:block">
+    <!-- Brand -->
+    <div class="flex items-center gap-4 mb-8">
+      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-green to-secondary-teal flex items-center justify-center text-white text-xl shadow-green">
+        <i class="bi bi-truck"></i>
+      </div>
+      <div>
+        <h2 class="font-black text-white text-lg">PickGo</h2>
+        <p class="text-primary-green text-sm font-semibold">{{ userName }}</p>
+      </div>
+    </div>
+
+    <!-- Role Badge -->
+    <div class="mb-6 px-4 py-2 bg-primary-green/10 border border-primary-green/20 rounded-xl">
+      <span class="text-primary-green text-sm font-bold">
+        <i class="bi bi-person-badge ml-2"></i>
+        حساب المندوب
+      </span>
+    </div>
+    
+    <!-- Navigation -->
+    <nav class="space-y-1">
+      <a *ngFor="let item of navItems"
+         [routerLink]="item.path"
+         routerLinkActive="sidebar-link-active"
+         class="sidebar-link">
+        <i class="bi text-lg" [ngClass]="item.icon"></i>
+        <span>{{ item.label }}</span>
+      </a>
+    </nav>
+    
+    <!-- Footer -->
+    <div class="mt-8 pt-6 border-t border-white/10 space-y-3">
+      <a routerLink="/home" class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-200">
+        <i class="bi bi-arrow-right"></i>
+        <span>العودة للرئيسية</span>
+      </a>
+      <button (click)="logout()" class="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors duration-200 w-full text-right">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>تسجيل الخروج</span>
+      </button>
+    </div>
+
+    <!-- Quick Status Toggle -->
+    <div class="mt-8 p-4 bg-white/5 rounded-xl border border-white/10">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-white font-semibold text-sm">الحالة</span>
+        <span class="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-bold rounded-full">متصل</span>
+      </div>
+      <p class="text-gray-400 text-xs">أنت متاح لاستلام طلبات جديدة</p>
+    </div>
+  </aside>
+  
+  <!-- Mobile Sidebar -->
+  <div class="lg:hidden fixed inset-0 z-50 transition-opacity duration-300"
+       [ngClass]="{'pointer-events-none opacity-0': !isMobileMenuOpen, 'pointer-events-auto opacity-100': isMobileMenuOpen}">
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black/50" (click)="closeMobileMenu()"></div>
+    
+    <!-- Sidebar -->
+    <aside class="sidebar absolute right-0 top-0 h-full w-72 transform transition-transform duration-300"
+           [ngClass]="{'translate-x-full': !isMobileMenuOpen, 'translate-x-0': isMobileMenuOpen}">
+      <div class="flex items-center gap-4 mb-8">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-green to-secondary-teal flex items-center justify-center text-white text-xl shadow-green">
+          <i class="bi bi-truck"></i>
+        </div>
+        <div>
+          <h2 class="font-black text-white text-lg">PickGo</h2>
+          <p class="text-primary-green text-sm font-semibold">{{ userName }}</p>
+        </div>
+      </div>
+
+      <!-- Role Badge Mobile -->
+      <div class="mb-6 px-4 py-2 bg-primary-green/10 border border-primary-green/20 rounded-xl">
+        <span class="text-primary-green text-sm font-bold">
+          <i class="bi bi-person-badge ml-2"></i>
+          حساب المندوب
+        </span>
+      </div>
+      
+      <nav class="space-y-1">
+        <a *ngFor="let item of navItems"
+           [routerLink]="item.path"
+           routerLinkActive="sidebar-link-active"
+           (click)="closeMobileMenu()"
+           class="sidebar-link">
+          <i class="bi text-lg" [ngClass]="item.icon"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      </nav>
+      
+      <div class="mt-8 pt-6 border-t border-white/10 space-y-3">
+        <a routerLink="/home" (click)="closeMobileMenu()" class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-200">
+          <i class="bi bi-arrow-right"></i>
+          <span>العودة للرئيسية</span>
+        </a>
+        <button (click)="logout()" class="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors duration-200 w-full text-right">
+          <i class="bi bi-box-arrow-right"></i>
+          <span>تسجيل الخروج</span>
+        </button>
+      </div>
+    </aside>
+  </div>
+  
+  <!-- Mobile Sidebar Toggle -->
+  <div class="lg:hidden fixed bottom-4 right-4 z-40">
+    <button (click)="toggleMobileMenu()"
+            class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-green to-secondary-teal text-white shadow-green flex items-center justify-center">
+      <i class="bi text-2xl" [ngClass]="isMobileMenuOpen ? 'bi-x' : 'bi-list'"></i>
+    </button>
+  </div>
+  
+  <!-- Main Content -->
+  <main class="p-6 lg:p-8 min-h-full">
+    <router-outlet></router-outlet>
+  </main>
+</div>

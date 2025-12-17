@@ -1,0 +1,5 @@
+<app-navbar *ngIf="showNavbar"></app-navbar>
+<main [class]="showNavbar ? 'min-h-screen pt-20 relative z-10 block overflow-visible bg-gray-50' : 'min-h-screen relative z-10 block overflow-visible'">
+  <router-outlet></router-outlet>
+</main>
+<app-footer *ngIf="showFooter"></app-footer>

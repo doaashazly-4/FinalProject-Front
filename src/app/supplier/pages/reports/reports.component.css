@@ -1,0 +1,5 @@
+/* Reports Component Styles */
+:host {
+  @apply block;
+}
+

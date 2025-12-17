@@ -1,0 +1,310 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">لوحة تحكم المُرسل</h1>
+      <p class="text-gray-600 mt-1">مرحباً بك، إليك نظرة عامة على شحناتك</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="text-sm text-gray-500 bg-white px-4 py-2 rounded-xl border border-gray-200">
+        <i class="bi bi-calendar3 ml-2 text-primary-green"></i>
+        {{ today | date:'fullDate':'':'ar' }}
+      </div>
+      <a routerLink="/supplier/create-shipment" 
+         class="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl shadow-green hover:shadow-green-lg transition-all">
+        <i class="bi bi-plus-lg"></i>
+        <span>طلب جديد</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4"></div>
+      <p class="text-gray-500">جاري تحميل البيانات...</p>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading" class="space-y-6">
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div *ngFor="let stat of stats; let i = index" 
+           class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-md"
+               [ngClass]="getStatIconBg(i)">
+            <i class="bi text-white text-xl" [ngClass]="stat.icon"></i>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm text-gray-500 font-medium">{{ stat.label }}</p>
+            <div class="flex items-baseline gap-2 mt-1">
+              <span class="text-xl lg:text-2xl font-black text-primary-dark">{{ stat.value }}</span>
+              <span *ngIf="stat.trend" class="text-xs font-bold" 
+                    [ngClass]="stat.trend.startsWith('+') ? 'text-green-500' : 'text-red-500'">
+                {{ stat.trend }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Today's Summary Card -->
+    <div *ngIf="dashboardData" class="bg-gradient-to-br from-primary-dark to-primary-dark-light rounded-2xl p-6 text-white">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h3 class="text-lg font-bold mb-2 flex items-center gap-2">
+            <i class="bi bi-graph-up-arrow"></i>
+            ملخص اليوم
+          </h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+            <div>
+              <p class="text-white/60 text-sm">تم التسليم</p>
+              <p class="text-2xl font-black text-primary-green">{{ dashboardData.deliveredTodayCount }}</p>
+            </div>
+            <div>
+              <p class="text-white/60 text-sm">قيد التوصيل</p>
+              <p class="text-2xl font-black text-blue-400">{{ dashboardData.inTransitCount }}</p>
+            </div>
+            <div>
+              <p class="text-white/60 text-sm">في الانتظار</p>
+              <p class="text-2xl font-black text-amber-400">{{ dashboardData.pendingCount }}</p>
+            </div>
+            <div>
+              <p class="text-white/60 text-sm">إجمالي COD</p>
+              <p class="text-2xl font-black text-accent-gold">{{ formatCurrency(dashboardData.totalCodToday) }}</p>
+            </div>
+          </div>
+        </div>
+        <a routerLink="/supplier/reports" 
+           class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors self-start md:self-center">
+          <span>عرض التقارير</span>
+          <i class="bi bi-arrow-left"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Pending Actions (UC-SUP-06) -->
+    <div *ngIf="pendingParcels.length > 0" class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-amber-800 flex items-center gap-2">
+          <i class="bi bi-exclamation-circle-fill"></i>
+          طلبات تحتاج إجراء
+        </h2>
+        <span class="px-3 py-1 bg-amber-200 text-amber-800 text-sm font-bold rounded-full">
+          {{ pendingParcels.length }}
+        </span>
+      </div>
+      
+      <div class="space-y-3">
+        <div *ngFor="let parcel of pendingParcels" 
+             class="bg-white rounded-xl p-4 border border-amber-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center"
+                 [ngClass]="parcel.priority === 'urgent' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'">
+              <i class="bi" [ngClass]="parcel.priority === 'urgent' ? 'bi-lightning-charge-fill' : 'bi-box-seam'"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <p class="font-bold text-primary-dark">{{ parcel.trackingNumber }}</p>
+                <span *ngIf="parcel.priority === 'urgent'" 
+                      class="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-bold rounded-full">
+                  عاجل
+                </span>
+              </div>
+              <p class="text-sm text-gray-500">{{ parcel.receiverName }} - {{ parcel.deliveryAddress }}</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <span class="px-3 py-1 rounded-full text-xs font-bold border" [ngClass]="getStatusClass(parcel.status)">
+              {{ getStatusText(parcel.status) }}
+            </span>
+            
+            <!-- Ready for Pickup Button (UC-SUP-06) -->
+            <button *ngIf="parcel.status === 'pending' && !parcel.isReadyForPickup"
+                    (click)="markReadyForPickup(parcel)"
+                    class="px-4 py-2 bg-primary-green text-white text-sm font-bold rounded-lg hover:bg-primary-green-dark transition-colors">
+              <i class="bi bi-check2-circle ml-1"></i>
+              جاهز للاستلام
+            </button>
+            
+            <a *ngIf="parcel.status === 'ready_for_pickup'"
+               [routerLink]="['/supplier/shipments']"
+               [queryParams]="{assign: parcel.id}"
+               class="px-4 py-2 bg-blue-500 text-white text-sm font-bold rounded-lg hover:bg-blue-600 transition-colors">
+              <i class="bi bi-person-plus ml-1"></i>
+              تعيين مندوب
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <!-- Recent Orders -->
+      <div class="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-5 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+          <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+            <i class="bi bi-clock-history text-primary-green"></i>
+            أحدث الطلبات
+          </h2>
+          <a routerLink="/supplier/shipments" class="text-primary-green hover:text-secondary-teal font-semibold text-sm transition-colors">
+            عرض الكل ←
+          </a>
+        </div>
+        
+        <div class="p-4">
+          <div *ngIf="recentParcels.length === 0" class="text-center py-8">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+              <i class="bi bi-inbox text-gray-400 text-2xl"></i>
+            </div>
+            <p class="text-gray-500 mb-4">لا توجد طلبات حديثة</p>
+            <a routerLink="/supplier/create-shipment" class="btn-primary text-sm">
+              <i class="bi bi-plus-lg"></i>
+              إنشاء طلب جديد
+            </a>
+          </div>
+
+          <div *ngIf="recentParcels.length > 0" class="space-y-3">
+            <a *ngFor="let parcel of recentParcels" 
+               [routerLink]="['/supplier/track']"
+               [queryParams]="{id: parcel.trackingNumber}"
+               class="block p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-primary-green/30 hover:shadow-md transition-all duration-200">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-primary-green/10 flex items-center justify-center">
+                    <i class="bi bi-box-seam text-primary-green"></i>
+                  </div>
+                  <div>
+                    <p class="font-bold text-primary-dark">{{ parcel.trackingNumber }}</p>
+                    <p class="text-sm text-gray-500">{{ parcel.receiverName }}</p>
+                  </div>
+                </div>
+                <div class="text-left">
+                  <span class="px-3 py-1 rounded-full text-xs font-bold border" [ngClass]="getStatusClass(parcel.status)">
+                    {{ getStatusText(parcel.status) }}
+                  </span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-sm text-gray-500 pt-2 border-t border-gray-100">
+                <span>
+                  <i class="bi bi-geo-alt ml-1"></i>
+                  {{ parcel.deliveryAddress }}
+                </span>
+                <span class="font-bold text-primary-dark">
+                  COD: {{ formatCurrency(parcel.codAmount) }}
+                </span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions Sidebar -->
+      <div class="space-y-6">
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="p-5 border-b border-gray-100 bg-gray-50">
+            <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+              <i class="bi bi-lightning-charge-fill text-accent-gold"></i>
+              إجراءات سريعة
+            </h2>
+          </div>
+          <div class="p-4 space-y-3">
+            <a routerLink="/supplier/create-shipment" 
+               class="flex items-center gap-3 p-4 bg-gradient-to-br from-primary-green to-secondary-teal rounded-xl text-white hover:shadow-lg transition-all duration-300">
+              <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                <i class="bi bi-plus-lg text-xl"></i>
+              </div>
+              <div>
+                <p class="font-bold">طلب شحن جديد</p>
+                <p class="text-sm text-white/70">إنشاء طلب توصيل</p>
+              </div>
+            </a>
+            
+            <a routerLink="/supplier/shipments" 
+               class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all duration-300">
+              <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                <i class="bi bi-box-seam text-blue-600 text-xl"></i>
+              </div>
+              <div>
+                <p class="font-bold text-primary-dark">إدارة الطلبات</p>
+                <p class="text-sm text-gray-500">عرض وإدارة شحناتك</p>
+              </div>
+            </a>
+            
+            <a routerLink="/supplier/track" 
+               class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all duration-300">
+              <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                <i class="bi bi-geo-alt-fill text-purple-600 text-xl"></i>
+              </div>
+              <div>
+                <p class="font-bold text-primary-dark">تتبع الشحنات</p>
+                <p class="text-sm text-gray-500">متابعة حالة التوصيل</p>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Delivery Status Overview -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="p-5 border-b border-gray-100 bg-gray-50">
+            <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+              <i class="bi bi-pie-chart-fill text-primary-green"></i>
+              حالة الطلبات
+            </h2>
+          </div>
+          <div class="p-4 space-y-4" *ngIf="dashboardData">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-amber-400"></div>
+                <span class="text-sm text-gray-600">في الانتظار</span>
+              </div>
+              <span class="font-bold text-primary-dark">{{ dashboardData.pendingCount }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-blue-400"></div>
+                <span class="text-sm text-gray-600">جاهز للاستلام</span>
+              </div>
+              <span class="font-bold text-primary-dark">{{ dashboardData.readyForPickupCount }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-purple-400"></div>
+                <span class="text-sm text-gray-600">قيد التوصيل</span>
+              </div>
+              <span class="font-bold text-primary-dark">{{ dashboardData.inTransitCount }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                <span class="text-sm text-gray-600">تم التسليم اليوم</span>
+              </div>
+              <span class="font-bold text-primary-dark">{{ dashboardData.deliveredTodayCount }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Help Card -->
+        <div class="bg-gradient-to-br from-accent-gold/10 to-accent-gold/5 rounded-2xl p-5 border border-accent-gold/20">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-lg bg-accent-gold/20 flex items-center justify-center">
+              <i class="bi bi-lightbulb-fill text-accent-gold"></i>
+            </div>
+            <h3 class="font-bold text-primary-dark">نصيحة</h3>
+          </div>
+          <p class="text-sm text-gray-600 mb-3">
+            قم بتأكيد جاهزية الطرد للاستلام لتسريع عملية التعيين التلقائي للمندوب.
+          </p>
+          <a routerLink="/supplier/settings" class="text-primary-green text-sm font-semibold hover:text-secondary-teal">
+            إعدادات التعيين التلقائي ←
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

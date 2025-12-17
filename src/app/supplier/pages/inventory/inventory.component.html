@@ -1,0 +1,178 @@
+<div class="inventory-page">
+  <!-- رأس الصفحة -->
+  <header class="head">
+    <div class="head-left">
+      <p class="overline">المخزون</p>
+      <h2>إدارة المخزون</h2>
+    </div>
+    <div class="head-right">
+      <button class="btn-primary" (click)="downloadInventoryReport()">
+        <i class="bi bi-file-earmark-excel"></i>
+        تحميل التقرير
+      </button>
+    </div>
+  </header>
+
+  <!-- إحصائيات المخزون -->
+  <section class="stats-cards">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: #4CAF50;">
+        <i class="bi bi-boxes"></i>
+      </div>
+      <div>
+        <p class="stat-label">إجمالي الأصناف</p>
+        <h3 class="stat-value">{{ stats.totalItems }}</h3>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background: #2196F3;">
+        <i class="bi bi-cash-stack"></i>
+      </div>
+      <div>
+        <p class="stat-label">القيمة الإجمالية</p>
+        <h3 class="stat-value">{{ stats.totalValue | currency:'EGP':'symbol':'1.0-0' }}</h3>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background: #FF9800;">
+        <i class="bi bi-exclamation-triangle"></i>
+      </div>
+      <div>
+        <p class="stat-label">منخفضة المخزون</p>
+        <h3 class="stat-value">{{ stats.lowStockItems }}</h3>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background: #F44336;">
+        <i class="bi bi-x-circle"></i>
+      </div>
+      <div>
+        <p class="stat-label">نفذ من المخزون</p>
+        <h3 class="stat-value">{{ stats.outOfStockItems }}</h3>
+      </div>
+    </div>
+  </section>
+
+  <!-- أدوات البحث والتصفية -->
+  <section class="filters">
+    <div class="search-box">
+      <i class="bi bi-search"></i>
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (ngModelChange)="filterInventory()"
+        placeholder="ابحث في المخزون..."
+      />
+    </div>
+    <div class="filter-options">
+      <div class="filter-group">
+        <label>الفئة:</label>
+        <select [(ngModel)]="selectedCategory" (ngModelChange)="filterInventory()">
+          <option value="all">جميع الفئات</option>
+          <option *ngFor="let category of categories" [value]="category">
+            {{ category }}
+          </option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>حالة المخزون:</label>
+        <select [(ngModel)]="selectedStatus" (ngModelChange)="filterInventory()">
+          <option *ngFor="let status of statuses" [value]="status.value">
+            {{ status.label }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- جدول المخزون -->
+  <section class="inventory-table">
+    <div class="table-header">
+      <span>اسم المنتج</span>
+      <span>الفئة</span>
+      <span>الكمية</span>
+      <span>حالة المخزون</span>
+      <span>السعر</span>
+      <span>القيمة</span>
+      <span>الإجراءات</span>
+    </div>
+
+    <div class="table-body">
+      <div class="table-row" *ngFor="let item of filteredInventory">
+        <span class="product-name">
+          <strong>{{ item.name }}</strong>
+          <small>{{ item.description | slice:0:30 }}{{ item.description.length > 30 ? '...' : '' }}</small>
+        </span>
+        <span class="product-category">
+          <span class="category-badge">{{ item.category }}</span>
+        </span>
+        <span class="product-quantity">
+          <div class="quantity-controls">
+            <button class="btn-icon btn-sm" (click)="decreaseQuantity(item)">
+              <i class="bi bi-dash"></i>
+            </button>
+            <span class="quantity-value">{{ item.quantity }}</span>
+            <button class="btn-icon btn-sm" (click)="increaseQuantity(item)">
+              <i class="bi bi-plus"></i>
+            </button>
+          </div>
+        </span>
+        <span class="stock-status">
+          <span class="badge" [ngClass]="getStockClass(item.quantity)">
+            {{ getStockStatus(item.quantity) }}
+          </span>
+        </span>
+        <span class="product-price">
+          {{ item.price | currency:'EGP':'symbol':'1.0-0' }}
+        </span>
+        <span class="product-value">
+          {{ (item.price * item.quantity) | currency:'EGP':'symbol':'1.0-0' }}
+        </span>
+        <span class="product-actions">
+          <button class="btn-icon" [routerLink]="['/supplier/products/edit', item.id]">
+            <i class="bi bi-pencil"></i>
+          </button>
+          <button class="btn-icon" [routerLink]="['/supplier/products/view', item.id]">
+            <i class="bi bi-eye"></i>
+          </button>
+        </span>
+      </div>
+    </div>
+
+    <!-- حالة فارغة -->
+    <div class="empty-state" *ngIf="filteredInventory.length === 0">
+      <i class="bi bi-inboxes"></i>
+      <h3>لا توجد عناصر في المخزون</h3>
+      <p>لم تقم بإضافة أي منتجات إلى المخزون بعد</p>
+      <button class="btn-primary" routerLink="/supplier/products/add">
+        <i class="bi bi-plus-circle"></i>
+        إضافة منتج جديد
+      </button>
+    </div>
+  </section>
+
+  <!-- ملخص المخزون -->
+  <section class="inventory-summary">
+    <h4>ملخص المخزون</h4>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <span class="summary-label">إجمالي القيمة:</span>
+        <span class="summary-value">{{ stats.totalValue | currency:'EGP':'symbol':'1.0-0' }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">متوسط السعر:</span>
+        <span class="summary-value">
+          {{ (stats.totalValue / stats.totalItems) | currency:'EGP':'symbol':'1.0-0' }}
+        </span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">المنتجات النشطة:</span>
+        <span class="summary-value">{{ stats.activeProducts }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">تحتاج إعادة تخزين:</span>
+        <span class="summary-value">{{ stats.lowStockItems + stats.outOfStockItems }}</span>
+      </div>
+    </div>
+  </section>
+</div>

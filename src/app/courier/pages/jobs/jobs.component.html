@@ -1,0 +1,37 @@
+<div class="jobs-page">
+  <header class="jobs-head">
+    <div>
+      <p class="overline">المهام</p>
+      <h2>المهام المسندة إليك</h2>
+    </div>
+    <div class="filters">
+      <button class="chip" [class.active]="filter === 'الكل'" (click)="filter = 'الكل'">الكل</button>
+      <button class="chip" [class.active]="filter === 'جديد'" (click)="filter = 'جديد'">جديد</button>
+      <button class="chip" [class.active]="filter === 'جارٍ التسليم'" (click)="filter = 'جارٍ التسليم'">جارٍ التسليم</button>
+      <button class="chip" [class.active]="filter === 'مكتمل'" (click)="filter = 'مكتمل'">مكتمل</button>
+      <button class="chip" [class.active]="filter === 'مؤجل'" (click)="filter = 'مؤجل'">مؤجل</button>
+    </div>
+  </header>
+
+  <div class="jobs-grid">
+    <div class="job-card" *ngFor="let job of filteredJobs()">
+      <div class="job-card-head">
+        <div class="job-id">{{ job.id }}</div>
+        <div class="status" [ngClass]="job.status">{{ job.status }}</div>
+      </div>
+      <div class="loc">
+        <span><i class="bi bi-geo-alt"></i> {{ job.pickup }}</span>
+        <span><i class="bi bi-flag"></i> {{ job.dropoff }}</span>
+      </div>
+      <div class="meta">
+        <span class="eta"><i class="bi bi-clock"></i> {{ job.eta }}</span>
+        <span class="payout">{{ job.payout | currency:'EGP':'symbol':'1.0-0' }}</span>
+      </div>
+      <div class="actions">
+        <button class="ghost">تفاصيل</button>
+        <button class="primary">بدء التوصيل</button>
+      </div>
+    </div>
+  </div>
+</div>
+

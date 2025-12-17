@@ -1,0 +1,4 @@
+/* Courier Component - Tailwind Overrides */
+:host {
+  @apply block w-full;
+}

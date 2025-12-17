@@ -1,0 +1,4 @@
+/* Admin Component Styles */
+:host {
+  @apply block w-full;
+}

@@ -1,0 +1,234 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">لوحة تحكم المدير</h1>
+      <p class="text-gray-600 mt-1">نظرة عامة على أداء النظام</p>
+    </div>
+    <div class="text-sm text-gray-500 bg-white px-4 py-2 rounded-xl border border-gray-200">
+      <i class="bi bi-calendar3 ml-2 text-primary-green"></i>
+      {{ today | date:'fullDate':'':'ar' }}
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4"></div>
+      <p class="text-gray-500">جاري تحميل البيانات...</p>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading" class="space-y-6">
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div *ngFor="let stat of stats; let i = index" 
+           class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-md"
+               [ngClass]="getStatIconBg(i)">
+            <i class="bi text-white text-xl" [ngClass]="stat.icon"></i>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm text-gray-500 font-medium">{{ stat.label }}</p>
+            <div class="flex items-baseline gap-2 mt-1">
+              <span class="text-xl lg:text-2xl font-black text-primary-dark">{{ stat.value }}</span>
+              <span *ngIf="stat.trend" class="text-xs font-bold text-green-500">{{ stat.trend }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Pending Carrier Approvals -->
+      <a routerLink="/admin/carrier-approvals" 
+         class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                <i class="bi bi-person-badge text-2xl"></i>
+              </div>
+              <div>
+                <p class="text-white/80 text-sm">طلبات تسجيل المناديب</p>
+                <p class="text-3xl font-black">{{ pendingCarriers.length }}</p>
+              </div>
+            </div>
+            <p class="text-white/70 text-sm">{{ pendingCarriers.length > 0 ? 'طلبات تحتاج مراجعة' : 'لا توجد طلبات معلقة' }}</p>
+          </div>
+          <i class="bi bi-arrow-left text-3xl text-white/50"></i>
+        </div>
+      </a>
+
+      <!-- Open Disputes -->
+      <a routerLink="/admin/disputes" 
+         class="bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-6 text-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                <i class="bi bi-exclamation-triangle text-2xl"></i>
+              </div>
+              <div>
+                <p class="text-white/80 text-sm">نزاعات مفتوحة</p>
+                <p class="text-3xl font-black">{{ recentDisputes.length }}</p>
+              </div>
+            </div>
+            <p class="text-white/70 text-sm">{{ recentDisputes.length > 0 ? 'نزاعات تحتاج حل' : 'لا توجد نزاعات مفتوحة' }}</p>
+          </div>
+          <i class="bi bi-arrow-left text-3xl text-white/50"></i>
+        </div>
+      </a>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <!-- Recent Orders -->
+      <div class="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-5 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+          <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+            <i class="bi bi-box-seam text-primary-green"></i>
+            أحدث الشحنات
+          </h2>
+          <a routerLink="/admin/orders" class="text-primary-green hover:text-secondary-teal font-semibold text-sm transition-colors">
+            عرض الكل ←
+          </a>
+        </div>
+        
+        <div class="p-4">
+          <div *ngIf="orders.length === 0" class="text-center py-8">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+              <i class="bi bi-inbox text-gray-400 text-2xl"></i>
+            </div>
+            <p class="text-gray-500">لا توجد شحنات حديثة</p>
+          </div>
+
+          <div *ngIf="orders.length > 0" class="space-y-3">
+            <div *ngFor="let order of orders" 
+                 class="p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-primary-green/30 hover:shadow-md transition-all duration-200">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-primary-green/10 flex items-center justify-center">
+                    <i class="bi bi-box-seam text-primary-green"></i>
+                  </div>
+                  <div>
+                    <p class="font-bold text-primary-dark">{{ order.id }}</p>
+                    <p class="text-sm text-gray-500">{{ order.customer }}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="px-3 py-1 rounded-full text-xs font-bold border"
+                        [ngClass]="getStatusClass(order.status)">
+                    {{ order.status }}
+                  </span>
+                  <span class="font-bold text-primary-dark">{{ order.total | currency:'EGP':'symbol':'1.0-0' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Sidebar -->
+      <div class="space-y-6">
+        <!-- Pending Carriers Preview -->
+        <div *ngIf="pendingCarriers.length > 0" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="p-4 border-b border-gray-100 bg-orange-50 flex items-center justify-between">
+            <h2 class="text-md font-bold text-orange-700 flex items-center gap-2">
+              <i class="bi bi-person-badge"></i>
+              مناديب بانتظار الموافقة
+            </h2>
+            <a routerLink="/admin/carrier-approvals" class="text-orange-600 hover:text-orange-700 text-sm font-semibold">
+              عرض الكل
+            </a>
+          </div>
+          <div class="p-4 space-y-3">
+            <div *ngFor="let carrier of pendingCarriers" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
+                <i class="bi bi-person text-orange-600"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-primary-dark text-sm truncate">{{ carrier.name }}</p>
+                <p class="text-xs text-gray-500">{{ getVehicleTypeText(carrier.vehicleType) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Disputes Preview -->
+        <div *ngIf="recentDisputes.length > 0" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="p-4 border-b border-gray-100 bg-red-50 flex items-center justify-between">
+            <h2 class="text-md font-bold text-red-700 flex items-center gap-2">
+              <i class="bi bi-exclamation-triangle"></i>
+              نزاعات حديثة
+            </h2>
+            <a routerLink="/admin/disputes" class="text-red-600 hover:text-red-700 text-sm font-semibold">
+              عرض الكل
+            </a>
+          </div>
+          <div class="p-4 space-y-3">
+            <div *ngFor="let dispute of recentDisputes" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <div class="w-10 h-10 rounded-lg flex items-center justify-center"
+                   [ngClass]="getDisputePriorityClass(dispute.priority)">
+                <i class="bi bi-exclamation-circle"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-primary-dark text-sm truncate">{{ dispute.id }}</p>
+                <p class="text-xs text-gray-500">{{ getDisputeTypeText(dispute.type) }}</p>
+              </div>
+              <span class="px-2 py-1 text-xs font-bold rounded-full"
+                    [ngClass]="getDisputePriorityClass(dispute.priority)">
+                {{ getDisputePriorityText(dispute.priority) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="p-5 border-b border-gray-100 bg-gray-50">
+            <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+              <i class="bi bi-lightning-charge text-accent-gold"></i>
+              إجراءات سريعة
+            </h2>
+          </div>
+          <div class="p-4 grid grid-cols-2 gap-3">
+            <a routerLink="/admin/carrier-approvals" 
+               class="flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl text-white hover:shadow-lg transition-all duration-300 group">
+              <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <i class="bi bi-person-check text-xl"></i>
+              </div>
+              <span class="font-semibold text-sm text-center">موافقات المناديب</span>
+            </a>
+            
+            <a routerLink="/admin/users" 
+               class="flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl text-white hover:shadow-lg transition-all duration-300 group">
+              <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <i class="bi bi-people text-xl"></i>
+              </div>
+              <span class="font-semibold text-sm text-center">إدارة المستخدمين</span>
+            </a>
+            
+            <a routerLink="/admin/disputes" 
+               class="flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-red-500 to-red-600 rounded-xl text-white hover:shadow-lg transition-all duration-300 group">
+              <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <i class="bi bi-exclamation-triangle text-xl"></i>
+              </div>
+              <span class="font-semibold text-sm text-center">النزاعات</span>
+            </a>
+            
+            <a routerLink="/admin/reports" 
+               class="flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-primary-green to-secondary-teal rounded-xl text-white hover:shadow-lg transition-all duration-300 group">
+              <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <i class="bi bi-graph-up text-xl"></i>
+              </div>
+              <span class="font-semibold text-sm text-center">التقارير</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

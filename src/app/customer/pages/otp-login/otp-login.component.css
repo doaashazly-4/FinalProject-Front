@@ -1,0 +1,13 @@
+/* OTP Login Component Styles */
+input[type="tel"],
+input[type="text"] {
+  direction: ltr;
+  text-align: center;
+}
+
+input[type="tel"]::placeholder,
+input[type="text"]::placeholder {
+  direction: rtl;
+  text-align: center;
+}
+

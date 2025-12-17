@@ -1,0 +1,4 @@
+/* Main Component - Tailwind Overrides */
+:host {
+  @apply block w-full min-h-full visible opacity-100;
+}

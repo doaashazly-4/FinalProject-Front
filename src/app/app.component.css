@@ -1,0 +1,19 @@
+:host {
+  @apply block w-full min-h-screen;
+}
+
+.main-content {
+  @apply w-full min-h-[calc(100vh-80px)] pt-0 mt-0 relative z-10 block overflow-visible;
+}
+
+.main-content router-outlet {
+  @apply block w-full min-h-full;
+}
+
+.main-content router-outlet + * {
+  @apply block w-full min-h-full visible opacity-100;
+}
+
+app-main {
+  @apply block w-full visible opacity-100;
+}

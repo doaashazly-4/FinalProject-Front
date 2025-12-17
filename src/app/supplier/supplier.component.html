@@ -1,0 +1,160 @@
+<div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] min-h-screen bg-gray-50">
+  <!-- Desktop Sidebar -->
+  <aside class="hidden lg:block bg-gradient-to-b from-primary-dark to-primary-dark-light text-gray-200 p-6 sticky top-0 self-start min-h-screen shadow-xl">
+    <div class="flex items-center gap-4 mb-8">
+      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-green to-secondary-teal flex items-center justify-center text-white text-2xl shadow-green">
+        <i class="bi bi-send-fill"></i>
+      </div>
+      <div>
+        <span class="font-black text-white text-xl block">PickGo</span>
+        <small class="text-primary-green font-semibold">{{ userName }}</small>
+      </div>
+    </div>
+
+    <!-- Role Badge -->
+    <div class="mb-6 px-4 py-2 bg-primary-green/10 border border-primary-green/20 rounded-xl">
+      <span class="text-primary-green text-sm font-bold">
+        <i class="bi bi-person-badge ml-2"></i>
+        حساب المُرسل
+      </span>
+      <p *ngIf="businessName" class="text-gray-400 text-xs mt-1">{{ businessName }}</p>
+    </div>
+
+    <!-- Quick Action Button -->
+    <a routerLink="/supplier/create-shipment" 
+       class="flex items-center justify-center gap-2 w-full py-3 mb-6 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl shadow-green hover:shadow-green-lg hover:-translate-y-0.5 transition-all duration-300">
+      <i class="bi bi-plus-lg"></i>
+      <span>طلب شحن جديد</span>
+    </a>
+
+    <nav class="flex flex-col gap-2">
+      <a *ngFor="let item of navItems"
+         [routerLink]="item.path"
+         routerLinkActive="bg-primary-green/15 text-white border border-primary-green/30"
+         class="flex items-center justify-between px-4 py-3 rounded-xl text-gray-300 hover:bg-white/5 hover:text-white transition-all duration-200">
+        <div class="flex items-center gap-3">
+          <i class="bi text-lg" [ngClass]="item.icon"></i>
+          <span>{{ item.label }}</span>
+        </div>
+        <span *ngIf="item.badge && item.badge > 0" 
+              class="px-2 py-0.5 bg-accent-gold text-primary-dark text-xs font-bold rounded-full min-w-[20px] text-center">
+          {{ item.badge }}
+        </span>
+      </a>
+    </nav>
+
+    <div class="mt-8 pt-6 border-t border-white/10 space-y-3">
+      <a routerLink="/home" class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-200">
+        <i class="bi bi-arrow-right"></i>
+        العودة للرئيسية
+      </a>
+      <button (click)="logout()" class="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors duration-200 w-full text-right">
+        <i class="bi bi-box-arrow-right"></i>
+        تسجيل الخروج
+      </button>
+    </div>
+
+    <!-- Quick Help -->
+    <div class="mt-8 p-4 bg-white/5 rounded-xl border border-white/10">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-lg bg-accent-gold/20 flex items-center justify-center">
+          <i class="bi bi-question-circle text-accent-gold"></i>
+        </div>
+        <span class="text-white font-semibold text-sm">تحتاج مساعدة؟</span>
+      </div>
+      <p class="text-gray-400 text-xs mb-3">فريق الدعم متاح على مدار الساعة</p>
+      <button class="w-full py-2 bg-accent-gold/10 text-accent-gold text-sm font-semibold rounded-lg hover:bg-accent-gold/20 transition-colors">
+        تواصل معنا
+      </button>
+    </div>
+  </aside>
+
+  <!-- Mobile Header -->
+  <div class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-primary-dark shadow-lg">
+    <div class="flex items-center justify-between px-4 py-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-green to-secondary-teal flex items-center justify-center text-white">
+          <i class="bi bi-send-fill"></i>
+        </div>
+        <div>
+          <span class="font-bold text-white text-sm block">PickGo</span>
+          <small class="text-primary-green text-xs">لوحة المُرسل</small>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <!-- Quick Add Button -->
+        <a routerLink="/supplier/create-shipment" 
+           class="w-10 h-10 rounded-xl bg-primary-green flex items-center justify-center text-white">
+          <i class="bi bi-plus-lg"></i>
+        </a>
+        
+        <!-- Menu Toggle -->
+        <button (click)="toggleMobileMenu()"
+                class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
+          <i class="bi text-xl" [ngClass]="isMobileMenuOpen ? 'bi-x-lg' : 'bi-list'"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Menu Overlay -->
+  <div class="lg:hidden fixed inset-0 z-40 transition-all duration-300"
+       [ngClass]="{'pointer-events-none opacity-0': !isMobileMenuOpen, 'pointer-events-auto opacity-100': isMobileMenuOpen}">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/60" (click)="closeMobileMenu()"></div>
+    
+    <!-- Mobile Sidebar -->
+    <div class="absolute right-0 top-0 h-full w-72 bg-gradient-to-b from-primary-dark to-primary-dark-light p-5 transform transition-transform duration-300 shadow-2xl"
+         [ngClass]="{'translate-x-full': !isMobileMenuOpen, 'translate-x-0': isMobileMenuOpen}">
+      
+      <!-- Mobile Header -->
+      <div class="flex items-center gap-3 mb-6 pb-4 border-b border-white/10">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-green to-secondary-teal flex items-center justify-center text-white text-xl">
+          <i class="bi bi-send-fill"></i>
+        </div>
+        <div>
+          <span class="font-bold text-white block">{{ userName }}</span>
+          <small class="text-primary-green text-sm">حساب المُرسل</small>
+        </div>
+      </div>
+
+      <!-- Mobile Nav -->
+      <nav class="flex flex-col gap-2">
+        <a *ngFor="let item of navItems"
+           [routerLink]="item.path"
+           routerLinkActive="bg-primary-green/15 text-white border border-primary-green/30"
+           (click)="closeMobileMenu()"
+           class="flex items-center justify-between px-4 py-3 rounded-xl text-gray-300 hover:bg-white/5 hover:text-white transition-all duration-200">
+          <div class="flex items-center gap-3">
+            <i class="bi" [ngClass]="item.icon"></i>
+            <span>{{ item.label }}</span>
+          </div>
+          <span *ngIf="item.badge && item.badge > 0" 
+                class="px-2 py-0.5 bg-accent-gold text-primary-dark text-xs font-bold rounded-full">
+            {{ item.badge }}
+          </span>
+        </a>
+      </nav>
+
+      <!-- Mobile Footer -->
+      <div class="mt-6 pt-4 border-t border-white/10 space-y-3">
+        <a routerLink="/home" (click)="closeMobileMenu()" 
+           class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+          <i class="bi bi-house"></i>
+          <span>العودة للرئيسية</span>
+        </a>
+        <button (click)="logout()" 
+                class="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors w-full">
+          <i class="bi bi-box-arrow-right"></i>
+          <span>تسجيل الخروج</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="p-4 lg:p-8 pt-20 lg:pt-8">
+    <router-outlet></router-outlet>
+  </main>
+</div>

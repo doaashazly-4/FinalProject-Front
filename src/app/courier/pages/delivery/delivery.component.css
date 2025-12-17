@@ -1,0 +1,68 @@
+.delivery-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.status {
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: white;
+}
+
+.status-accepted { background-color: #007bff; }
+.status-picked_up { background-color: #ffc107; }
+.status-out_for_delivery { background-color: #17a2b8; }
+.status-delivered { background-color: #28a745; }
+.status-failed { background-color: #dc3545; }
+
+.location-card, .customer-info, .order-info {
+  background: #f8f9fa;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-navigate, .btn-call, .btn-action, .btn-failed {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.btn-navigate:hover, .btn-call:hover, .btn-action:hover {
+  background-color: #0056b3;
+}
+
+.btn-failed {
+  background-color: #dc3545;
+  margin-right: 10px;
+}
+
+.btn-failed:hover {
+  background-color: #c82333;
+}
+
+.actions {
+  margin-top: 20px;
+}
+
+.failed-actions {
+  margin-top: 10px;
+}
+
+.loading {
+  text-align: center;
+  padding: 50px;
+}

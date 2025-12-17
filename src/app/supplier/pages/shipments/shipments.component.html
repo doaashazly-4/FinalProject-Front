@@ -1,0 +1,420 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">طلباتي</h1>
+      <p class="text-gray-600 mt-1">إدارة ومتابعة جميع طلبات الشحن</p>
+    </div>
+    <a routerLink="/supplier/create-shipment" 
+       class="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl shadow-green hover:shadow-green-lg transition-all">
+      <i class="bi bi-plus-lg"></i>
+      <span>طلب جديد</span>
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+    <div class="flex flex-col lg:flex-row lg:items-center gap-4">
+      <!-- Search -->
+      <div class="flex-1">
+        <div class="relative">
+          <i class="bi bi-search absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <input type="text"
+                 [(ngModel)]="searchQuery"
+                 (ngModelChange)="onSearchChange()"
+                 class="input pr-12"
+                 placeholder="بحث برقم التتبع، اسم المستلم، الهاتف...">
+        </div>
+      </div>
+      
+      <!-- Status Filter -->
+      <div class="flex flex-wrap gap-2">
+        <button *ngFor="let filter of statusFilters"
+                (click)="onStatusChange(filter.value)"
+                class="px-4 py-2 rounded-xl text-sm font-medium transition-all"
+                [ngClass]="selectedStatus === filter.value 
+                  ? 'bg-primary-green text-white shadow-green' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+          {{ filter.label }}
+          <span *ngIf="filter.count !== undefined" class="mr-1 opacity-70">({{ filter.count }})</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4"></div>
+      <p class="text-gray-500">جاري تحميل الطلبات...</p>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredParcels.length === 0" class="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
+    <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
+      <i class="bi bi-inbox text-gray-400 text-4xl"></i>
+    </div>
+    <h3 class="text-xl font-bold text-primary-dark mb-2">لا توجد طلبات</h3>
+    <p class="text-gray-500 mb-6">
+      {{ selectedStatus === 'all' ? 'لم تقم بإنشاء أي طلبات بعد' : 'لا توجد طلبات بهذه الحالة' }}
+    </p>
+    <a routerLink="/supplier/create-shipment" class="btn-primary">
+      <i class="bi bi-plus-lg ml-2"></i>
+      إنشاء طلب جديد
+    </a>
+  </div>
+
+  <!-- Parcels List -->
+  <div *ngIf="!isLoading && filteredParcels.length > 0" class="space-y-4">
+    <div *ngFor="let parcel of filteredParcels" 
+         class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
+      
+      <!-- Parcel Header -->
+      <div class="p-4 sm:p-5 border-b border-gray-100">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center"
+                 [ngClass]="parcel.priority === 'urgent' ? 'bg-red-100' : 'bg-primary-green/10'">
+              <i class="bi bi-box-seam text-xl" 
+                 [ngClass]="parcel.priority === 'urgent' ? 'text-red-500' : 'text-primary-green'"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <p class="font-bold text-primary-dark">{{ parcel.trackingNumber }}</p>
+                <span *ngIf="parcel.priority === 'urgent'" 
+                      class="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-bold rounded-full">
+                  <i class="bi bi-lightning-charge-fill ml-1"></i>
+                  عاجل
+                </span>
+              </div>
+              <p class="text-sm text-gray-500">{{ formatDate(parcel.createdAt) }}</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <span class="px-4 py-1.5 rounded-full text-sm font-bold border" [ngClass]="getStatusClass(parcel.status)">
+              {{ getStatusText(parcel.status) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Parcel Body -->
+      <div class="p-4 sm:p-5 bg-gray-50">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Receiver Info -->
+          <div>
+            <p class="text-xs text-gray-500 mb-1">المستلم</p>
+            <p class="font-bold text-primary-dark">{{ parcel.receiverName }}</p>
+            <p class="text-sm text-gray-600">{{ parcel.receiverPhone }}</p>
+          </div>
+          
+          <!-- Delivery Address -->
+          <div>
+            <p class="text-xs text-gray-500 mb-1">عنوان التسليم</p>
+            <p class="text-sm text-gray-700">{{ parcel.deliveryAddress }}</p>
+          </div>
+          
+          <!-- COD & Fee -->
+          <div class="flex gap-6">
+            <div>
+              <p class="text-xs text-gray-500 mb-1">COD</p>
+              <p class="font-bold text-primary-dark">{{ formatCurrency(parcel.codAmount) }}</p>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 mb-1">رسوم التوصيل</p>
+              <p class="font-bold text-primary-green">{{ formatCurrency(parcel.deliveryFee) }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Courier Info (if assigned) -->
+        <div *ngIf="parcel.courierName" class="mt-4 pt-4 border-t border-gray-200">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+              <i class="bi bi-person-fill text-blue-600"></i>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500">المندوب</p>
+              <p class="font-bold text-primary-dark">{{ parcel.courierName }}</p>
+            </div>
+            <a *ngIf="parcel.courierPhone" 
+               [href]="'tel:' + parcel.courierPhone"
+               class="mr-auto px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm font-bold hover:bg-blue-200 transition-colors">
+              <i class="bi bi-telephone ml-1"></i>
+              اتصل
+            </a>
+          </div>
+        </div>
+
+        <!-- Failed Attempts -->
+        <div *ngIf="parcel.failedAttempts && parcel.failedAttempts.length > 0" 
+             class="mt-4 pt-4 border-t border-gray-200">
+          <p class="text-xs text-red-500 font-bold mb-2">
+            <i class="bi bi-exclamation-triangle ml-1"></i>
+            محاولات التسليم الفاشلة
+          </p>
+          <div *ngFor="let attempt of parcel.failedAttempts" class="bg-red-50 rounded-lg p-3 text-sm">
+            <p class="text-red-700"><strong>السبب:</strong> {{ attempt.reason }}</p>
+            <p class="text-red-600 text-xs mt-1">{{ formatDate(attempt.timestamp) }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="p-4 sm:p-5 bg-white border-t border-gray-100 flex flex-wrap items-center gap-3">
+        <!-- View Details -->
+        <button (click)="openDetailsModal(parcel)"
+                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+          <i class="bi bi-eye ml-1"></i>
+          التفاصيل
+        </button>
+        
+        <!-- Track -->
+        <a [routerLink]="['/supplier/track']" 
+           [queryParams]="{id: parcel.trackingNumber}"
+           class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg font-medium hover:bg-purple-200 transition-colors">
+          <i class="bi bi-geo-alt ml-1"></i>
+          تتبع
+        </a>
+
+        <!-- Mark Ready for Pickup (UC-SUP-06) -->
+        <button *ngIf="canMarkReady(parcel)"
+                (click)="markReadyForPickup(parcel)"
+                [disabled]="markingReady === parcel.id"
+                class="px-4 py-2 bg-primary-green text-white rounded-lg font-medium hover:bg-primary-green-dark transition-colors disabled:opacity-50">
+          <span *ngIf="markingReady !== parcel.id">
+            <i class="bi bi-check2-circle ml-1"></i>
+            جاهز للاستلام
+          </span>
+          <span *ngIf="markingReady === parcel.id" class="flex items-center gap-2">
+            <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+            جاري...
+          </span>
+        </button>
+
+        <!-- Assign Carrier (UC-SUP-03) -->
+        <button *ngIf="canAssignCarrier(parcel)"
+                (click)="openAssignModal(parcel)"
+                class="px-4 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors">
+          <i class="bi bi-person-plus ml-1"></i>
+          تعيين مندوب
+        </button>
+
+        <!-- Cancel -->
+        <button *ngIf="canCancel(parcel)"
+                (click)="cancelOrder(parcel)"
+                class="px-4 py-2 text-red-500 hover:bg-red-50 rounded-lg font-medium transition-colors mr-auto">
+          <i class="bi bi-x-circle ml-1"></i>
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Assign Carrier Modal (UC-SUP-03) -->
+<div *ngIf="showAssignModal" 
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+  <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+    <!-- Modal Header -->
+    <div class="p-6 border-b border-gray-100 bg-gray-50">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-black text-primary-dark">تعيين مندوب</h2>
+          <p class="text-gray-500 text-sm">اختر مندوب من القائمة لتعيينه للطلب {{ selectedParcel?.trackingNumber }}</p>
+        </div>
+        <button (click)="closeAssignModal()" class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-6 overflow-y-auto max-h-[60vh]">
+      <!-- Loading -->
+      <div *ngIf="isLoadingCarriers" class="text-center py-8">
+        <div class="animate-spin rounded-full h-10 w-10 border-4 border-primary-green border-t-transparent mx-auto mb-4"></div>
+        <p class="text-gray-500">جاري البحث عن المناديب المتاحين...</p>
+      </div>
+
+      <!-- Empty -->
+      <div *ngIf="!isLoadingCarriers && availableCarriers.length === 0" class="text-center py-8">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+          <i class="bi bi-person-x text-gray-400 text-2xl"></i>
+        </div>
+        <p class="text-gray-500">لا يوجد مناديب متاحين حالياً</p>
+        <p class="text-gray-400 text-sm mt-1">يرجى المحاولة لاحقاً</p>
+      </div>
+
+      <!-- Carriers List -->
+      <div *ngIf="!isLoadingCarriers && availableCarriers.length > 0" class="space-y-3">
+        <div *ngFor="let carrier of availableCarriers"
+             (click)="carrier.isAvailable && selectCarrier(carrier)"
+             class="p-4 rounded-xl border-2 transition-all cursor-pointer"
+             [ngClass]="{
+               'border-primary-green bg-primary-green/5': selectedCarrier?.id === carrier.id,
+               'border-gray-200 hover:border-gray-300': selectedCarrier?.id !== carrier.id && carrier.isAvailable,
+               'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed': !carrier.isAvailable
+             }">
+          <div class="flex items-center gap-4">
+            <!-- Photo -->
+            <div class="w-14 h-14 rounded-xl bg-gray-200 flex items-center justify-center overflow-hidden">
+              <img *ngIf="carrier.photoUrl" [src]="carrier.photoUrl" alt="{{ carrier.name }}" class="w-full h-full object-cover">
+              <i *ngIf="!carrier.photoUrl" class="bi bi-person text-gray-400 text-2xl"></i>
+            </div>
+            
+            <!-- Info -->
+            <div class="flex-1">
+              <div class="flex items-center gap-2">
+                <p class="font-bold text-primary-dark">{{ carrier.name }}</p>
+                <span *ngIf="carrier.isOnline" class="w-2 h-2 rounded-full bg-green-500"></span>
+                <span *ngIf="!carrier.isAvailable" class="px-2 py-0.5 bg-gray-200 text-gray-600 text-xs rounded-full">مشغول</span>
+              </div>
+              <div class="flex items-center gap-4 mt-1 text-sm text-gray-500">
+                <span>
+                  <i class="bi ml-1" [ngClass]="getVehicleIcon(carrier.vehicleType)"></i>
+                  {{ getVehicleText(carrier.vehicleType) }}
+                </span>
+                <span>
+                  <i class="bi bi-star-fill ml-1 text-amber-400"></i>
+                  {{ carrier.rating }}
+                </span>
+                <span>{{ carrier.totalDeliveries }} توصيلة</span>
+              </div>
+            </div>
+            
+            <!-- Distance & ETA -->
+            <div class="text-left">
+              <p class="text-sm text-gray-500">{{ carrier.distanceKm }} كم</p>
+              <p class="font-bold text-primary-green">{{ carrier.estimatedArrival }}</p>
+            </div>
+            
+            <!-- Selected Check -->
+            <div *ngIf="selectedCarrier?.id === carrier.id" 
+                 class="w-8 h-8 rounded-full bg-primary-green flex items-center justify-center text-white">
+              <i class="bi bi-check-lg"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="p-6 border-t border-gray-100 bg-gray-50">
+      <div class="flex items-center justify-end gap-3">
+        <button (click)="closeAssignModal()"
+                class="px-6 py-3 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition-colors">
+          إلغاء
+        </button>
+        <button (click)="assignCarrier()"
+                [disabled]="!selectedCarrier || isAssigning"
+                class="px-6 py-3 bg-primary-green text-white font-bold rounded-xl shadow-green hover:shadow-green-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+          <span *ngIf="!isAssigning">
+            <i class="bi bi-check-lg ml-2"></i>
+            تعيين المندوب
+          </span>
+          <span *ngIf="isAssigning" class="flex items-center gap-2">
+            <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+            جاري التعيين...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Order Details Modal -->
+<div *ngIf="showDetailsModal && detailsParcel" 
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+  <div class="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl">
+    <!-- Modal Header -->
+    <div class="p-6 border-b border-gray-100 bg-gradient-to-br from-primary-dark to-primary-dark-light text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-white/70 text-sm">رقم التتبع</p>
+          <h2 class="text-xl font-black">{{ detailsParcel.trackingNumber }}</h2>
+        </div>
+        <button (click)="closeDetailsModal()" class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white hover:bg-white/20">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-6 space-y-4 overflow-y-auto max-h-[60vh]">
+      <!-- Status -->
+      <div class="flex items-center justify-between">
+        <span class="text-gray-500">الحالة</span>
+        <span class="px-4 py-1.5 rounded-full text-sm font-bold border" [ngClass]="getStatusClass(detailsParcel.status)">
+          {{ getStatusText(detailsParcel.status) }}
+        </span>
+      </div>
+
+      <!-- Description -->
+      <div>
+        <p class="text-gray-500 text-sm mb-1">وصف الشحنة</p>
+        <p class="font-medium text-primary-dark">{{ detailsParcel.description }}</p>
+      </div>
+
+      <!-- Receiver -->
+      <div class="p-4 bg-gray-50 rounded-xl">
+        <p class="text-gray-500 text-sm mb-2">بيانات المستلم</p>
+        <p class="font-bold text-primary-dark">{{ detailsParcel.receiverName }}</p>
+        <p class="text-gray-600">{{ detailsParcel.receiverPhone }}</p>
+        <p class="text-gray-600 mt-1">{{ detailsParcel.deliveryAddress }}</p>
+      </div>
+
+      <!-- Amounts -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="p-4 bg-green-50 rounded-xl">
+          <p class="text-gray-500 text-sm mb-1">COD</p>
+          <p class="text-xl font-black text-green-600">{{ formatCurrency(detailsParcel.codAmount) }}</p>
+        </div>
+        <div class="p-4 bg-blue-50 rounded-xl">
+          <p class="text-gray-500 text-sm mb-1">رسوم التوصيل</p>
+          <p class="text-xl font-black text-blue-600">{{ formatCurrency(detailsParcel.deliveryFee) }}</p>
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="flex flex-wrap gap-2">
+        <span *ngIf="detailsParcel.isFragile" class="px-3 py-1.5 bg-amber-100 text-amber-700 text-sm font-medium rounded-lg">
+          <i class="bi bi-exclamation-triangle ml-1"></i>
+          قابل للكسر
+        </span>
+        <span *ngIf="detailsParcel.requiresSignature" class="px-3 py-1.5 bg-blue-100 text-blue-700 text-sm font-medium rounded-lg">
+          <i class="bi bi-pencil-square ml-1"></i>
+          يتطلب توقيع
+        </span>
+        <span *ngIf="detailsParcel.priority === 'urgent'" class="px-3 py-1.5 bg-red-100 text-red-700 text-sm font-medium rounded-lg">
+          <i class="bi bi-lightning-charge-fill ml-1"></i>
+          عاجل
+        </span>
+      </div>
+
+      <!-- Notes -->
+      <div *ngIf="detailsParcel.notes">
+        <p class="text-gray-500 text-sm mb-1">ملاحظات</p>
+        <p class="text-gray-700">{{ detailsParcel.notes }}</p>
+      </div>
+
+      <!-- Dates -->
+      <div class="text-sm text-gray-500 space-y-1">
+        <p>تاريخ الإنشاء: {{ formatDate(detailsParcel.createdAt) }}</p>
+        <p *ngIf="detailsParcel.actualDelivery">تاريخ التسليم: {{ formatDate(detailsParcel.actualDelivery) }}</p>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="p-6 border-t border-gray-100">
+      <a [routerLink]="['/supplier/track']" 
+         [queryParams]="{id: detailsParcel.trackingNumber}"
+         class="block w-full py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl text-center hover:shadow-lg transition-all">
+        <i class="bi bi-geo-alt ml-2"></i>
+        تتبع الشحنة
+      </a>
+    </div>
+  </div>
+</div>
