@@ -1,0 +1,28 @@
+<div class="max-w-md mx-auto mt-16 p-6 bg-white rounded-xl shadow-sm">
+  <h2 class="text-2xl font-bold mb-4 text-primary-dark">تسجيل دخول المدير</h2>
+
+  <form (ngSubmit)="submit()" [formGroup]="loginForm" novalidate>
+    <div class="mb-4">
+      <label class="block text-sm font-medium mb-1">اسم المستخدم</label>
+      <input type="text" formControlName="userName" class="input w-full" [class.invalid]="loginForm.controls['userName'].invalid && loginForm.controls['userName'].touched" />
+    </div>
+
+    <div class="mb-4">
+      <label class="block text-sm font-medium mb-1">كلمة المرور</label>
+      <input [type]="hidePassword ? 'password' : 'text'" formControlName="password" class="input w-full" />
+    </div>
+
+    <div *ngIf="errorMessage" class="text-sm text-red-600 mb-3">
+      {{ errorMessage }}
+    </div>
+
+    <div class="flex items-center justify-between">
+      <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+        <span *ngIf="!isLoading">تسجيل الدخول</span>
+        <span *ngIf="isLoading">جاري المعالجة...</span>
+      </button>
+    </div>
+  </form>
+</div>
+
+

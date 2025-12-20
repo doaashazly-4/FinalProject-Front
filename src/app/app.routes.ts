@@ -19,6 +19,11 @@ export const routes: Routes = [
     loadComponent: () => import('./auth/auth/login/login.component').then(m => m.LoginComponent)
   },
   {
+    path: 'admin-login',
+    canActivate: [noAuthGuard],
+    loadComponent: () => import('./admin-login/admin-login.component').then(m => m.AdminLoginComponent)
+  },
+  {
     path: 'register',
     canActivate: [noAuthGuard],
     loadComponent: () => import('./auth/auth/register/register.component').then(m => m.RegisterComponent)
