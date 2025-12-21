@@ -81,9 +81,9 @@ export interface DeliveryConfirmation {
   signature?: string;
 }
 
-//export interface OTPRequest {
-//    phoneNumber: string;
-//}
+export interface OTPRequest {
+  phoneNumber: string;
+}
 
 export interface OTPVerification {
   phoneNumber: string;
