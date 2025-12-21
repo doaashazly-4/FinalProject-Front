@@ -13,8 +13,7 @@ import { CustomerDataService, IncomingDelivery, DeliveryStatus } from '../../ser
 })
 export class DeliveriesComponent implements OnInit {
   deliveries: IncomingDelivery[] = [];
-  phoneNumber = '';
-
+  phoneNumber = '01012345678'; // TODO: replace later with real source
 
   filteredDeliveries: IncomingDelivery[] = [];
   filter: DeliveryStatus | 'all' | 'active' = 'all';
@@ -30,6 +29,7 @@ export class DeliveriesComponent implements OnInit {
   ];
 
   constructor(private dataService: CustomerDataService) { }
+  constructor(private dataService: CustomerDataService) { }
 
   ngOnInit(): void {
     this.loadDeliveries();
@@ -37,6 +37,10 @@ export class DeliveriesComponent implements OnInit {
 
   loadDeliveries(): void {
     this.isLoading = true;
+
+    this.dataService.getMyOrders(this.phoneNumber).subscribe({
+      next: (packages) => {
+        this.deliveries = packages.map(pkg => this.mapBackendPackage(pkg));
 
     this.dataService.getMyOrders(this.phoneNumber).subscribe({
       next: (packages) => {
@@ -53,7 +57,6 @@ export class DeliveriesComponent implements OnInit {
       }
     });
   }
-
 
   mapStatus(status: number | string): DeliveryStatus {
     if (typeof status === 'string') return status as DeliveryStatus;
@@ -97,6 +100,7 @@ export class DeliveriesComponent implements OnInit {
         filter.count = this.deliveries.length;
       } else if (filter.value === 'active') {
         filter.count = this.deliveries.filter(d =>
+        filter.count = this.deliveries.filter(d =>
           !['delivered', 'cancelled', 'returned'].includes(d.status)
         ).length;
       } else {
@@ -116,10 +120,12 @@ export class DeliveriesComponent implements OnInit {
         matchesStatus = delivery.status === this.filter;
       }
 
+
       const matchesSearch = this.searchTerm === '' ||
         delivery.trackingNumber.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         delivery.senderName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         delivery.description.toLowerCase().includes(this.searchTerm.toLowerCase());
+
 
       return matchesStatus && matchesSearch;
     });
