@@ -148,6 +148,12 @@ export class CustomerDataService {
     return this.http.get<IncomingDelivery>(`${this.apiUrl}/orders/track/${trackingNumber}`);
   }
 
+  trackPackage(packageId: number) {
+  return this.http.get<any>(
+    `${this.apiUrl}/TrackPackage/${packageId}`
+  );
+}
+
   confirmDelivery(confirmation: DeliveryConfirmation): Observable<{ success: boolean }> {
     return this.http.post<{ success: boolean }>(`${this.apiUrl}/orders/${confirmation.deliveryId}/confirm`, confirmation);
   }

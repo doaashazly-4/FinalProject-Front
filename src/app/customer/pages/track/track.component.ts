@@ -57,27 +57,90 @@ export class CustomerTrackComponent implements OnInit, OnDestroy {
     }
   }
 
-  search(): void {
-    if (!this.trackingNumber.trim()) {
-      this.error = 'الرجاء إدخال رقم التتبع';
-      return;
-    }
+  // search(): void {
+  //   if (!this.trackingNumber.trim()) {
+  //     this.error = 'الرجاء إدخال رقم التتبع';
+  //     return;
+  //   }
 
-    this.isLoading = true;
-    this.error = '';
-    this.searchPerformed = true;
+  //   this.isLoading = true;
+  //   this.error = '';
+  //   this.searchPerformed = true;
 
-    this.dataService.trackDelivery(this.trackingNumber).subscribe({
-      next: (delivery) => {
-        this.selectedDelivery = delivery;
-        this.isLoading = false;
-        this.startLocationTracking(delivery.id);
-      },
-      error: () => {
-        this.loadFromMock();
-      }
-    });
+  //   this.dataService.trackDelivery(this.trackingNumber).subscribe({
+  //     next: (delivery) => {
+  //       this.selectedDelivery = delivery;
+  //       this.isLoading = false;
+  //       this.startLocationTracking(delivery.id);
+  //     },
+  //     error: () => {
+  //       this.loadFromMock();
+  //     }
+  //   });
+  // }
+
+  search() {
+  this.searchPerformed = true;
+  this.error = '';
+  this.selectedDelivery = null;
+
+  if (!this.trackingNumber) {
+    this.error = 'من فضلك أدخل رقم التتبع';
+    return;
   }
+
+  // ⚠️ Backend expects packageId (number)
+  const packageId = Number(this.trackingNumber);
+
+  if (isNaN(packageId)) {
+    this.error = 'رقم التتبع غير صالح حالياً (يجب أن يكون رقم)';
+    return;
+  }
+
+  this.isLoading = true;
+
+  this.dataService.trackPackage(packageId).subscribe({
+    next: (data) => {
+      this.selectedDelivery = data;
+      this.isLoading = false;
+    },
+    error: () => {
+      this.error = 'لم يتم العثور على الشحنة';
+      this.isLoading = false;
+    }
+  });
+}
+  
+  mapBackendPackage(pkg: any) {
+  return {
+    id: pkg.id,
+    trackingNumber: `PKG-${pkg.id}`, // temporary
+    description: 'شحنة قيد التتبع',
+    senderName: 'غير محدد',
+    pickupAddress: '',
+    deliveryAddress: '',
+    status: this.mapStatus(pkg.status),
+    createdAt: new Date(),
+    weight: 0,
+    courierName: pkg.courier ? `Courier #${pkg.courier.id}` : null,
+    courierPhone: null,
+    isFragile: false,
+    requiresSignature: false
+  };
+}
+
+mapStatus(status: number | string): any {
+  // adapt if enum is numeric
+  switch (status) {
+    case 0: return 'pending';
+    case 1: return 'assigned';
+    case 2: return 'picked_up';
+    case 3: return 'in_transit';
+    case 4: return 'out_for_delivery';
+    case 5: return 'delivered';
+    default: return 'pending';
+  }
+}
 
   loadDeliveryById(id: string): void {
     this.isLoading = true;
