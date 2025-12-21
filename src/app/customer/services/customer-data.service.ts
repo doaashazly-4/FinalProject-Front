@@ -26,7 +26,7 @@ export interface IncomingDelivery {
   notes?: string;
 }
 
-export type DeliveryStatus = 
+export type DeliveryStatus =
   | 'pending'           // Waiting for courier
   | 'assigned'          // Courier assigned
   | 'picked_up'         // Courier picked up
@@ -118,7 +118,7 @@ export interface CarrierLocation {
 export class CustomerDataService {
   private apiUrl = 'https://localhost:7104/api/Customer';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // ========== Stats ==========
   getStats(): Observable<ReceiverStat[]> {
@@ -148,6 +148,15 @@ export class CustomerDataService {
     return this.http.get<IncomingDelivery>(`${this.apiUrl}/orders/track/${trackingNumber}`);
   }
 
+  getMyOrders(phoneNumber: string) {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/MyOrders`,
+      { params: { phoneNumber } }
+    );
+  }
+
+
+  // ========== Delivery ==========
   confirmDelivery(confirmation: DeliveryConfirmation): Observable<{ success: boolean }> {
     return this.http.post<{ success: boolean }>(`${this.apiUrl}/orders/${confirmation.deliveryId}/confirm`, confirmation);
   }

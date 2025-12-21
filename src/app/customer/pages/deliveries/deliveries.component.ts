@@ -13,6 +13,8 @@ import { CustomerDataService, IncomingDelivery, DeliveryStatus } from '../../ser
 })
 export class DeliveriesComponent implements OnInit {
   deliveries: IncomingDelivery[] = [];
+  phoneNumber = '01012345678'; // TODO: replace later with real source
+
   filteredDeliveries: IncomingDelivery[] = [];
   filter: DeliveryStatus | 'all' | 'active' = 'all';
   searchTerm = '';
@@ -26,7 +28,7 @@ export class DeliveriesComponent implements OnInit {
     { value: 'delivered', label: 'تم التسليم' }
   ];
 
-  constructor(private dataService: CustomerDataService) {}
+  constructor(private dataService: CustomerDataService) { }
 
   ngOnInit(): void {
     this.loadDeliveries();
@@ -34,9 +36,10 @@ export class DeliveriesComponent implements OnInit {
 
   loadDeliveries(): void {
     this.isLoading = true;
-    this.dataService.getDeliveries().subscribe({
-      next: (deliveries) => {
-        this.deliveries = deliveries;
+
+    this.dataService.getMyOrders(this.phoneNumber).subscribe({
+      next: (packages) => {
+        this.deliveries = packages.map(pkg => this.mapBackendPackage(pkg));
         this.updateFilterCounts();
         this.applyFilters();
         this.isLoading = false;
@@ -50,12 +53,48 @@ export class DeliveriesComponent implements OnInit {
     });
   }
 
+  mapStatus(status: number | string): DeliveryStatus {
+    if (typeof status === 'string') return status as DeliveryStatus;
+
+    switch (status) {
+      case 0: return 'pending';
+      case 1: return 'assigned';
+      case 2: return 'picked_up';
+      case 3: return 'in_transit';
+      case 4: return 'out_for_delivery';
+      case 5: return 'delivered';
+      default: return 'pending';
+    }
+  }
+
+
+  mapBackendPackage(pkg: any): IncomingDelivery {
+    return {
+      id: String(pkg.id),
+      trackingNumber: `PKG-${pkg.id}`, // temporary display
+      description: pkg.description ?? '—',
+      senderName: 'غير محدد',
+      senderPhone: undefined,
+      pickupAddress: '—',
+      deliveryAddress: '—',
+      status: this.mapStatus(pkg.status),
+      createdAt: new Date(),
+      weight: pkg.weight ?? 0,
+      courierName: pkg.courier ? `Courier #${pkg.courier.id}` : undefined,
+      courierPhone: undefined,
+      isFragile: pkg.fragile ?? false,
+      requiresSignature: false
+    };
+  }
+
+
+
   updateFilterCounts(): void {
     this.statusFilters.forEach(filter => {
       if (filter.value === 'all') {
         filter.count = this.deliveries.length;
       } else if (filter.value === 'active') {
-        filter.count = this.deliveries.filter(d => 
+        filter.count = this.deliveries.filter(d =>
           !['delivered', 'cancelled', 'returned'].includes(d.status)
         ).length;
       } else {
@@ -74,12 +113,12 @@ export class DeliveriesComponent implements OnInit {
       } else {
         matchesStatus = delivery.status === this.filter;
       }
-      
+
       const matchesSearch = this.searchTerm === '' ||
         delivery.trackingNumber.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         delivery.senderName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         delivery.description.toLowerCase().includes(this.searchTerm.toLowerCase());
-      
+
       return matchesStatus && matchesSearch;
     });
   }
