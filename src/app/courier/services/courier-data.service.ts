@@ -36,7 +36,7 @@ export interface DeliveryJob {
   distance?: number;
 }
 
-export type JobStatus = 
+export type JobStatus =
   | 'available'         // Available for pickup
   | 'accepted'          // Courier accepted the job
   | 'picked_up'         // Parcel picked up from sender
@@ -99,7 +99,28 @@ export interface CourierTicket {
 export class CourierDataService {
   private apiUrl = `${environment.apiUrl}/Courier`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
+
+
+  deliverPackage(
+    packageId: number,
+    otp: string,
+    signatureUrl?: string
+  ) {
+    return this.http.post(`/api/packages/${packageId}/deliver`, {
+      customerOTP: otp,
+      signatureUrl
+    });
+  }
+
+  verifyDeliveryOTP(packageId: number, otp: string) {
+    return this.http.post(
+      `${this.apiUrl}/VerifyOTP/${packageId}`,
+      otp,
+      { responseType: 'text' }
+    );
+  }
+
 
   // ========== Stats ==========
   getStats(): Observable<CourierStat[]> {
