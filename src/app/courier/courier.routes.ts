@@ -35,6 +35,14 @@ export const COURIER_ROUTES: Routes = [
         loadComponent: () => import('./pages/delivery/delivery.component').then(m => m.DeliveryComponent)
       },
       // Legacy routes
+
+      {
+        path: 'confirm-delivery/:packageId',
+        loadComponent: () =>
+          import('./pages/confirm-delivery/confirm-delivery.component')
+            .then(m => m.ConfirmDeliveryComponent)
+      },
+
       {
         path: 'jobs',
         redirectTo: 'my-jobs',
