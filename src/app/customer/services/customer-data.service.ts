@@ -148,6 +148,11 @@ export class CustomerDataService {
     return this.http.get<IncomingDelivery>(`${this.apiUrl}/orders/track/${trackingNumber}`);
   }
 
+  trackPackage(packageId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/TrackPackage/${packageId}`);
+  }
+
+
   getMyOrders(phoneNumber: string) {
     return this.http.get<any[]>(
       `${this.apiUrl}/MyOrders`,

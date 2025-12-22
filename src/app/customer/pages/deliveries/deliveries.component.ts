@@ -13,7 +13,8 @@ import { CustomerDataService, IncomingDelivery, DeliveryStatus } from '../../ser
 })
 export class DeliveriesComponent implements OnInit {
   deliveries: IncomingDelivery[] = [];
-  phoneNumber = '01012345678'; // TODO: replace later with real source
+  phoneNumber = '';
+
 
   filteredDeliveries: IncomingDelivery[] = [];
   filter: DeliveryStatus | 'all' | 'active' = 'all';
@@ -52,6 +53,7 @@ export class DeliveriesComponent implements OnInit {
       }
     });
   }
+
 
   mapStatus(status: number | string): DeliveryStatus {
     if (typeof status === 'string') return status as DeliveryStatus;
