@@ -1,8 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { CustomerDataService, IncomingDelivery, CarrierLocation } from '../../services/customer-data.service';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import {
+  CustomerDataService,
+  IncomingDelivery,
+  CarrierLocation,
+  DeliveryStatus
+} from '../../services/customer-data.service';
 import { Subscription, interval } from 'rxjs';
 
 @Component({
@@ -10,80 +15,163 @@ import { Subscription, interval } from 'rxjs';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './order-detail.component.html',
-  styleUrl: './order-detail.component.css'
+  styleUrls: ['./order-detail.component.css']
 })
 export class OrderDetailComponent implements OnInit, OnDestroy {
+
+  // ---------- CORE ----------
   delivery: IncomingDelivery | null = null;
   isLoading = true;
+  error = '';
+
+  // ---------- UI STATE ----------
   showRatingModal = false;
   showNoteModal = false;
   showTimeChangeModal = false;
-  
-  // Rating
+
+  // ---------- RATING ----------
   rating = 0;
   ratingComment = '';
-  
-  // Notes
+
+  // ---------- NOTES ----------
   deliveryNote = '';
-  
-  // Time Change
+
+  // ---------- TIME CHANGE ----------
   newTime: Date = new Date();
   timeChangeReason = '';
-  
-  // Real-time tracking
+
+  // ---------- TRACKING ----------
   carrierLocation: CarrierLocation | null = null;
-  locationSubscription: Subscription | null = null;
+  locationSubscription?: Subscription;
   mapUrl = '';
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
     private dataService: CustomerDataService
-  ) {}
+  ) { }
+
+  // ================= LIFECYCLE =================
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      this.loadDelivery(id);
+      this.loadDelivery(Number(id));
     }
   }
 
   ngOnDestroy(): void {
-    if (this.locationSubscription) {
-      this.locationSubscription.unsubscribe();
-    }
+    this.locationSubscription?.unsubscribe();
   }
 
-  loadDelivery(id: string): void {
+  // ================= DATA =================
+
+  loadDelivery(id: number): void {
     this.isLoading = true;
-    this.dataService.getDeliveryById(id).subscribe({
-      next: (delivery) => {
-        this.delivery = delivery;
-        this.deliveryNote = delivery.notes || '';
+
+    this.dataService.trackPackage(id).subscribe({
+      next: (pkg: any) => {
+        this.delivery = this.mapBackendPackage(pkg);
+        this.deliveryNote = this.delivery.notes ?? '';
         this.isLoading = false;
-        
-        // Start real-time tracking if in transit
-        if (['in_transit', 'out_for_delivery', 'picked_up'].includes(delivery.status)) {
-          this.startLocationTracking(id);
+
+        if (
+          ['picked_up', 'in_transit', 'out_for_delivery'].includes(this.delivery.status)
+        ) {
+          this.startLocationTracking(String(id));
         }
-        
-        // Show rating modal if delivered and not rated
-        if (delivery.status === 'delivered' && !delivery.deliveryProofImage) {
-          // Check if already rated (would need backend check)
-          setTimeout(() => {
-            this.showRatingModal = true;
-          }, 1000);
+
+        if (this.delivery.status === 'delivered') {
+          this.showRatingModal = true;
         }
       },
-      error: (err) => {
-        console.error('Error loading delivery:', err);
+      error: () => {
+        this.error = 'لم يتم العثور على الشحنة';
         this.isLoading = false;
       }
     });
   }
 
+  // ================= MAPPING =================
+
+  mapBackendPackage(pkg: any): IncomingDelivery {
+    return {
+      id: String(pkg.id),
+      trackingNumber: `PKG-${pkg.id}`,
+      description: pkg.description ?? '—',
+      senderName: 'غير محدد',
+      senderPhone: undefined,
+      pickupAddress: '—',
+      deliveryAddress: '—',
+      status: this.mapStatus(pkg.status),
+      createdAt: new Date(),
+      estimatedDelivery: undefined,
+      weight: pkg.weight ?? 0,
+      courierName: pkg.courier ? `Courier #${pkg.courier.id}` : undefined,
+      courierPhone: undefined,
+      notes: pkg.shipmentNotes ?? ''
+    };
+  }
+
+  mapStatus(status: number | string): DeliveryStatus {
+    if (typeof status === 'string') return status as DeliveryStatus;
+
+    switch (status) {
+      case 0: return 'pending';
+      case 1: return 'assigned';
+      case 2: return 'picked_up';
+      case 3: return 'in_transit';
+      case 4: return 'out_for_delivery';
+      case 5: return 'delivered';
+      default: return 'pending';
+    }
+  }
+
+  // ================= STATUS UI =================
+
+  getStatusText(status: DeliveryStatus): string {
+    const map: Record<DeliveryStatus, string> = {
+      pending: 'في الانتظار',
+      assigned: 'تم التعيين',
+      picked_up: 'تم الاستلام من المُرسل',
+      in_transit: 'في الطريق إليك',
+      out_for_delivery: 'المندوب قريب منك',
+      delivered: 'تم التسليم',
+      failed_delivery: 'فشل التسليم',
+      returned: 'تم الإرجاع',
+      cancelled: 'ملغي'
+    };
+    return map[status];
+  }
+
+  getStatusClass(status: DeliveryStatus): string {
+    const map: Record<DeliveryStatus, string> = {
+      pending: 'bg-yellow-100 text-yellow-800',
+      assigned: 'bg-blue-100 text-blue-800',
+      picked_up: 'bg-indigo-100 text-indigo-800',
+      in_transit: 'bg-purple-100 text-purple-800',
+      out_for_delivery: 'bg-cyan-100 text-cyan-800',
+      delivered: 'bg-green-100 text-green-800',
+      failed_delivery: 'bg-red-100 text-red-800',
+      returned: 'bg-orange-100 text-orange-800',
+      cancelled: 'bg-gray-100 text-gray-800'
+    };
+    return map[status];
+  }
+
+  formatDate(date?: Date | string): string {
+    if (!date) return '-';
+    return new Date(date).toLocaleDateString('ar-EG', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  // ================= TRACKING =================
+
   startLocationTracking(deliveryId: string): void {
-    // Update location every 5 seconds
     this.updateCarrierLocation(deliveryId);
     this.locationSubscription = interval(5000).subscribe(() => {
       this.updateCarrierLocation(deliveryId);
@@ -92,31 +180,17 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
 
   updateCarrierLocation(deliveryId: string): void {
     this.dataService.getCarrierLocation(deliveryId).subscribe({
-      next: (location) => {
-        this.carrierLocation = location;
-        // Update map URL
-        if (this.delivery) {
-          this.mapUrl = `https://www.google.com/maps?q=${location.lat},${location.lng}&z=15`;
-        }
-      },
-      error: (err) => {
-        // Mock location for demo
-        if (this.delivery) {
-          this.carrierLocation = {
-            lat: 30.0444 + (Math.random() * 0.01),
-            lng: 31.2357 + (Math.random() * 0.01),
-            timestamp: new Date(),
-            courierId: 'courier-1'
-          };
-          this.mapUrl = `https://www.google.com/maps?q=${this.carrierLocation.lat},${this.carrierLocation.lng}&z=15`;
-        }
+      next: (loc) => {
+        this.carrierLocation = loc;
+        this.mapUrl = `https://www.google.com/maps?q=${loc.lat},${loc.lng}&z=15`;
       }
     });
   }
 
+  // ================= ACTIONS =================
+
   callCarrier(): void {
     if (this.delivery?.courierPhone) {
-      // For masked call, would need backend API
       window.open(`tel:${this.delivery.courierPhone}`, '_self');
     }
   }
@@ -128,117 +202,44 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
   }
 
   updateDeliveryNote(): void {
-    if (!this.delivery || !this.deliveryNote.trim()) return;
-    
-    this.dataService.updateDeliveryNote(this.delivery.id, this.deliveryNote).subscribe({
-      next: () => {
-        if (this.delivery) {
-          this.delivery.notes = this.deliveryNote;
-        }
-        this.showNoteModal = false;
-        alert('تم تحديث الملاحظات بنجاح');
-      },
-      error: (err) => {
-        console.error('Error updating note:', err);
-        alert('حدث خطأ أثناء تحديث الملاحظات');
-      }
+    if (!this.delivery) return;
+
+    this.dataService.updateDeliveryNote(this.delivery.id, this.deliveryNote).subscribe(() => {
+      this.showNoteModal = false;
     });
   }
 
   requestTimeChange(): void {
     if (!this.delivery) return;
-    
-    this.dataService.requestTimeChange(this.delivery.id, this.newTime, this.timeChangeReason).subscribe({
-      next: () => {
-        this.showTimeChangeModal = false;
-        alert('تم إرسال طلب تغيير الوقت للمورد');
-      },
-      error: (err) => {
-        console.error('Error requesting time change:', err);
-        alert('حدث خطأ أثناء إرسال الطلب');
-      }
+
+    this.dataService.requestTimeChange(
+      this.delivery.id,
+      this.newTime,
+      this.timeChangeReason
+    ).subscribe(() => {
+      this.showTimeChangeModal = false;
     });
   }
 
   markNotAvailableToday(): void {
     if (!this.delivery) return;
-    
-    if (confirm('هل أنت متأكد أنك غير متاح اليوم؟ سيتم إشعار المورد.')) {
-      this.dataService.markNotAvailableToday(this.delivery.id).subscribe({
-        next: () => {
-          alert('تم إشعار المورد بعدم تواجدك اليوم');
-        },
-        error: (err) => {
-          console.error('Error marking not available:', err);
-          alert('حدث خطأ أثناء إرسال الإشعار');
-        }
-      });
-    }
+
+    this.dataService.markNotAvailableToday(this.delivery.id).subscribe();
   }
 
   submitRating(): void {
-    if (!this.delivery || this.rating === 0) {
-      alert('يرجى اختيار تقييم');
-      return;
-    }
-    
-    this.dataService.rateDelivery(this.delivery.id, this.rating, this.ratingComment).subscribe({
-      next: () => {
-        this.showRatingModal = false;
-        alert('شكراً لك على تقييمك!');
-        this.rating = 0;
-        this.ratingComment = '';
-      },
-      error: (err) => {
-        console.error('Error submitting rating:', err);
-        alert('حدث خطأ أثناء إرسال التقييم');
-      }
+    if (!this.delivery || this.rating === 0) return;
+
+    this.dataService.rateDelivery(
+      this.delivery.id,
+      this.rating,
+      this.ratingComment
+    ).subscribe(() => {
+      this.showRatingModal = false;
     });
   }
 
-  setRating(rating: number): void {
-    this.rating = rating;
-  }
-
-  getStatusText(status: string): string {
-    const statusMap: { [key: string]: string } = {
-      'pending': 'في الانتظار',
-      'assigned': 'تم التعيين',
-      'picked_up': 'تم الاستلام من المُرسل',
-      'in_transit': 'في الطريق إليك',
-      'out_for_delivery': 'المندوب قريب منك',
-      'delivered': 'تم التسليم',
-      'failed_delivery': 'فشل التسليم',
-      'returned': 'تم الإرجاع',
-      'cancelled': 'ملغي'
-    };
-    return statusMap[status] || status;
-  }
-
-  getStatusClass(status: string): string {
-    const classMap: { [key: string]: string } = {
-      'pending': 'bg-yellow-100 text-yellow-800',
-      'assigned': 'bg-blue-100 text-blue-800',
-      'picked_up': 'bg-indigo-100 text-indigo-800',
-      'in_transit': 'bg-purple-100 text-purple-800',
-      'out_for_delivery': 'bg-cyan-100 text-cyan-800',
-      'delivered': 'bg-green-100 text-green-800',
-      'failed_delivery': 'bg-red-100 text-red-800',
-      'returned': 'bg-orange-100 text-orange-800',
-      'cancelled': 'bg-gray-100 text-gray-800'
-    };
-    return classMap[status] || 'bg-gray-100 text-gray-800';
-  }
-
-  formatDate(date: Date | string | undefined): string {
-    if (!date) return '-';
-    return new Date(date).toLocaleDateString('ar-EG', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  setRating(value: number): void {
+    this.rating = value;
   }
 }
-
