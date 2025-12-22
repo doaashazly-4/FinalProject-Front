@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminDataService, AdminUserRow } from '../../services/admin-data.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-admin-users',
@@ -120,7 +121,27 @@ export class AdminUsersComponent implements OnInit {
   }
 
   onSearch(): void {
-    this.applyFilters();
+    // If input looks like email or phone, query server; otherwise filter locally
+    const q = this.searchQuery.trim();
+    if (!q) {
+      this.applyFilters();
+      return;
+    }
+    // Try server-side search by email or phone
+    this.isLoading = true;
+    this.data.searchUsersAdmin(q.includes('@') ? q : undefined, q.includes('@') ? undefined : q).subscribe({
+      next: (users) => {
+        this.users = users;
+        this.updateFilterCounts();
+        this.applyFilters();
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Search users error:', err);
+        this.applyFilters();
+        this.isLoading = false;
+      }
+    });
   }
 
   clearSearch(): void {
@@ -156,27 +177,19 @@ export class AdminUsersComponent implements OnInit {
     if (!this.userToAction) return;
 
     this.isProcessing = true;
-    this.data.blockUser(this.userToAction.id, this.blockReason).subscribe({
+    // Use admin endpoint
+    this.data.blockUserAdmin(this.userToAction.id).subscribe({
       next: () => {
         const user = this.users.find(u => u.id === this.userToAction!.id);
-        if (user) {
-          user.status = 'محظور';
-        }
-        this.successMessage = `تم حظر المستخدم "${this.userToAction!.name}" بنجاح`;
+        if (user) user.status = 'محظور';
+        Swal.fire({ icon: 'success', title: 'تم الحظر', text: `تم حظر المستخدم "${this.userToAction!.name}" بنجاح` });
         this.closeBlockModal();
         this.applyFilters();
         this.isProcessing = false;
       },
       error: (err) => {
         console.error('Error blocking user:', err);
-        // Update locally for demo
-        const user = this.users.find(u => u.id === this.userToAction!.id);
-        if (user) {
-          user.status = 'محظور';
-        }
-        this.successMessage = `تم حظر المستخدم "${this.userToAction!.name}" بنجاح`;
-        this.closeBlockModal();
-        this.applyFilters();
+        Swal.fire({ icon: 'error', title: 'فشل', text: 'حدث خطأ أثناء حظر المستخدم' });
         this.isProcessing = false;
       }
     });
@@ -218,10 +231,10 @@ export class AdminUsersComponent implements OnInit {
     if (!this.userToAction) return;
 
     this.isProcessing = true;
-    this.data.deleteUser(this.userToAction.id).subscribe({
+    this.data.deleteUserAdmin(this.userToAction.id).subscribe({
       next: () => {
         this.users = this.users.filter(u => u.id !== this.userToAction!.id);
-        this.successMessage = `تم حذف المستخدم "${this.userToAction!.name}" بنجاح`;
+        Swal.fire({ icon: 'success', title: 'تم الحذف', text: `تم حذف المستخدم "${this.userToAction!.name}" بنجاح` });
         this.updateFilterCounts();
         this.applyFilters();
         this.closeDeleteModal();
@@ -229,12 +242,7 @@ export class AdminUsersComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error deleting user:', err);
-        // Remove locally for demo
-        this.users = this.users.filter(u => u.id !== this.userToAction!.id);
-        this.successMessage = `تم حذف المستخدم "${this.userToAction!.name}" بنجاح`;
-        this.updateFilterCounts();
-        this.applyFilters();
-        this.closeDeleteModal();
+        Swal.fire({ icon: 'error', title: 'فشل', text: 'حدث خطأ أثناء حذف المستخدم' });
         this.isProcessing = false;
       }
     });

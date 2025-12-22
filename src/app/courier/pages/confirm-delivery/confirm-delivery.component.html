@@ -1,0 +1,41 @@
+<div class="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow">
+
+    <h2 class="text-xl font-bold mb-4 text-center">
+        تأكيد تسليم الشحنة
+    </h2>
+
+    <!-- WAITING STATE -->
+    <div *ngIf="status === 'waiting'">
+
+        <p class="text-gray-600 mb-4 text-center">
+            أدخل رمز OTP الذي حصل عليه العميل
+        </p>
+
+        <input type="text" maxlength="6" [(ngModel)]="otp" placeholder="رمز OTP"
+            class="w-full border p-3 rounded mb-3 text-center text-lg tracking-widest" />
+
+        <p *ngIf="error" class="text-red-600 mb-3 text-center">
+            {{ error }}
+        </p>
+
+        <button (click)="confirmDelivery()" [disabled]="isLoading"
+            class="w-full bg-green-600 text-white py-2 rounded disabled:opacity-50">
+            {{ isLoading ? 'جاري التحقق...' : 'تأكيد التسليم' }}
+        </button>
+
+    </div>
+
+    <!-- CONFIRMED STATE -->
+    <div *ngIf="status === 'confirmed'" class="text-center">
+
+        <p class="text-green-600 font-semibold text-lg mb-4">
+            ✅ تم تأكيد التسليم بنجاح
+        </p>
+
+        <button routerLink="/courier/dashboard" class="bg-blue-600 text-white px-4 py-2 rounded">
+            العودة إلى لوحة التحكم
+        </button>
+
+    </div>
+
+</div>

@@ -223,6 +223,84 @@ export class AdminDataService {
     return this.http.post<void>(`${this.apiUrl}/carriers/${carrierId}/reject`, { reason });
   }
 
+  // ===== New Admin endpoints mapped to backend API described by user =====
+
+  // Task 1 — Get Pending Couriers
+  getPendingCouriersAdmin(): Observable<PendingCarrier[]> {
+    return this.http.get<PendingCarrier[]>(`${this.apiUrl}/PendingCouriers`).pipe(
+      catchError(() => of(this.getMockPendingCarriers()))
+    );
+  }
+
+  // Task 2 — Approve Courier
+  approveCourierAdmin(courierId: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/ApproveCourier/${courierId}`, {});
+  }
+
+  // Task 3 — Reject Courier
+  rejectCourierAdmin(courierId: string, reason: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/RejectCourier/${courierId}`, { reason });
+  }
+
+  // Task 4 — Get Online Couriers
+  getOnlineCouriersAdmin(): Observable<PendingCarrier[]> {
+    return this.http.get<PendingCarrier[]>(`${this.apiUrl}/OnlineCouriers`).pipe(
+      catchError(() => of([]))
+    );
+  }
+
+  // Task 5 — Get Dashboard Stats
+  getDashboardStatsAdmin(): Observable<SystemReport> {
+    return this.http.get<SystemReport>(`${this.apiUrl}/DashboardStats`).pipe(
+      catchError(() => of(this.getMockSystemReport()))
+    );
+  }
+
+  // Task 6 — Block User
+  blockUserAdmin(userId: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/BlockUser/${userId}`, {});
+  }
+
+  // Task 7 — Delete User
+  deleteUserAdmin(userId: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/DeleteUser/${userId}`, {});
+  }
+
+  // Task 8 — Search Users
+  searchUsersAdmin(email?: string, phone?: string): Observable<AdminUserRow[]> {
+    const params: string[] = [];
+    if (email) params.push(`email=${encodeURIComponent(email)}`);
+    if (phone) params.push(`phone=${encodeURIComponent(phone)}`);
+    const query = params.length ? `?${params.join('&')}` : '';
+    return this.http.get<AdminUserRow[]>(`${this.apiUrl}/SearchUsers${query}`).pipe(
+      catchError(() => of(this.getMockUsers().filter(u => {
+        const matchEmail = email ? u.email.includes(email) : true;
+        const matchPhone = phone ? (u.phone?.includes(phone) ?? false) : true;
+        return matchEmail && matchPhone;
+      })))
+    );
+  }
+
+  // Task 9 — Get Disputes
+  getDisputesAdmin(): Observable<Dispute[]> {
+    return this.http.get<Dispute[]>(`${this.apiUrl}/Disputes`).pipe(
+      catchError(() => of(this.getMockDisputes()))
+    );
+  }
+
+  // Task 10 — Get Dispute by ID
+  getDisputeByIdAdmin(id: string): Observable<Dispute> {
+    return this.http.get<Dispute>(`${this.apiUrl}/Dispute/${id}`).pipe(
+      catchError(() => of(this.getMockDisputes().find(d => d.id === id)!))
+    );
+  }
+
+  // Task 11 — Resolve Dispute
+  resolveDisputeAdmin(disputeId: string, status: string, notes: string): Observable<void> {
+    const body = { status, notes };
+    return this.http.post<void>(`${this.apiUrl}/ResolveDispute/${disputeId}`, body);
+  }
+
   // ========== ORDERS MANAGEMENT ==========
 
   getOrders(): Observable<AdminOrderRow[]> {

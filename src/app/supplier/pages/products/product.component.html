@@ -114,8 +114,8 @@
           </span>
         </div>
         <div class="product-status">
-          <span class="status-badge" [ngClass]="product.status">
-            {{ getStatusText(product.status) }}
+          <span class="status-badge" [ngClass]="product.isActive ? 'active' : 'inactive'">
+            {{ getStatusText(product.isActive ? 'active' : 'inactive') }}
           </span>
         </div>
         <div class="product-actions">
