@@ -119,7 +119,7 @@ export interface CarrierLocation {
 export class CustomerDataService {
   private apiUrl = 'https://localhost:7104/api/Customer';
 
-  constructor(private http: HttpClient) { }
+
   constructor(private http: HttpClient) { }
 
   // ========== Stats ==========
