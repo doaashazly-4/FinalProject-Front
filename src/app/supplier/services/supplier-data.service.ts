@@ -227,194 +227,194 @@ export interface SupplierProfile {
   averageRating: number;
 }
 
+// ========== PRODUCTS (UC-SUP-01 - assumed) ==========
+
+export interface SupplierProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  quantity: number;
+  category: string;
+  imageUrl?: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class SupplierDataService {
+  calculateDeliveryFee(request: DeliveryFeeRequest): Observable<DeliveryFeeResponse> {
+    return of(this.getMockDeliveryFee(request)).pipe(delay(500));
+  }
   private apiUrl = 'https://localhost:7104/api/Supplier';
 
   constructor(private http: HttpClient) {}
 
-  // ========== DASHBOARD (UC-SUP-01 post-login) ==========
-  
+  // ================= DASHBOARD =================
+
   getDashboardData(): Observable<SenderDashboardData> {
-    return this.http.get<SenderDashboardData>(`${this.apiUrl}/dashboard`).pipe(
-      catchError(() => of(this.getMockDashboardData()))
-    );
+    // الباك معندوش dashboard → Mock مباشر
+    return of(this.getMockDashboardData()).pipe(delay(300));
   }
 
   getStats(): Observable<SenderStat[]> {
-    return this.http.get<SenderStat[]>(`${this.apiUrl}/stats`).pipe(
-      catchError(() => of(this.getMockStats()))
-    );
+    return of(this.getMockStats());
   }
 
-  // ========== PARCELS/ORDERS (UC-SUP-02) ==========
-  
+  // ================= PARCELS =================
+
   getParcels(filter?: ParcelFilter): Observable<Parcel[]> {
-    let url = `${this.apiUrl}/orders`;
-    const params: string[] = [];
-    
-    if (filter?.status) {
-      if (Array.isArray(filter.status)) {
-        params.push(`status=${filter.status.join(',')}`);
-      } else {
-        params.push(`status=${filter.status}`);
-      }
-    }
-    if (filter?.priority) params.push(`priority=${filter.priority}`);
-    if (filter?.dateFrom) params.push(`dateFrom=${filter.dateFrom}`);
-    if (filter?.dateTo) params.push(`dateTo=${filter.dateTo}`);
-    if (filter?.search) params.push(`search=${filter.search}`);
-    
-    if (params.length) url += '?' + params.join('&');
-    
-    return this.http.get<Parcel[]>(url).pipe(
-      catchError(() => of(this.getMockParcels(filter)))
-    );
+    // الباك مفيهوش endpoint list orders
+    return of(this.getMockParcels(filter)).pipe(delay(300));
   }
 
   getParcelById(id: string): Observable<Parcel> {
-    return this.http.get<Parcel>(`${this.apiUrl}/orders/${id}`).pipe(
+    return of(this.getMockParcels().find(p => p.id === id)!);
+  }
+
+  // ================= CREATE REQUEST =================
+
+  createParcel(dto: CreateParcelDTO): Observable<any> {
+    const backendDto = {
+      source: dto.pickupAddress,
+      priority: dto.priority,
+      pickupLat: 0,
+      pickupLng: 0,
+      packages: [
+        {
+          description: dto.description,
+          weight: dto.weight,
+          fragile: dto.isFragile,
+          shipmentCost: dto.codAmount,
+          destination: dto.deliveryAddress,
+          lat: 0,
+          lng: 0
+        }
+      ]
+    };
+
+    return this.http.post(`${this.apiUrl}/CreateRequest`, backendDto).pipe(
       catchError(() => {
-        const parcel = this.getMockParcels().find(p => p.id === id);
-        return of(parcel!);
+        console.warn('CreateRequest API failed → using MOCK');
+        return of({
+          message: 'Mock request created',
+          requestId: Date.now()
+        }).pipe(delay(500));
       })
     );
   }
 
-  createParcel(dto: CreateParcelDTO): Observable<Parcel> {
-    return this.http.post<Parcel>(`${this.apiUrl}/orders`, dto).pipe(
-      catchError(() => {
-        // Return mock created parcel
-        const newParcel: Parcel = {
-          id: 'NEW-' + Date.now(),
-          trackingNumber: 'PKG-' + new Date().getFullYear() + '-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0'),
-          ...dto,
-          status: 'pending',
-          isReadyForPickup: false,
-          deliveryFee: 35,
-          createdAt: new Date().toISOString()
-        };
-        return of(newParcel).pipe(delay(500));
-      })
-    );
-  }
+  // ================= READY FOR PICKUP =================
 
-  updateParcel(id: string, updates: Partial<Parcel>): Observable<Parcel> {
-    return this.http.put<Parcel>(`${this.apiUrl}/orders/${id}`, updates);
-  }
-
-  cancelParcel(id: string): Observable<{ success: boolean }> {
-    return this.http.patch<{ success: boolean }>(`${this.apiUrl}/orders/${id}/cancel`, {}).pipe(
-      catchError(() => of({ success: true }).pipe(delay(300)))
-    );
-  }
-
-  // ========== READY FOR PICKUP (UC-SUP-06) ==========
-  
-  markReadyForPickup(orderId: string): Observable<Parcel> {
-    return this.http.patch<Parcel>(`${this.apiUrl}/orders/${orderId}/ready`, {}).pipe(
+  markReadyForPickup(orderId: string): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/ConfirmReady/${orderId}`,
+      {}
+    ).pipe(
       catchError(() => {
         const parcel = this.getMockParcels().find(p => p.id === orderId);
         if (parcel) {
           parcel.status = 'ready_for_pickup';
           parcel.isReadyForPickup = true;
         }
-        return of(parcel!).pipe(delay(300));
+        return of(parcel).pipe(delay(300));
       })
     );
   }
 
-  // ========== CARRIER ASSIGNMENT (UC-SUP-03) ==========
-  
-  getAvailableCarriers(orderId: string): Observable<AvailableCarrier[]> {
-    return this.http.get<AvailableCarrier[]>(`${this.apiUrl}/orders/${orderId}/available-carriers`).pipe(
-      catchError(() => of(this.getMockAvailableCarriers()))
-    );
-  }
+  // ================= ASSIGN COURIER =================
 
-  assignCarrier(dto: AssignCarrierDTO): Observable<Parcel> {
-    return this.http.post<Parcel>(`${this.apiUrl}/orders/${dto.orderId}/assign`, dto).pipe(
+  assignCarrier(dto: AssignCarrierDTO): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/AssignCourier/${dto.orderId}`,
+      { courierId: dto.carrierId }
+    ).pipe(
       catchError(() => {
         const parcel = this.getMockParcels().find(p => p.id === dto.orderId);
-        const carrier = this.getMockAvailableCarriers().find(c => c.id === dto.carrierId);
+        const carrier = this.getMockAvailableCarriers()
+          .find(c => c.id === dto.carrierId);
+
         if (parcel && carrier) {
           parcel.status = 'assigned';
           parcel.courierId = carrier.id;
           parcel.courierName = carrier.name;
           parcel.courierPhone = carrier.phone;
         }
-        return of(parcel!).pipe(delay(500));
+        return of(parcel).pipe(delay(400));
       })
     );
   }
 
-  // ========== TRACKING (UC-SUP-04) ==========
-  
-  trackParcel(trackingNumber: string): Observable<Parcel> {
-    return this.http.get<Parcel>(`${this.apiUrl}/orders/track/${trackingNumber}`).pipe(
+  // ================= TRACKING =================
+
+  trackParcel(requestId: string): Observable<Parcel> {
+    return this.http.get<any>(`${this.apiUrl}/TrackOrder/${requestId}`).pipe(
+      map(res => ({
+        id: res.requestId,
+        trackingNumber: res.requestId,
+        status: res.status.toLowerCase(),
+        isReadyForPickup: false,
+        deliveryFee: 0,
+        codAmount: 0,
+        createdAt: new Date().toISOString()
+      }) as Parcel),
       catchError(() => {
-        const parcel = this.getMockParcels().find(p => p.trackingNumber === trackingNumber);
+        const parcel = this.getMockParcels()
+          .find(p => p.trackingNumber === requestId || p.id === requestId);
         return of(parcel!);
       })
     );
   }
 
-  getParcelTimeline(orderId: string): Observable<ParcelTimelineEvent[]> {
-    return this.http.get<ParcelTimelineEvent[]>(`${this.apiUrl}/orders/${orderId}/timeline`).pipe(
-      catchError(() => of(this.getMockTimeline(orderId)))
-    );
+  // ================= AVAILABLE COURIERS =================
+
+  getAvailableCarriers(orderId: string): Observable<AvailableCarrier[]> {
+    // الباك مش موفرها → Mock
+    return of(this.getMockAvailableCarriers()).pipe(delay(300));
   }
 
-  getCarrierLiveLocation(orderId: string): Observable<CarrierLiveLocation> {
-    return this.http.get<CarrierLiveLocation>(`${this.apiUrl}/orders/${orderId}/carrier-location`).pipe(
-      catchError(() => of(this.getMockCarrierLocation()))
-    );
-  }
+  // ================= REPORTS =================
 
-  // ========== REPORTS (UC-SUP-05) ==========
-  
   getReportSummary(period: 'today' | 'week' | 'month'): Observable<ReportSummary> {
-    return this.http.get<ReportSummary>(`${this.apiUrl}/reports/summary?period=${period}`).pipe(
-      catchError(() => of(this.getMockReportSummary(period)))
-    );
+    return of(this.getMockReportSummary(period));
   }
 
   getDailyReports(startDate: string, endDate: string): Observable<DailyReport[]> {
-    return this.http.get<DailyReport[]>(`${this.apiUrl}/reports/daily?start=${startDate}&end=${endDate}`).pipe(
-      catchError(() => of(this.getMockDailyReports()))
-    );
+    return of(this.getMockDailyReports());
   }
 
   exportReport(dto: ExportReportDTO): Observable<Blob> {
-    return this.http.post(`${this.apiUrl}/reports/export`, dto, { responseType: 'blob' });
+    return of(new Blob()).pipe(delay(500));
   }
 
-  // ========== RATING (UC-SUP-05) ==========
-  
-  rateCarrier(dto: RateCarrierDTO): Observable<{ success: boolean }> {
-    return this.http.post<{ success: boolean }>(`${this.apiUrl}/orders/${dto.orderId}/rate`, dto).pipe(
-      catchError(() => of({ success: true }).pipe(delay(300)))
-    );
-  }
+  // ================= PROFILE =================
 
-  // ========== FEE CALCULATION ==========
-  
-  calculateDeliveryFee(request: DeliveryFeeRequest): Observable<DeliveryFeeResponse> {
-    return this.http.post<DeliveryFeeResponse>(`${this.apiUrl}/calculate-fee`, request).pipe(
-      catchError(() => of(this.getMockDeliveryFee(request)))
-    );
-  }
-
-  // ========== PROFILE ==========
-  
   getProfile(): Observable<SupplierProfile> {
-    return this.http.get<SupplierProfile>(`${this.apiUrl}/profile`).pipe(
-      catchError(() => of(this.getMockProfile()))
-    );
+    return of(this.getMockProfile());
   }
 
   updateProfile(profile: Partial<SupplierProfile>): Observable<SupplierProfile> {
-    return this.http.put<SupplierProfile>(`${this.apiUrl}/profile`, profile);
+    return of({ ...this.getMockProfile(), ...profile });
+  }
+
+  // ================= PRODUCTS =================
+
+  getProducts(): Observable<SupplierProduct[]> {
+    return of(this.getMockProducts()).pipe(delay(300));
+  }
+
+  deleteProduct(id: string): Observable<void> {
+    return of(undefined).pipe(delay(500));
+  }
+
+  // ================= CANCEL PARCEL =================
+
+  cancelParcel(id: string): Observable<void> {
+    const parcel = this.getMockParcels().find(p => p.id === id);
+    if (parcel) {
+      parcel.status = 'cancelled';
+    }
+    return of(undefined).pipe(delay(400));
   }
 
   // ========== MOCK DATA ==========
@@ -778,5 +778,40 @@ export class SupplierDataService {
       totalOrders: 176,
       averageRating: 4.8
     };
+  }
+
+  private getMockProducts(): SupplierProduct[] {
+    return [
+      {
+        id: '1',
+        name: 'تي شيرت قطن',
+        description: 'تي شيرت قطن 100% عالي الجودة',
+        price: 150,
+        quantity: 50,
+        category: 'ملابس',
+        isActive: true,
+        createdAt: '2024-01-01'
+      },
+      {
+        id: '2',
+        name: 'بنطلون جينز',
+        description: 'بنطلون جينز أزرق كلاسيك',
+        price: 300,
+        quantity: 5,
+        category: 'ملابس',
+        isActive: true,
+        createdAt: '2024-01-10'
+      },
+      {
+        id: '3',
+        name: 'حذاء رياضي',
+        description: 'حذاء رياضي مريح للجري',
+        price: 800,
+        quantity: 0,
+        category: 'أحذية',
+        isActive: false,
+        createdAt: '2024-02-01'
+      }
+    ];
   }
 }
