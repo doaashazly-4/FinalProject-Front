@@ -124,23 +124,21 @@ export class CustomerDataService {
 
   // ========== Stats ==========
   getStats(): Observable<ReceiverStat[]> {
-    return this.http.get<ReceiverStat[]>(`${this.apiUrl}/stats`).pipe(
-      catchError(() => of(this.getMockStats()))
-    );
+    return this.http.get<ReceiverStat[]>(`${this.apiUrl}/stats`);
   }
+
 
   // ========== Deliveries ==========
   getDeliveries(): Observable<IncomingDelivery[]> {
-    return this.http.get<IncomingDelivery[]>(`${this.apiUrl}/orders`).pipe(
-      catchError(() => of(this.getMockDeliveries()))
-    );
+    return this.http.get<IncomingDelivery[]>(`${this.apiUrl}/orders`);
   }
 
+
+
   getRecentDeliveries(): Observable<IncomingDelivery[]> {
-    return this.http.get<IncomingDelivery[]>(`${this.apiUrl}/orders/recent`).pipe(
-      catchError(() => of(this.getMockDeliveries().slice(0, 5)))
-    );
+    return this.http.get<IncomingDelivery[]>(`${this.apiUrl}/orders/recent`);
   }
+
 
   getDeliveryById(id: string): Observable<IncomingDelivery> {
     return this.http.get<IncomingDelivery>(`${this.apiUrl}/orders/${id}`);
