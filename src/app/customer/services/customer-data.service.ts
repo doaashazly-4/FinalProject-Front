@@ -170,6 +170,15 @@ export class CustomerDataService {
     return this.http.post<SupportTicket>(`${this.apiUrl}/orders/${deliveryId}/issue`, { issue });
   }
 
+  confirmDeliveryOTP(packageId: number, otp: string) {
+    return this.http.post(
+      `/api/Courier/VerifyOTP/${packageId}`,
+      otp,
+      { responseType: 'text' }
+    );
+  }
+
+
   // ========== Profile ==========
   getProfile(): Observable<CustomerProfile> {
     return this.http.get<CustomerProfile>(`${this.apiUrl}/profile`);

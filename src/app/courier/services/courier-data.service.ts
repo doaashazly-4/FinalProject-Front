@@ -129,6 +129,13 @@ export class CourierDataService {
     );
   }
 
+  checkOTPStatus(packageId: number) {
+    return this.http.get<{ otpVerified: boolean }>(
+      `${this.apiUrl}/Courier/CheckOTPStatus/${packageId}`
+    );
+  }
+
+
   // ========== Jobs ==========
   getAvailableJobs(): Observable<DeliveryJob[]> {
     return this.http.get<DeliveryJob[]>(`${this.apiUrl}/jobs/available`).pipe(
