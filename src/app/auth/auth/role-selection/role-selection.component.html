@@ -5,60 +5,38 @@
       <h2 class="text-3xl lg:text-4xl font-black text-primary-dark text-center mb-3">اختر دورك</h2>
       <p class="text-gray-600 text-center mb-10">حدد كيف تريد استخدام PickGo</p>
       
-      <div class="grid sm:grid-cols-3 gap-6">
-        <!-- Client Card (Login Only - No Registration) -->
-        <div class="group cursor-pointer bg-white p-6 rounded-2xl border-2 transition-all duration-300 text-center"
-             [ngClass]="{'border-primary-green shadow-green scale-105': selectedRole === 'client', 'border-gray-200 hover:border-primary-green/50 hover:shadow-lg': selectedRole !== 'client'}"
-             (click)="selectRole('client')">
-          <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform duration-300">
-            🛒
+      <div class="grid sm:grid-cols-2 gap-6">
+        <!-- Combined Card: Sender & Courier -->
+        <div class="group relative cursor-pointer bg-white p-6 rounded-2xl border-2 transition-all duration-300 text-center"
+             [ngClass]="{'border-primary-green shadow-green scale-105': selectedRole === 'supplier' || selectedRole === 'courier', 'border-gray-200 hover:border-primary-green/50 hover:shadow-lg': !(selectedRole === 'supplier' || selectedRole === 'courier')}"
+             (click)="toggleCombinedDropdown()">
+          <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-100 to-orange-100 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform duration-300">
+            📦🚚
           </div>
-          <h3 class="text-xl font-bold text-primary-dark mb-1">عميل</h3>
-          <p class="text-primary-green font-semibold text-sm mb-2">تسوق وتتبع</p>
-          <p class="text-gray-600 text-sm">اطلب المنتجات وتتبع الشحنات</p>
-          <div class="mt-4 overflow-hidden transition-all duration-300"
-               [ngClass]="{'max-h-0 opacity-0': selectedRole !== 'client', 'max-h-20 opacity-100': selectedRole === 'client'}">
-            <button class="w-full py-3 rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-white font-bold hover:shadow-lg transition-all duration-300"
-                    (click)="goToLogin(); $event.stopPropagation()">
-              دخول عبر OTP
-            </button>
+          <h3 class="text-xl font-bold text-primary-dark mb-1">مُرسل / مندوب</h3>
+          <p class="text-primary-green font-semibold text-sm mb-2">اختر دورك لتسجيل الدخول</p>
+          <p class="text-gray-600 text-sm">اضغط لاختيار الدخول كمُرسل أو كمندوب توصيل</p>
+
+          <!-- Dropdown -->
+          <div class="absolute left-1/2 transform -translate-x-1/2 mt-4 bg-white border rounded-xl shadow-lg w-44 z-50"
+               *ngIf="showCombinedDropdown" (click)="$event.stopPropagation()">
+            <button class="w-full text-right px-4 py-3 hover:bg-gray-50" (click)="navigateToRoleLogin('supplier')">مُرسل</button>
+            <hr />
+            <button class="w-full text-right px-4 py-3 hover:bg-gray-50" (click)="navigateToRoleLogin('courier')">مندوب توصيل</button>
           </div>
         </div>
-        
-        <!-- Supplier Card (Sender) -->
-        <div class="group cursor-pointer bg-white p-6 rounded-2xl border-2 transition-all duration-300 text-center"
-             [ngClass]="{'border-primary-green shadow-green scale-105': selectedRole === 'supplier', 'border-gray-200 hover:border-primary-green/50 hover:shadow-lg': selectedRole !== 'supplier'}"
-             (click)="selectRole('supplier')">
-          <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform duration-300">
-            📦
+
+        <!-- Supplier / Courier Action Card (keeps layout balanced) -->
+        <div class="group cursor-default bg-white p-6 rounded-2xl border-2 transition-all duration-300 text-center">
+          <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-5xl transition-transform duration-300">
+            🧭
           </div>
-          <h3 class="text-xl font-bold text-primary-dark mb-1">مُرسل</h3>
-          <p class="text-primary-green font-semibold text-sm mb-2">إرسال الطلبات</p>
-          <p class="text-gray-600 text-sm">أرسل طلباتك وتتبع شحناتك</p>
-          <div class="mt-4 overflow-hidden transition-all duration-300"
-               [ngClass]="{'max-h-0 opacity-0': selectedRole !== 'supplier', 'max-h-20 opacity-100': selectedRole === 'supplier'}">
+          <h3 class="text-xl font-bold text-primary-dark mb-1">للمرسلين والمناديب</h3>
+          <p class="text-gray-600 text-sm">سجل أو سجل دخول للوصول إلى لوحة التحكم الخاصة بك</p>
+          <div class="mt-4">
             <button class="w-full py-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold hover:shadow-lg transition-all duration-300"
                     (click)="goToRegister(); $event.stopPropagation()">
-              التسجيل كمُرسل
-            </button>
-          </div>
-        </div>
-        
-        <!-- Courier Card -->
-        <div class="group cursor-pointer bg-white p-6 rounded-2xl border-2 transition-all duration-300 text-center"
-             [ngClass]="{'border-primary-green shadow-green scale-105': selectedRole === 'courier', 'border-gray-200 hover:border-primary-green/50 hover:shadow-lg': selectedRole !== 'courier'}"
-             (click)="selectRole('courier')">
-          <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform duration-300">
-            🚚
-          </div>
-          <h3 class="text-xl font-bold text-primary-dark mb-1">مندوب توصيل</h3>
-          <p class="text-primary-green font-semibold text-sm mb-2">توصيل الطلبات</p>
-          <p class="text-gray-600 text-sm">قم بتوصيل الطلبات واكسب المال</p>
-          <div class="mt-4 overflow-hidden transition-all duration-300"
-               [ngClass]="{'max-h-0 opacity-0': selectedRole !== 'courier', 'max-h-20 opacity-100': selectedRole === 'courier'}">
-            <button class="w-full py-3 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 text-white font-bold hover:shadow-lg transition-all duration-300"
-                    (click)="goToRegister(); $event.stopPropagation()">
-              التسجيل كمندوب
+              التسجيل
             </button>
           </div>
         </div>

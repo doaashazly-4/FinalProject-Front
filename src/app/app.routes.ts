@@ -9,9 +9,9 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
   {
-    path: 'role-selection',
+    path: 'register-role',
     canActivate: [noAuthGuard],
-    loadComponent: () => import('./auth/auth/role-selection/role-selection.component').then(m => m.RoleSelectionComponent)
+    loadComponent: () => import('./auth/auth/register/register.component').then(m => m.RegisterComponent)
   },
   {
     path: 'login',

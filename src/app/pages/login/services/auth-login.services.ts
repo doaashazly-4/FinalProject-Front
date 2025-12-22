@@ -2,6 +2,7 @@ import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 export type UserRole = 'customer' | 'courier' | 'admin' | 'supplier' | null;
 
@@ -11,7 +12,7 @@ export class AuthService {
   private roleSignal = signal<UserRole>(this.readFromStorage());
   
   // ⬇⬇⬇⬇⬇⬇⬇⬇⬇ غيري هنا ⬇⬇⬇⬇⬇⬇⬇⬇⬇
-  private apiUrl = 'https://localhost:7180/api'; 
+  private apiUrl = environment.apiUrl; 
   
   private readonly demoUsers = [
     { email: 'customer@test.com', password: '123456', role: 'customer' as const },

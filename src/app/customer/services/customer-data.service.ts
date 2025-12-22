@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 // Delivery interfaces for Receiver module
 export interface IncomingDelivery {
@@ -116,7 +117,7 @@ export interface CarrierLocation {
 
 @Injectable({ providedIn: 'root' })
 export class CustomerDataService {
-  private apiUrl = 'https://localhost:7104/api/Customer';
+  private apiUrl = `${environment.apiUrl}/Customer`;
 
   constructor(private http: HttpClient) {}
 

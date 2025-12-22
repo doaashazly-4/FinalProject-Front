@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 })
 export class RoleSelectionComponent implements OnInit {
   selectedRole: string = '';
+  showCombinedDropdown = false;
   
   constructor(private router: Router) {}
 
@@ -22,7 +23,8 @@ export class RoleSelectionComponent implements OnInit {
   }
 
   goToRegister(): void {
-    if (this.selectedRole && this.selectedRole !== 'client') {
+    if (this.selectedRole) {
+      // Registration only available for supplier/courier via role selection
       this.router.navigate(['/register'], { 
         queryParams: { role: this.selectedRole } 
       });
@@ -30,14 +32,12 @@ export class RoleSelectionComponent implements OnInit {
   }
 
   goToLogin(): void {
-    if (this.selectedRole === 'client' || this.selectedRole === 'customer') {
-      // Redirect to OTP login for customers
+    if (!this.selectedRole) return;
+    if (this.selectedRole === 'customer') {
       this.router.navigate(['/customer-otp-login']);
-    } else if (this.selectedRole) {
-      this.router.navigate(['/login'], { 
-        queryParams: { role: this.selectedRole } 
-      });
+      return;
     }
+    this.router.navigate(['/login'], { queryParams: { role: this.selectedRole } });
   }
 
   getRoleTitleArabic(): string {
@@ -51,5 +51,19 @@ export class RoleSelectionComponent implements OnInit {
       default:
         return '';
     }
+  }
+
+  toggleCombinedDropdown(): void {
+    this.showCombinedDropdown = !this.showCombinedDropdown;
+  }
+
+  navigateToRoleLogin(role: string): void {
+    // Close dropdown and navigate to login with role query param
+    this.showCombinedDropdown = false;
+    if (role === 'customer') {
+      this.router.navigate(['/customer-otp-login']);
+      return;
+    }
+    this.router.navigate(['/login'], { queryParams: { role } });
   }
 }

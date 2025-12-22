@@ -3,10 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../shared/services/auth.service';
-import { 
-  SupplierRegisterDTO, 
-  CourierRegisterDTO 
-} from '../../../models/user.models';
+import { SupplierRegisterDTO, CourierRegisterDTO } from '../../../models/user.models';
 
 @Component({
   selector: 'app-register',
@@ -21,11 +18,11 @@ export class RegisterComponent implements OnInit {
   isLoading: boolean = false;
   errorMessage: string = '';
   successMessage: string = '';
-  
+
   // Data for dropdowns - matching backend enums
   vehicleTypes = ['Motorcycle', 'Car', 'Truck', 'Van'];
   genders = ['Male', 'Female', 'Other'];
-  
+
   // Password visibility
   hidePassword = true;
   hideConfirmPassword = true;
@@ -54,7 +51,6 @@ export class RegisterComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Get role from query params or default to Supplier
     const roleParam = this.route.snapshot.queryParamMap.get('role');
     if (roleParam && (roleParam.toLowerCase() === 'supplier' || roleParam.toLowerCase() === 'courier')) {
       this.selectedRole = roleParam.charAt(0).toUpperCase() + roleParam.slice(1).toLowerCase();
@@ -71,32 +67,21 @@ export class RegisterComponent implements OnInit {
 
   createForm(): FormGroup {
     return this.fb.group({
-      // Common fields for all roles (User table)
       userName: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]],
       agreeTerms: [false, [Validators.requiredTrue]],
-      
-      // Common fields
       address: [''],
       phoneNumber: [''],
-      
-      // Supplier & Courier fields (User table)
       birthDate: [''],
       gender: [''],
-      
-      // Supplier only (Supplier table)
       shopName: [''],
-      
-      // Courier only (Courier table)
       vehicleType: [''],
       licenseNumber: [''],
       maxWeight: [''],
-      status: ['Available']  // Default status
-    }, { 
-      validators: this.passwordMatchValidator 
-    });
+      status: ['Available']
+    }, { validators: this.passwordMatchValidator });
   }
 
   passwordMatchValidator(g: FormGroup) {
@@ -106,29 +91,23 @@ export class RegisterComponent implements OnInit {
   }
 
   updateFormForRole(): void {
-    // Reset all validators
     Object.keys(this.registerForm.controls).forEach(key => {
       const control = this.registerForm.get(key);
-      if (key !== 'agreeTerms') {
-        control?.clearValidators();
-      }
+      if (key !== 'agreeTerms') control?.clearValidators();
     });
 
-    // Required fields for all
     ['userName', 'email', 'password', 'confirmPassword'].forEach(field => {
       this.registerForm.get(field)?.setValidators([Validators.required]);
     });
     this.registerForm.get('email')?.setValidators([Validators.required, Validators.email]);
     this.registerForm.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
 
-    // Role-specific fields
     switch (this.selectedRole) {
       case 'Supplier':
         ['address', 'birthDate', 'gender', 'shopName'].forEach(field => {
           this.registerForm.get(field)?.setValidators([Validators.required]);
         });
         break;
-
       case 'Courier':
         ['address', 'birthDate', 'gender', 'vehicleType', 'licenseNumber', 'maxWeight']
           .forEach(field => {
@@ -137,17 +116,14 @@ export class RegisterComponent implements OnInit {
         break;
     }
 
-    // Update validity
     Object.keys(this.registerForm.controls).forEach(key => {
       this.registerForm.get(key)?.updateValueAndValidity();
     });
-    
-    // Reset values
+
     this.registerForm.reset();
     this.registerForm.get('agreeTerms')?.setValue(false);
     this.registerForm.get('status')?.setValue('Available');
-    
-    // Reset file uploads and messages
+
     this.resetFileUploads();
     this.errorMessage = '';
     this.successMessage = '';
@@ -166,7 +142,6 @@ export class RegisterComponent implements OnInit {
     this.vehicleLicensePhotoBackPreview = null;
   }
 
-  // File upload handlers
   onPhotoSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
@@ -209,26 +184,11 @@ export class RegisterComponent implements OnInit {
 
   removePhoto(type: string): void {
     switch (type) {
-      case 'photo':
-        this.photoFile = null;
-        this.photoPreview = null;
-        break;
-      case 'licenseFront':
-        this.licensePhotoFrontFile = null;
-        this.licensePhotoFrontPreview = null;
-        break;
-      case 'licenseBack':
-        this.licensePhotoBackFile = null;
-        this.licensePhotoBackPreview = null;
-        break;
-      case 'vehicleFront':
-        this.vehicleLicensePhotoFrontFile = null;
-        this.vehicleLicensePhotoFrontPreview = null;
-        break;
-      case 'vehicleBack':
-        this.vehicleLicensePhotoBackFile = null;
-        this.vehicleLicensePhotoBackPreview = null;
-        break;
+      case 'photo': this.photoFile = null; this.photoPreview = null; break;
+      case 'licenseFront': this.licensePhotoFrontFile = null; this.licensePhotoFrontPreview = null; break;
+      case 'licenseBack': this.licensePhotoBackFile = null; this.licensePhotoBackPreview = null; break;
+      case 'vehicleFront': this.vehicleLicensePhotoFrontFile = null; this.vehicleLicensePhotoFrontPreview = null; break;
+      case 'vehicleBack': this.vehicleLicensePhotoBackFile = null; this.vehicleLicensePhotoBackPreview = null; break;
     }
   }
 
@@ -241,75 +201,55 @@ export class RegisterComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
     this.successMessage = '';
+
+     console.log('Form Data Before Sending:', this.registerForm.value);
     
     const formValue = this.registerForm.value;
-
     switch (this.selectedRole) {
-      case 'Supplier':
-        this.registerSupplier(formValue);
-        break;
-
-      case 'Courier':
-        this.registerCourier(formValue);
-        break;
+      case 'Supplier': this.registerSupplier(formValue); break;
+      case 'Courier': this.registerCourier(formValue); break;
     }
   }
 
   private markFormAsTouched(): void {
-    Object.values(this.registerForm.controls).forEach(control => {
-      control.markAsTouched();
-    });
+    Object.values(this.registerForm.controls).forEach(control => control.markAsTouched());
   }
 
-  /**
-   * Register Supplier
-   * Stores in database:
-   * - User table: userName, email, password, birthDate, gender
-   * - Supplier table: userId (FK), shopName, address, isDeleted=false
-   */
   registerSupplier(data: any): void {
-    const supplierDTO: SupplierRegisterDTO = {
-      userName: data.userName,
-      email: data.email,
-      password: data.password,
-      address: data.address,
-      birthDate: data.birthDate,
-      gender: data.gender,
-      shopName: data.shopName,
-      phoneNumber: data.phoneNumber || undefined
-    };
+  const supplierDTO: SupplierRegisterDTO = {
+  userName: data.userName,
+  email: data.email,
+  password: data.password,
+  address: data.address,
+  birthDate: data.birthDate,
+  gender: data.gender,
+  shopName: data.shopName
+};
 
+
+    console.log('Supplier DTO:', supplierDTO);
+ 
     this.authService.registerSupplier(supplierDTO).subscribe({
       next: (response) => {
+        console.log('Supplier registration success:', response);
         this.successMessage = 'تم إنشاء حساب المُرسل بنجاح!';
         this.isLoading = false;
-        setTimeout(() => {
-          this.router.navigate(['/login'], { queryParams: { role: 'supplier' } });
-        }, 2000);
+        // Navigate immediately to supplier login/dashboard flow
+        this.router.navigate(['/supplier/dashboard'], { queryParams: { role: 'supplier' } });
       },
       error: (error) => {
+        console.error('Supplier registration failed:', error);
         this.errorMessage = typeof error === 'string' ? error : 'فشل في إنشاء الحساب';
         this.isLoading = false;
       }
     });
   }
 
-  /**
-   * Register Courier
-   * Stores in database:
-   * - User table: userName, email, password, birthDate, gender
-   * - Courier table: userId (FK), vehicleType, licenseNumber, maxWeight, status,
-   *                  isAvailable, isOnline, rating, photoUrl, licensePhotoFront,
-   *                  licensePhotoBack, vehcelLicensePhotoFront, vehcelLicensePhotoBack
-   */
   registerCourier(data: any): void {
-    // Check if we have files to upload
-    const hasFiles = this.photoFile || this.licensePhotoFrontFile || 
-                     this.licensePhotoBackFile || this.vehicleLicensePhotoFrontFile || 
-                     this.vehicleLicensePhotoBackFile;
+    const hasFiles = this.photoFile || this.licensePhotoFrontFile || this.licensePhotoBackFile ||
+                     this.vehicleLicensePhotoFrontFile || this.vehicleLicensePhotoBackFile;
 
     if (hasFiles) {
-      // Register with files using FormData
       const courierDTO: CourierRegisterDTO = {
         userName: data.userName,
         email: data.email,
@@ -325,7 +265,6 @@ export class RegisterComponent implements OnInit {
         isOnline: false,
         rating: 0
       };
-
       const files = {
         photo: this.photoFile || undefined,
         licensePhotoFront: this.licensePhotoFrontFile || undefined,
@@ -336,19 +275,18 @@ export class RegisterComponent implements OnInit {
 
       this.authService.registerCourierWithFiles(courierDTO, files).subscribe({
         next: (response) => {
+          console.log('Courier registration with files success:', response);
           this.successMessage = 'تم إنشاء حساب المندوب بنجاح! يرجى انتظار موافقة الإدارة.';
           this.isLoading = false;
-          setTimeout(() => {
-            this.router.navigate(['/login'], { queryParams: { role: 'courier' } });
-          }, 2000);
+          this.router.navigate(['/login'], { queryParams: { role: 'courier' } });
         },
         error: (error) => {
+          console.error('Courier registration with files failed:', error);
           this.errorMessage = typeof error === 'string' ? error : 'فشل في إنشاء الحساب';
           this.isLoading = false;
         }
       });
     } else {
-      // Register without files
       const courierDTO: CourierRegisterDTO = {
         userName: data.userName,
         email: data.email,
@@ -372,13 +310,13 @@ export class RegisterComponent implements OnInit {
 
       this.authService.registerCourier(courierDTO).subscribe({
         next: (response) => {
+          console.log('Courier registration success:', response);
           this.successMessage = 'تم إنشاء حساب المندوب بنجاح! يرجى انتظار موافقة الإدارة.';
           this.isLoading = false;
-          setTimeout(() => {
-            this.router.navigate(['/login'], { queryParams: { role: 'courier' } });
-          }, 2000);
+          this.router.navigate(['/login'], { queryParams: { role: 'courier' } });
         },
         error: (error) => {
+          console.error('Courier registration failed:', error);
           this.errorMessage = typeof error === 'string' ? error : 'فشل في إنشاء الحساب';
           this.isLoading = false;
         }
@@ -386,21 +324,10 @@ export class RegisterComponent implements OnInit {
     }
   }
 
-  goBack(): void {
-    this.router.navigate(['/home']);
-  }
-
-  goToLogin(): void {
-    this.router.navigate(['/login']);
-  }
-
-  togglePasswordVisibility(): void {
-    this.hidePassword = !this.hidePassword;
-  }
-
-  toggleConfirmPasswordVisibility(): void {
-    this.hideConfirmPassword = !this.hideConfirmPassword;
-  }
+  goBack(): void { this.router.navigate(['/home']); }
+  goToLogin(): void { this.router.navigate(['/login']); }
+  togglePasswordVisibility(): void { this.hidePassword = !this.hidePassword; }
+  toggleConfirmPasswordVisibility(): void { this.hideConfirmPassword = !this.hideConfirmPassword; }
 
   getRoleTitle(): string {
     if (!this.selectedRole) return '';
@@ -409,14 +336,10 @@ export class RegisterComponent implements OnInit {
 
   getRoleTitleArabic(): string {
     if (!this.selectedRole) return '';
-    
     switch (this.selectedRole.toLowerCase()) {
-      case 'supplier':
-        return 'مُرسل';
-      case 'courier':
-        return 'مندوب توصيل';
-      default:
-        return this.selectedRole;
+      case 'supplier': return 'مُرسل';
+      case 'courier': return 'مندوب توصيل';
+      default: return this.selectedRole;
     }
   }
 

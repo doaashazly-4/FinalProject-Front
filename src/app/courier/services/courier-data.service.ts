@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 // Delivery job interfaces for Courier/Carrier module
 export interface DeliveryJob {
@@ -96,7 +97,7 @@ export interface CourierTicket {
 
 @Injectable({ providedIn: 'root' })
 export class CourierDataService {
-  private apiUrl = 'https://localhost:7104/api/Courier';
+  private apiUrl = `${environment.apiUrl}/Courier`;
 
   constructor(private http: HttpClient) {}
 

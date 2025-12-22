@@ -142,7 +142,8 @@ export interface AdminRegisterDTO extends UserRegisterDTO {
 // ========== LOGIN DTOs ==========
 
 export interface UserLoginDTO {
-  email: string;
+  userName?: string;
+  email?: string;
   password: string;
 }
 

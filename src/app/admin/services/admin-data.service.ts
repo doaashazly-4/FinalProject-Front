@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 // ========== INTERFACES ==========
 
@@ -134,7 +135,7 @@ export interface ReportExportDTO {
 
 @Injectable({ providedIn: 'root' })
 export class AdminDataService {
-  private apiUrl = 'https://localhost:7104/api/Admin';
+  private apiUrl = `${environment.apiUrl}/Admin`;
 
   constructor(private http: HttpClient) {}
 

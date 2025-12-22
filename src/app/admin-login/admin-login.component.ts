@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../shared/services/auth.service';
 import { LoginResponse } from '../models/user.models';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-admin-login',
@@ -46,7 +47,7 @@ export class AdminLoginComponent {
     };
 
     // Call the admin-specific login endpoint directly (hidden endpoint) using userName/password
-    this.http.post<LoginResponse>('https://localhost:7180/api/Auth/Login/Admin', body).subscribe({
+    this.http.post<LoginResponse>(`${environment.apiUrl}/Auth/Login/Admin`, body).subscribe({
       next: (response) => {
         if (response && response.token) {
           // Store token and set role using existing AuthService helper
@@ -68,5 +69,6 @@ export class AdminLoginComponent {
     });
   }
 }
+
 
 
