@@ -35,6 +35,14 @@ export const CUSTOMER_ROUTES: Routes = [
         loadComponent: () => import('./pages/order-detail/order-detail.component').then(m => m.OrderDetailComponent)
       },
       // Legacy routes
+
+      {
+        path: 'delivery-confirmation/:packageId',
+        loadComponent: () =>
+          import('./pages/delivery-confirmation/delivery-confirmation.component')
+            .then(m => m.DeliveryConfirmationComponent)
+      },
+
       {
         path: 'orders',
         redirectTo: 'deliveries',

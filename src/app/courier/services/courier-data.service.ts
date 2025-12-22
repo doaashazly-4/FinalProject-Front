@@ -113,6 +113,15 @@ export class CourierDataService {
     });
   }
 
+  verifyDeliveryOTP(packageId: number, otp: string) {
+    return this.http.post(
+      `${this.apiUrl}/VerifyOTP/${packageId}`,
+      otp,
+      { responseType: 'text' }
+    );
+  }
+
+
   // ========== Stats ==========
   getStats(): Observable<CourierStat[]> {
     return this.http.get<CourierStat[]>(`${this.apiUrl}/stats`).pipe(

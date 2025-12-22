@@ -1,0 +1,12 @@
+<div *ngIf="!isLoading && delivery" class="max-w-xl mx-auto mt-10 p-6 bg-white rounded shadow">
+    <h2 class="text-2xl font-bold text-green-700 mb-3">
+        ✅ تم تسليم الشحنة بنجاح
+    </h2>
+
+    <p>رقم التتبع: {{ delivery.trackingNumber }}</p>
+    <p>تاريخ التسليم: {{ delivery.actualDelivery | date:'short' }}</p>
+
+    <a [routerLink]="['/customer/orders', delivery.id]" class="inline-block mt-4 text-primary-green underline">
+        عرض تفاصيل الشحنة
+    </a>
+</div>
