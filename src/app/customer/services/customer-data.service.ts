@@ -123,24 +123,24 @@ export class CustomerDataService {
   constructor(private http: HttpClient) { }
 
   // ========== Stats ==========
-  getStats(): Observable<ReceiverStat[]> {
-    return this.http.get<ReceiverStat[]>(`${this.apiUrl}/stats`).pipe(
-      catchError(() => of(this.getMockStats()))
-    );
-  }
+  // getStats(): Observable<ReceiverStat[]> {
+  //   return this.http.get<ReceiverStat[]>(`${this.apiUrl}/stats`).pipe(
+  //     catchError(() => of(this.getMockStats()))
+  //   );
+  // }
 
-  // ========== Deliveries ==========
-  getDeliveries(): Observable<IncomingDelivery[]> {
-    return this.http.get<IncomingDelivery[]>(`${this.apiUrl}/orders`).pipe(
-      catchError(() => of(this.getMockDeliveries()))
-    );
-  }
+  // // ========== Deliveries ==========
+  // getDeliveries(): Observable<IncomingDelivery[]> {
+  //   return this.http.get<IncomingDelivery[]>(`${this.apiUrl}/orders`).pipe(
+  //     catchError(() => of(this.getMockDeliveries()))
+  //   );
+  // }
 
-  getRecentDeliveries(): Observable<IncomingDelivery[]> {
-    return this.http.get<IncomingDelivery[]>(`${this.apiUrl}/orders/recent`).pipe(
-      catchError(() => of(this.getMockDeliveries().slice(0, 5)))
-    );
-  }
+  // getRecentDeliveries(): Observable<IncomingDelivery[]> {
+  //   return this.http.get<IncomingDelivery[]>(`${this.apiUrl}/orders/recent`).pipe(
+  //     catchError(() => of(this.getMockDeliveries().slice(0, 5)))
+  //   );
+  // }
 
   getDeliveryById(id: string): Observable<IncomingDelivery> {
     return this.http.get<IncomingDelivery>(`${this.apiUrl}/orders/${id}`);
@@ -164,11 +164,7 @@ export class CustomerDataService {
   }
 
 
-  // ========== Delivery ==========
-  return this.http.get<any>(
-    `${this.apiUrl}/TrackPackage/${packageId}`
-  );
-}
+
 
   confirmDelivery(confirmation: DeliveryConfirmation): Observable<{ success: boolean }> {
     return this.http.post<{ success: boolean }>(`${this.apiUrl}/orders/${confirmation.deliveryId}/confirm`, confirmation);
