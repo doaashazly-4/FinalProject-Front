@@ -10,9 +10,15 @@ import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (
+
+
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
 ) => {
+
+  const isCustomerRequest = (url: string) => {
+    return url.includes('/Customer');
+  };
 
   /**
    * 🔓 STEP 1: Skip authentication for PUBLIC customer endpoints
@@ -21,7 +27,7 @@ export const authInterceptor: HttpInterceptorFn = (
    * If we attach a token here, the backend will reject the request
    * and cause redirect loops or silent failures.
    */
-  if (req.url.includes('/Customer')) {
+  if (isCustomerRequest(req.url)) {
     return next(req);
   }
 
@@ -69,9 +75,13 @@ export const authInterceptor: HttpInterceptorFn = (
        * We clean session and redirect to login.
        */
       if (error.status === 401) {
-        authService.logout();
-        router.navigate(['/login']);
+        // ❗ Do NOT redirect customer flow
+        if (!isCustomerRequest(req.url)) {
+          authService.logout();
+          router.navigate(['/login']);
+        }
       }
+
 
       /**
        * 🚫 STEP 7: Handle FORBIDDEN (403)

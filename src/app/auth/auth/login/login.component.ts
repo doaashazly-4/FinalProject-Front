@@ -95,6 +95,7 @@ export class LoginComponent implements OnInit {
     }
   }
 
+
   onSupplierCourierLogin(): void {
     if (this.loginForm.invalid || this.isLoading) {
       this.markFormAsTouched(this.loginForm);
@@ -144,6 +145,17 @@ export class LoginComponent implements OnInit {
       }
     });
   }
+
+  onOtpLogin(): void {
+    console.log('🔐 OTP login clicked (mock mode)');
+
+    // TEMP: simulate successful customer login
+    localStorage.setItem('customer_id', 'mock-customer-001');
+    localStorage.setItem('pickgo_role', 'customer');
+
+    this.router.navigate(['/customer/dashboard']);
+  }
+
 
   onClientLogin(): void {
     if (this.clientLoginForm.invalid) {
