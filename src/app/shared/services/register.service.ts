@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment'; // مهم جدًا
 import { 
   SupplierRegisterDTO, 
   CourierRegisterDTO,
@@ -13,7 +14,7 @@ import {
  */
 @Injectable({ providedIn: 'root' })
 export class RegisterService {
-  private apiUrl = 'https://localhost:7104/api/Auth';
+  private apiUrl = `${environment.apiUrl}/Auth`; //ضفنا دا 
 
   constructor(private http: HttpClient) {}
 
@@ -25,7 +26,7 @@ export class RegisterService {
   }
 
   /**
-   * Register a new Courier
+   * Register a new Courier without files
    */
   registerCourier(dto: CourierRegisterDTO): Observable<ApiResponse> {
     return this.http.post<ApiResponse>(`${this.apiUrl}/Register/Courier`, dto);
@@ -40,20 +41,20 @@ export class RegisterService {
       photo?: File;
       licensePhotoFront?: File;
       licensePhotoBack?: File;
-      vehicleLicensePhotoFront?: File;
-      vehicleLicensePhotoBack?: File;
+      vehicleLicenseFront?: File;
+      vehicleLicenseBack?: File;
     }
   ): Observable<ApiResponse> {
     const formData = new FormData();
     
-    // Add text fields
+    // إضافة البيانات النصية
     Object.entries(dto).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         formData.append(key, String(value));
       }
     });
     
-    // Add file fields
+    // إضافة الملفات
     if (files.photo) {
       formData.append('photoUrl', files.photo, files.photo.name);
     }
@@ -63,11 +64,11 @@ export class RegisterService {
     if (files.licensePhotoBack) {
       formData.append('licensePhotoBack', files.licensePhotoBack, files.licensePhotoBack.name);
     }
-    if (files.vehicleLicensePhotoFront) {
-      formData.append('vehcelLicensePhotoFront', files.vehicleLicensePhotoFront, files.vehicleLicensePhotoFront.name);
+    if (files.vehicleLicenseFront) {
+      formData.append('vehcelLicensePhotoFront', files.vehicleLicenseFront, files.vehicleLicenseFront.name);
     }
-    if (files.vehicleLicensePhotoBack) {
-      formData.append('vehcelLicensePhotoBack', files.vehicleLicensePhotoBack, files.vehicleLicensePhotoBack.name);
+    if (files.vehicleLicenseBack) {
+      formData.append('vehcelLicensePhotoBack', files.vehicleLicenseBack, files.vehicleLicenseBack.name);
     }
     
     return this.http.post<ApiResponse>(`${this.apiUrl}/Register/Courier`, formData);

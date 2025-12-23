@@ -97,7 +97,7 @@ export interface CourierRegisterDTO extends UserRegisterDTO {
   address: string;
   birthDate: string;
   gender: string;
-  vehicleType: string;
+  vehicleType: Number;
   licenseNumber: string;
   maxWeight: number;
   status?: string;
@@ -142,7 +142,8 @@ export interface AdminRegisterDTO extends UserRegisterDTO {
 // ========== LOGIN DTOs ==========
 
 export interface UserLoginDTO {
-  email: string;
+  userName?: string;
+  email?: string;
   password: string;
 }
 

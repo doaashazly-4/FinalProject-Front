@@ -17,6 +17,7 @@ export class LoginComponent implements OnInit {
   clientLoginForm: FormGroup;
   selectedRole: string = '';
   loginMode: 'supplier_courier' | 'client' = 'supplier_courier';
+  selectedSubRole: 'supplier' | 'courier' | null = null;
   isLoading: boolean = false;
   hidePassword: boolean = true;
   errorMessage: string = '';
@@ -27,9 +28,9 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private authService: AuthService
   ) {
-    // Form for Supplier and Courier (email/password)
+    // Form for Supplier and Courier (userName/password)
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      userName: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required]],
       rememberMe: [false]
     });
@@ -43,10 +44,10 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     // Load saved data
-    const savedEmail = localStorage.getItem('rememberedEmail');
-    if (savedEmail) {
+    const savedUserName = localStorage.getItem('rememberedUserName');
+    if (savedUserName) {
       this.loginForm.patchValue({ 
-        email: savedEmail,
+        userName: savedUserName,
         rememberMe: true 
       });
     }
@@ -63,6 +64,11 @@ export class LoginComponent implements OnInit {
     const role = this.route.snapshot.queryParamMap.get('role');
     if (role === 'client' || role === 'customer') {
       this.loginMode = 'client';
+      return;
+    }
+    if (role === 'supplier' || role === 'courier') {
+      this.loginMode = 'supplier_courier';
+      this.selectedSubRole = role as 'supplier' | 'courier';
     }
   }
 
@@ -89,30 +95,39 @@ export class LoginComponent implements OnInit {
     this.errorMessage = '';
     const formValue = this.loginForm.value;
 
-    // Save email if remember me is checked
+    // Save userName if remember me is checked
     if (formValue.rememberMe) {
-      localStorage.setItem('rememberedEmail', formValue.email);
+      localStorage.setItem('rememberedUserName', formValue.userName);
     } else {
-      localStorage.removeItem('rememberedEmail');
+      localStorage.removeItem('rememberedUserName');
     }
 
     const loginDTO: UserLoginDTO = {
-      email: formValue.email,
+      userName: formValue.userName,
       password: formValue.password
     };
 
-    // Try supplier login first, then courier
+    // If a sub-role (supplier or courier) was chosen, try only that role.
+    if (this.selectedSubRole) {
+      this.authService.login(loginDTO, this.selectedSubRole).subscribe({
+        next: () => this.handleLoginSuccess(this.selectedSubRole!),
+      error: () => this.handleLoginError('اسم المستخدم أو كلمة المرور غير صحيحة')
+      });
+      return;
+    }
+
+    // No selected sub-role: try supplier first, then courier (existing behavior)
     this.authService.login(loginDTO, 'supplier').subscribe({
-      next: (response) => {
+      next: () => {
         this.handleLoginSuccess('supplier');
       },
-      error: (error) => {
+      error: () => {
         // Try courier login
         this.authService.login(loginDTO, 'courier').subscribe({
-          next: (response) => {
+          next: () => {
             this.handleLoginSuccess('courier');
           },
-          error: (courierError) => {
+          error: () => {
             this.handleLoginError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
           }
         });

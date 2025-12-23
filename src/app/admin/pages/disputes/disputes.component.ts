@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminDataService, Dispute, DisputeResolutionDTO } from '../../services/admin-data.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-disputes',
@@ -53,7 +54,7 @@ export class DisputesComponent implements OnInit {
 
   loadDisputes(): void {
     this.isLoading = true;
-    this.dataService.getDisputes().subscribe({
+    this.dataService.getDisputesAdmin().subscribe({
       next: (disputes) => {
         this.disputes = disputes;
         this.calculateStats();
@@ -113,30 +114,18 @@ export class DisputesComponent implements OnInit {
     }
 
     this.isProcessing = true;
-    const dto: DisputeResolutionDTO = {
-      disputeId: this.selectedDispute.id,
-      resolutionType: this.resolutionType,
-      notes: this.resolutionNotes,
-      refundAmount: this.refundAmount || undefined
-    };
-
-    this.dataService.resolveDispute(dto).subscribe({
-      next: (updatedDispute) => {
-        this.successMessage = 'تم حل النزاع بنجاح';
-        // Update local data
-        const index = this.disputes.findIndex(d => d.id === this.selectedDispute!.id);
-        if (index !== -1) {
-          this.disputes[index] = { ...this.disputes[index], status: 'resolved', resolution: this.resolutionNotes, resolutionType: this.resolutionType };
-        }
-        this.calculateStats();
-        this.applyFilters();
+    // Use admin resolve endpoint
+    this.dataService.resolveDisputeAdmin(this.selectedDispute.id, this.resolutionType === 'no_action' ? 'NoAction' : 'Resolved', this.resolutionNotes).subscribe({
+      next: () => {
+        Swal.fire({ icon: 'success', title: 'تم الحل', text: 'تم حل النزاع بنجاح' });
+        this.loadDisputes();
         this.closeResolutionModal();
         this.selectedDispute = null;
         this.isProcessing = false;
       },
       error: (error) => {
         console.error('Error resolving dispute:', error);
-        this.errorMessage = 'حدث خطأ أثناء حل النزاع';
+        Swal.fire({ icon: 'error', title: 'فشل', text: 'حدث خطأ أثناء حل النزاع' });
         this.isProcessing = false;
       }
     });
@@ -273,4 +262,5 @@ export class DisputesComponent implements OnInit {
     });
   }
 }
+
 

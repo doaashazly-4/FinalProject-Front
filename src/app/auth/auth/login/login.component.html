@@ -37,6 +37,21 @@
           </button>
         </div>
 
+        <!-- Dropdown for choosing supplier/courier (visible when no role query param) -->
+        <div *ngIf="loginMode === 'supplier_courier' && !selectedSubRole" class="mb-6 text-right">
+          <p class="text-gray-700 mb-2">اختر تسجيل الدخول كـ:</p>
+          <div class="flex gap-3 justify-end">
+            <button type="button" (click)="selectedSubRole = 'supplier'" class="py-2 px-4 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600">مُرسل</button>
+            <button type="button" (click)="selectedSubRole = 'courier'" class="py-2 px-4 rounded-lg bg-orange-500 text-white font-semibold hover:bg-orange-600">مندوب توصيل</button>
+          </div>
+        </div>
+
+        <!-- Indicator showing selected sub-role and option to change -->
+        <div *ngIf="loginMode === 'supplier_courier' && selectedSubRole" class="mb-6 text-right">
+          <p class="text-gray-700 mb-2">أنت تختار تسجيل الدخول كـ: <strong class="mr-2">{{ selectedSubRole === 'supplier' ? 'مُرسل' : 'مندوب توصيل' }}</strong></p>
+          <a class="text-sm text-gray-500 hover:underline cursor-pointer" (click)="selectedSubRole = null">تغيير</a>
+        </div>
+
         <!-- Error Message -->
         <div *ngIf="errorMessage" class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl flex items-center gap-3">
           <span class="text-2xl">❌</span>
@@ -45,20 +60,20 @@
 
         <!-- Supplier/Courier Login Form -->
         <form *ngIf="loginMode === 'supplier_courier'" [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
-          <!-- Email -->
+          <!-- UserName -->
           <div class="group">
-            <label class="block text-gray-800 font-bold mb-3 text-lg">البريد الإلكتروني *</label>
+            <label class="block text-gray-800 font-bold mb-3 text-lg">اسم المستخدم *</label>
             <div class="relative">
-              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl group-focus-within:text-emerald-600 transition-colors">✉️</span>
-              <input type="email" formControlName="email" placeholder="أدخل البريد الإلكتروني"
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl group-focus-within:text-emerald-600 transition-colors">👤</span>
+              <input type="text" formControlName="userName" placeholder="أدخل اسم المستخدم"
                      class="w-full pr-12 pl-4 py-4 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all duration-300 text-lg bg-gray-50 focus:bg-white"
-                     [class.border-red-400]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+                     [class.border-red-400]="loginForm.get('userName')?.invalid && loginForm.get('userName')?.touched">
             </div>
-            <p class="text-red-600 text-sm mt-2 font-semibold" *ngIf="loginForm.get('email')?.hasError('required') && loginForm.get('email')?.touched">
-              البريد الإلكتروني مطلوب
+            <p class="text-red-600 text-sm mt-2 font-semibold" *ngIf="loginForm.get('userName')?.hasError('required') && loginForm.get('userName')?.touched">
+              اسم المستخدم مطلوب
             </p>
-            <p class="text-red-600 text-sm mt-2 font-semibold" *ngIf="loginForm.get('email')?.hasError('email') && loginForm.get('email')?.touched">
-              الرجاء إدخال بريد إلكتروني صحيح
+            <p class="text-red-600 text-sm mt-2 font-semibold" *ngIf="loginForm.get('userName')?.hasError('minlength') && loginForm.get('userName')?.touched">
+              اسم المستخدم يجب أن يكون 3 أحرف على الأقل
             </p>
           </div>
 

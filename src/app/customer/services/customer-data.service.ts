@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 // Delivery interfaces for Receiver module
 export interface IncomingDelivery {
@@ -117,7 +118,7 @@ export interface CarrierLocation {
 
 @Injectable({ providedIn: 'root' })
 export class CustomerDataService {
-  private apiUrl = 'https://localhost:7104/api/Customer';
+  private apiUrl = `${environment.apiUrl}/Customer`;
 
 
   constructor(private http: HttpClient) { }
@@ -233,73 +234,4 @@ export class CustomerDataService {
     return this.http.post<{ success: boolean; message: string }>(`${this.apiUrl}/upgrade-to-supplier`, {});
   }
 
-  // ========== Mock Data ==========
-  private getMockStats(): ReceiverStat[] {
-    return [
-      { label: 'شحنات واردة', value: '5', icon: 'bi-box-arrow-in-down', trend: '', color: 'blue' },
-      { label: 'تم الاستلام', value: '23', icon: 'bi-check-circle', trend: '+3', color: 'green' },
-      { label: 'في الطريق', value: '2', icon: 'bi-truck', trend: '', color: 'purple' }
-    ];
-  }
-
-  private getMockDeliveries(): IncomingDelivery[] {
-    return [
-      {
-        id: '1',
-        trackingNumber: 'PKG-2024-101',
-        description: 'طرد من متجر إلكتروني',
-        senderName: 'متجر الإلكترونيات',
-        pickupAddress: 'القاهرة - وسط البلد',
-        deliveryAddress: 'القاهرة - المعادي، شارع 9، عمارة 15، شقة 5',
-        status: 'out_for_delivery',
-        estimatedDelivery: new Date(),
-        createdAt: new Date(Date.now() - 172800000),
-        weight: 1.5,
-        courierName: 'أحمد محمد',
-        courierPhone: '01098765432'
-      },
-      {
-        id: '2',
-        trackingNumber: 'PKG-2024-102',
-        description: 'مستندات مهمة',
-        senderName: 'شركة التوظيف',
-        pickupAddress: 'الجيزة - المهندسين',
-        deliveryAddress: 'القاهرة - المعادي، شارع 9، عمارة 15، شقة 5',
-        status: 'in_transit',
-        estimatedDelivery: new Date(Date.now() + 86400000),
-        createdAt: new Date(Date.now() - 86400000),
-        weight: 0.3,
-        courierName: 'محمد علي',
-        courierPhone: '01087654321',
-        requiresSignature: true
-      },
-      {
-        id: '3',
-        trackingNumber: 'PKG-2024-100',
-        description: 'هدية - قابل للكسر',
-        senderName: 'سارة أحمد',
-        senderPhone: '01112345678',
-        pickupAddress: 'الإسكندرية - سموحة',
-        deliveryAddress: 'القاهرة - المعادي، شارع 9، عمارة 15، شقة 5',
-        status: 'delivered',
-        actualDelivery: new Date(Date.now() - 259200000),
-        createdAt: new Date(Date.now() - 345600000),
-        weight: 2.0,
-        isFragile: true,
-        courierName: 'علي حسن'
-      },
-      {
-        id: '4',
-        trackingNumber: 'PKG-2024-099',
-        description: 'ملابس',
-        senderName: 'متجر الأزياء',
-        pickupAddress: 'القاهرة - التجمع الخامس',
-        deliveryAddress: 'القاهرة - المعادي، شارع 9، عمارة 15، شقة 5',
-        status: 'delivered',
-        actualDelivery: new Date(Date.now() - 432000000),
-        createdAt: new Date(Date.now() - 518400000),
-        weight: 1.0
-      }
-    ];
-  }
 }

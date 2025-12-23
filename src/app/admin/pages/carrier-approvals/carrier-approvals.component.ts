@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminDataService, PendingCarrier } from '../../services/admin-data.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-carrier-approvals',
@@ -38,7 +39,8 @@ export class CarrierApprovalsComponent implements OnInit {
 
   loadPendingCarriers(): void {
     this.isLoading = true;
-    this.dataService.getPendingCarriers().subscribe({
+    // Use admin endpoint
+    this.dataService.getPendingCouriersAdmin().subscribe({
       next: (carriers) => {
         this.pendingCarriers = carriers;
         this.isLoading = false;
@@ -63,17 +65,17 @@ export class CarrierApprovalsComponent implements OnInit {
   approveCarrier(carrier: PendingCarrier): void {
     this.isProcessing = true;
     this.clearMessages();
-    
-    this.dataService.approveCarrier(carrier.id).subscribe({
+    // Call admin approve endpoint
+    this.dataService.approveCourierAdmin(carrier.id).subscribe({
       next: () => {
-        this.successMessage = `تم قبول طلب المندوب "${carrier.name}" بنجاح! سيتم إرسال إشعار له.`;
-        this.pendingCarriers = this.pendingCarriers.filter(c => c.id !== carrier.id);
+        Swal.fire({ icon: 'success', title: 'تم القبول', text: `تم قبول طلب المندوب "${carrier.name}" بنجاح.` });
+        this.loadPendingCarriers();
         this.selectedCarrier = null;
         this.isProcessing = false;
       },
       error: (error) => {
         console.error('Error approving carrier:', error);
-        this.errorMessage = 'حدث خطأ أثناء قبول الطلب. يرجى المحاولة مرة أخرى.';
+        Swal.fire({ icon: 'error', title: 'فشل', text: 'حدث خطأ أثناء قبول الطلب. يرجى المحاولة مرة أخرى.' });
         this.isProcessing = false;
       }
     });
@@ -98,20 +100,17 @@ export class CarrierApprovalsComponent implements OnInit {
 
     this.isProcessing = true;
     this.clearMessages();
-    
-    this.dataService.rejectCarrier(this.carrierToReject.id, this.rejectionReason).subscribe({
+    // Call admin reject endpoint
+    this.dataService.rejectCourierAdmin(this.carrierToReject.id, this.rejectionReason).subscribe({
       next: () => {
-        this.successMessage = `تم رفض طلب المندوب "${this.carrierToReject!.name}". سيتم إرسال إشعار له بالسبب.`;
-        this.pendingCarriers = this.pendingCarriers.filter(c => c.id !== this.carrierToReject!.id);
-        if (this.selectedCarrier?.id === this.carrierToReject!.id) {
-          this.selectedCarrier = null;
-        }
+        Swal.fire({ icon: 'success', title: 'تم الرفض', text: `تم رفض طلب المندوب "${this.carrierToReject!.name}".` });
         this.closeRejectModal();
+        this.loadPendingCarriers();
         this.isProcessing = false;
       },
       error: (error) => {
         console.error('Error rejecting carrier:', error);
-        this.errorMessage = 'حدث خطأ أثناء رفض الطلب. يرجى المحاولة مرة أخرى.';
+        Swal.fire({ icon: 'error', title: 'فشل', text: 'حدث خطأ أثناء رفض الطلب. يرجى المحاولة مرة أخرى.' });
         this.isProcessing = false;
       }
     });

@@ -2,6 +2,7 @@ import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError, of } from 'rxjs';
 import { tap, catchError, map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 import { 
   SupplierRegisterDTO, 
   CourierRegisterDTO,
@@ -25,9 +26,11 @@ export class AuthService {
   private readonly TOKEN_KEY = 'pickgo_token';
   private roleSignal = signal<UserRole>(this.readFromStorage());
   
-  private apiUrl = 'https://localhost:7104/api/Auth';
+  // API base - call backend directly
+  private apiUrl = 'https://localhost:7180/api/Auth';
 
   constructor(private http: HttpClient) {
+    
     this.loadUserFromStorage();
   }
 
@@ -63,16 +66,19 @@ export class AuthService {
    * - shopName, address, isDeleted=false (Supplier table)
    */
   registerSupplier(dto: SupplierRegisterDTO): Observable<ApiResponse> {
-    const supplierData = {
+    // Ensure birthDate is YYYY-MM-DD if an ISO string was provided
+    const birthDate = dto.birthDate
+      ? (typeof dto.birthDate === 'string' && dto.birthDate.includes('T') ? dto.birthDate.split('T')[0] : dto.birthDate)
+      : undefined;
+
+    const supplierData: any = {
       userName: dto.userName,
       email: dto.email,
       password: dto.password,
-      address: dto.address,
-      birthDate: dto.birthDate,
-      gender: dto.gender,
       shopName: dto.shopName,
-      phoneNumber: dto.phoneNumber || null,
-      isDeleted: false
+      address: dto.address,
+      birthDate: birthDate,
+      gender: dto.gender
     };
     
     console.log('Registering Supplier with data:', supplierData);
@@ -143,7 +149,7 @@ export class AuthService {
     formData.append('address', dto.address);
     formData.append('birthDate', dto.birthDate);
     formData.append('gender', dto.gender);
-    formData.append('vehicleType', dto.vehicleType);
+     formData.append('vehicleType', String(dto.vehicleType));
     formData.append('licenseNumber', dto.licenseNumber);
     formData.append('maxWeight', String(dto.maxWeight));
     formData.append('status', dto.status || 'Available');
