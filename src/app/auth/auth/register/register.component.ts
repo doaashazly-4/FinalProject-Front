@@ -20,7 +20,12 @@ export class RegisterComponent implements OnInit {
   successMessage: string = '';
 
   // Data for dropdowns - matching backend enums
-  vehicleTypes = ['Motorcycle', 'Car', 'Truck', 'Van'];
+ vehicleTypes = [
+  { name: 'Car', value: 0 },
+  { name: 'Bike', value: 1 },
+  { name: 'Foot', value: 2 }
+];
+
   genders = ['Male', 'Female', 'Other'];
 
   // Password visibility
@@ -193,6 +198,11 @@ export class RegisterComponent implements OnInit {
   }
 
   onSubmit(): void {
+
+   console.log('SUBMIT TRIGGERED');
+  console.log('Form valid:', this.registerForm.valid);
+  console.log(this.registerForm.value);
+
     if (this.registerForm.invalid || this.isLoading) {
       this.markFormAsTouched();
       return;
@@ -232,10 +242,20 @@ export class RegisterComponent implements OnInit {
     this.authService.registerSupplier(supplierDTO).subscribe({
       next: (response) => {
         console.log('Supplier registration success:', response);
-        this.successMessage = 'تم إنشاء حساب المُرسل بنجاح!';
-        this.isLoading = false;
-        // Navigate immediately to supplier login/dashboard flow
-        this.router.navigate(['/supplier/dashboard'], { queryParams: { role: 'supplier' } });
+        // Try to auto-login the newly registered supplier
+        const loginDto = { userName: supplierDTO.userName, password: supplierDTO.password };
+        this.authService.login(loginDto as any, 'supplier').subscribe({
+          next: () => {
+            this.isLoading = false;
+            this.router.navigate([this.authService.getDashboardRoute()]);
+          },
+          error: (loginErr) => {
+            console.warn('Auto-login after supplier registration failed:', loginErr);
+            this.isLoading = false;
+            this.successMessage = 'تم إنشاء حساب المُرسل بنجاح! يمكنك الآن تسجيل الدخول.';
+            this.router.navigate(['/login'], { queryParams: { role: 'supplier' } });
+          }
+        });
       },
       error: (error) => {
         console.error('Supplier registration failed:', error);
@@ -276,9 +296,20 @@ export class RegisterComponent implements OnInit {
       this.authService.registerCourierWithFiles(courierDTO, files).subscribe({
         next: (response) => {
           console.log('Courier registration with files success:', response);
-          this.successMessage = 'تم إنشاء حساب المندوب بنجاح! يرجى انتظار موافقة الإدارة.';
-          this.isLoading = false;
-          this.router.navigate(['/login'], { queryParams: { role: 'courier' } });
+          // Attempt auto-login after registration
+          const loginDto = { userName: courierDTO.userName, password: courierDTO.password };
+          this.authService.login(loginDto as any, 'courier').subscribe({
+            next: () => {
+              this.isLoading = false;
+              this.router.navigate([this.authService.getDashboardRoute()]);
+            },
+            error: (loginErr) => {
+              console.warn('Auto-login after courier registration failed:', loginErr);
+              this.isLoading = false;
+              this.successMessage = 'تم إنشاء حساب المندوب بنجاح! يمكنك الآن تسجيل الدخول.';
+              this.router.navigate(['/login'], { queryParams: { role: 'courier' } });
+            }
+          });
         },
         error: (error) => {
           console.error('Courier registration with files failed:', error);
@@ -294,7 +325,7 @@ export class RegisterComponent implements OnInit {
         address: data.address,
         birthDate: data.birthDate,
         gender: data.gender,
-        vehicleType: data.vehicleType,
+        vehicleType: Number(data.vehicleType),
         licenseNumber: data.licenseNumber,
         maxWeight: Number(data.maxWeight),
         status: 'Available',
@@ -311,9 +342,20 @@ export class RegisterComponent implements OnInit {
       this.authService.registerCourier(courierDTO).subscribe({
         next: (response) => {
           console.log('Courier registration success:', response);
-          this.successMessage = 'تم إنشاء حساب المندوب بنجاح! يرجى انتظار موافقة الإدارة.';
-          this.isLoading = false;
-          this.router.navigate(['/login'], { queryParams: { role: 'courier' } });
+          // Attempt auto-login after registration
+          const loginDto = { userName: courierDTO.userName, password: courierDTO.password };
+          this.authService.login(loginDto as any, 'courier').subscribe({
+            next: () => {
+              this.isLoading = false;
+              this.router.navigate([this.authService.getDashboardRoute()]);
+            },
+            error: (loginErr) => {
+              console.warn('Auto-login after courier registration failed:', loginErr);
+              this.isLoading = false;
+              this.successMessage = 'تم إنشاء حساب المندوب بنجاح! يمكنك الآن تسجيل الدخول.';
+              this.router.navigate(['/login'], { queryParams: { role: 'courier' } });
+            }
+          });
         },
         error: (error) => {
           console.error('Courier registration failed:', error);

@@ -151,9 +151,10 @@
               <label class="block text-dark-blue font-semibold mb-2">نوع المركبة *</label>
               <select formControlName="vehicleType" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bright-green focus:border-transparent transition-all duration-200" [class.border-red-500]="registerForm.get('vehicleType')?.invalid && registerForm.get('vehicleType')?.touched">
                 <option value="">اختر نوع المركبة</option>
-                <option *ngFor="let type of vehicleTypes" [value]="type">
-                  {{type === 'Motorcycle' ? 'دراجة نارية' : type === 'Car' ? 'سيارة' : type === 'Truck' ? 'شاحنة' : 'فان'}}
-                </option>
+              <option *ngFor="let type of vehicleTypes" [value]="type.value">
+               {{ type.name === 'Car' ? 'سيارة' : type.name === 'Bike' ? 'دراجة نارية' : 'مشياً' }}
+               </option>
+
               </select>
             </div>
             <div class="grid grid-cols-2 gap-4">

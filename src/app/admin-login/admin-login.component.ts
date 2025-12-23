@@ -36,8 +36,10 @@ export class AdminLoginComponent implements OnInit {
     // تحقق من وجود توكن وصلاحية الادمن عند تحميل الصفحة
     const token = localStorage.getItem('pickgo_token');
     const role = localStorage.getItem('pickgo_role');
+    const expiration = localStorage.getItem('token_expiration');
 
-    if (token && role === 'admin') {
+    // If user already has valid admin token, redirect to dashboard immediately
+    if (token && role === 'admin' && expiration && new Date(expiration) > new Date()) {
       this.router.navigate(['/admin/dashboard']); // دخول مباشر للداشبورد
     }
   }

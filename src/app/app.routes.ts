@@ -6,9 +6,14 @@ export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
 
   {
-    path: 'register-role',
+    path: 'role-selection',
     canActivate: [noAuthGuard],
     loadComponent: () => import('./auth/auth/role-selection/role-selection.component').then(m => m.RoleSelectionComponent)
+  },
+  {
+    path: 'register',
+    canActivate: [noAuthGuard],
+    loadComponent: () => import('./auth/auth/register/register.component').then(m => m.RegisterComponent)
   },
   {
     path: 'login',
@@ -45,6 +50,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./customer/pages/order-detail/order-detail.component')
         .then(m => m.OrderDetailComponent)
+  },
+
+  {
+    path: 'supplier',
+    canActivate: [roleGuard(['supplier'])],
+    loadChildren: () =>
+      import('./supplier/supplier.routes')
+        .then(m => m.SUPPLIER_ROUTES)
   },
 
   {

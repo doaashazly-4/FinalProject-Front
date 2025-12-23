@@ -30,6 +30,7 @@ export class AuthService {
   private apiUrl = 'https://localhost:7180/api/Auth';
 
   constructor(private http: HttpClient) {
+    
     this.loadUserFromStorage();
   }
 
@@ -148,7 +149,7 @@ export class AuthService {
     formData.append('address', dto.address);
     formData.append('birthDate', dto.birthDate);
     formData.append('gender', dto.gender);
-    formData.append('vehicleType', dto.vehicleType);
+     formData.append('vehicleType', String(dto.vehicleType));
     formData.append('licenseNumber', dto.licenseNumber);
     formData.append('maxWeight', String(dto.maxWeight));
     formData.append('status', dto.status || 'Available');

@@ -23,18 +23,15 @@ export class RoleSelectionComponent implements OnInit {
   }
 
   goToRegister(): void {
-    if (this.selectedRole) {
-      // Registration only available for supplier/courier via role selection
-      this.router.navigate(['/register'], { 
-        queryParams: { role: this.selectedRole } 
-      });
-    }
+    // Registration is available for supplier and courier
+    // Navigate to register page - it will default to supplier if no role is provided
+    this.router.navigate(['/register']);
   }
 
   goToLogin(): void {
     if (!this.selectedRole) return;
-    if (this.selectedRole === 'customer') {
-      this.router.navigate(['/customer-otp-login']);
+    if (this.selectedRole === 'customer' || this.selectedRole === 'client') {
+      this.router.navigate(['/customer/otp-login']);
       return;
     }
     this.router.navigate(['/login'], { queryParams: { role: this.selectedRole } });
@@ -60,8 +57,8 @@ export class RoleSelectionComponent implements OnInit {
   navigateToRoleLogin(role: string): void {
     // Close dropdown and navigate to login with role query param
     this.showCombinedDropdown = false;
-    if (role === 'customer') {
-      this.router.navigate(['/customer-otp-login']);
+    if (role === 'customer' || role === 'client') {
+      this.router.navigate(['/customer/otp-login']);
       return;
     }
     this.router.navigate(['/login'], { queryParams: { role } });

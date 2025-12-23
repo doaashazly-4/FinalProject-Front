@@ -114,13 +114,6 @@ export class DisputesComponent implements OnInit {
     }
 
     this.isProcessing = true;
-    const dto: DisputeResolutionDTO = {
-      disputeId: this.selectedDispute.id,
-      resolutionType: this.resolutionType,
-      notes: this.resolutionNotes,
-      refundAmount: this.refundAmount || undefined
-    };
-
     // Use admin resolve endpoint
     this.dataService.resolveDisputeAdmin(this.selectedDispute.id, this.resolutionType === 'no_action' ? 'NoAction' : 'Resolved', this.resolutionNotes).subscribe({
       next: () => {
@@ -269,4 +262,5 @@ export class DisputesComponent implements OnInit {
     });
   }
 }
+
 
