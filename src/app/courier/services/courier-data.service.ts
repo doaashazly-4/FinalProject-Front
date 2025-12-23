@@ -102,7 +102,7 @@ export class CourierDataService {
   constructor(private http: HttpClient) { }
 
   // ========== Online Status & Location ==========
-  
+
   /**
    * 1️⃣ Get Online Status
    * GET /api/Courier/Online
@@ -174,12 +174,13 @@ export class CourierDataService {
    * 9️⃣ Deliver Package
    * POST /api/Courier/DeliverPackage/{packageId}
    */
-  deliverPackage(packageId: number, customerOTP: string, signatureUrl?: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/DeliverPackage/${packageId}`, {
-      customerOTP,
-      signatureUrl: signatureUrl || ''
-    });
+  deliverPackage(packageId: number, customerOTP: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/DeliverPackage/${packageId}`,
+      { customerOTP }
+    );
   }
+
 
   /**
    * 🔟 Fail Delivery
@@ -205,7 +206,7 @@ export class CourierDataService {
     otp: string,
     signatureUrl?: string
   ) {
-    return this.deliverPackage(packageId, otp, signatureUrl);
+    return this.deliverPackage(packageId, otp);
   }
 
   verifyDeliveryOTP(packageId: number, otp: string) {

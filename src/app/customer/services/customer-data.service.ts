@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, map } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+
 
 // Delivery interfaces for Receiver module
 export interface IncomingDelivery {
@@ -41,7 +42,7 @@ export type DeliveryStatus =
 
 export interface ReceiverStat {
   label: string;
-  value: string;
+  value: number;
   icon: string;
   trend?: string;
   color?: string;
@@ -116,6 +117,56 @@ export interface CarrierLocation {
   courierId: string;
 }
 
+// ================= MOCK DATA (TEMPORARY) =================
+
+const MOCK_DELIVERIES: IncomingDelivery[] = [
+  {
+    id: '101',
+    trackingNumber: 'PKG-101',
+    description: 'شحنة إلكترونيات',
+    senderName: 'متجر الإلكترونيات',
+    pickupAddress: 'القاهرة - مدينة نصر',
+    deliveryAddress: 'الجيزة - الدقي',
+    status: 'out_for_delivery',
+    estimatedDelivery: new Date(),
+    createdAt: new Date(),
+    weight: 2.5,
+    courierName: 'أحمد',
+    courierPhone: '01012345678',
+    isFragile: true,
+    requiresSignature: true
+  },
+  {
+    id: '102',
+    trackingNumber: 'PKG-102',
+    description: 'أدوية',
+    senderName: 'صيدلية الشفاء',
+    pickupAddress: 'القاهرة - المعادي',
+    deliveryAddress: 'الجيزة - المهندسين',
+    status: 'in_transit',
+    estimatedDelivery: new Date(),
+    createdAt: new Date(),
+    weight: 1,
+    courierName: 'محمد',
+    courierPhone: '01198765432'
+  },
+  {
+    id: '103',
+    trackingNumber: 'PKG-103',
+    description: 'ملابس',
+    senderName: 'متجر الملابس',
+    pickupAddress: 'الإسكندرية',
+    deliveryAddress: 'القاهرة',
+    status: 'delivered',
+    estimatedDelivery: new Date(),
+    actualDelivery: new Date(),
+    createdAt: new Date(),
+    weight: 3,
+    courierName: 'يوسف',
+    courierPhone: '01234567890'
+  }
+];
+
 @Injectable({ providedIn: 'root' })
 export class CustomerDataService {
   private apiUrl = `${environment.apiUrl}/Customer`;
@@ -123,15 +174,64 @@ export class CustomerDataService {
 
   constructor(private http: HttpClient) { }
 
+  private getCustomerId(): string {
+    const id = localStorage.getItem('customer_id');
+    if (!id) {
+      throw new Error('Customer ID not found in session');
+    }
+    return id;
+  }
+
   // ========== Stats ==========
   getStats(): Observable<ReceiverStat[]> {
-    return this.http.get<ReceiverStat[]>(`${this.apiUrl}/stats`);
+    return this.getDeliveries().pipe(
+      map((deliveries: IncomingDelivery[]) => {
+        const total = deliveries.length;
+
+        const delivered = deliveries.filter(
+          (d: IncomingDelivery) => d.status === 'delivered'
+        ).length;
+
+        const active = deliveries.filter(
+          (d: IncomingDelivery) =>
+            !['delivered', 'cancelled', 'returned'].includes(d.status)
+        ).length;
+
+        return [
+          {
+            label: 'إجمالي الشحنات',
+            value: total,
+            icon: 'bi-box-seam'
+          },
+          {
+            label: 'تم تسليمها',
+            value: delivered,
+            icon: 'bi-check-circle'
+          },
+          {
+            label: 'قيد التوصيل',
+            value: active,
+            icon: 'bi-truck'
+          }
+        ];
+      })
+    );
   }
 
 
+
+
   // ========== Deliveries ==========
+  // getDeliveries() {
+  //   const customerId = this.getCustomerId();
+  //   return this.http.get<IncomingDelivery[]>(
+  //     `${environment.apiUrl}/Customer/${customerId}/packages`
+  //   );
+  // }
+
   getDeliveries(): Observable<IncomingDelivery[]> {
-    return this.http.get<IncomingDelivery[]>(`${this.apiUrl}/orders`);
+    console.log('🧪 Using MOCK deliveries');
+    return of(MOCK_DELIVERIES);
   }
 
 
@@ -234,4 +334,8 @@ export class CustomerDataService {
     return this.http.post<{ success: boolean; message: string }>(`${this.apiUrl}/upgrade-to-supplier`, {});
   }
 
+
+
 }
+
+

@@ -2,12 +2,15 @@
   <div class="flex flex-col lg:flex-row gap-8 min-h-[calc(100vh-180px)]">
     <!-- Left Section - Form -->
     <div class="flex-1 flex justify-center items-center p-4">
-      <div class="w-full max-w-lg bg-white/98 backdrop-blur-md rounded-3xl p-10 lg:p-12 shadow-2xl border-2 border-emerald-100/50 transform hover:scale-[1.01] transition-all duration-300">
+      <div
+        class="w-full max-w-lg bg-white/98 backdrop-blur-md rounded-3xl p-10 lg:p-12 shadow-2xl border-2 border-emerald-100/50 transform hover:scale-[1.01] transition-all duration-300">
         <div class="text-center mb-10">
-          <div class="inline-flex items-center justify-center w-28 h-28 rounded-full bg-gradient-to-br from-emerald-100 via-teal-100 to-cyan-100 mb-6 shadow-xl border-4 border-emerald-200/50">
+          <div
+            class="inline-flex items-center justify-center w-28 h-28 rounded-full bg-gradient-to-br from-emerald-100 via-teal-100 to-cyan-100 mb-6 shadow-xl border-4 border-emerald-200/50">
             <span class="text-6xl">🔐</span>
           </div>
-          <h1 class="text-5xl lg:text-6xl font-black mb-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">
+          <h1
+            class="text-5xl lg:text-6xl font-black mb-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">
             تسجيل الدخول
           </h1>
           <p class="text-gray-700 text-lg mb-6 font-medium">مرحباً بك مرة أخرى! اختر طريقة تسجيل الدخول</p>
@@ -15,9 +18,8 @@
 
         <!-- Login Mode Toggle -->
         <div class="flex mb-8 bg-gray-100 rounded-xl p-1">
-          <button type="button" 
-                  (click)="setLoginMode('supplier_courier')"
-                  [class]="loginMode === 'supplier_courier' 
+          <button type="button" (click)="setLoginMode('supplier_courier')"
+            [class]="loginMode === 'supplier_courier' 
                     ? 'flex-1 py-3 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-bold transition-all duration-300' 
                     : 'flex-1 py-3 rounded-lg text-gray-600 font-medium hover:bg-gray-200 transition-all duration-300'">
             <span class="flex items-center justify-center gap-2">
@@ -25,9 +27,8 @@
               <span>مُرسل / مندوب</span>
             </span>
           </button>
-          <button type="button" 
-                  (click)="setLoginMode('client')"
-                  [class]="loginMode === 'client' 
+          <button type="button" (click)="setLoginMode('client')"
+            [class]="loginMode === 'client' 
                     ? 'flex-1 py-3 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-bold transition-all duration-300' 
                     : 'flex-1 py-3 rounded-lg text-gray-600 font-medium hover:bg-gray-200 transition-all duration-300'">
             <span class="flex items-center justify-center gap-2">
@@ -41,38 +42,47 @@
         <div *ngIf="loginMode === 'supplier_courier' && !selectedSubRole" class="mb-6 text-right">
           <p class="text-gray-700 mb-2">اختر تسجيل الدخول كـ:</p>
           <div class="flex gap-3 justify-end">
-            <button type="button" (click)="selectedSubRole = 'supplier'" class="py-2 px-4 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600">مُرسل</button>
-            <button type="button" (click)="selectedSubRole = 'courier'" class="py-2 px-4 rounded-lg bg-orange-500 text-white font-semibold hover:bg-orange-600">مندوب توصيل</button>
+            <button type="button" (click)="selectedSubRole = 'supplier'"
+              class="py-2 px-4 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600">مُرسل</button>
+            <button type="button" (click)="selectedSubRole = 'courier'"
+              class="py-2 px-4 rounded-lg bg-orange-500 text-white font-semibold hover:bg-orange-600">مندوب
+              توصيل</button>
           </div>
         </div>
 
         <!-- Indicator showing selected sub-role and option to change -->
         <div *ngIf="loginMode === 'supplier_courier' && selectedSubRole" class="mb-6 text-right">
-          <p class="text-gray-700 mb-2">أنت تختار تسجيل الدخول كـ: <strong class="mr-2">{{ selectedSubRole === 'supplier' ? 'مُرسل' : 'مندوب توصيل' }}</strong></p>
+          <p class="text-gray-700 mb-2">أنت تختار تسجيل الدخول كـ: <strong class="mr-2">{{ selectedSubRole ===
+              'supplier' ? 'مُرسل' : 'مندوب توصيل' }}</strong></p>
           <a class="text-sm text-gray-500 hover:underline cursor-pointer" (click)="selectedSubRole = null">تغيير</a>
         </div>
 
         <!-- Error Message -->
-        <div *ngIf="errorMessage" class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl flex items-center gap-3">
+        <div *ngIf="errorMessage"
+          class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl flex items-center gap-3">
           <span class="text-2xl">❌</span>
           <span class="font-medium">{{ errorMessage }}</span>
         </div>
 
         <!-- Supplier/Courier Login Form -->
-        <form *ngIf="loginMode === 'supplier_courier'" [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <form *ngIf="loginMode === 'supplier_courier'" [formGroup]="loginForm" (ngSubmit)="onSubmit()"
+          class="space-y-6">
           <!-- UserName -->
           <div class="group">
             <label class="block text-gray-800 font-bold mb-3 text-lg">اسم المستخدم *</label>
             <div class="relative">
-              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl group-focus-within:text-emerald-600 transition-colors">👤</span>
+              <span
+                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl group-focus-within:text-emerald-600 transition-colors">👤</span>
               <input type="text" formControlName="userName" placeholder="أدخل اسم المستخدم"
-                     class="w-full pr-12 pl-4 py-4 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all duration-300 text-lg bg-gray-50 focus:bg-white"
-                     [class.border-red-400]="loginForm.get('userName')?.invalid && loginForm.get('userName')?.touched">
+                class="w-full pr-12 pl-4 py-4 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all duration-300 text-lg bg-gray-50 focus:bg-white"
+                [class.border-red-400]="loginForm.get('userName')?.invalid && loginForm.get('userName')?.touched">
             </div>
-            <p class="text-red-600 text-sm mt-2 font-semibold" *ngIf="loginForm.get('userName')?.hasError('required') && loginForm.get('userName')?.touched">
+            <p class="text-red-600 text-sm mt-2 font-semibold"
+              *ngIf="loginForm.get('userName')?.hasError('required') && loginForm.get('userName')?.touched">
               اسم المستخدم مطلوب
             </p>
-            <p class="text-red-600 text-sm mt-2 font-semibold" *ngIf="loginForm.get('userName')?.hasError('minlength') && loginForm.get('userName')?.touched">
+            <p class="text-red-600 text-sm mt-2 font-semibold"
+              *ngIf="loginForm.get('userName')?.hasError('minlength') && loginForm.get('userName')?.touched">
               اسم المستخدم يجب أن يكون 3 أحرف على الأقل
             </p>
           </div>
@@ -81,14 +91,18 @@
           <div class="group">
             <label class="block text-gray-800 font-bold mb-3 text-lg">كلمة المرور *</label>
             <div class="relative">
-              <input [type]="hidePassword ? 'password' : 'text'" formControlName="password" placeholder="أدخل كلمة المرور"
-                     class="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all duration-300 text-lg bg-gray-50 focus:bg-white"
-                     [class.border-red-400]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
-              <button type="button" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 text-xl transition-colors duration-300" (click)="togglePasswordVisibility()">
+              <input [type]="hidePassword ? 'password' : 'text'" formControlName="password"
+                placeholder="أدخل كلمة المرور"
+                class="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all duration-300 text-lg bg-gray-50 focus:bg-white"
+                [class.border-red-400]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+              <button type="button"
+                class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 text-xl transition-colors duration-300"
+                (click)="togglePasswordVisibility()">
                 {{hidePassword ? '👁️' : '🙈'}}
               </button>
             </div>
-            <p class="text-red-600 text-sm mt-2 font-semibold" *ngIf="loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched">
+            <p class="text-red-600 text-sm mt-2 font-semibold"
+              *ngIf="loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched">
               كلمة المرور مطلوبة
             </p>
           </div>
@@ -96,17 +110,20 @@
           <!-- Remember & Forgot -->
           <div class="flex flex-wrap justify-between items-center gap-4">
             <label class="flex items-center gap-2 cursor-pointer text-gray-700 font-medium">
-              <input type="checkbox" formControlName="rememberMe" class="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 focus:ring-2">
+              <input type="checkbox" formControlName="rememberMe"
+                class="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 focus:ring-2">
               <span>تذكرني</span>
             </label>
-            <button type="button" class="text-emerald-600 font-semibold hover:text-emerald-700 hover:underline transition-colors" (click)="goToForgotPassword()">
+            <button type="button"
+              class="text-emerald-600 font-semibold hover:text-emerald-700 hover:underline transition-colors"
+              (click)="goToForgotPassword()">
               نسيت كلمة المرور؟
             </button>
           </div>
 
           <!-- Submit Button -->
-          <button type="submit" [disabled]="loginForm.invalid || isLoading" 
-                  class="w-full py-5 rounded-xl bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 text-white font-bold text-lg shadow-xl hover:shadow-2xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all duration-300 transform">
+          <button type="submit" [disabled]="loginForm.invalid || isLoading"
+            class="w-full py-5 rounded-xl bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 text-white font-bold text-lg shadow-xl hover:shadow-2xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all duration-300 transform">
             <span *ngIf="!isLoading" class="flex items-center justify-center gap-2">
               <span>🔓</span>
               <span>تسجيل الدخول</span>
@@ -127,15 +144,18 @@
           <div class="group">
             <label class="block text-gray-800 font-bold mb-3 text-lg">رقم الجوال *</label>
             <div class="relative">
-              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl group-focus-within:text-emerald-600 transition-colors">📱</span>
+              <span
+                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl group-focus-within:text-emerald-600 transition-colors">📱</span>
               <input type="tel" formControlName="mobileNumber" placeholder="05XXXXXXXX" dir="ltr"
-                     class="w-full pr-12 pl-4 py-4 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all duration-300 text-lg bg-gray-50 focus:bg-white text-left"
-                     [class.border-red-400]="clientLoginForm.get('mobileNumber')?.invalid && clientLoginForm.get('mobileNumber')?.touched">
+                class="w-full pr-12 pl-4 py-4 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all duration-300 text-lg bg-gray-50 focus:bg-white text-left"
+                [class.border-red-400]="clientLoginForm.get('mobileNumber')?.invalid && clientLoginForm.get('mobileNumber')?.touched">
             </div>
-            <p class="text-red-600 text-sm mt-2 font-semibold" *ngIf="clientLoginForm.get('mobileNumber')?.hasError('required') && clientLoginForm.get('mobileNumber')?.touched">
+            <p class="text-red-600 text-sm mt-2 font-semibold"
+              *ngIf="clientLoginForm.get('mobileNumber')?.hasError('required') && clientLoginForm.get('mobileNumber')?.touched">
               رقم الجوال مطلوب
             </p>
-            <p class="text-red-600 text-sm mt-2 font-semibold" *ngIf="clientLoginForm.get('mobileNumber')?.hasError('pattern') && clientLoginForm.get('mobileNumber')?.touched">
+            <p class="text-red-600 text-sm mt-2 font-semibold"
+              *ngIf="clientLoginForm.get('mobileNumber')?.hasError('pattern') && clientLoginForm.get('mobileNumber')?.touched">
               الرجاء إدخال رقم جوال صحيح (يبدأ بـ 05)
             </p>
           </div>
@@ -156,24 +176,27 @@
               <i class="bi bi-shield-check ml-1"></i>
               تسجيل دخول آمن عبر OTP
             </p>
-            <a routerLink="/customer-otp-login"
-               class="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-colors">
+            <button type="button" (click)="onOtpLogin()"
+              class="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-colors">
+
               <i class="bi bi-arrow-left"></i>
               <span>تسجيل الدخول عبر OTP</span>
-            </a>
+            </button>
+
           </div>
 
           <!-- Remember -->
           <div class="flex items-center">
             <label class="flex items-center gap-2 cursor-pointer text-gray-700 font-medium">
-              <input type="checkbox" formControlName="rememberMe" class="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 focus:ring-2">
+              <input type="checkbox" formControlName="rememberMe"
+                class="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 focus:ring-2">
               <span>تذكر رقم الجوال</span>
             </label>
           </div>
 
           <!-- Submit Button -->
-          <button type="submit" [disabled]="clientLoginForm.invalid || isLoading" 
-                  class="w-full py-5 rounded-xl bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 text-white font-bold text-lg shadow-xl hover:shadow-2xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all duration-300 transform">
+          <button type="submit" [disabled]="clientLoginForm.invalid || isLoading"
+            class="w-full py-5 rounded-xl bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 text-white font-bold text-lg shadow-xl hover:shadow-2xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all duration-300 transform">
             <span *ngIf="!isLoading" class="flex items-center justify-center gap-2">
               <span>📱</span>
               <span>دخول كعميل</span>
@@ -191,49 +214,58 @@
         <!-- Links -->
         <div class="mt-8 pt-6 border-t-2 border-gray-200 text-center" *ngIf="loginMode === 'supplier_courier'">
           <p class="text-gray-700 font-medium">
-            ليس لديك حساب؟ 
-            <a class="text-emerald-600 font-bold cursor-pointer hover:text-emerald-700 hover:underline transition-colors" (click)="goToRegister()">إنشاء حساب جديد</a>
+            ليس لديك حساب؟
+            <a class="text-emerald-600 font-bold cursor-pointer hover:text-emerald-700 hover:underline transition-colors"
+              (click)="goToRegister()">إنشاء حساب جديد</a>
           </p>
         </div>
       </div>
     </div>
 
     <!-- Right Section - Features -->
-    <div class="flex-1 p-6 lg:p-10 rounded-3xl flex flex-col justify-center items-center shadow-xl border-2 border-white/50 bg-gradient-to-br from-emerald-100 via-teal-100 to-cyan-100">
-      
+    <div
+      class="flex-1 p-6 lg:p-10 rounded-3xl flex flex-col justify-center items-center shadow-xl border-2 border-white/50 bg-gradient-to-br from-emerald-100 via-teal-100 to-cyan-100">
+
       <!-- Role Image Placeholder -->
       <div class="w-full max-w-md mb-8">
-        <div class="w-full h-64 rounded-3xl shadow-2xl overflow-hidden flex items-center justify-center border-4 border-white/50 bg-gradient-to-br from-emerald-200 via-teal-200 to-cyan-200">
+        <div
+          class="w-full h-64 rounded-3xl shadow-2xl overflow-hidden flex items-center justify-center border-4 border-white/50 bg-gradient-to-br from-emerald-200 via-teal-200 to-cyan-200">
           <span class="text-9xl drop-shadow-2xl">🚚</span>
         </div>
       </div>
-      
+
       <div class="text-center max-w-md">
         <h2 class="text-3xl lg:text-4xl font-black text-gray-800 mb-8">مرحباً بعودتك</h2>
-        
+
         <!-- Features -->
         <div class="grid grid-cols-2 gap-4 mb-8">
-          <div class="bg-white/95 p-5 rounded-xl shadow-lg hover:-translate-y-1 transition-all duration-300 border-2 border-white/50">
+          <div
+            class="bg-white/95 p-5 rounded-xl shadow-lg hover:-translate-y-1 transition-all duration-300 border-2 border-white/50">
             <span class="text-4xl mb-2 block">📍</span>
             <h4 class="font-bold text-gray-800 mb-1">تتبع الطلبات</h4>
             <p class="text-gray-600 text-sm">تتبع شحناتك في الوقت الحقيقي</p>
           </div>
-          
-          <div class="bg-white/95 p-5 rounded-xl shadow-lg hover:-translate-y-1 transition-all duration-300 border-2 border-white/50">
+
+          <div
+            class="bg-white/95 p-5 rounded-xl shadow-lg hover:-translate-y-1 transition-all duration-300 border-2 border-white/50">
             <span class="text-4xl mb-2 block">🔔</span>
             <h4 class="font-bold text-gray-800 mb-1">ابقَ محدثاً</h4>
             <p class="text-gray-600 text-sm">احصل على إشعارات فورية</p>
           </div>
         </div>
-        
+
         <!-- Stats -->
         <div class="flex justify-center gap-12">
           <div class="text-center">
-            <h3 class="text-4xl font-black bg-gradient-to-br from-emerald-600 to-teal-600 bg-clip-text text-transparent">+1000</h3>
+            <h3
+              class="text-4xl font-black bg-gradient-to-br from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+              +1000</h3>
             <p class="text-gray-700 font-semibold">مستخدم نشط</p>
           </div>
           <div class="text-center">
-            <h3 class="text-4xl font-black bg-gradient-to-br from-emerald-600 to-teal-600 bg-clip-text text-transparent">99%</h3>
+            <h3
+              class="text-4xl font-black bg-gradient-to-br from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+              99%</h3>
             <p class="text-gray-700 font-semibold">معدل الرضا</p>
           </div>
         </div>
