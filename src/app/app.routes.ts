@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 import { roleGuard } from './shared/guards/role.guard';
 import { noAuthGuard } from './shared/guards/auth.guard';
 import { CustomerGuard } from './shared/guards/customer.guard';
-import { CustomerGuard } from './shared/guards/customer.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -15,7 +14,7 @@ export const routes: Routes = [
         path: 'dashboard',
         loadComponent: () =>
           import('./customer/pages/dashboard/dashboard.component')
-            .then(m => m.CustomerDashboardComponent)  
+            .then(m => m.CustomerDashboardComponent)
       },
       {
         path: 'packages',
