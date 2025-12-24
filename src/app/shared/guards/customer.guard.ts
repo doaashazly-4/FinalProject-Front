@@ -6,7 +6,7 @@ export class CustomerGuard implements CanActivate {
   constructor(private router: Router) { }
 
   canActivate(): boolean {
-    const customerId = localStorage.getItem('customer_id');   
+    const customerId = localStorage.getItem('customer_id');
     console.log(customerId);
     if (!customerId) {
       console.warn('No customer_id found in session');

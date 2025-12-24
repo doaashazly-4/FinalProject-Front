@@ -222,8 +222,16 @@ export class CustomerDataService {
 
 
   // ========== Deliveries ==========
+  // getDeliveries() {
+  //   const customerId = this.getCustomerId();
+  //   return this.http.get<IncomingDelivery[]>(
+  //     `${environment.apiUrl}/Customer/${customerId}/packages`
+  //   );
+  // }
+
   getDeliveries(): Observable<IncomingDelivery[]> {
-    return this.http.get<IncomingDelivery[]>(`${this.apiUrl}/orders`);
+    console.log('🧪 Using MOCK deliveries');
+    return of(MOCK_DELIVERIES);
   }
 
 
