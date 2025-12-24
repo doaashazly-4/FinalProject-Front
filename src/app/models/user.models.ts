@@ -97,7 +97,7 @@ export interface CourierRegisterDTO extends UserRegisterDTO {
   address: string;
   birthDate: string;
   gender: string;
-  vehicleType: string;
+  vehicleType: Number;
   licenseNumber: string;
   maxWeight: number;
   status?: string;

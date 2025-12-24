@@ -1,12 +1,32 @@
 import { Routes } from '@angular/router';
 import { roleGuard } from './shared/guards/role.guard';
 import { noAuthGuard } from './shared/guards/auth.guard';
+import { CustomerGuard } from './shared/guards/customer.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
 
   {
-    path: 'register-role',
+    path: 'customer',
+    canActivate: [CustomerGuard],
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./customer/pages/dashboard/dashboard.component')
+            .then(m => m.CustomerDashboardComponent)  
+      },
+      {
+        path: 'packages',
+        loadComponent: () =>
+          import('./customer/pages/deliveries/deliveries.component')
+            .then(m => m.DeliveriesComponent)
+      }
+    ]
+  },
+
+  {
+    path: 'role-selection',
     canActivate: [noAuthGuard],
     loadComponent: () => import('./auth/auth/role-selection/role-selection.component').then(m => m.RoleSelectionComponent)
   },
@@ -50,6 +70,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./customer/pages/order-detail/order-detail.component')
         .then(m => m.OrderDetailComponent)
+  },
+
+  {
+    path: 'supplier',
+    canActivate: [roleGuard(['supplier'])],
+    loadChildren: () =>
+      import('./supplier/supplier.routes')
+        .then(m => m.SUPPLIER_ROUTES)
   },
 
   {

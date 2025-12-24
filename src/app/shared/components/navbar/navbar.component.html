@@ -49,7 +49,7 @@
     <!-- الأزرار -->
     <div class="flex items-center gap-3">
       <ng-container *ngIf="!isAuthenticated; else loggedIn">
-        <a routerLink="/login" 
+        <a routerLink="/role-selection" 
            class="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-primary-green text-primary-green font-semibold hover:bg-primary-green/10 hover:-translate-y-0.5 transition-all duration-300">
           <span>🔑</span>
           <span>تسجيل الدخول</span>
@@ -143,7 +143,7 @@
          class="w-full text-center py-3 px-4 rounded-xl text-gray-600 font-semibold bg-gray-50 hover:bg-primary-green/10 hover:text-primary-green transition-all duration-300">
         سجل كمُرسل أو مندوب
       </a>
-      <a routerLink="/login" 
+      <a routerLink="/role-selection" 
          routerLinkActive="bg-primary-green/10 text-primary-green" 
          (click)="closeMenu()"
          class="w-full text-center py-3 px-4 rounded-xl text-gray-600 font-semibold bg-gray-50 hover:bg-primary-green/10 hover:text-primary-green transition-all duration-300">

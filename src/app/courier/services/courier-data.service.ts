@@ -101,16 +101,112 @@ export class CourierDataService {
 
   constructor(private http: HttpClient) { }
 
+  // ========== Online Status & Location ==========
 
-  deliverPackage(
+  /**
+   * 1️⃣ Get Online Status
+   * GET /api/Courier/Online
+   */
+  getOnlineStatus(): Observable<boolean> {
+    return this.http.get<boolean>(`${this.apiUrl}/Online`);
+  }
+
+  /**
+   * 2️⃣ Add Location
+   * POST /api/Courier/AddLocation
+   */
+  addLocation(lat: number, lng: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/AddLocation`, { lat, lng });
+  }
+
+  /**
+   * 3️⃣ Toggle Online Status
+   * POST /api/Courier/ToggleOnlineStatus
+   * Note: This method is implemented below with backward compatibility
+   */
+
+  /**
+   * 4️⃣ Match Courier
+   * POST /api/Courier/MatchCourier
+   */
+  matchCourier(pickupLat: number, pickupLng: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/MatchCourier`, {
+      pickupLat,
+      pickupLng
+    });
+  }
+
+  // ========== Packages ==========
+
+  /**
+   * 5️⃣ My Assigned Packages
+   * GET /api/Courier/MyAssignedPackages
+   */
+  getMyAssignedPackages(): Observable<DeliveryJob[]> {
+    return this.http.get<DeliveryJob[]>(`${this.apiUrl}/MyAssignedPackages`);
+  }
+
+  /**
+   * 6️⃣ Accept Package
+   * POST /api/Courier/AcceptPackage/{packageId}
+   */
+  acceptPackage(packageId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/AcceptPackage/${packageId}`, {});
+  }
+
+  /**
+   * 7️⃣ Reject Package
+   * POST /api/Courier/RejectPackage/{packageId}
+   */
+  rejectPackage(packageId: number, reason: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/RejectPackage/${packageId}`, reason);
+  }
+
+  /**
+   * 8️⃣ Update Status
+   * POST /api/Courier/UpdateStatus/{packageId}?status={status}
+   */
+  updateStatus(packageId: number, status: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/UpdateStatus/${packageId}?status=${status}`, {});
+  }
+
+  /**
+   * 9️⃣ Deliver Package
+   * POST /api/Courier/DeliverPackage/{packageId}
+   */
+  deliverPackage(packageId: number, customerOTP: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/DeliverPackage/${packageId}`,
+      { customerOTP }
+    );
+  }
+
+
+  /**
+   * 🔟 Fail Delivery
+   * POST /api/Courier/FailDelivery/{packageId}
+   */
+  failDelivery(packageId: number, reason: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/FailDelivery/${packageId}`, reason);
+  }
+
+  /**
+   * 1️⃣1️⃣ Delete Courier
+   * DELETE /api/Courier/{id}
+   */
+  deleteCourier(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
+  }
+
+
+  // Legacy method - kept for backward compatibility
+  // Use deliverPackage() method above instead
+  deliverPackageLegacy(
     packageId: number,
     otp: string,
     signatureUrl?: string
   ) {
-    return this.http.post(`/api/packages/${packageId}/deliver`, {
-      customerOTP: otp,
-      signatureUrl
-    });
+    return this.deliverPackage(packageId, otp);
   }
 
   verifyDeliveryOTP(packageId: number, otp: string) {
@@ -124,9 +220,7 @@ export class CourierDataService {
 
   // ========== Stats ==========
   getStats(): Observable<CourierStat[]> {
-    return this.http.get<CourierStat[]>(`${this.apiUrl}/stats`).pipe(
-      catchError(() => of(this.getMockStats()))
-    );
+    return this.http.get<CourierStat[]>(`${this.apiUrl}/stats`);
   }
 
   checkOTPStatus(packageId: number) {
@@ -138,34 +232,43 @@ export class CourierDataService {
 
   // ========== Jobs ==========
   getAvailableJobs(): Observable<DeliveryJob[]> {
-    return this.http.get<DeliveryJob[]>(`${this.apiUrl}/jobs/available`).pipe(
-      catchError(() => of(this.getMockAvailableJobs()))
-    );
+    return this.http.get<DeliveryJob[]>(`${this.apiUrl}/jobs/available`);
   }
 
   getMyJobs(): Observable<DeliveryJob[]> {
-    return this.http.get<DeliveryJob[]>(`${this.apiUrl}/jobs`).pipe(
-      catchError(() => of(this.getMockMyJobs()))
+    // Try new API first, fallback to old
+    return this.http.get<DeliveryJob[]>(`${this.apiUrl}/MyAssignedPackages`).pipe(
+      catchError(() => this.http.get<DeliveryJob[]>(`${this.apiUrl}/jobs`))
     );
   }
 
   getActiveJobs(): Observable<DeliveryJob[]> {
-    return this.http.get<DeliveryJob[]>(`${this.apiUrl}/jobs/active`).pipe(
-      catchError(() => of(this.getMockMyJobs().filter(j => !['delivered', 'failed', 'returned'].includes(j.status))))
-    );
+    return this.http.get<DeliveryJob[]>(`${this.apiUrl}/jobs/active`);
   }
 
   getJobById(id: string): Observable<DeliveryJob> {
-    return this.http.get<DeliveryJob>(`${this.apiUrl}/jobs/${id}`).pipe(
-      catchError(() => of(this.getMockMyJobs().find(j => j.id === id)!))
-    );
+    return this.http.get<DeliveryJob>(`${this.apiUrl}/jobs/${id}`);
   }
 
   acceptJob(jobId: string): Observable<DeliveryJob> {
+    // Try new API first, fallback to old
+    const packageId = parseInt(jobId);
+    if (!isNaN(packageId)) {
+      return this.http.post<DeliveryJob>(`${this.apiUrl}/AcceptPackage/${packageId}`, {}).pipe(
+        catchError(() => this.http.post<DeliveryJob>(`${this.apiUrl}/jobs/${jobId}/accept`, {}))
+      );
+    }
     return this.http.post<DeliveryJob>(`${this.apiUrl}/jobs/${jobId}/accept`, {});
   }
 
   rejectJob(jobId: string, reason?: string): Observable<void> {
+    // Try new API first, fallback to old
+    const packageId = parseInt(jobId);
+    if (!isNaN(packageId) && reason) {
+      return this.http.post<void>(`${this.apiUrl}/RejectPackage/${packageId}`, reason).pipe(
+        catchError(() => this.http.post<void>(`${this.apiUrl}/jobs/${jobId}/reject`, { reason }))
+      );
+    }
     return this.http.post<void>(`${this.apiUrl}/jobs/${jobId}/reject`, { reason });
   }
 
@@ -182,6 +285,13 @@ export class CourierDataService {
   }
 
   failJob(jobId: string, reason: string): Observable<DeliveryJob> {
+    // Try new API first, fallback to old
+    const packageId = parseInt(jobId);
+    if (!isNaN(packageId)) {
+      return this.http.post<DeliveryJob>(`${this.apiUrl}/FailDelivery/${packageId}`, reason).pipe(
+        catchError(() => this.http.post<DeliveryJob>(`${this.apiUrl}/jobs/${jobId}/fail`, { reason }))
+      );
+    }
     return this.http.post<DeliveryJob>(`${this.apiUrl}/jobs/${jobId}/fail`, { reason });
   }
 
@@ -203,25 +313,29 @@ export class CourierDataService {
     return this.http.patch<CourierProfile>(`${this.apiUrl}/availability`, { isAvailable });
   }
 
-  toggleOnlineStatus(isOnline: boolean): Observable<CourierProfile> {
-    return this.http.patch<CourierProfile>(`${this.apiUrl}/online-status`, { isOnline });
+  toggleOnlineStatus(isOnline?: boolean): Observable<CourierProfile | any> {
+    // New API doesn't require parameters - just toggles status
+    return this.http.post<any>(`${this.apiUrl}/ToggleOnlineStatus`, {}).pipe(
+      catchError(() => {
+        // Fallback to old API if provided
+        if (isOnline !== undefined) {
+          return this.http.patch<CourierProfile>(`${this.apiUrl}/online-status`, { isOnline });
+        }
+        throw new Error('Failed to toggle online status');
+      })
+    );
   }
 
   updateLocation(lat: number, lng: number): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/location`, { latitude: lat, longitude: lng });
+    // Try new API first, fallback to old
+    return this.http.post<void>(`${this.apiUrl}/AddLocation`, { lat, lng }).pipe(
+      catchError(() => this.http.post<void>(`${this.apiUrl}/location`, { latitude: lat, longitude: lng }))
+    );
   }
 
   // ========== Earnings ==========
   getEarnings(): Observable<CourierEarnings> {
-    return this.http.get<CourierEarnings>(`${this.apiUrl}/earnings`).pipe(
-      catchError(() => of({
-        today: 125,
-        thisWeek: 875,
-        thisMonth: 3250,
-        pending: 250,
-        totalEarned: 15750
-      }))
-    );
+    return this.http.get<CourierEarnings>(`${this.apiUrl}/earnings`);
   }
 
   // ========== Support ==========
@@ -233,167 +347,4 @@ export class CourierDataService {
     return this.http.post<any>(`${this.apiUrl}/tickets`, ticket);
   }
 
-  // ========== Mock Data ==========
-  private getMockStats(): CourierStat[] {
-    return [
-      { label: 'التوصيلات اليوم', value: '8', icon: 'bi-box-seam', trend: '+2', color: 'green' },
-      { label: 'في الطريق', value: '2', icon: 'bi-truck', color: 'blue' },
-      { label: 'أرباح اليوم', value: '125 ج.م', icon: 'bi-cash', trend: '+15%', color: 'emerald' },
-      { label: 'التقييم', value: '4.9', icon: 'bi-star-fill', color: 'yellow' }
-    ];
-  }
-
-  private getMockAvailableJobs(): DeliveryJob[] {
-    return [
-      {
-        id: 'job-1',
-        trackingNumber: 'PKG-2024-201',
-        description: 'مستندات مهمة',
-        weight: 0.5,
-        status: 'available',
-        pickupAddress: 'القاهرة - المعادي، شارع 9، عمارة 12',
-        deliveryAddress: 'الجيزة - المهندسين، شارع شهاب، عمارة 5',
-        pickupLocation: { lat: 29.9667, lng: 31.2833, address: 'القاهرة - المعادي، شارع 9، عمارة 12' },
-        dropoffLocation: { lat: 30.0667, lng: 31.2, address: 'الجيزة - المهندسين، شارع شهاب، عمارة 5' },
-        senderName: 'شركة الأعمال',
-        senderPhone: '01012345678',
-        receiverName: 'أحمد محمد',
-        receiverPhone: '01098765432',
-        customerName: 'أحمد محمد',
-        customerPhone: '01098765432',
-        codAmount: 0,
-        items: 'مستندات',
-        createdAt: new Date(Date.now() - 3600000),
-        deliveryFee: 35,
-        courierEarning: 25,
-        distance: 12.5
-      },
-      {
-        id: 'job-2',
-        trackingNumber: 'PKG-2024-202',
-        description: 'هدية - قابل للكسر',
-        weight: 2.0,
-        status: 'available',
-        pickupAddress: 'القاهرة - مصر الجديدة، شارع النزهة',
-        deliveryAddress: 'القاهرة - مدينة نصر، شارع عباس العقاد',
-        pickupLocation: { lat: 30.1167, lng: 31.3333, address: 'القاهرة - مصر الجديدة، شارع النزهة' },
-        dropoffLocation: { lat: 30.0667, lng: 31.3333, address: 'القاهرة - مدينة نصر، شارع عباس العقاد' },
-        senderName: 'سارة علي',
-        senderPhone: '01112345678',
-        receiverName: 'نورة محمود',
-        receiverPhone: '01187654321',
-        customerName: 'نورة محمود',
-        customerPhone: '01187654321',
-        codAmount: 300,
-        items: 'هدية',
-        createdAt: new Date(Date.now() - 7200000),
-        deliveryFee: 45,
-        courierEarning: 32,
-        isFragile: true,
-        distance: 8.3
-      },
-      {
-        id: 'job-3',
-        trackingNumber: 'PKG-2024-203',
-        description: 'ملابس',
-        weight: 1.5,
-        status: 'available',
-        pickupAddress: 'القاهرة - التجمع الخامس',
-        deliveryAddress: 'القاهرة - الرحاب',
-        pickupLocation: { lat: 30.0333, lng: 31.4667, address: 'القاهرة - التجمع الخامس' },
-        dropoffLocation: { lat: 30.0667, lng: 31.4833, address: 'القاهرة - الرحاب' },
-        senderName: 'متجر الأزياء',
-        senderPhone: '01234567890',
-        receiverName: 'خالد العمري',
-        receiverPhone: '01076543210',
-        customerName: 'خالد العمري',
-        customerPhone: '01076543210',
-        codAmount: 250,
-        items: 'ملابس',
-        createdAt: new Date(Date.now() - 1800000),
-        deliveryFee: 30,
-        courierEarning: 22,
-        distance: 5.2
-      }
-    ];
-  }
-
-  private getMockMyJobs(): DeliveryJob[] {
-    return [
-      {
-        id: 'myjob-1',
-        trackingNumber: 'PKG-2024-198',
-        description: 'طرد إلكتروني',
-        weight: 3.0,
-        status: 'in_transit',
-        pickupAddress: 'القاهرة - وسط البلد',
-        deliveryAddress: 'القاهرة - المقطم، الهضبة الوسطى',
-        pickupLocation: { lat: 30.0444, lng: 31.2357, address: 'القاهرة - وسط البلد' },
-        dropoffLocation: { lat: 30.1167, lng: 31.3167, address: 'القاهرة - المقطم، الهضبة الوسطى' },
-        senderName: 'متجر الإلكترونيات',
-        senderPhone: '01055555555',
-        receiverName: 'محمد حسن',
-        receiverPhone: '01066666666',
-        customerName: 'محمد حسن',
-        customerPhone: '01066666666',
-        codAmount: 500,
-        items: 'هاتف محمول، شاحن',
-        createdAt: new Date(Date.now() - 86400000),
-        acceptedAt: new Date(Date.now() - 3600000),
-        pickedUpAt: new Date(Date.now() - 1800000),
-        deliveryFee: 50,
-        courierEarning: 35,
-        isFragile: true,
-        requiresSignature: true
-      },
-      {
-        id: 'myjob-2',
-        trackingNumber: 'PKG-2024-197',
-        description: 'كتب',
-        weight: 4.5,
-        status: 'accepted',
-        pickupAddress: 'القاهرة - الزمالك',
-        deliveryAddress: 'القاهرة - شبرا',
-        pickupLocation: { lat: 30.0667, lng: 31.2167, address: 'القاهرة - الزمالك' },
-        dropoffLocation: { lat: 30.0833, lng: 31.2833, address: 'القاهرة - شبرا' },
-        senderName: 'مكتبة النور',
-        senderPhone: '01077777777',
-        receiverName: 'علي أحمد',
-        receiverPhone: '01088888888',
-        customerName: 'علي أحمد',
-        customerPhone: '01088888888',
-        codAmount: 200,
-        items: 'كتب مدرسية',
-        createdAt: new Date(Date.now() - 43200000),
-        acceptedAt: new Date(Date.now() - 600000),
-        deliveryFee: 40,
-        courierEarning: 28
-      },
-      {
-        id: 'myjob-3',
-        trackingNumber: 'PKG-2024-195',
-        description: 'أدوات مكتبية',
-        weight: 2.0,
-        status: 'delivered',
-        pickupAddress: 'القاهرة - مدينة نصر',
-        deliveryAddress: 'القاهرة - المعادي',
-        pickupLocation: { lat: 30.0667, lng: 31.3333, address: 'القاهرة - مدينة نصر' },
-        dropoffLocation: { lat: 29.9667, lng: 31.2833, address: 'القاهرة - المعادي' },
-        senderName: 'شركة المستلزمات',
-        senderPhone: '01099999999',
-        receiverName: 'سامي يوسف',
-        receiverPhone: '01011111111',
-        customerName: 'سامي يوسف',
-        customerPhone: '01011111111',
-        codAmount: 150,
-        items: 'أقلام، ورق، مجلدات',
-        createdAt: new Date(Date.now() - 172800000),
-        acceptedAt: new Date(Date.now() - 86400000),
-        pickedUpAt: new Date(Date.now() - 82800000),
-        deliveredAt: new Date(Date.now() - 79200000),
-        deliveryFee: 35,
-        courierEarning: 25
-      }
-    ];
-  }
 }

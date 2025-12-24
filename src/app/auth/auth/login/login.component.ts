@@ -4,6 +4,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService, ClientLoginDTO } from '../../../shared/services/auth.service';
 import { UserLoginDTO } from '../../../models/user.models';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -26,7 +28,8 @@ export class LoginComponent implements OnInit {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private http: HttpClient
   ) {
     // Form for Supplier and Courier (userName/password)
     this.loginForm = this.fb.group({
@@ -43,12 +46,19 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
+
+    if (!localStorage.getItem('customer_id')) {
+      localStorage.setItem('customer_id', 'DEV_CUSTOMER');
+      localStorage.setItem('customer_mobile', '01011111111');
+      this.router.navigate(['/customer/dashboard']);
+    }
+
     // Load saved data
     const savedUserName = localStorage.getItem('rememberedUserName');
     if (savedUserName) {
-      this.loginForm.patchValue({ 
+      this.loginForm.patchValue({
         userName: savedUserName,
-        rememberMe: true 
+        rememberMe: true
       });
     }
 
@@ -85,6 +95,7 @@ export class LoginComponent implements OnInit {
     }
   }
 
+
   onSupplierCourierLogin(): void {
     if (this.loginForm.invalid || this.isLoading) {
       this.markFormAsTouched(this.loginForm);
@@ -111,7 +122,7 @@ export class LoginComponent implements OnInit {
     if (this.selectedSubRole) {
       this.authService.login(loginDTO, this.selectedSubRole).subscribe({
         next: () => this.handleLoginSuccess(this.selectedSubRole!),
-      error: () => this.handleLoginError('اسم المستخدم أو كلمة المرور غير صحيحة')
+        error: () => this.handleLoginError('اسم المستخدم أو كلمة المرور غير صحيحة')
       });
       return;
     }
@@ -135,36 +146,50 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  onOtpLogin(): void {
+    console.log('🔐 OTP login clicked (mock mode)');
+
+    // TEMP: simulate successful customer login
+    localStorage.setItem('customer_id', 'mock-customer-001');
+    localStorage.setItem('pickgo_role', 'customer');
+
+    this.router.navigate(['/customer/dashboard']);
+  }
+
+
   onClientLogin(): void {
-    if (this.clientLoginForm.invalid || this.isLoading) {
+    if (this.clientLoginForm.invalid) {
       this.markFormAsTouched(this.clientLoginForm);
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage = '';
-    const formValue = this.clientLoginForm.value;
+    const mobile = this.clientLoginForm.value.mobileNumber;
 
-    // Save mobile if remember me is checked
-    if (formValue.rememberMe) {
-      localStorage.setItem('rememberedMobile', formValue.mobileNumber);
-    } else {
-      localStorage.removeItem('rememberedMobile');
+    // Remember mobile
+    if (this.clientLoginForm.value.rememberMe) {
+      localStorage.setItem('rememberedMobile', mobile);
     }
 
-    const clientDTO: ClientLoginDTO = {
-      mobileNumber: formValue.mobileNumber
-    };
+    // 🔹 Call EXISTING backend endpoint
+    this.isLoading = true;
+    this.http.post<any>(`${environment.apiUrl}/Customer/join`, {
+      mobileNumber: mobile
+    }).subscribe({
+      next: (res) => {
+        // Expected: { customerId, ... }
+        localStorage.setItem('customer_id', res.customerId);
+        localStorage.setItem('customer_mobile', mobile);
 
-    this.authService.loginClient(clientDTO).subscribe({
-      next: (response) => {
-        this.handleLoginSuccess('customer');
+        this.router.navigate(['/customer/dashboard']);
+        this.isLoading = false;
       },
-      error: (error) => {
-        this.handleLoginError('رقم الجوال غير مسجل في النظام');
+      error: () => {
+        this.errorMessage = 'تعذر تسجيل العميل';
+        this.isLoading = false;
       }
     });
   }
+
 
   private markFormAsTouched(form: FormGroup): void {
     Object.values(form.controls).forEach(control => {

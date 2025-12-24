@@ -3,8 +3,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError, of } from 'rxjs';
 import { tap, catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { 
-  SupplierRegisterDTO, 
+import {
+  SupplierRegisterDTO,
   CourierRegisterDTO,
   AdminRegisterDTO,
   UserLoginDTO,
@@ -25,11 +25,13 @@ export class AuthService {
   private readonly STORAGE_KEY = 'pickgo_role';
   private readonly TOKEN_KEY = 'pickgo_token';
   private roleSignal = signal<UserRole>(this.readFromStorage());
-  
+
   // API base - call backend directly
-  private apiUrl = 'https://localhost:7180/api/Auth';
+  private apiUrl = `${environment.apiUrl}/Auth`;
+
 
   constructor(private http: HttpClient) {
+
     this.loadUserFromStorage();
   }
 
@@ -46,7 +48,7 @@ export class AuthService {
       localStorage.setItem('user_id', 'dev-user-id');
       localStorage.setItem('user_name', role === 'admin' ? 'مدير النظام' : 'مستخدم تجريبي');
       localStorage.setItem('user_email', `${role}@test.com`);
-      localStorage.setItem('token_expiration', new Date(Date.now() + 24*60*60*1000).toISOString());
+      localStorage.setItem('token_expiration', new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString());
       this.roleSignal.set(role);
       console.log(`✅ Dev mode: Role set to "${role}". Refresh or navigate to /${role}`);
     }
@@ -79,7 +81,7 @@ export class AuthService {
       birthDate: birthDate,
       gender: dto.gender
     };
-    
+
     console.log('Registering Supplier with data:', supplierData);
     return this.http.post<ApiResponse>(`${this.apiUrl}/Register/Supplier`, supplierData)
       .pipe(
@@ -116,7 +118,7 @@ export class AuthService {
       vehcelLicensePhotoFront: dto.vehcelLicensePhotoFront || null,
       vehcelLicensePhotoBack: dto.vehcelLicensePhotoBack || null
     };
-    
+
     console.log('Registering Courier with data:', courierData);
     return this.http.post<ApiResponse>(`${this.apiUrl}/Register/Courier`, courierData)
       .pipe(
@@ -140,7 +142,7 @@ export class AuthService {
     }
   ): Observable<ApiResponse> {
     const formData = new FormData();
-    
+
     // Add text fields
     formData.append('userName', dto.userName);
     formData.append('email', dto.email);
@@ -148,14 +150,14 @@ export class AuthService {
     formData.append('address', dto.address);
     formData.append('birthDate', dto.birthDate);
     formData.append('gender', dto.gender);
-    formData.append('vehicleType', dto.vehicleType);
+    formData.append('vehicleType', String(dto.vehicleType));
     formData.append('licenseNumber', dto.licenseNumber);
     formData.append('maxWeight', String(dto.maxWeight));
     formData.append('status', dto.status || 'Available');
     formData.append('isAvailable', 'true');
     formData.append('isOnline', 'false');
     formData.append('rating', '0');
-    
+
     // Add file fields
     if (files.photo) {
       formData.append('photoUrl', files.photo, files.photo.name);
@@ -172,9 +174,9 @@ export class AuthService {
     if (files.vehicleLicensePhotoBack) {
       formData.append('vehcelLicensePhotoBack', files.vehicleLicensePhotoBack, files.vehicleLicensePhotoBack.name);
     }
-    
+
     console.log('Registering Courier with files');
-    
+
     // Don't set Content-Type header - let browser set it with boundary for multipart/form-data
     return this.http.post<ApiResponse>(`${this.apiUrl}/Register/Courier`, formData)
       .pipe(
@@ -192,7 +194,7 @@ export class AuthService {
       email: dto.email,
       password: dto.password
     };
-    
+
     console.log('Registering Admin with data:', adminData);
     return this.http.post<ApiResponse>(`${this.apiUrl}/Register/Admin`, adminData)
       .pipe(
@@ -204,7 +206,7 @@ export class AuthService {
   private handleRegistrationError(error: any, role: string): Observable<never> {
     console.error(`${role} registration error:`, error);
     let errorMessage = `فشل في تسجيل ${role}`;
-    
+
     if (error.error?.message) {
       errorMessage = error.error.message;
     } else if (error.error?.errors) {
@@ -215,17 +217,17 @@ export class AuthService {
     } else if (error.status === 409) {
       errorMessage = 'البريد الإلكتروني أو اسم المستخدم مسجل مسبقاً';
     }
-    
+
     return throwError(() => errorMessage);
   }
 
   // ========== LOGIN METHODS ==========
-  
+
   login(dto: UserLoginDTO, role: UserRole): Observable<LoginResponse> {
     if (!role) {
       return throwError(() => 'Role is required');
     }
-    
+
     const roleCapitalized = role.charAt(0).toUpperCase() + role.slice(1);
     return this.http.post<LoginResponse>(`${this.apiUrl}/Login/${roleCapitalized}`, dto)
       .pipe(
@@ -273,7 +275,7 @@ export class AuthService {
     localStorage.setItem('user_name', response.userName || '');
     localStorage.setItem('user_email', response.email || '');
     localStorage.setItem('token_expiration', response.expiration);
-    
+
     this.roleSignal.set(role);
   }
 
@@ -281,7 +283,7 @@ export class AuthService {
     const token = localStorage.getItem(this.TOKEN_KEY);
     const role = localStorage.getItem(this.STORAGE_KEY) as UserRole;
     const expiration = localStorage.getItem('token_expiration');
-    
+
     if (token && role && expiration && new Date(expiration) > new Date()) {
       this.roleSignal.set(role);
     } else {
@@ -315,11 +317,11 @@ export class AuthService {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  getCurrentUser(): { 
-    role: UserRole; 
-    userId: string; 
-    userName: string; 
-    email: string; 
+  getCurrentUser(): {
+    role: UserRole;
+    userId: string;
+    userName: string;
+    email: string;
   } {
     return {
       role: this.roleSignal(),
@@ -343,7 +345,7 @@ export class AuthService {
         if (userData.userName) localStorage.setItem('user_name', userData.userName);
         if (userData.email) localStorage.setItem('user_email', userData.email);
       }
-      localStorage.setItem('token_expiration', new Date(Date.now() + 24*60*60*1000).toISOString());
+      localStorage.setItem('token_expiration', new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString());
       this.roleSignal.set(role);
     }
   }
@@ -351,7 +353,7 @@ export class AuthService {
   hasRole(requiredRole: UserRole | UserRole[]): boolean {
     const currentRole = this.roleSignal();
     if (!currentRole) return false;
-    
+
     if (Array.isArray(requiredRole)) {
       return requiredRole.includes(currentRole);
     }
