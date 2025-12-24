@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { SupplierDataService, CreateParcelDTO, DeliveryFeeResponse, SupplierProfile } from '../../services/supplier-data.service';
+import * as L from 'leaflet';
 
 @Component({
   selector: 'app-create-shipment',
@@ -11,7 +12,7 @@ import { SupplierDataService, CreateParcelDTO, DeliveryFeeResponse, SupplierProf
   templateUrl: './create-shipment.component.html',
   styleUrl: './create-shipment.component.css'
 })
-export class CreateShipmentComponent implements OnInit {
+export class CreateShipmentComponent implements OnInit, AfterViewInit {
   shipmentForm!: FormGroup;
   profile: SupplierProfile | null = null;
   deliveryFee: DeliveryFeeResponse | null = null;
@@ -26,6 +27,12 @@ export class CreateShipmentComponent implements OnInit {
   currentStep = 1;
   totalSteps = 3;
 
+  // Leaflet Map
+  private map: L.Map | undefined;
+  private marker: L.Marker | undefined;
+  deliveryLat: number | null = null;
+  deliveryLng: number | null = null;
+
   constructor(
     private fb: FormBuilder,
     private dataService: SupplierDataService,
@@ -35,6 +42,74 @@ export class CreateShipmentComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadProfile();
+  }
+
+  ngAfterViewInit(): void {
+    // Initialize map if we start at step 1
+    if (this.currentStep === 1) {
+      setTimeout(() => {
+        this.initMap();
+      }, 100); // Small delay to ensure DOM is ready
+    }
+  }
+
+  private initMap(): void {
+    const mapContainer = document.getElementById('map');
+    if (!mapContainer) return;
+
+    // Default center (Cairo)
+    const defaultLat = 30.0444;
+    const defaultLng = 31.2357;
+
+    this.map = L.map('map').setView([defaultLat, defaultLng], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(this.map);
+
+    // Click handler
+    this.map.on('click', (e: L.LeafletMouseEvent) => {
+      this.updateMarker(e.latlng.lat, e.latlng.lng);
+    });
+
+    // Fix for map resizing issues
+    setTimeout(() => {
+      this.map?.invalidateSize();
+    }, 200);
+  }
+
+  private updateMarker(lat: number, lng: number): void {
+    this.deliveryLat = lat;
+    this.deliveryLng = lng;
+
+    if (this.marker) {
+      this.marker.setLatLng([lat, lng]);
+    } else {
+      if (this.map) {
+        this.marker = L.marker([lat, lng], { draggable: true }).addTo(this.map);
+        
+        // Handle drag end
+        this.marker.on('dragend', () => {
+          const position = this.marker!.getLatLng();
+          this.deliveryLat = position.lat;
+          this.deliveryLng = position.lng;
+          this.updateFormCoordinates();
+        });
+      }
+    }
+    
+    this.updateFormCoordinates();
+  }
+
+  private updateFormCoordinates(): void {
+    if (this.deliveryLat && this.deliveryLng) {
+      // Update the form control with a string representation
+      // This satisfies the 'required' validator
+      this.shipmentForm.patchValue({
+        deliveryAddress: `${this.deliveryLat.toFixed(6)},${this.deliveryLng.toFixed(6)}`
+      });
+      this.shipmentForm.get('deliveryAddress')?.markAsTouched();
+    }
   }
 
   initForm(): void {
@@ -94,6 +169,17 @@ export class CreateShipmentComponent implements OnInit {
   prevStep(): void {
     if (this.currentStep > 1) {
       this.currentStep--;
+      
+      // Re-initialize map if going back to step 1
+      if (this.currentStep === 1) {
+        setTimeout(() => {
+          this.initMap();
+          // Restore marker if exists
+          if (this.deliveryLat && this.deliveryLng) {
+            this.updateMarker(this.deliveryLat, this.deliveryLng);
+          }
+        }, 100);
+      }
     }
   }
 
@@ -231,6 +317,17 @@ export class CreateShipmentComponent implements OnInit {
     });
     this.currentStep = 1;
     this.deliveryFee = null;
+    this.deliveryLat = null;
+    this.deliveryLng = null;
+    this.marker = undefined;
+    if (this.map) {
+      this.map.remove();
+      this.map = undefined;
+    }
+    // Re-init map for new order
+    setTimeout(() => {
+        this.initMap();
+    }, 100);
   }
 
   goToShipments(): void {
