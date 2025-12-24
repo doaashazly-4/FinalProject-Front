@@ -47,11 +47,6 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
 
-    if (!localStorage.getItem('customer_id')) {
-      localStorage.setItem('customer_id', 'DEV_CUSTOMER');
-      localStorage.setItem('customer_mobile', '01011111111');
-      this.router.navigate(['/customer/dashboard']);
-    }
 
     // Load saved data
     const savedUserName = localStorage.getItem('rememberedUserName');
@@ -147,13 +142,13 @@ export class LoginComponent implements OnInit {
   }
 
   onOtpLogin(): void {
-    console.log('🔐 OTP login clicked (mock mode)');
+    // console.log('🔐 OTP login clicked (mock mode)');
 
-    // TEMP: simulate successful customer login
-    localStorage.setItem('customer_id', 'mock-customer-001');
-    localStorage.setItem('pickgo_role', 'customer');
+    // // TEMP: simulate successful customer login
+    // localStorage.setItem('customer_id', 'mock-customer-001');
+    // localStorage.setItem('pickgo_role', 'customer');
 
-    this.router.navigate(['/customer/dashboard']);
+    // this.router.navigate(['/customer/dashboard']);
   }
 
 
@@ -173,17 +168,20 @@ export class LoginComponent implements OnInit {
     // 🔹 Call EXISTING backend endpoint
     this.isLoading = true;
     this.http.post<any>(`${environment.apiUrl}/Customer/join`, {
-      mobileNumber: mobile
+      PhoneNumber: mobile
     }).subscribe({
       next: (res) => {
+
+        console.log(res);
         // Expected: { customerId, ... }
-        localStorage.setItem('customer_id', res.customerId);
+        localStorage.setItem('customer_id', res.userId);
         localStorage.setItem('customer_mobile', mobile);
 
         this.router.navigate(['/customer/dashboard']);
         this.isLoading = false;
       },
-      error: () => {
+      error: (err) => {
+        console.log(err);
         this.errorMessage = 'تعذر تسجيل العميل';
         this.isLoading = false;
       }
