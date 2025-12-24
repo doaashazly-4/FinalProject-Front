@@ -221,18 +221,23 @@ export class CustomerDataService {
 
 
 
-  // ========== Deliveries ==========
-  // getDeliveries() {
-  //   const customerId = this.getCustomerId();
-  //   return this.http.get<IncomingDelivery[]>(
-  //     `${environment.apiUrl}/Customer/${customerId}/packages`
-  //   );
+  //========== Deliveries ==========
+  getDeliveries() {
+    const customerId = this.getCustomerId();
+    return this.http.get<IncomingDelivery[]>(
+      `${environment.apiUrl}/Customer/${customerId}/packages`
+    );
+  }
+
+  // getDeliveries(): Observable<IncomingDelivery[]> {
+  //   console.log('🧪 Using MOCK deliveries');
+  //   return of(MOCK_DELIVERIES);
   // }
 
-  getDeliveries(): Observable<IncomingDelivery[]> {
-    console.log('🧪 Using MOCK deliveries');
-    return of(MOCK_DELIVERIES);
-  }
+  // getDeliveries(): Observable<IncomingDelivery[]> {
+  //   console.log('🧪 Using MOCK deliveries');
+  //   return of(MOCK_DELIVERIES);
+  // }
 
 
 
