@@ -143,7 +143,6 @@ export class LoginComponent implements OnInit {
 
   onOtpLogin(): void {
 
-
   }
 
 
@@ -200,14 +199,17 @@ export class LoginComponent implements OnInit {
       mobileNumber: mobile
     }).subscribe({
       next: (res) => {
+
+        console.log(res);
         // Expected: { customerId, ... }
-        localStorage.setItem('customer_id', res.customerId);
+        localStorage.setItem('customer_id', res.userId);
         localStorage.setItem('customer_mobile', mobile);
 
         this.router.navigate(['/customer/dashboard']);
         this.isLoading = false;
       },
-      error: () => {
+      error: (err) => {
+        console.log(err);
         this.errorMessage = 'تعذر تسجيل العميل';
         this.isLoading = false;
       }
