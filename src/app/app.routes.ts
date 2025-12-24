@@ -14,7 +14,7 @@ export const routes: Routes = [
         path: 'dashboard',
         loadComponent: () =>
           import('./customer/pages/dashboard/dashboard.component')
-            .then(m => m.CustomerDashboardComponent)
+            .then(m => m.CustomerDashboardComponent)  
       },
       {
         path: 'packages',
@@ -70,14 +70,6 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./customer/pages/order-detail/order-detail.component')
         .then(m => m.OrderDetailComponent)
-  },
-
-  {
-    path: 'supplier',
-    canActivate: [roleGuard(['supplier'])],
-    loadChildren: () =>
-      import('./supplier/supplier.routes')
-        .then(m => m.SUPPLIER_ROUTES)
   },
 
   {
