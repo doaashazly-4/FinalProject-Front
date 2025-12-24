@@ -271,9 +271,9 @@ export class AuthService {
   private handleLoginResponse(response: LoginResponse, role: UserRole): void {
     localStorage.setItem(this.TOKEN_KEY, response.token);
     localStorage.setItem(this.STORAGE_KEY, role!);
-    localStorage.setItem('user_id', response.userId || '');
-    localStorage.setItem('user_name', response.userName || '');
-    localStorage.setItem('user_email', response.email || '');
+    // localStorage.setItem('user_id', response.userId || '');
+    // localStorage.setItem('user_name', response.userName || '');
+    // localStorage.setItem('user_email', response.email || '');
     localStorage.setItem('token_expiration', response.expiration);
 
     this.roleSignal.set(role);
