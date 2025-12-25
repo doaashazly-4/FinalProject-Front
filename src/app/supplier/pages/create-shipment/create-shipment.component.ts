@@ -344,10 +344,12 @@ prevStep(): void {
     };
     
     this.dataService.createParcel(dto).subscribe({
+      
       next: (parcel) => {
         this.isSubmitting = false;
         this.createdTrackingNumber = parcel.trackingNumber;
         this.showSuccessModal = true;
+        console.log(dto);
       },
       error: (err) => {
         this.isSubmitting = false;
