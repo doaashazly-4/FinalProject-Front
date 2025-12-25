@@ -33,6 +33,7 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
   deliveryLat: number | null = null;
   deliveryLng: number | null = null;
 
+
   constructor(
     private fb: FormBuilder,
     private dataService: SupplierDataService,
@@ -147,7 +148,6 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     }
   }
 
-
   initForm(): void {
     this.shipmentForm = this.fb.group({
       // Step 1: Addresses
@@ -210,18 +210,23 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     }
   }
 
-  prevStep(): void {
-    if (this.currentStep > 1) {
-      this.currentStep--;
+prevStep(): void {
+  if (this.currentStep > 1) {
+    this.currentStep--;
 
-      // Re-initialize map if going back to step 1
-      if (this.currentStep === 1) {
-        setTimeout(() => {
-          this.initMap();
-        }, 100);
-      }
+    // Re-initialize map if going back to step 1
+    if (this.currentStep === 1) {
+      setTimeout(() => {
+        this.initMap();
+
+        // Restore marker if exists
+        if (this.deliveryLat !== null && this.deliveryLng !== null) {
+          this.updateMarker(this.deliveryLat, this.deliveryLng);
+        }
+      }, 100);
     }
   }
+}
 
   goToStep(step: number): void {
     // Only allow going back or to completed steps
