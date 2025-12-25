@@ -184,6 +184,7 @@
 
 <!-- Delivery Proof Modal -->
 <app-delivery-proof
+  *ngIf="showProofModal"
   [isVisible]="showProofModal"
   [job]="job"
   (onComplete)="onProofComplete($event)"
@@ -192,6 +193,7 @@
 
 <!-- Failed Delivery Modal -->
 <app-failed-delivery-proof
+  *ngIf="showFailedModal"
   [isVisible]="showFailedModal"
   [job]="job"
   (onSubmit)="onFailedSubmit($event)"

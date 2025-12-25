@@ -1,0 +1,18 @@
+<div class="chat-container">
+
+  <div class="messages" #messagesContainer>
+    <div *ngFor="let msg of messages" 
+         class="message" 
+         [ngClass]="{'user': msg.sender === 'user', 'support': msg.sender === 'support'}">
+      <p>{{ msg.text }}</p>
+      <img *ngIf="msg.imageUrl" [src]="msg.imageUrl" alt="attached image" />
+    </div>
+  </div>
+
+  <div class="chat-input">
+    <input type="text" placeholder="اكتب رسالتك..." [(ngModel)]="messageText" />
+    <input type="file" (change)="onImageSelected($event)" />
+    <button (click)="onSend()">إرسال</button>
+  </div>
+
+</div>
