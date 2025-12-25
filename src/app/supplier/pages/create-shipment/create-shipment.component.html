@@ -90,13 +90,37 @@
             <i class="bi bi-geo-fill ml-2 text-red-500"></i>
             عنوان التسليم (وجهة الشحنة)
           </label>
-          <textarea formControlName="deliveryAddress"
-                    rows="2"
-                    class="input resize-none"
-                    [ngClass]="{'input-error': hasError('deliveryAddress')}"
-                    placeholder="أدخل عنوان التسليم التفصيلي (المنطقة، الشارع، العمارة، الشقة)"></textarea>
-          <p *ngIf="hasError('deliveryAddress')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('deliveryAddress') }}</p>
-        </div>
+
+          <!-- Map Wrapper -->
+          <div class="relative w-full h-[400px] rounded-xl overflow-hidden border-2 border-gray-200 group">
+            <!-- Leaflet Map -->
+            <div id="map" class="w-full h-full z-0"></div>
+
+            <!-- Coordinates Overlay -->
+            <div class="absolute bottom-4 left-4 right-4 z-[500] flex gap-2 transition-all duration-300"
+                 *ngIf="deliveryLat && deliveryLng">
+              <div class="bg-white/95 backdrop-blur-sm shadow-lg px-4 py-2 rounded-xl text-sm font-bold text-primary-dark flex-1 text-center border border-gray-100">
+                <span class="text-xs text-gray-500 block">Latitude</span>
+                {{ deliveryLat.toFixed(6) }}
+              </div>
+              <div class="bg-white/95 backdrop-blur-sm shadow-lg px-4 py-2 rounded-xl text-sm font-bold text-primary-dark flex-1 text-center border border-gray-100">
+                <span class="text-xs text-gray-500 block">Longitude</span>
+                {{ deliveryLng.toFixed(6) }}
+              </div>
+            </div>
+
+            <!-- Hint Overlay (Visible when no location selected) -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[400] pointer-events-none bg-white/80 backdrop-blur-sm px-6 py-3 rounded-full text-sm font-bold text-gray-600 shadow-md border border-gray-100 transition-opacity duration-300"
+                 *ngIf="!deliveryLat">
+              <i class="bi bi-geo-alt-fill text-red-500 mr-2"></i>
+              اضغط على الخريطة لتحديد الموقع
+            </div>
+          </div>
+
+          <!-- Hidden input for form validation -->
+          <input type="hidden" formControlName="deliveryAddress">
+          
+          <p *ngIf="hasError('deliveryAddress')" class="text-red-500 text-sm mt-1">يرجى تحديد الموقع على الخريطة</p>        </div>
       </div>
     </div>
 
