@@ -1,9 +1,23 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  AfterViewInit,
+  ViewChild,
+  ElementRef
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
-import { SupplierDataService, Parcel, ParcelTimelineEvent, CarrierLiveLocation } from '../../services/supplier-data.service';
+import {
+  SupplierDataService,
+  Parcel,
+  ParcelTimelineEvent,
+  CarrierLiveLocation,
+  RateCarrierDTO
+} from '../../services/supplier-data.service';
 import { interval, Subscription } from 'rxjs';
+import * as L from 'leaflet';
 
 @Component({
   selector: 'app-track',
@@ -12,35 +26,36 @@ import { interval, Subscription } from 'rxjs';
   templateUrl: './track.component.html',
   styleUrl: './track.component.css'
 })
-export class TrackComponent implements OnInit, OnDestroy {
+export class TrackComponent
+  implements OnInit, AfterViewInit, OnDestroy {
+
+  @ViewChild('mapContainer') mapContainer!: ElementRef;
+
   trackingNumber = '';
   parcel: Parcel | null = null;
   timeline: ParcelTimelineEvent[] = [];
   carrierLocation: CarrierLiveLocation | null = null;
-  
-  isLoading = false;
+
   isSearching = false;
   errorMessage = '';
-  
+
   // Live tracking
   isLiveTracking = false;
   liveTrackingSubscription: Subscription | null = null;
   lastUpdated: Date | null = null;
 
-  // Rating
-  showRatingModal = false;
-  rating = 0;
-  ratingHover = 0;
-  ratingReview = '';
-  isSubmittingRating = false;
+  // Leaflet
+  map?: L.Map;
+  carrierMarker?: L.Marker;
 
   constructor(
     private dataService: SupplierDataService,
     private route: ActivatedRoute
   ) {}
 
+  /* ================= INIT ================= */
+
   ngOnInit(): void {
-    // Check for tracking ID in query params
     this.route.queryParams.subscribe(params => {
       if (params['id']) {
         this.trackingNumber = params['id'];
@@ -49,9 +64,14 @@ export class TrackComponent implements OnInit, OnDestroy {
     });
   }
 
+  ngAfterViewInit(): void {}
+
   ngOnDestroy(): void {
     this.stopLiveTracking();
+    this.destroyMap();
   }
+
+  /* ================= SEARCH ================= */
 
   searchParcel(): void {
     if (!this.trackingNumber.trim()) {
@@ -64,19 +84,19 @@ export class TrackComponent implements OnInit, OnDestroy {
     this.parcel = null;
     this.timeline = [];
     this.stopLiveTracking();
+    this.destroyMap();
 
     this.dataService.trackParcel(this.trackingNumber).subscribe({
       next: (parcel) => {
         this.parcel = parcel;
         this.loadTimeline();
         this.isSearching = false;
-        
-        // Start live tracking if parcel is in transit
+
         if (this.shouldShowLiveTracking()) {
           this.startLiveTracking();
         }
       },
-      error: (err) => {
+      error: () => {
         this.errorMessage = 'لم يتم العثور على شحنة بهذا الرقم';
         this.isSearching = false;
       }
@@ -87,28 +107,25 @@ export class TrackComponent implements OnInit, OnDestroy {
     if (!this.parcel) return;
 
     this.dataService.getParcelTimeline(this.parcel.id).subscribe({
-      next: (events) => {
-        this.timeline = events;
-      },
-      error: (err) => {
-        console.error('Error loading timeline:', err);
-      }
+      next: (events) => (this.timeline = events)
     });
   }
 
-  // Live Tracking
+  /* ================= LIVE TRACKING ================= */
+
   shouldShowLiveTracking(): boolean {
-    if (!this.parcel) return false;
-    return ['assigned', 'picked_up', 'in_transit', 'out_for_delivery'].includes(this.parcel.status);
+    return !!this.parcel &&
+      ['assigned', 'picked_up', 'in_transit', 'out_for_delivery']
+        .includes(this.parcel.status);
   }
 
   startLiveTracking(): void {
     if (!this.parcel || this.isLiveTracking) return;
 
     this.isLiveTracking = true;
-    this.loadCarrierLocation();
+    this.initMap();
 
-    // Refresh location every 10 seconds
+    this.loadCarrierLocation();
     this.liveTrackingSubscription = interval(10000).subscribe(() => {
       this.loadCarrierLocation();
     });
@@ -116,10 +133,8 @@ export class TrackComponent implements OnInit, OnDestroy {
 
   stopLiveTracking(): void {
     this.isLiveTracking = false;
-    if (this.liveTrackingSubscription) {
-      this.liveTrackingSubscription.unsubscribe();
-      this.liveTrackingSubscription = null;
-    }
+    this.liveTrackingSubscription?.unsubscribe();
+    this.liveTrackingSubscription = null;
   }
 
   loadCarrierLocation(): void {
@@ -129,22 +144,63 @@ export class TrackComponent implements OnInit, OnDestroy {
       next: (location) => {
         this.carrierLocation = location;
         this.lastUpdated = new Date();
-      },
-      error: (err) => {
-        console.error('Error loading carrier location:', err);
+        this.updateCarrierMarker(location.lat, location.lng);
       }
     });
   }
 
-  // Rating (UC-SUP-05)
+  /* ================= MAP ================= */
+
+  initMap(): void {
+    if (this.map) return;
+
+    this.map = L.map(this.mapContainer.nativeElement).setView(
+      [30.0444, 31.2357],
+      12
+    );
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(this.map);
+  }
+
+  updateCarrierMarker(lat: number, lng: number): void {
+    if (!this.map) return;
+
+    if (this.carrierMarker) {
+      this.carrierMarker.setLatLng([lat, lng]);
+    } else {
+      this.carrierMarker = L.marker([lat, lng]).addTo(this.map);
+    }
+
+    this.map.setView([lat, lng], 14);
+  }
+
+  destroyMap(): void {
+    if (this.map) {
+      this.map.remove();
+      this.map = undefined;
+      this.carrierMarker = undefined;
+    }
+  }
+
+  /* ================= RATING ================= */
+
+  showRatingModal = false;
+  rating = 0;
+  ratingHover = 0;
+  ratingReview = '';
+  isSubmittingRating = false;
+
   canRate(): boolean {
-    return this.parcel?.status === 'delivered' && !this.parcel?.carrierRating;
+    return !!this.parcel &&
+           this.parcel.status === 'delivered' &&
+           !this.parcel.carrierRating;
   }
 
   openRatingModal(): void {
     this.showRatingModal = true;
     this.rating = 0;
-    this.ratingHover = 0;
     this.ratingReview = '';
   }
 
@@ -152,37 +208,38 @@ export class TrackComponent implements OnInit, OnDestroy {
     this.showRatingModal = false;
   }
 
-  setRating(value: number): void {
-    this.rating = value;
+  setRating(star: number): void {
+    this.rating = star;
   }
 
   submitRating(): void {
     if (!this.parcel || !this.parcel.courierId || this.rating === 0) return;
 
     this.isSubmittingRating = true;
-
-    this.dataService.rateCarrier({
+    const dto: RateCarrierDTO = {
       orderId: this.parcel.id,
       carrierId: this.parcel.courierId,
       rating: this.rating,
       review: this.ratingReview
-    }).subscribe({
+    };
+
+    this.dataService.rateCarrier(dto).subscribe({
       next: () => {
+        this.isSubmittingRating = false;
+        this.closeRatingModal();
         if (this.parcel) {
           this.parcel.carrierRating = this.rating;
-          this.parcel.carrierReview = this.ratingReview;
         }
-        this.closeRatingModal();
-        this.isSubmittingRating = false;
       },
-      error: (err) => {
-        console.error('Error submitting rating:', err);
+      error: () => {
         this.isSubmittingRating = false;
+        alert('حدث خطأ أثناء إرسال التقييم');
       }
     });
   }
 
-  // Helpers
+  /* ================= HELPERS ================= */
+
   getStatusText(status: string): string {
     const statusMap: { [key: string]: string } = {
       'pending': 'في الانتظار',
