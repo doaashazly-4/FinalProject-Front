@@ -229,15 +229,7 @@ export class CustomerDataService {
     );
   }
 
-  // getDeliveries(): Observable<IncomingDelivery[]> {
-  //   console.log('🧪 Using MOCK deliveries');
-  //   return of(MOCK_DELIVERIES);
-  // }
 
-  // getDeliveries(): Observable<IncomingDelivery[]> {
-  //   console.log('🧪 Using MOCK deliveries');
-  //   return of(MOCK_DELIVERIES);
-  // }
 
 
 

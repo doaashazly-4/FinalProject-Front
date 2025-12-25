@@ -142,13 +142,7 @@ export class LoginComponent implements OnInit {
   }
 
   onOtpLogin(): void {
-    // console.log('🔐 OTP login clicked (mock mode)');
 
-    // // TEMP: simulate successful customer login
-    // localStorage.setItem('customer_id', 'mock-customer-001');
-    // localStorage.setItem('pickgo_role', 'customer');
-
-    // this.router.navigate(['/customer/dashboard']);
   }
 
 
@@ -169,6 +163,40 @@ export class LoginComponent implements OnInit {
     this.isLoading = true;
     this.http.post<any>(`${environment.apiUrl}/Customer/join`, {
       PhoneNumber: mobile
+    }).subscribe({
+      next: (res) => {
+
+        console.log(res);
+        // Expected: { customerId, ... }
+        localStorage.setItem('customer_id', res.userId);
+        localStorage.setItem('customer_mobile', mobile);
+
+        this.router.navigate(['/customer/dashboard']);
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.log(err);
+      }
+    });
+  }
+
+  onCourierLogin(): void {
+    if (this.clientLoginForm.invalid) {
+      this.markFormAsTouched(this.clientLoginForm);
+      return;
+    }
+
+    const mobile = this.clientLoginForm.value.mobileNumber;
+
+    // Remember mobile
+    if (this.clientLoginForm.value.rememberMe) {
+      localStorage.setItem('rememberedMobile', mobile);
+    }
+
+    // 🔹 Call EXISTING backend endpoint
+    this.isLoading = true;
+    this.http.post<any>(`${environment.apiUrl}/Customer/join`, {
+      mobileNumber: mobile
     }).subscribe({
       next: (res) => {
 
