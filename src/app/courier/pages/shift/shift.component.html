@@ -1,0 +1,33 @@
+<div class="shift-container">
+  <h2>إنهاء المناوبة</h2>
+
+  <!-- زر إنهاء المناوبة -->
+  <button (click)="endShift()">إنهاء المناوبة</button>
+
+  <!-- ملخص اليوم -->
+  <div *ngIf="shiftData">
+    <h3>ملخص اليوم</h3>
+    <p>عدد الطلبات: {{shiftData.orders.length}}</p>
+    <p>الأرباح: {{shiftData.totalAmount}} ج.م</p>
+    <p>COD المحصل: {{shiftData.codCollected}} ج.م</p>
+  </div>
+
+  <!-- زر تحميل التقرير PDF -->
+  <button (click)="generatePDF()" *ngIf="shiftData">تحميل التقرير PDF</button>
+
+  <!-- المقارنات -->
+  <canvas id="comparisonChart" *ngIf="shiftData?.previousDays"></canvas>
+
+  <!-- أهداف وتحفيزات -->
+  <div *ngIf="shiftData?.goals">
+    <h3>أهداف اليوم 🎯</h3>
+    <ul>
+      <li *ngFor="let goal of shiftData.goals">
+        {{goal.text}} - {{goal.completed ? '✅' : '❌'}}
+      </li>
+    </ul>
+  </div>
+
+  <!-- مشاركة التقرير -->
+  <button (click)="shareReport()" *ngIf="shiftData">مشاركة التقرير</button>
+</div>

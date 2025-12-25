@@ -114,7 +114,7 @@
             <i class="bi bi-check-circle ml-2"></i>
             قبول
           </button>
-          <button (click)="rejectJob(job)"
+          <button (click)="onRejectClick(job)"
                   class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-all duration-300">
             <i class="bi bi-x-circle ml-2"></i>
             رفض
@@ -123,5 +123,11 @@
       </div>
     </div>
   </div>
-</div>
 
+   <!-- Reject Reason Modal -->
+  <app-reject-reason-modal
+    [isVisible]="showRejectModal"
+    (onConfirm)="handleRejectConfirm($event)"
+    (onCancel)="handleRejectCancel()">
+  </app-reject-reason-modal>
+</div>
