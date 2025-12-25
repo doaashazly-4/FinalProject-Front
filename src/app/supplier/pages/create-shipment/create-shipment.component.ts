@@ -1,4 +1,5 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+
+import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -12,7 +13,7 @@ import * as L from 'leaflet';
   templateUrl: './create-shipment.component.html',
   styleUrl: './create-shipment.component.css'
 })
-export class CreateShipmentComponent implements OnInit, AfterViewInit {
+export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy {
   shipmentForm!: FormGroup;
   profile: SupplierProfile | null = null;
   deliveryFee: DeliveryFeeResponse | null = null;
@@ -26,12 +27,12 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit {
   // Form step tracking
   currentStep = 1;
   totalSteps = 3;
-
   // Leaflet Map
   private map: L.Map | undefined;
   private marker: L.Marker | undefined;
   deliveryLat: number | null = null;
   deliveryLng: number | null = null;
+
 
   constructor(
     private fb: FormBuilder,
@@ -41,6 +42,7 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.initForm();
+    this.fixLeafletIcons();
     this.loadProfile();
   }
 
@@ -53,9 +55,38 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit {
     }
   }
 
+  ngOnDestroy(): void {
+    if (this.map) {
+      this.map.remove();
+      this.map = undefined;
+    }
+  }
+
+  private fixLeafletIcons(): void {
+    const iconRetinaUrl = 'assets/marker-icon-2x.png';
+    const iconUrl = 'assets/marker-icon.png';
+    const shadowUrl = 'assets/marker-shadow.png';
+    const iconDefault = L.icon({
+      iconRetinaUrl,
+      iconUrl,
+      shadowUrl,
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      tooltipAnchor: [16, -28],
+      shadowSize: [41, 41]
+    });
+    L.Marker.prototype.options.icon = iconDefault;
+  }
+
   private initMap(): void {
     const mapContainer = document.getElementById('map');
     if (!mapContainer) return;
+
+    // Check if map is already initialized
+    if (this.map) {
+      this.map.remove();
+    }
 
     // Default center (Cairo)
     const defaultLat = 30.0444;
@@ -66,6 +97,11 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(this.map);
+
+    // If we have saved coordinates, restore the marker
+    if (this.deliveryLat && this.deliveryLng) {
+      this.updateMarker(this.deliveryLat, this.deliveryLng);
+    }
 
     // Click handler
     this.map.on('click', (e: L.LeafletMouseEvent) => {
@@ -156,6 +192,14 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit {
   nextStep(): void {
     if (this.validateCurrentStep()) {
       if (this.currentStep < this.totalSteps) {
+        
+        // Clean up map when leaving step 1
+        if (this.currentStep === 1 && this.map) {
+          this.map.remove();
+          this.map = undefined;
+          this.marker = undefined;
+        }
+
         this.currentStep++;
         
         // Calculate fee when moving to step 3
@@ -166,27 +210,42 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit {
     }
   }
 
-  prevStep(): void {
-    if (this.currentStep > 1) {
-      this.currentStep--;
-      
-      // Re-initialize map if going back to step 1
-      if (this.currentStep === 1) {
-        setTimeout(() => {
-          this.initMap();
-          // Restore marker if exists
-          if (this.deliveryLat && this.deliveryLng) {
-            this.updateMarker(this.deliveryLat, this.deliveryLng);
-          }
-        }, 100);
-      }
+prevStep(): void {
+  if (this.currentStep > 1) {
+    this.currentStep--;
+
+    // Re-initialize map if going back to step 1
+    if (this.currentStep === 1) {
+      setTimeout(() => {
+        this.initMap();
+
+        // Restore marker if exists
+        if (this.deliveryLat !== null && this.deliveryLng !== null) {
+          this.updateMarker(this.deliveryLat, this.deliveryLng);
+        }
+      }, 100);
     }
   }
+}
 
   goToStep(step: number): void {
     // Only allow going back or to completed steps
     if (step < this.currentStep) {
+        // Clean up map if leaving step 1
+        if (this.currentStep === 1 && this.map) {
+            this.map.remove();
+            this.map = undefined;
+            this.marker = undefined;
+        }
+
       this.currentStep = step;
+
+      // Init map if going back to step 1
+      if (step === 1) {
+        setTimeout(() => {
+            this.initMap();
+        }, 100);
+      }
     }
   }
 
@@ -317,7 +376,7 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit {
     });
     this.currentStep = 1;
     this.deliveryFee = null;
-    this.deliveryLat = null;
+     this.deliveryLat = null;
     this.deliveryLng = null;
     this.marker = undefined;
     if (this.map) {
