@@ -1,4 +1,4 @@
-import { Component ,OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -23,9 +23,9 @@ export class ShiftComponent implements OnInit {
   constructor(
     private courierService: CourierDataService,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   endShift() {
     this.courierService.endShift().subscribe({
@@ -39,7 +39,7 @@ export class ShiftComponent implements OnInit {
   }
 
   generatePDF() {
-    if(!this.shiftData) return;
+    if (!this.shiftData) return;
     const doc = new jsPDF();
     doc.text('تقرير المناوبة', 14, 20);
     (doc as any).autoTable({
@@ -50,7 +50,7 @@ export class ShiftComponent implements OnInit {
   }
 
   drawComparisonChart() {
-    if(!this.shiftData?.previousDays) return;
+    if (!this.shiftData?.previousDays) return;
     const ctx: any = document.getElementById('comparisonChart');
     new Chart(ctx, {
       type: 'bar',

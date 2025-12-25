@@ -1,16 +1,11 @@
 import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-chat',
-  imports: [CommonModule, FormsModule],
   templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.css'],
+  styleUrls: ['./chat.component.scss'],
   standalone: true
 })
-
-
 export class ChatComponent implements AfterViewChecked {
 
   @Input() messages: any[] = [];
@@ -28,7 +23,7 @@ export class ChatComponent implements AfterViewChecked {
   scrollToBottom() {
     try {
       this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
-    } catch(err) { }
+    } catch (err) { }
   }
 
   onSend() {

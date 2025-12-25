@@ -10,8 +10,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   standalone: true,
   imports: [CommonModule, FormsModule, ChatComponent, MatSnackBarModule],
-  templateUrl: './chat-page.component.html',
-  styleUrls: ['./chat-page.component.css'],
+  templateUrl: './chat-page.component.html'
 })
 export class ChatPageComponent implements OnInit, OnDestroy {
 
@@ -22,7 +21,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     private signalRService: CourierSignalRService,
     private courierService: CourierDataService,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.signalRService.startConnection();
@@ -31,7 +30,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
       this.messages = msgs;
 
       const lastMsg = msgs[msgs.length - 1];
-      if(lastMsg?.sender === 'support') {
+      if (lastMsg?.sender === 'support') {
         this.snackBar.open('💬 لديك رسالة جديدة من الدعم!', 'اغلاق', {
           duration: 4000,
           horizontalPosition: 'right',
@@ -48,7 +47,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   async sendMessage(event: any) {
     let imageUrl: string | null = null;
 
-    if(event.image) {
+    if (event.image) {
       const formData = new FormData();
       formData.append('image', event.image);
 

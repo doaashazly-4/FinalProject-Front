@@ -59,7 +59,7 @@ export class DeliveryComponent implements OnInit {
     if (!this.job) return;
 
     const updateStatus = () => {
-      this.dataService.updateJobStatus(Number(this.job!.id), 'picked_up' as JobStatus).subscribe({
+      this.dataService.updateJobStatus(this.job!.id, 'picked_up' as JobStatus).subscribe({
         next: () => this.job!.status = 'picked_up' as JobStatus,
         error: (err) => console.error('Error updating status:', err)
       });
@@ -69,7 +69,7 @@ export class DeliveryComponent implements OnInit {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const pickupData = { lat: pos.coords.latitude, lng: pos.coords.longitude, timestamp: new Date() };
-          this.dataService.updateJobStatus(Number(this.job!.id), 'picked_up' as JobStatus, undefined, pickupData).subscribe({
+          this.dataService.updateJobStatus(this.job!.id, 'picked_up' as JobStatus, undefined, pickupData).subscribe({
             next: () => this.job!.status = 'picked_up' as JobStatus,
             error: (err) => console.error('Error updating status with location:', err)
           });
@@ -80,14 +80,15 @@ export class DeliveryComponent implements OnInit {
   }
 
   markOutForDelivery(): void {
-  if (!this.job) return;
-  this.dataService.updateJobStatus(Number(this.job.id), 'out_for_delivery').subscribe({
-    next: () => this.job!.status = 'out_for_delivery',
-    error: (err) => console.error('Error updating status:', err)
-  });
-}
+    if (!this.job) return;
+    this.dataService.updateJobStatus(this.job.id, 'out_for_delivery' as JobStatus).subscribe({
+      next: () => this.job!.status = 'out_for_delivery' as JobStatus,
+      error: (err) => console.error('Error updating status:', err)
+    });
+  }
 
   completeDelivery(): void { this.showProofModal = true; }
+
   unableToDeliver(reason: string): void {
     this.showFailedModal = true;
   }
@@ -127,21 +128,19 @@ export class DeliveryComponent implements OnInit {
   }
 
   // ===== Proof Modals =====
- handleDeliveryComplete(event: any): void {
-  if (!this.job) return;
-  this.dataService.completeDelivery(Number(this.job.id), event).subscribe({
-    next: () => { 
-      this.job!.status = 'delivered'; 
-      alert('تم التسليم بنجاح');
-    },
-    error: (err) => { console.error('Error completing delivery:', err); }
-  });
-}
+  handleDeliveryComplete(event: any): void {
+    if (!this.job) return;
+    this.showProofModal = false;
+    this.dataService.completeJob(this.job.id, event).subscribe({
+      next: () => { this.job!.status = 'delivered' as JobStatus; this.router.navigate(['/courier/my-jobs']); },
+      error: (err) => { console.error('Error completing delivery:', err); alert('حدث خطأ أثناء إتمام المهمة'); }
+    });
+  }
 
   handleDeliveryFailure(event: any): void {
     if (!this.job) return;
     this.showFailedModal = false;
-    this.dataService.updateJobStatus(Number(this.job.id), 'failed' as JobStatus, event.reason, event).subscribe({
+    this.dataService.updateJobStatus(this.job.id, 'failed' as JobStatus, event.reason, event).subscribe({
       next: () => { this.job!.status = 'failed' as JobStatus; this.router.navigate(['/courier/my-jobs']); },
       error: (err) => { console.error('Error updating failure:', err); alert('حدث خطأ أثناء تحديث حالة المهمة'); }
     });

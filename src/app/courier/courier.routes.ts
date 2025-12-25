@@ -58,6 +58,7 @@ export const COURIER_ROUTES: Routes = [
             .then(m => m.ConfirmDeliveryComponent)
       },
 
+      // إعادة توجيه قديم
       {
   path: 'support',
   loadComponent: () =>
