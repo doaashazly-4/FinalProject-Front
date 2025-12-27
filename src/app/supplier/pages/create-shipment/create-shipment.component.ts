@@ -17,13 +17,13 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
   shipmentForm!: FormGroup;
   profile: SupplierProfile | null = null;
   deliveryFee: DeliveryFeeResponse | null = null;
-  
+
   isLoading = false;
   isCalculatingFee = false;
   isSubmitting = false;
   showSuccessModal = false;
   createdTrackingNumber = '';
-  
+
   // Form step tracking
   currentStep = 1;
   totalSteps = 3;
@@ -38,7 +38,7 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     private fb: FormBuilder,
     private dataService: SupplierDataService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initForm();
@@ -123,7 +123,7 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     } else {
       if (this.map) {
         this.marker = L.marker([lat, lng], { draggable: true }).addTo(this.map);
-        
+
         // Handle drag end
         this.marker.on('dragend', () => {
           const position = this.marker!.getLatLng();
@@ -133,7 +133,7 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
         });
       }
     }
-    
+
     this.updateFormCoordinates();
   }
 
@@ -153,12 +153,12 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
       // Step 1: Addresses
       pickupAddress: ['', Validators.required],
       deliveryAddress: ['', Validators.required],
-      
+
       // Step 2: Receiver Info
       receiverName: ['', [Validators.required, Validators.minLength(3)]],
       receiverPhone: ['', [Validators.required, Validators.pattern(/^01[0125][0-9]{8}$/)]],
       receiverEmail: ['', Validators.email],
-      
+
       // Step 3: Package Details
       description: ['', [Validators.required, Validators.minLength(3)]],
       weight: [1, [Validators.required, Validators.min(0.1), Validators.max(100)]],
@@ -192,7 +192,7 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
   nextStep(): void {
     if (this.validateCurrentStep()) {
       if (this.currentStep < this.totalSteps) {
-        
+
         // Clean up map when leaving step 1
         if (this.currentStep === 1 && this.map) {
           this.map.remove();
@@ -201,7 +201,7 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
         }
 
         this.currentStep++;
-        
+
         // Calculate fee when moving to step 3
         if (this.currentStep === 3) {
           this.calculateDeliveryFee();
@@ -210,40 +210,40 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     }
   }
 
-prevStep(): void {
-  if (this.currentStep > 1) {
-    this.currentStep--;
+  prevStep(): void {
+    if (this.currentStep > 1) {
+      this.currentStep--;
 
-    // Re-initialize map if going back to step 1
-    if (this.currentStep === 1) {
-      setTimeout(() => {
-        this.initMap();
+      // Re-initialize map if going back to step 1
+      if (this.currentStep === 1) {
+        setTimeout(() => {
+          this.initMap();
 
-        // Restore marker if exists
-        if (this.deliveryLat !== null && this.deliveryLng !== null) {
-          this.updateMarker(this.deliveryLat, this.deliveryLng);
-        }
-      }, 100);
+          // Restore marker if exists
+          if (this.deliveryLat !== null && this.deliveryLng !== null) {
+            this.updateMarker(this.deliveryLat, this.deliveryLng);
+          }
+        }, 100);
+      }
     }
   }
-}
 
   goToStep(step: number): void {
     // Only allow going back or to completed steps
     if (step < this.currentStep) {
-        // Clean up map if leaving step 1
-        if (this.currentStep === 1 && this.map) {
-            this.map.remove();
-            this.map = undefined;
-            this.marker = undefined;
-        }
+      // Clean up map if leaving step 1
+      if (this.currentStep === 1 && this.map) {
+        this.map.remove();
+        this.map = undefined;
+        this.marker = undefined;
+      }
 
       this.currentStep = step;
 
       // Init map if going back to step 1
       if (step === 1) {
         setTimeout(() => {
-            this.initMap();
+          this.initMap();
         }, 100);
       }
     }
@@ -251,7 +251,7 @@ prevStep(): void {
 
   validateCurrentStep(): boolean {
     const controls = this.shipmentForm.controls;
-    
+
     switch (this.currentStep) {
       case 1:
         return controls['pickupAddress'].valid && controls['deliveryAddress'].valid;
@@ -266,7 +266,7 @@ prevStep(): void {
 
   isStepValid(step: number): boolean {
     const controls = this.shipmentForm.controls;
-    
+
     switch (step) {
       case 1:
         return controls['pickupAddress'].valid && controls['deliveryAddress'].valid;
@@ -282,13 +282,13 @@ prevStep(): void {
   // Fee Calculation
   calculateDeliveryFee(): void {
     const formValue = this.shipmentForm.value;
-    
+
     if (!formValue.pickupAddress || !formValue.deliveryAddress) {
       return;
     }
-    
+
     this.isCalculatingFee = true;
-    
+
     this.dataService.calculateDeliveryFee({
       pickupAddress: formValue.pickupAddress,
       deliveryAddress: formValue.deliveryAddress,
@@ -323,9 +323,9 @@ prevStep(): void {
       this.markAllAsTouched();
       return;
     }
-    
+
     this.isSubmitting = true;
-    
+
     const formValue = this.shipmentForm.value;
     const dto: CreateParcelDTO = {
       description: formValue.description,
@@ -342,12 +342,14 @@ prevStep(): void {
       codAmount: formValue.codAmount,
       priority: formValue.priority
     };
-    
+
     this.dataService.createParcel(dto).subscribe({
+
       next: (parcel) => {
         this.isSubmitting = false;
         this.createdTrackingNumber = parcel.trackingNumber;
         this.showSuccessModal = true;
+
       },
       error: (err) => {
         this.isSubmitting = false;
@@ -376,7 +378,7 @@ prevStep(): void {
     });
     this.currentStep = 1;
     this.deliveryFee = null;
-     this.deliveryLat = null;
+    this.deliveryLat = null;
     this.deliveryLng = null;
     this.marker = undefined;
     if (this.map) {
@@ -385,7 +387,7 @@ prevStep(): void {
     }
     // Re-init map for new order
     setTimeout(() => {
-        this.initMap();
+      this.initMap();
     }, 100);
   }
 
@@ -394,8 +396,8 @@ prevStep(): void {
   }
 
   trackShipment(): void {
-    this.router.navigate(['/supplier/track'], { 
-      queryParams: { id: this.createdTrackingNumber } 
+    this.router.navigate(['/supplier/track'], {
+      queryParams: { id: this.createdTrackingNumber }
     });
   }
 
@@ -408,14 +410,14 @@ prevStep(): void {
   getErrorMessage(field: string): string {
     const control = this.shipmentForm.get(field);
     if (!control || !control.errors) return '';
-    
+
     if (control.errors['required']) return 'هذا الحقل مطلوب';
     if (control.errors['minlength']) return `الحد الأدنى ${control.errors['minlength'].requiredLength} أحرف`;
     if (control.errors['pattern']) return 'صيغة غير صحيحة';
     if (control.errors['email']) return 'بريد إلكتروني غير صحيح';
     if (control.errors['min']) return `القيمة الدنيا ${control.errors['min'].min}`;
     if (control.errors['max']) return `القيمة القصوى ${control.errors['max'].max}`;
-    
+
     return 'خطأ في الإدخال';
   }
 }
