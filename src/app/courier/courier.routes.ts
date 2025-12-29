@@ -58,6 +58,29 @@ export const COURIER_ROUTES: Routes = [
             .then(m => m.ConfirmDeliveryComponent)
       },
 
+      {
+  path: 'support',
+  loadComponent: () =>
+    import('./pages/support/support.component')
+      .then(m => m.CourierSupportComponent)
+},
+{
+  path: 'chat',
+  loadComponent: () =>
+    import('./pages/support/chat/chat-page/chat-page.component')
+      .then(m => m.ChatPageComponent)
+},
+
+ {
+  path: 'shift',
+  loadComponent: () =>
+    import('./pages/shift/shift.component').then(m => m.ShiftComponent)
+},
+
+
+
+
+
       // إعادة توجيه قديم
       {
         path: 'jobs',

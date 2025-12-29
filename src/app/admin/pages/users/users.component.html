@@ -27,8 +27,8 @@
   </div>
 
   <!-- Search & Filters -->
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-4">
-    <!-- Search Bar -->
+ <!-- <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-4">
+     Search Bar تعليق
     <div class="relative">
       <i class="bi bi-search absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
       <input type="text" 
@@ -41,7 +41,7 @@
               class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
         <i class="bi bi-x-circle"></i>
       </button>
-    </div>
+    </div>-->
 
     <!-- Filters -->
     <div class="flex flex-wrap gap-4">
@@ -190,7 +190,7 @@
       </table>
     </div>
   </div>
-</div>
+<!--</div>-->
 
 <!-- User Details Modal -->
 <div *ngIf="showUserModal && selectedUser" class="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -294,11 +294,11 @@
               class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors">
         إلغاء
       </button>
-      <button (click)="confirmBlock()"
+      <!--<button (click)="confirmBlock()"
               [disabled]="isProcessing"
               class="flex-1 py-3 px-4 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-colors disabled:opacity-50">
         {{ isProcessing ? 'جاري الحظر...' : 'تأكيد الحظر' }}
-      </button>
+      </button> -->
     </div>
   </div>
 </div>
@@ -322,11 +322,11 @@
               class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors">
         إلغاء
       </button>
-      <button (click)="confirmDelete()"
+     <!-- <button (click)="confirmDelete()"
               [disabled]="isProcessing"
               class="flex-1 py-3 px-4 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50">
         {{ isProcessing ? 'جاري الحذف...' : 'تأكيد الحذف' }}
-      </button>
+      </button> -->
     </div>
   </div>
 </div>

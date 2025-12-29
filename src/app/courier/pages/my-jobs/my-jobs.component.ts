@@ -69,7 +69,7 @@ export class MyJobsComponent implements OnInit {
         });
         break;
       case 'in_transit':
-        this.dataService.startDelivery(job.id).subscribe({
+        this.dataService.startDelivery(Number(job.id)).subscribe({
           next: () => {
             job.status = 'in_transit';
           },
@@ -80,7 +80,7 @@ export class MyJobsComponent implements OnInit {
         });
         break;
       case 'delivered':
-        this.dataService.completeJob(job.id, {
+        this.dataService.completeDelivery(Number(job.id), {
           jobId: job.id,
           imageUrl: '',
           timestamp: new Date()
