@@ -87,7 +87,7 @@ export class CourierDashboardComponent implements OnInit {
       return;
     }
 
-    this.dataService.updateJobStatus(job.id, status, undefined, additionalData).subscribe({
+    this.dataService.updateJobStatus(Number(job.id), status, undefined, additionalData).subscribe({
       next: () => job.status = status,
       error: (err) => {
         console.error(err);

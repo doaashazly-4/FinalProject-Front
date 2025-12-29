@@ -40,17 +40,18 @@ export interface AdminOrderRow {
 // ========== CARRIER INTERFACES (UC-ADM-01) ==========
 
 export interface PendingCarrier {
-  id: string;
+ 
+  id: number;
   name: string;
   email: string;
-  phone: string;
+  phone?: string;
   vehicleType: 'Motorcycle' | 'Car' | 'Truck' | 'Van';
   licenseNumber: string;
   maxWeight: number;
-  photoUrl?: string;
-  licensePhotoFront?: string;
-  licensePhotoBack?: string;
-  idPhotoUrl?: string;
+  photoUrl: string;
+  licensePhotoFront: string;
+  licensePhotoBack: string;
+  idPhotoUrl: string;
   appliedAt: string;
   address: string;
   birthDate: string;
@@ -127,14 +128,15 @@ export interface ReportExportDTO {
 
 @Injectable({ providedIn: 'root' })
 export class AdminDataService {
-  private apiUrl = `${environment.apiUrl}/Admin`;
+   private apiUrl = `${environment.apiUrl}/Admin`; // تمام
+;
 
   constructor(private http: HttpClient) {}
 
   // ========== DASHBOARD & STATS ==========
 
   getStats(): Observable<AdminStat[]> {
-    return this.http.get<AdminStat[]>(`${this.apiUrl}/stats`);
+    return this.http.get<AdminStat[]>(`${this.apiUrl}/DashboardStats`);
   }
 
   getDashboardData(): Observable<{stats: AdminStat[], recentUsers: AdminUserRow[], recentOrders: AdminOrderRow[]}> {
@@ -149,10 +151,6 @@ export class AdminDataService {
 
   getUsersByRole(role: string): Observable<AdminUserRow[]> {
     return this.http.get<AdminUserRow[]>(`${this.apiUrl}/users?role=${role}`);
-  }
-
-  searchUsers(query: string): Observable<AdminUserRow[]> {
-    return this.http.get<AdminUserRow[]>(`${this.apiUrl}/users/search?q=${query}`);
   }
 
   getUserDetails(userId: string): Observable<AdminUserRow> {
@@ -171,44 +169,68 @@ export class AdminDataService {
     return this.http.post<void>(`${this.apiUrl}/users/${userId}/unblock`, {});
   }
 
-  deleteUser(userId: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/users/${userId}`);
-  }
+ 
 
   // ========== CARRIER APPROVALS (UC-ADM-01) ==========
 
   getPendingCarriers(): Observable<PendingCarrier[]> {
-    return this.http.get<PendingCarrier[]>(`${this.apiUrl}/carriers/pending`);
+    return this.http.get<PendingCarrier[]>(`${this.apiUrl}/PendingCouriers`);
   }
 
   getCarrierDetails(carrierId: string): Observable<PendingCarrier> {
     return this.http.get<PendingCarrier>(`${this.apiUrl}/carriers/${carrierId}`);
   }
 
-  approveCarrier(carrierId: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/carriers/${carrierId}/approve`, {});
-  }
 
-  rejectCarrier(carrierId: string, reason: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/carriers/${carrierId}/reject`, { reason });
-  }
+approveCourier(courierId: number): Observable<void> {
+  return this.http.post<void>(`${this.apiUrl}/ApproveCourier/${courierId}`, {});
+}
+
+rejectCourierAdmin(carrierId: number, reason: string): Observable<void> {
+  return this.http.post<void>(
+    `${this.apiUrl}/RejectCourier/${carrierId}`,
+    { reason }
+  );
+}
 
   // ===== New Admin endpoints mapped to backend API described by user =====
 
   // Task 1 — Get Pending Couriers
   getPendingCouriersAdmin(): Observable<PendingCarrier[]> {
-    return this.http.get<PendingCarrier[]>(`${this.apiUrl}/PendingCouriers`);
-  }
+  return this.http.get<any[]>(`${this.apiUrl}/PendingCouriers`).pipe(
+    map(carriers => carriers.map(c => ({
+      id: c.Id,
+      name: c.name ,           // لو مش موجود => undefined
+      email: c.email ,
+      phone: c.phone ,
+      vehicleType: c.VehicleType,
+      licenseNumber: c.LicenseNumber,
+      maxWeight: c.maxWeight ,
+      photoUrl: c.photoUrl ,
+      licensePhotoFront: c.licensePhotoFront ,
+      licensePhotoBack: c.licensePhotoBack ,
+      idPhotoUrl: c.idPhotoUrl ,
+      appliedAt: c.appliedAt ,
+      address: c.address ,
+      birthDate: c.birthDate ,
+      gender: c.gender 
+    })))
+  );
+}
 
   // Task 2 — Approve Courier
-  approveCourierAdmin(courierId: string): Observable<void> {
+  approveCourierAdmin(courierId: number): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/ApproveCourier/${courierId}`, {});
   }
 
   // Task 3 — Reject Courier
-  rejectCourierAdmin(courierId: string, reason: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/RejectCourier/${courierId}`, { reason });
-  }
+//   rejectCourierAdmin(carrierId: number, reason: string): Observable<void> {
+//   return this.http.post<void>(
+//     `${this.apiUrl}/Admin/RejectCourier/${carrierId}`,
+//     { reason }
+//   );
+// }
+
 
   // Task 4 — Get Online Couriers
   getOnlineCouriersAdmin(): Observable<PendingCarrier[]> {
@@ -221,23 +243,24 @@ export class AdminDataService {
   }
 
   // Task 6 — Block User
-  blockUserAdmin(userId: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/BlockUser/${userId}`, {});
-  }
+  // blockUserAdmin(userId: string): Observable<void> {
+  //   return this.http.post<void>(`${this.apiUrl}/BlockUser/${userId}`, {});
+  // }
 
-  // Task 7 — Delete User
-  deleteUserAdmin(userId: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/DeleteUser/${userId}`, {});
-  }
+  // // Task 7 — Delete User
+  deleteUser(userId: string) {
+  return this.http.post<void>(`${this.apiUrl}/DeleteUser/${userId}`, {});
+}
 
-  // Task 8 — Search Users
-  searchUsersAdmin(email?: string, phone?: string): Observable<AdminUserRow[]> {
-    const params: string[] = [];
-    if (email) params.push(`email=${encodeURIComponent(email)}`);
-    if (phone) params.push(`phone=${encodeURIComponent(phone)}`);
-    const query = params.length ? `?${params.join('&')}` : '';
-    return this.http.get<AdminUserRow[]>(`${this.apiUrl}/SearchUsers${query}`);
-  }
+
+  // // Task 8 — Search Users
+ searchUsers(email?: string, phone?: string) {
+  let params = [];
+  if (email) params.push(`email=${email}`);
+  if (phone) params.push(`phone=${phone}`);
+
+  return this.http.get(`${this.apiUrl}/SearchUsers?${params.join('&')}`);
+}
 
   // Task 9 — Get Disputes
   getDisputesAdmin(): Observable<Dispute[]> {
@@ -257,39 +280,53 @@ export class AdminDataService {
 
   // ========== ORDERS MANAGEMENT ==========
 
-  getOrders(): Observable<AdminOrderRow[]> {
-    return this.http.get<AdminOrderRow[]>(`${this.apiUrl}/orders`);
-  }
+  // getOrders(): Observable<AdminOrderRow[]> {
+  //   return this.http.get<AdminOrderRow[]>(`${this.apiUrl}/orders`);
+  // }
 
-  getOrdersByStatus(status: string): Observable<AdminOrderRow[]> {
-    return this.http.get<AdminOrderRow[]>(`${this.apiUrl}/orders?status=${status}`);
-  }
+  // getOrdersByStatus(status: string): Observable<AdminOrderRow[]> {
+  //   return this.http.get<AdminOrderRow[]>(`${this.apiUrl}/orders?status=${status}`);
+  // }
 
-  updateOrderStatus(orderId: string, status: string): Observable<AdminOrderRow> {
-    return this.http.patch<AdminOrderRow>(`${this.apiUrl}/orders/${orderId}/status`, { status });
-  }
+  // updateOrderStatus(orderId: string, status: string): Observable<AdminOrderRow> {
+  //   return this.http.patch<AdminOrderRow>(`${this.apiUrl}/orders/${orderId}/status`, { status });
+  // }
 
   // ========== DISPUTES (UC-ADM-04) ==========
 
+
   getDisputes(): Observable<Dispute[]> {
-    return this.http.get<Dispute[]>(`${this.apiUrl}/disputes`);
-  }
+  return this.http.get<Dispute[]>(`${this.apiUrl}/Disputes`);
+}
 
-  getDisputesByStatus(status: string): Observable<Dispute[]> {
-    return this.http.get<Dispute[]>(`${this.apiUrl}/disputes?status=${status}`);
-  }
+getDisputeDetails(id: number): Observable<Dispute> {
+  return this.http.get<Dispute>(`${this.apiUrl}/Dispute/${id}`);
+}
 
-  getDisputeDetails(disputeId: string): Observable<Dispute> {
-    return this.http.get<Dispute>(`${this.apiUrl}/disputes/${disputeId}`);
-  }
+resolveDispute(disputeId: number, dto: {status: string, notes: string}): Observable<any> {
+  return this.http.post(`${this.apiUrl}/ResolveDispute/${disputeId}`, dto);
+}
 
-  resolveDispute(dto: DisputeResolutionDTO): Observable<Dispute> {
-    return this.http.post<Dispute>(`${this.apiUrl}/disputes/${dto.disputeId}/resolve`, dto);
-  }
 
-  escalateDispute(disputeId: string, notes: string): Observable<Dispute> {
-    return this.http.post<Dispute>(`${this.apiUrl}/disputes/${disputeId}/escalate`, { notes });
-  }
+  // getDisputes(): Observable<Dispute[]> {
+  //   return this.http.get<Dispute[]>(`${this.apiUrl}/Disputes`);
+  // }
+
+  // getDisputesByStatus(status: string): Observable<Dispute[]> {
+  //   return this.http.get<Dispute[]>(`${this.apiUrl}/disputes?status=${status}`);
+  // }
+
+  // getDisputeDetails(disputeId: string): Observable<Dispute> {
+  //   return this.http.get<Dispute>(`${this.apiUrl}/disputes/${disputeId}`);
+  // }
+
+  // resolveDispute(dto: DisputeResolutionDTO): Observable<Dispute> {
+  //   return this.http.post<Dispute>(`${this.apiUrl}/disputes/${dto.disputeId}/resolve`, dto);
+  // }
+
+  // escalateDispute(disputeId: string, notes: string): Observable<Dispute> {
+  //   return this.http.post<Dispute>(`${this.apiUrl}/disputes/${disputeId}/escalate`, { notes });
+  // }
 
   // ========== REPORTS (UC-ADM-03) ==========
 
