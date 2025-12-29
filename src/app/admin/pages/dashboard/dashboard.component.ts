@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AdminDataService, AdminOrderRow, AdminStat, SystemReport, PendingCarrier, Dispute } from '../../services/admin-data.service';
+import { AdminOrderService } from '../../services/admin-order.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -19,7 +20,19 @@ export class AdminDashboardComponent implements OnInit {
   isLoading = true;
   today = new Date();
 
-  constructor(private data: AdminDataService) {}
+  constructor(private data: AdminDataService  , private orderService: AdminOrderService ) {}
+
+
+  mapOrderStatusToAr(status: string): 'جديد' | 'قيد المعالجة' | 'قيد التوصيل' | 'مكتمل' | 'ملغي' | 'فشل التوصيل' {
+  switch (status) {
+    case 'Pending': return 'جديد';
+    case 'Assigned': return 'قيد المعالجة';
+    case 'PickupInProgress': return 'قيد التوصيل';
+    case 'Delivered': return 'مكتمل';
+    case 'Cancelled': return 'ملغي';
+    default: return 'فشل التوصيل';
+  }
+}
 
   ngOnInit(): void {
     this.loadData();
@@ -37,12 +50,15 @@ export class AdminDashboardComponent implements OnInit {
     });
 
     // Load orders
-    this.data.getOrders().subscribe({
-      next: (orders) => {
-        this.orders = orders.slice(0, 5);
-      },
-      error: (err) => console.error('Error loading orders:', err)
-    });
+   this.orderService.getOrders().subscribe({
+  next: (orders) => {
+    this.orders = orders.slice(0, 5).map(o => ({
+      ...o,
+      status: this.mapOrderStatusToAr(o.status) // تحويل الإنجليزي → عربي
+    }));
+  },
+  error: (err) => console.error('Error loading orders:', err)
+});
 
     // Load pending carriers
     this.data.getPendingCarriers().subscribe({

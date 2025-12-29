@@ -131,29 +131,29 @@ export class DisputesComponent implements OnInit {
     });
   }
 
-  escalateDispute(): void {
-    if (!this.selectedDispute) return;
+  // escalateDispute(): void {
+  //   if (!this.selectedDispute) return;
 
-    this.isProcessing = true;
-    this.dataService.escalateDispute(this.selectedDispute.id, 'تم التصعيد للإدارة العليا').subscribe({
-      next: () => {
-        this.successMessage = 'تم تصعيد النزاع للإدارة العليا';
-        const index = this.disputes.findIndex(d => d.id === this.selectedDispute!.id);
-        if (index !== -1) {
-          this.disputes[index].status = 'escalated';
-        }
-        this.calculateStats();
-        this.applyFilters();
-        this.selectedDispute = null;
-        this.isProcessing = false;
-      },
-      error: (error) => {
-        console.error('Error escalating dispute:', error);
-        this.errorMessage = 'حدث خطأ أثناء تصعيد النزاع';
-        this.isProcessing = false;
-      }
-    });
-  }
+  //   this.isProcessing = true;
+  //   this.dataService.escalateDispute(this.selectedDispute.id, 'تم التصعيد للإدارة العليا').subscribe({
+  //     next: () => {
+  //       this.successMessage = 'تم تصعيد النزاع للإدارة العليا';
+  //       const index = this.disputes.findIndex(d => d.id === this.selectedDispute!.id);
+  //       if (index !== -1) {
+  //         this.disputes[index].status = 'escalated';
+  //       }
+  //       this.calculateStats();
+  //       this.applyFilters();
+  //       this.selectedDispute = null;
+  //       this.isProcessing = false;
+  //     },
+  //     error: (error) => {
+  //       console.error('Error escalating dispute:', error);
+  //       this.errorMessage = 'حدث خطأ أثناء تصعيد النزاع';
+  //       this.isProcessing = false;
+  //     }
+  //   });
+  // }
 
   openImageViewer(imageUrl: string): void {
     this.currentImage = imageUrl;

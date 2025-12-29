@@ -59,13 +59,21 @@ export interface CourierProfile {
   name: string;
   email: string;
   phone: string;
+  address: string;
   vehicleType: string;
   licenseNumber: string;
   rating: number;
   completedDeliveries: number;
   isAvailable: boolean;
   isOnline: boolean;
-  currentLocation?: { lat: number; lng: number };
+  CourierLocationDto?: { lat: number; lng: number };
+}
+
+export interface UpdateProfileDto {
+  name?: string;
+  phone?: string;
+  vehicleType?: string;
+  licenseNumber?: string;
 }
 
 export interface CourierEarnings {
@@ -77,7 +85,7 @@ export interface CourierEarnings {
 }
 
 export interface DeliveryProof {
-  jobId: string;
+  jobId: string | number;
   photos?: string[];
   imageUrl?: string;
   otp?: string;
@@ -231,17 +239,13 @@ export class CourierDataService {
 
 
   // ========== Jobs ==========
-  getAvailableJobs(): Observable<DeliveryJob[]> {
-    return this.http.get<DeliveryJob[]>(`${this.apiUrl}/jobs/available`);
+  getAvailableJobs(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/AvailableJobs`);
   }
 
-  getMyJobs(): Observable<DeliveryJob[]> {
-    // Try new API first, fallback to old
-    return this.http.get<DeliveryJob[]>(`${this.apiUrl}/MyAssignedPackages`).pipe(
-      catchError(() => this.http.get<DeliveryJob[]>(`${this.apiUrl}/jobs`))
-    );
+ getMyJobs(): Observable<DeliveryJob[]> {
+    return this.http.get<DeliveryJob[]>(`${this.apiUrl}/MyAssignedPackages`);
   }
-
   getActiveJobs(): Observable<DeliveryJob[]> {
     return this.http.get<DeliveryJob[]>(`${this.apiUrl}/jobs/active`);
   }
@@ -276,12 +280,12 @@ export class CourierDataService {
     return this.http.post<DeliveryJob>(`${this.apiUrl}/jobs/${jobId}/pickup`, {});
   }
 
-  startDelivery(jobId: string): Observable<DeliveryJob> {
-    return this.http.post<DeliveryJob>(`${this.apiUrl}/jobs/${jobId}/start-delivery`, {});
+  startDelivery(jobId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/StartDelivery/${jobId}`, {});
   }
 
-  completeJob(jobId: string, proof: DeliveryProof): Observable<DeliveryJob> {
-    return this.http.post<DeliveryJob>(`${this.apiUrl}/jobs/${jobId}/complete`, proof);
+ completeDelivery(jobId: number, dto: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/DeliverPackage/${jobId}`, dto);
   }
 
   failJob(jobId: string, reason: string): Observable<DeliveryJob> {
@@ -295,18 +299,21 @@ export class CourierDataService {
     return this.http.post<DeliveryJob>(`${this.apiUrl}/jobs/${jobId}/fail`, { reason });
   }
 
-  updateJobStatus(jobId: string, status: JobStatus, reason?: string, additionalData?: any): Observable<DeliveryJob> {
-    const body = { status, reason, ...additionalData };
-    return this.http.patch<DeliveryJob>(`${this.apiUrl}/jobs/${jobId}/status`, body);
+   updateJobStatus(jobId: number, status: JobStatus, reason?: string, extraData?: any): Observable<any> {
+    if (status === 'failed') {
+      return this.http.post(`${this.apiUrl}/FailDelivery/${jobId}`, reason);
+    }
+    return this.http.post(`${this.apiUrl}/UpdateStatus/${jobId}?status=${status}`, extraData || {});
   }
 
   // ========== Profile & Status ==========
   getProfile(): Observable<CourierProfile> {
-    return this.http.get<CourierProfile>(`${this.apiUrl}/profile`);
+    return this.http.get<CourierProfile>(`${this.apiUrl}/Profile`);
   }
 
-  updateProfile(profile: Partial<CourierProfile>): Observable<CourierProfile> {
-    return this.http.put<CourierProfile>(`${this.apiUrl}/profile`, profile);
+  // تحديث بيانات البروفايل
+  updateProfile(dto: UpdateProfileDto): Observable<any> {
+    return this.http.put(`${this.apiUrl}/Profile`, dto);
   }
 
   toggleAvailability(isAvailable: boolean): Observable<CourierProfile> {
@@ -335,7 +342,7 @@ export class CourierDataService {
 
   // ========== Earnings ==========
   getEarnings(): Observable<CourierEarnings> {
-    return this.http.get<CourierEarnings>(`${this.apiUrl}/earnings`);
+    return this.http.get<CourierEarnings>(`${this.apiUrl}/Earnings`);
   }
 
   // ========== Support ==========
@@ -372,8 +379,8 @@ export class CourierDataService {
   return this.http.post<{url: string}>(`${this.apiUrl}/upload/image`, data);
 }
 //====================== Shift Management ==========
-  endShift(): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/EndShift`, {});
+   endShift(): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/end-shift`, {});
   }
 
 }

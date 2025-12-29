@@ -1,5 +1,7 @@
 import { Component ,OnInit } from '@angular/core';
-
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { CourierDataService } from '../../services/courier-data.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import jsPDF from 'jspdf';
@@ -10,7 +12,7 @@ Chart.register(...registerables);
 
 @Component({
   selector: 'app-shift',
-  imports: [],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './shift.component.html',
   styleUrl: './shift.component.css'
 })

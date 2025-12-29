@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AdminDataService, AdminOrderRow } from '../../services/admin-data.service';
+import { AdminOrderService, AdminOrderRow, OrderStatus, PackageRow } from '../../services/admin-order.service';
 
 interface ExtendedOrder extends AdminOrderRow {
-  sender?: string;
-  courier?: string;
+  packages?: PackageRow[];
 }
 
 @Component({
@@ -12,28 +11,40 @@ interface ExtendedOrder extends AdminOrderRow {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './orders.component.html',
-  styleUrl: './orders.component.css'
+  styleUrls: ['./orders.component.css']
 })
 export class AdminOrdersComponent implements OnInit {
   orders: ExtendedOrder[] = [];
   filteredOrders: ExtendedOrder[] = [];
-  filter: string = 'all';
+  filter: OrderStatus | 'all' = 'all';
   isLoading = true;
 
   pendingCount = 0;
   inTransitCount = 0;
   deliveredCount = 0;
-  failedCount = 0;
+  cancelledCount = 0;
+  failedCount = 0; // للعرض
 
-  statusFilters: { value: string; label: string }[] = [
+  statusLabelsAr: Record<OrderStatus, string> = {
+    Pending: 'جديد',
+    Assigned: 'تم التعيين',
+    Accepted: 'مقبول',
+    PickupInProgress: 'قيد التوصيل',
+    Delivered: 'مكتمل',
+    Cancelled: 'ملغي'
+  };
+
+  statusFilters: { value: OrderStatus | 'all'; label: string }[] = [
     { value: 'all', label: 'الكل' },
-    { value: 'جديد', label: 'جديد' },
-    { value: 'قيد المعالجة', label: 'قيد التوصيل' },
-    { value: 'مكتمل', label: 'تم التسليم' },
-    { value: 'ملغي', label: 'ملغي' }
+    { value: 'Pending', label: 'جديد' },
+    { value: 'Assigned', label: 'تم التعيين' },
+    { value: 'Accepted', label: 'مقبول' },
+    { value: 'PickupInProgress', label: 'قيد التوصيل' },
+    { value: 'Delivered', label: 'مكتمل' },
+    { value: 'Cancelled', label: 'ملغي' }
   ];
 
-  constructor(private data: AdminDataService) {}
+  constructor(private orderService: AdminOrderService) {}
 
   ngOnInit(): void {
     this.loadOrders();
@@ -41,19 +52,15 @@ export class AdminOrdersComponent implements OnInit {
 
   loadOrders(): void {
     this.isLoading = true;
-    this.data.getOrders().subscribe({
+    this.orderService.getOrders().subscribe({
       next: (orders) => {
-        this.orders = orders;
+        this.orders = orders.map(o => ({ ...o }));
         this.updateCounts();
         this.applyFilter();
         this.isLoading = false;
       },
       error: (err) => {
         console.error('Error loading orders:', err);
-        // Load mock data for development
-        this.orders = this.getMockOrders();
-        this.updateCounts();
-        this.applyFilter();
         this.isLoading = false;
       }
     });
@@ -64,73 +71,64 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   updateCounts(): void {
-    this.pendingCount = this.orders.filter(o => o.status === 'جديد').length;
-    this.inTransitCount = this.orders.filter(o => o.status === 'قيد المعالجة').length;
-    this.deliveredCount = this.orders.filter(o => o.status === 'مكتمل').length;
-    this.failedCount = this.orders.filter(o => o.status === 'ملغي').length;
+    this.pendingCount = this.orders.filter(o => o.status === 'Pending').length;
+    this.inTransitCount = this.orders.filter(o => o.status === 'PickupInProgress').length;
+    this.deliveredCount = this.orders.filter(o => o.status === 'Delivered').length;
+    this.cancelledCount = this.orders.filter(o => o.status === 'Cancelled').length;
+    this.failedCount = this.orders.filter(o => o.status === 'Cancelled').length; // لو عايزة فشل + ملغي
   }
 
-  setFilter(status: string): void {
+  setFilter(status: OrderStatus | 'all'): void {
     this.filter = status;
     this.applyFilter();
   }
 
   applyFilter(): void {
-    if (this.filter === 'all') {
-      this.filteredOrders = this.orders;
-    } else {
-      this.filteredOrders = this.orders.filter(o => o.status === this.filter);
-    }
+    this.filteredOrders = this.filter === 'all'
+      ? this.orders
+      : this.orders.filter(o => o.status === this.filter);
   }
 
-  canUpdateStatus(status: string): boolean {
-    return status !== 'مكتمل' && status !== 'ملغي';
+  canUpdateStatus(status: OrderStatus): boolean {
+    return status !== 'Delivered' && status !== 'Cancelled';
   }
 
-  updateOrderStatus(order: ExtendedOrder): void {
-    const nextStatus = this.getNextStatus(order.status);
-    if (nextStatus) {
-      this.data.updateOrderStatus(order.id, nextStatus).subscribe({
-        next: () => {
-          order.status = nextStatus as 'جديد' | 'قيد المعالجة' | 'مكتمل' | 'ملغي';
-          this.updateCounts();
-        },
-        error: (err) => {
-          console.error('Error updating order status:', err);
-          // Update locally for demo
-          order.status = nextStatus as 'جديد' | 'قيد المعالجة' | 'مكتمل' | 'ملغي';
-          this.updateCounts();
-        }
-      });
-    }
-  }
-
-  getNextStatus(currentStatus: string): string | null {
-    const statusFlow: { [key: string]: string } = {
-      'جديد': 'قيد المعالجة',
-      'قيد المعالجة': 'مكتمل'
+  getNextStatus(currentStatus: OrderStatus): OrderStatus | null {
+    const statusFlow: { [key in OrderStatus]?: OrderStatus } = {
+      Pending: 'PickupInProgress',
+      PickupInProgress: 'Delivered'
     };
     return statusFlow[currentStatus] || null;
   }
 
-  getStatusClass(status: string): string {
-    const classMap: { [key: string]: string } = {
-      'جديد': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      'قيد المعالجة': 'bg-blue-100 text-blue-800 border-blue-200',
-      'مكتمل': 'bg-green-100 text-green-800 border-green-200',
-      'ملغي': 'bg-red-100 text-red-800 border-red-200'
-    };
-    return classMap[status] || 'bg-gray-100 text-gray-800 border-gray-200';
+  updateOrderStatus(order: ExtendedOrder): void {
+    const nextStatus = this.getNextStatus(order.status);
+    if (!nextStatus) return;
+
+    this.orderService.updateOrderStatus(Number(order.id), nextStatus).subscribe({
+      next: (updatedOrder) => {
+        order.status = updatedOrder.status;
+        order.packages = updatedOrder.packages;
+        this.updateCounts();
+        this.applyFilter();
+      },
+      error: (err) => console.error('Error updating order status:', err)
+    });
   }
 
-  private getMockOrders(): ExtendedOrder[] {
-    return [
-      { id: 'PKG-2024-001', customer: 'أحمد محمد', sender: 'شركة الإلكترونيات', status: 'قيد المعالجة', total: 35, createdAt: '2024-12-15', courier: 'محمد علي' },
-      { id: 'PKG-2024-002', customer: 'سارة علي', sender: 'متجر الأزياء', status: 'جديد', total: 45, createdAt: '2024-12-15' },
-      { id: 'PKG-2024-003', customer: 'خالد سعيد', sender: 'مكتبة النور', status: 'مكتمل', total: 25, createdAt: '2024-12-14', courier: 'أحمد حسن' },
-      { id: 'PKG-2024-004', customer: 'نورة أحمد', sender: 'متجر الهدايا', status: 'قيد المعالجة', total: 55, createdAt: '2024-12-14', courier: 'علي محمود' },
-      { id: 'PKG-2024-005', customer: 'محمود حسين', sender: 'شركة المستلزمات', status: 'جديد', total: 30, createdAt: '2024-12-13' },
-      { id: 'PKG-2024-006', customer: 'فاطمة يوسف', sender: 'متجر العطور', status: 'ملغي', total: 75, createdAt: '2024-12-12' }
-    ];
+  getStatusLabel(status: OrderStatus): string {
+    return this.statusLabelsAr[status] || status;
+  }
+
+  getStatusClass(status: OrderStatus): string {
+    const classMap: { [key in OrderStatus]: string } = {
+      Pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      Assigned: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+      Accepted: 'bg-purple-100 text-purple-800 border-purple-200',
+      PickupInProgress: 'bg-blue-100 text-blue-800 border-blue-200',
+      Delivered: 'bg-green-100 text-green-800 border-green-200',
+      Cancelled: 'bg-red-100 text-red-800 border-red-200'
+    };
+    return classMap[status];
   }
 }
