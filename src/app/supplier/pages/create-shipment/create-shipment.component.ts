@@ -163,7 +163,7 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
 
       // Receiver Info
       receiverName: ['', [Validators.required, Validators.minLength(3)]],
-      receiverPhone: ['', [Validators.required, Validators.pattern(/^01[0125][0-9]{8}$/)]],
+      receiverPhone: ['', [Validators.required, Validators.pattern(/^(01|05)[0-9]{8,9}$/)]],
       receiverEmail: ['', Validators.email],
 
       // Hidden fields or auto-filled
