@@ -266,6 +266,16 @@ export interface SupplierProduct {
   createdAt: string;
 }
 
+// ========= CUSTOMERS (UC-SUP-02 - assumed) =========
+
+export interface Customer {
+  id: number;
+  phoneNumber: string;
+  name?: string;
+}
+
+
+
 @Injectable({ providedIn: 'root' })
 export class SupplierDataService {
   private apiUrl = `${environment.apiUrl}/Supplier`;
@@ -407,8 +417,10 @@ export class SupplierDataService {
 
   // ================= Get CustomerNumber =================
 
-  getCustomers(): Observable<any> {
-    return this.http.get<any>(`https://localhost:7180/api/Customer`);
+  getCustomers(): Observable<Customer[]> {
+    return this.http.get<Customer[]>(
+      'https://localhost:7180/api/Customer'
+    );
   }
 
 
