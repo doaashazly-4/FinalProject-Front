@@ -15,26 +15,43 @@
       </div>
 
       <!-- Photos Section -->
-      <div class="mb-6">
-        <h3 class="font-semibold text-gray-800 mb-3">التقاط الصور (1-3 صور) <span class="text-red-500">*</span></h3>
-        <div class="grid grid-cols-3 gap-3 mb-3">
-          <div *ngFor="let preview of photoPreviews; let i = index"
-               class="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 border-primary-green">
-            <img [src]="preview" alt="Proof photo" class="w-full h-full object-cover">
-            <button (click)="removePhoto(i)"
-                    class="absolute top-1 right-1 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 transition-colors">
-              <i class="bi bi-x"></i>
-            </button>
-          </div>
-          <button *ngIf="photoPreviews.length < 3"
-                  (click)="takePhoto()"
-                  class="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-primary-green hover:text-primary-green transition-colors bg-gray-50">
-            <i class="bi bi-camera text-3xl mb-2"></i>
-            <span class="text-xs font-medium">إضافة صورة</span>
-          </button>
-        </div>
-        <p class="text-xs text-gray-500">التقط صورة للطرد والعميل لإثبات التسليم (إلزامي)</p>
+    <div class="mb-6">
+  <h3 class="font-semibold text-gray-800 mb-3">التقاط الصور (1-3 صور) <span class="text-red-500">*</span></h3>
+  
+  <!-- استخدم الكاميرا الجديدة هنا -->
+  <app-proof-camera
+      [maxPhotos]="3"
+      [required]="true"
+      [quality]="0.8"
+      (photoCaptured)="onCameraPhotoCaptured($event)"
+      (photosChanged)="onCameraPhotosChanged($event)"
+      (cameraClosed)="onCameraClosed()"
+      class="mb-3">
+  </app-proof-camera>
+  
+  <!-- معرض الصور الملتقطة (يمكن إزالته لأن الكاميرا تعرضها) -->
+  <div *ngIf="photoPreviews.length > 0" class="mt-4">
+    <p class="text-sm font-medium text-gray-700 mb-2">الصور الملتقطة:</p>
+    <div class="grid grid-cols-3 gap-3">
+      <div *ngFor="let preview of photoPreviews; let i = index"
+           class="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 border-primary-green">
+        <img [src]="preview" alt="Proof photo" class="w-full h-full object-cover">
+        <button (click)="removePhoto(i)"
+                class="absolute top-1 right-1 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 transition-colors">
+          <i class="bi bi-x"></i>
+        </button>
+        <span class="absolute bottom-1 left-1 bg-black/50 text-white text-xs px-2 py-1 rounded">
+          {{ i + 1 }}
+        </span>
       </div>
+    </div>
+  </div>
+  
+  <p class="text-xs text-gray-500 mt-3">
+    <i class="bi bi-info-circle ml-1"></i>
+    التقط صورة للطرد والعميل لإثبات التسليم (إلزامي)
+  </p>
+</div>
 
       <!-- OTP Section (for COD/high-value) -->
       <div *ngIf="requiresOTP" class="mb-6">

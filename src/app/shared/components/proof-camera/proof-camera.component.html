@@ -1,0 +1,152 @@
+<div class="proof-camera">
+  <!-- رسالة الخطأ -->
+  <div *ngIf="errorMessage" class="error-message">
+    <span class="error-icon">⚠️</span>
+    <span class="error-text">{{ errorMessage }}</span>
+    <button class="error-close" (click)="errorMessage = ''">✕</button>
+  </div>
+
+  <!-- حالة المعالجة -->
+  <div *ngIf="isProcessing" class="processing-overlay">
+    <div class="spinner">⏳</div>
+    <p>جاري إعداد الكاميرا...</p>
+  </div>
+
+  <!-- الكاميرا النشطة -->
+  <div *ngIf="isCameraActive" class="camera-active">
+    <!-- فيديو الكاميرا -->
+    <div class="camera-preview">
+      <video #videoElement autoplay playsinline></video>
+      
+      <!-- شبكة التركيز -->
+      <div class="focus-grid">
+        <div class="grid-line horizontal"></div>
+        <div class="grid-line vertical"></div>
+        <div class="focus-circle"></div>
+      </div>
+      
+      <!-- تأثير التقاط الصورة -->
+      <div class="capture-effect" *ngIf="false"></div>
+    </div>
+
+    <!-- عناصر التحكم في الكاميرا -->
+    <div class="camera-controls">
+      <!-- زر إغلاق الكاميرا -->
+      <button class="control-btn close-btn" (click)="closeCamera()">
+        ✕ إغلاق
+      </button>
+
+      <!-- تبديل الكاميرا -->
+      <button class="control-btn switch-btn" (click)="switchCamera()">
+        {{ cameraIcon }} تبديل
+      </button>
+
+      <!-- التحكم في التكبير -->
+      <div class="zoom-controls">
+        <button class="zoom-btn" (click)="zoomOut()" [disabled]="zoomLevel <= 1">
+          ➖
+        </button>
+        <span class="zoom-level">×{{ zoomLevel.toFixed(1) }}</span>
+        <button class="zoom-btn" (click)="zoomIn()" [disabled]="zoomLevel >= maxZoom">
+          ➕
+        </button>
+      </div>
+    </div>
+
+    <!-- زر التقاط الصورة -->
+    <div class="capture-section">
+      <button class="capture-btn" (click)="capturePhoto()" [disabled]="remainingPhotos <= 0">
+        <div class="capture-circle">
+          <div class="capture-inner"></div>
+        </div>
+      </button>
+      <p class="photos-counter" *ngIf="remainingPhotos > 0">
+        باقي {{ remainingPhotos }} صور
+      </p>
+      <p class="photos-counter limit" *ngIf="remainingPhotos <= 0">
+        ⚠️ وصلت للحد الأقصى
+      </p>
+    </div>
+  </div>
+
+  <!-- واجهة بدء الكاميرا -->
+  <div *ngIf="!isCameraActive" class="camera-inactive">
+    <!-- معرض الصور الملتقطة -->
+    <div *ngIf="hasPhotos" class="photos-preview">
+      <h3 class="photos-title">الصور الملتقطة ({{ capturedPhotos.length }}/{{ maxPhotos }})</h3>
+      
+      <div class="photos-grid">
+        <div *ngFor="let photo of capturedPhotos; let i = index" class="photo-item">
+          <img [src]="photo.preview" [alt]="'صورة ' + (i + 1)" class="photo-thumbnail">
+          <button class="remove-photo-btn" (click)="removePhoto(i)" title="حذف الصورة">
+            ✕
+          </button>
+          <span class="photo-number">{{ i + 1 }}</span>
+        </div>
+        
+        <!-- مساحة للصور الجديدة -->
+        <div *ngFor="let _ of [].constructor(remainingPhotos)" 
+             class="photo-placeholder"
+             (click)="startCamera()">
+          <span class="placeholder-icon">📷</span>
+          <span class="placeholder-text">إضافة صورة</span>
+        </div>
+      </div>
+      
+      <div class="photos-actions">
+        <button class="btn secondary" (click)="clearAllPhotos()">
+          🗑️ مسح الكل
+        </button>
+        <button class="btn primary" (click)="startCamera()" [disabled]="remainingPhotos <= 0">
+          📸 أضف صورة أخرى
+        </button>
+      </div>
+    </div>
+
+    <!-- خيارات البدء -->
+    <div class="start-options">
+      <h3 class="options-title">كيف تريد إضافة الصور؟</h3>
+      
+      <div class="options-grid">
+        <!-- كاميرا الهاتف -->
+        <button class="option-card primary" (click)="startCamera()" [disabled]="remainingPhotos <= 0">
+          <div class="option-icon">📸</div>
+          <h4>الكاميرا</h4>
+          <p>افتح كاميرا الهاتف مباشرة</p>
+          <span class="option-badge" *ngIf="remainingPhotos > 0">+{{ remainingPhotos }}</span>
+        </button>
+
+        <!-- معرض الصور -->
+        <button class="option-card secondary" (click)="openGallery()" [disabled]="remainingPhotos <= 0">
+          <div class="option-icon">🖼️</div>
+          <h4>المعرض</h4>
+          <p>اختر صورة من هاتفك</p>
+          <span class="option-badge" *ngIf="remainingPhotos > 0">+{{ remainingPhotos }}</span>
+        </button>
+
+        <!-- تحميل ملف -->
+        <button class="option-card secondary" (click)="fileInput.click()" [disabled]="remainingPhotos <= 0">
+          <div class="option-icon">📁</div>
+          <h4>ملف</h4>
+          <p>رفع صورة من الجهاز</p>
+          <span class="option-badge" *ngIf="remainingPhotos > 0">+{{ remainingPhotos }}</span>
+        </button>
+      </div>
+
+      <!-- تحذير إذا كانت الصور إلزامية -->
+      <div *ngIf="required && !hasPhotos" class="required-warning">
+        <span class="warning-icon">⚠️</span>
+        <p>يجب إضافة صورة واحدة على الأقل</p>
+      </div>
+
+      <!-- زر الإغلاق -->
+      <button class="btn close-option" (click)="closeCamera()">
+        ✕ إلغاء
+      </button>
+    </div>
+  </div>
+
+  <!-- Input مخفي لرفع الملفات -->
+  <input #fileInput type="file" accept="image/*" capture="environment" 
+         (change)="onFileSelected($event)" style="display: none;" multiple>
+</div>

@@ -170,3 +170,6 @@
     animation: float 3s ease-in-out infinite;
   }
 }
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

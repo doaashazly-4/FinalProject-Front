@@ -1,8 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { SupplierDataService, CreateParcelDTO, DeliveryFeeResponse, SupplierProfile } from '../../services/supplier-data.service';
+import { SupplierDataService, CreateParcelDTO, DeliveryFeeResponse, SupplierProfile, CreateRequestDTO } from '../../services/supplier-data.service';
+import * as L from 'leaflet';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-create-shipment',
@@ -11,44 +14,160 @@ import { SupplierDataService, CreateParcelDTO, DeliveryFeeResponse, SupplierProf
   templateUrl: './create-shipment.component.html',
   styleUrl: './create-shipment.component.css'
 })
-export class CreateShipmentComponent implements OnInit {
+export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('mapContainer') mapContainer!: ElementRef;
+
   shipmentForm!: FormGroup;
   profile: SupplierProfile | null = null;
   deliveryFee: DeliveryFeeResponse | null = null;
-  
+
   isLoading = false;
   isCalculatingFee = false;
   isSubmitting = false;
   showSuccessModal = false;
   createdTrackingNumber = '';
-  
-  // Form step tracking
-  currentStep = 1;
-  totalSteps = 3;
+
+  // Leaflet Map
+  private map: L.Map | undefined;
+  private marker: L.Marker | undefined;
+  deliveryLat: number | null = null;
+  deliveryLng: number | null = null;
+
+  private subscriptions: Subscription = new Subscription();
 
   constructor(
     private fb: FormBuilder,
     private dataService: SupplierDataService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initForm();
+    this.fixLeafletIcons();
     this.loadProfile();
+    this.setupFeeCalculationTriggers();
+
+   // Get customers
+    this.dataService.getCustomers().subscribe({
+      next: (customers) => {
+        console.log(customers);
+      },
+      error: (error) => {
+        console.error('Error fetching customers:', error);
+      }
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // Initialize map once view is ready
+    setTimeout(() => {
+      this.initMap();
+    }, 100);
+  }
+
+  ngOnDestroy(): void {
+    if (this.map) {
+      this.map.remove();
+      this.map = undefined;
+    }
+    this.subscriptions.unsubscribe();
+  }
+
+  private fixLeafletIcons(): void {
+    const iconRetinaUrl = 'assets/marker-icon-2x.png';
+    const iconUrl = 'assets/marker-icon.png';
+    const shadowUrl = 'assets/marker-shadow.png';
+    const iconDefault = L.icon({
+      iconRetinaUrl,
+      iconUrl,
+      shadowUrl,
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      tooltipAnchor: [16, -28],
+      shadowSize: [41, 41]
+    });
+    L.Marker.prototype.options.icon = iconDefault;
+  }
+
+  private initMap(): void {
+    if (!this.mapContainer) return;
+
+    // Check if map is already initialized
+    if (this.map) {
+      this.map.remove();
+    }
+
+    // Default center (Cairo)
+    const defaultLat = 30.0444;
+    const defaultLng = 31.2357;
+
+    this.map = L.map(this.mapContainer.nativeElement).setView([defaultLat, defaultLng], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(this.map);
+
+    // If we have saved coordinates, restore the marker
+    if (this.deliveryLat && this.deliveryLng) {
+      this.updateMarker(this.deliveryLat, this.deliveryLng);
+    }
+
+    // Click handler
+    this.map.on('click', (e: L.LeafletMouseEvent) => {
+      this.updateMarker(e.latlng.lat, e.latlng.lng);
+    });
+
+    // Fix for map resizing issues
+    setTimeout(() => {
+      this.map?.invalidateSize();
+    }, 200);
+  }
+
+  private updateMarker(lat: number, lng: number): void {
+    this.deliveryLat = lat;
+    this.deliveryLng = lng;
+
+    if (this.marker) {
+      this.marker.setLatLng([lat, lng]);
+    } else {
+      if (this.map) {
+        this.marker = L.marker([lat, lng], { draggable: true }).addTo(this.map);
+
+        // Handle drag end
+        this.marker.on('dragend', () => {
+          const position = this.marker!.getLatLng();
+          this.deliveryLat = position.lat;
+          this.deliveryLng = position.lng;
+          this.updateFormCoordinates();
+        });
+      }
+    }
+
+    this.updateFormCoordinates();
+  }
+
+  private updateFormCoordinates(): void {
+    if (this.deliveryLat && this.deliveryLng) {
+      this.shipmentForm.patchValue({
+        deliveryAddress: `${this.deliveryLat.toFixed(6)},${this.deliveryLng.toFixed(6)}`
+      });
+      this.shipmentForm.get('deliveryAddress')?.markAsTouched();
+    }
   }
 
   initForm(): void {
     this.shipmentForm = this.fb.group({
-      // Step 1: Addresses
+      // Addresses
       pickupAddress: ['', Validators.required],
       deliveryAddress: ['', Validators.required],
-      
-      // Step 2: Receiver Info
+
+      // Receiver Info
       receiverName: ['', [Validators.required, Validators.minLength(3)]],
       receiverPhone: ['', [Validators.required, Validators.pattern(/^01[0125][0-9]{8}$/)]],
       receiverEmail: ['', Validators.email],
-      
-      // Step 3: Package Details
+
+      // Package Details
       description: ['', [Validators.required, Validators.minLength(3)]],
       weight: [1, [Validators.required, Validators.min(0.1), Validators.max(100)]],
       dimensions: [''],
@@ -65,10 +184,12 @@ export class CreateShipmentComponent implements OnInit {
     this.dataService.getProfile().subscribe({
       next: (profile) => {
         this.profile = profile;
-        // Auto-fill pickup address from profile
-        this.shipmentForm.patchValue({
-          pickupAddress: profile.address
-        });
+        // Auto-fill pickup address from profile if empty
+        if (!this.shipmentForm.get('pickupAddress')?.value) {
+          this.shipmentForm.patchValue({
+            pickupAddress: profile.address
+          });
+        }
         this.isLoading = false;
       },
       error: () => {
@@ -77,73 +198,35 @@ export class CreateShipmentComponent implements OnInit {
     });
   }
 
-  // Step Navigation
-  nextStep(): void {
-    if (this.validateCurrentStep()) {
-      if (this.currentStep < this.totalSteps) {
-        this.currentStep++;
-        
-        // Calculate fee when moving to step 3
-        if (this.currentStep === 3) {
-          this.calculateDeliveryFee();
-        }
-      }
-    }
+  setupFeeCalculationTriggers(): void {
+    // Watch for changes in weight, priority, and deliveryAddress
+    const weightSub = this.shipmentForm.get('weight')?.valueChanges
+      .pipe(debounceTime(500), distinctUntilChanged())
+      .subscribe(() => this.calculateDeliveryFee());
+
+    const prioritySub = this.shipmentForm.get('priority')?.valueChanges
+      .subscribe(() => this.calculateDeliveryFee());
+
+    // Even though deliveryAddress is updated programmatically, valueChanges *should* fire when we patchValue.
+    // However, patchValue often has emitEvent: true by default.
+    const addressSub = this.shipmentForm.get('deliveryAddress')?.valueChanges
+      .pipe(debounceTime(500), distinctUntilChanged())
+      .subscribe(() => this.calculateDeliveryFee());
+
+    this.subscriptions.add(weightSub);
+    this.subscriptions.add(prioritySub);
+    this.subscriptions.add(addressSub);
   }
 
-  prevStep(): void {
-    if (this.currentStep > 1) {
-      this.currentStep--;
-    }
-  }
-
-  goToStep(step: number): void {
-    // Only allow going back or to completed steps
-    if (step < this.currentStep) {
-      this.currentStep = step;
-    }
-  }
-
-  validateCurrentStep(): boolean {
-    const controls = this.shipmentForm.controls;
-    
-    switch (this.currentStep) {
-      case 1:
-        return controls['pickupAddress'].valid && controls['deliveryAddress'].valid;
-      case 2:
-        return controls['receiverName'].valid && controls['receiverPhone'].valid;
-      case 3:
-        return controls['description'].valid && controls['weight'].valid;
-      default:
-        return true;
-    }
-  }
-
-  isStepValid(step: number): boolean {
-    const controls = this.shipmentForm.controls;
-    
-    switch (step) {
-      case 1:
-        return controls['pickupAddress'].valid && controls['deliveryAddress'].valid;
-      case 2:
-        return controls['receiverName'].valid && controls['receiverPhone'].valid;
-      case 3:
-        return controls['description'].valid && controls['weight'].valid;
-      default:
-        return false;
-    }
-  }
-
-  // Fee Calculation
   calculateDeliveryFee(): void {
     const formValue = this.shipmentForm.value;
-    
-    if (!formValue.pickupAddress || !formValue.deliveryAddress) {
+
+    if (!formValue.pickupAddress || !formValue.deliveryAddress || !formValue.weight) {
       return;
     }
-    
+
     this.isCalculatingFee = true;
-    
+
     this.dataService.calculateDeliveryFee({
       pickupAddress: formValue.pickupAddress,
       deliveryAddress: formValue.deliveryAddress,
@@ -156,48 +239,45 @@ export class CreateShipmentComponent implements OnInit {
       },
       error: () => {
         this.isCalculatingFee = false;
+        // Optional: Reset fee or show error
+        this.deliveryFee = null;
       }
     });
   }
 
-  onPriorityChange(): void {
-    if (this.currentStep === 3) {
-      this.calculateDeliveryFee();
-    }
-  }
-
-  onWeightChange(): void {
-    if (this.currentStep === 3) {
-      this.calculateDeliveryFee();
-    }
-  }
-
-  // Form Submission
   onSubmit(): void {
+    console.log('Submit clicked');
     if (this.shipmentForm.invalid) {
       this.markAllAsTouched();
       return;
     }
-    
+
     this.isSubmitting = true;
-    
+
     const formValue = this.shipmentForm.value;
-    const dto: CreateParcelDTO = {
-      description: formValue.description,
-      weight: formValue.weight,
-      dimensions: formValue.dimensions,
-      pickupAddress: formValue.pickupAddress,
-      deliveryAddress: formValue.deliveryAddress,
-      receiverName: formValue.receiverName,
-      receiverPhone: formValue.receiverPhone,
-      receiverEmail: formValue.receiverEmail,
-      notes: formValue.notes,
-      isFragile: formValue.isFragile,
-      requiresSignature: formValue.requiresSignature,
-      codAmount: formValue.codAmount,
-      priority: formValue.priority
+    const dto: CreateRequestDTO = {
+      source: formValue.pickupAddress,
+      priority: formValue.priority,
+      pickupLat: this.deliveryLat,
+      pickupLng: this.deliveryLng,
+      packages: [
+        {
+          description: formValue.description,
+          weight: formValue.weight,
+          fragile: formValue.isFragile,
+          shipmentCost: formValue.codAmount,
+          destination: formValue.deliveryAddress,
+          lat: 0,
+          lng: 0,
+          expireDate: formValue.expireDate,
+          notes: formValue.notes,
+          customerID: formValue.customerID
+        }
+      ]
     };
-    
+
+    console.log('Sending DTO:', dto);
+
     this.dataService.createParcel(dto).subscribe({
       next: (parcel) => {
         this.isSubmitting = false;
@@ -207,7 +287,6 @@ export class CreateShipmentComponent implements OnInit {
       error: (err) => {
         this.isSubmitting = false;
         console.error('Error creating shipment:', err);
-        // Show error message
       }
     });
   }
@@ -218,7 +297,6 @@ export class CreateShipmentComponent implements OnInit {
     });
   }
 
-  // Success Modal Actions
   createAnother(): void {
     this.showSuccessModal = false;
     this.shipmentForm.reset({
@@ -229,8 +307,22 @@ export class CreateShipmentComponent implements OnInit {
       isFragile: false,
       requiresSignature: false
     });
-    this.currentStep = 1;
+
     this.deliveryFee = null;
+    this.deliveryLat = null;
+    this.deliveryLng = null;
+    this.marker = undefined;
+
+    // Clear map marker
+    if (this.map) {
+      this.map.eachLayer((layer) => {
+        if (layer instanceof L.Marker) {
+          this.map!.removeLayer(layer);
+        }
+      });
+      // Re-center map to default
+      this.map.setView([30.0444, 31.2357], 13);
+    }
   }
 
   goToShipments(): void {
@@ -238,12 +330,11 @@ export class CreateShipmentComponent implements OnInit {
   }
 
   trackShipment(): void {
-    this.router.navigate(['/supplier/track'], { 
-      queryParams: { id: this.createdTrackingNumber } 
+    this.router.navigate(['/supplier/track'], {
+      queryParams: { id: this.createdTrackingNumber }
     });
   }
 
-  // Helper Methods
   hasError(field: string): boolean {
     const control = this.shipmentForm.get(field);
     return control ? control.invalid && control.touched : false;
@@ -252,14 +343,14 @@ export class CreateShipmentComponent implements OnInit {
   getErrorMessage(field: string): string {
     const control = this.shipmentForm.get(field);
     if (!control || !control.errors) return '';
-    
+
     if (control.errors['required']) return 'هذا الحقل مطلوب';
     if (control.errors['minlength']) return `الحد الأدنى ${control.errors['minlength'].requiredLength} أحرف`;
     if (control.errors['pattern']) return 'صيغة غير صحيحة';
     if (control.errors['email']) return 'بريد إلكتروني غير صحيح';
     if (control.errors['min']) return `القيمة الدنيا ${control.errors['min'].min}`;
     if (control.errors['max']) return `القيمة القصوى ${control.errors['max'].max}`;
-    
+
     return 'خطأ في الإدخال';
   }
 }

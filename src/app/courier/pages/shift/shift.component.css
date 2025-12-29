@@ -1,0 +1,24 @@
+.shift-container {
+  max-width: 700px;
+  margin: 20px auto;
+  padding: 15px;
+  background-color: #f0f2f5;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.shift-container button {
+  margin: 10px 0;
+  padding: 10px 20px;
+  border-radius: 25px;
+  border: none;
+  background-color: #00bfa5;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.shift-container button:hover {
+  background-color: #009e8f;
+}

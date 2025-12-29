@@ -1,0 +1,147 @@
+<div class="delivery-workflow">
+  <!-- حالة التحميل -->
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner">⏳</div>
+    <p>جاري تحميل بيانات الطلب...</p>
+  </div>
+
+  <!-- المحتوى الرئيسي -->
+  <div *ngIf="!isLoading && job" class="content">
+    
+    <!-- العنوان -->
+    <div class="header">
+      <button class="back-btn" (click)="goBack()">← رجوع</button>
+      <h1>تسليم الطلب</h1>
+      
+      <div class="order-header">
+        <span class="order-id">#{{ job.id || job.trackingNumber || jobId }}</span>
+        <span class="order-status">{{ job.status || 'قيد المعالجة' }}</span>
+      </div>
+    </div>
+
+    <!-- معلومات الطلب -->
+    <div class="order-card">
+      <h2>معلومات الطلب</h2>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">العميل:</span>
+          <span class="value">{{ job.customerName || job.receiverName || 'غير محدد' }}</span>
+        </div>
+        
+        <div class="info-item">
+          <span class="label">الهاتف:</span>
+          <span class="value">{{ job.customerPhone || job.receiverPhone || 'غير متاح' }}</span>
+        </div>
+        
+        <div class="info-item full-width">
+          <span class="label">عنوان التسليم:</span>
+          <span class="value">{{ job.deliveryAddress || 'غير محدد' }}</span>
+        </div>
+        
+        <div *ngIf="job.pickupAddress" class="info-item full-width">
+          <span class="label">عنوان الاستلام:</span>
+          <span class="value">{{ job.pickupAddress }}</span>
+        </div>
+        
+        <div *ngIf="job.codAmount && job.codAmount > 0" class="info-item cod">
+          <span class="label">الدفع عند الاستلام:</span>
+          <span class="value">{{ job.codAmount }} ج.م</span>
+        </div>
+        
+        <div *ngIf="job.items" class="info-item full-width">
+          <span class="label">المحتويات:</span>
+          <span class="value">{{ job.items }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- أزرار التنفيذ السريع -->
+    <div class="quick-actions">
+      <button class="action-btn map" (click)="openGoogleMaps()">
+        🗺️ فتح الخريطة
+      </button>
+      
+      <button class="action-btn call" (click)="callCustomer()">
+        📞 الاتصال بالعميل
+      </button>
+    </div>
+
+    <!-- خطوات التسليم -->
+    <div class="steps-container">
+      <h2>خطوات التسليم</h2>
+      
+      <div class="steps">
+        <div *ngFor="let step of steps" 
+             class="step"
+             [class.completed]="step.status === 'completed'"
+             [class.current]="step.status === 'current'"
+             [class.pending]="step.status === 'pending'">
+          
+          <div class="step-icon">{{ step.icon }}</div>
+          
+          <div class="step-content">
+            <h3>{{ step.title }}</h3>
+            <p>{{ getStepDescription(step.action) }}</p>
+          </div>
+          
+          <div class="step-action">
+            <div *ngIf="step.status === 'completed'" class="done">
+              ✓ تم
+            </div>
+            
+            <button *ngIf="step.status === 'current'" 
+                    class="execute-btn"
+                    (click)="executeStep(step)">
+              تنفيذ
+            </button>
+            
+            <div *ngIf="step.status === 'pending'" class="waiting">
+              قادم
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- زر الإنهاء (يظهر فقط عند الخطوة الأخيرة) -->
+    <div *ngIf="currentStep === 4" class="completion-options">
+      <h3>اختر نتيجة التسليم:</h3>
+      
+      <div class="options">
+        <button class="success-btn" (click)="openDeliveryProof()">
+          ✅ نجاح التسليم
+        </button>
+        
+        <button class="failure-btn" (click)="openFailedProof()">
+          ❌ فشل التسليم
+        </button>
+      </div>
+    </div>
+
+    <!-- ملاحظات -->
+    <div *ngIf="job.notes" class="notes">
+      <h3>ملاحظات:</h3>
+      <p>{{ job.notes }}</p>
+    </div>
+  </div>
+
+  <!-- المودالات (باستخدام المكونات الموجودة لديك) -->
+  @if (showProofModal) {
+    <app-delivery-proof
+      [isVisible]="showProofModal"
+      [job]="job"
+      (onComplete)="handleDeliveryComplete($event)"
+      (onCancel)="cancelModal()">
+    </app-delivery-proof>
+  }
+
+  @if (showFailedProofModal) {
+    <app-failed-delivery-proof
+      [isVisible]="showFailedProofModal"
+      [job]="job"
+      (onSubmit)="handleDeliveryFailure($event)"
+      (onCancel)="cancelModal()">
+    </app-failed-delivery-proof>
+  }
+</div>

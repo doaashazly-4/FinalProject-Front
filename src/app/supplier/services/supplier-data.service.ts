@@ -6,7 +6,7 @@ import { environment } from '../../../environments/environment';
 
 // ========== PARCEL INTERFACES (UC-SUP-02) ==========
 
-export type ParcelStatus = 
+export type ParcelStatus =
   | 'pending'           // Waiting for pickup confirmation
   | 'ready_for_pickup'  // Ready, waiting for carrier assignment
   | 'assigned'          // Carrier assigned
@@ -57,6 +57,30 @@ export interface FailedAttempt {
   timestamp: string;
   notes?: string;
 }
+
+export interface CreateRequestDTO {
+  source: string,
+  priority: string,
+  pickupLat: number|null,
+  pickupLng: number|null,
+  packages: [
+    {
+      description: string,
+      weight: number,
+      fragile: boolean,
+      shipmentCost: number,
+      destination: string,
+      lat: number|null,
+      lng: number|null,
+      expireDate: string,
+      notes: string,
+      customerID: string
+    }
+  ]
+
+}
+
+
 
 export interface CreateParcelDTO {
   description: string;
@@ -246,7 +270,7 @@ export interface SupplierProduct {
 export class SupplierDataService {
   private apiUrl = `${environment.apiUrl}/Supplier`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // ================= DASHBOARD =================
 
@@ -278,26 +302,10 @@ export class SupplierDataService {
 
   // ================= CREATE REQUEST =================
 
-  createParcel(dto: CreateParcelDTO): Observable<any> {
-    const backendDto = {
-      source: dto.pickupAddress,
-      priority: dto.priority,
-      pickupLat: 0,
-      pickupLng: 0,
-      packages: [
-        {
-          description: dto.description,
-          weight: dto.weight,
-          fragile: dto.isFragile,
-          shipmentCost: dto.codAmount,
-          destination: dto.deliveryAddress,
-          lat: 0,
-          lng: 0
-        }
-      ]
-    };
+  createParcel(dto: CreateRequestDTO): Observable<any> {
+ 
 
-    return this.http.post(`${this.apiUrl}/CreateRequest`, backendDto);
+    return this.http.post(`${this.apiUrl}/CreateRequest`, dto);
   }
 
   // ================= READY FOR PICKUP =================
@@ -396,4 +404,12 @@ export class SupplierDataService {
   calculateDeliveryFee(request: DeliveryFeeRequest): Observable<DeliveryFeeResponse> {
     return this.http.post<DeliveryFeeResponse>(`${this.apiUrl}/CalculateFee`, request);
   }
+
+  // ================= Get CustomerNumber =================
+
+  getCustomers(): Observable<any> {
+    return this.http.get<any>(`https://localhost:7180/api/Customer`);
+  }
+
+
 }

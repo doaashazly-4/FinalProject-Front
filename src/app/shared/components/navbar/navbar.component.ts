@@ -32,7 +32,7 @@ export class NavbarComponent implements OnInit {
     const user = this.auth.getCurrentUser();
     this.currentUserRole = user.role;
     this.userName = user.userName;
-    
+
     if (!this.userName && user.email) {
       this.userName = user.email.split('@')[0];
     }
@@ -49,14 +49,14 @@ export class NavbarComponent implements OnInit {
   // Updated terminology: Supplier = Sender, Customer = Receiver
   getRoleTitle(): string {
     if (!this.currentUserRole) return '';
-    
+
     const roleTitles: { [key: string]: string } = {
       'customer': 'مُستلم',    // Receiver
       'supplier': 'مُرسل',     // Sender
       'courier': 'مندوب',      // Carrier
       'admin': 'مدير'          // Admin
     };
-    
+
     return roleTitles[this.currentUserRole] || this.currentUserRole;
   }
 
@@ -72,7 +72,7 @@ export class NavbarComponent implements OnInit {
     this.router.navigate(['/']);
   }
 
-  @HostListener('window:scroll', ['$event'])
+  @HostListener('window:scroll')
   onWindowScroll() {
     this.isScrolled = window.scrollY > 50;
   }

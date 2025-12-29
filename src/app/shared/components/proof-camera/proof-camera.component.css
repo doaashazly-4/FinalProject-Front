@@ -1,0 +1,557 @@
+.proof-camera {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* رسالة الخطأ */
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  color: #c00;
+  font-size: 14px;
+}
+
+.error-icon {
+  font-size: 18px;
+}
+
+.error-text {
+  flex: 1;
+}
+
+.error-close {
+  background: none;
+  border: none;
+  color: #c00;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* حالة المعالجة */
+.processing-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  border-radius: 12px;
+}
+
+.spinner {
+  font-size: 48px;
+  margin-bottom: 16px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* الكاميرا النشطة */
+.camera-active {
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.camera-preview {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+}
+
+.camera-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* مرآة للكاميرا الأمامية */
+}
+
+/* شبكة التركيز */
+.focus-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.grid-line {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.grid-line.horizontal {
+  top: 50%;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  transform: translateY(-50%);
+}
+
+.grid-line.vertical {
+  left: 50%;
+  top: 20%;
+  bottom: 20%;
+  width: 1px;
+  transform: translateX(-50%);
+}
+
+.focus-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* عناصر التحكم */
+.camera-controls {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.control-btn {
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s;
+}
+
+.control-btn:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.control-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.close-btn {
+  background: rgba(220, 53, 69, 0.7);
+}
+
+.switch-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* التحكم في التكبير */
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 6px 12px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.zoom-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.zoom-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.zoom-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.zoom-level {
+  color: white;
+  font-size: 14px;
+  min-width: 40px;
+  text-align: center;
+}
+
+/* زر التقاط الصورة */
+.capture-section {
+  position: absolute;
+  bottom: 30px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.capture-btn {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 3px solid white;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.capture-btn:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+.capture-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.capture-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.capture-inner {
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  border: 2px solid #333;
+}
+
+.photos-counter {
+  color: white;
+  font-size: 14px;
+  margin: 0;
+}
+
+.photos-counter.limit {
+  color: #ff6b6b;
+  font-weight: bold;
+}
+
+/* واجهة الكاميرا غير النشطة */
+.camera-inactive {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* معرض الصور الملتقطة */
+.photos-preview {
+  margin-bottom: 24px;
+}
+
+.photos-title {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 18px;
+  text-align: center;
+}
+
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.photo-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.photo-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-photo-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(220, 53, 69, 0.9);
+  color: white;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-photo-btn:hover {
+  background: #dc3545;
+}
+
+.photo-number {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.photo-placeholder {
+  aspect-ratio: 1;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: #f8f9fa;
+}
+
+.photo-placeholder:hover {
+  border-color: #007bff;
+  background: #e7f3ff;
+}
+
+.placeholder-icon {
+  font-size: 32px;
+  color: #999;
+  margin-bottom: 8px;
+}
+
+.placeholder-text {
+  color: #666;
+  font-size: 12px;
+}
+
+.photos-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* خيارات البدء */
+.start-options {
+  text-align: center;
+}
+
+.options-title {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 20px;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.option-card {
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 20px 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.option-card:hover:not(:disabled) {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.option-card:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.option-card.primary {
+  border-color: #007bff;
+  background: #f0f7ff;
+}
+
+.option-card.primary:hover:not(:disabled) {
+  border-color: #0056b3;
+  background: #e1f0ff;
+}
+
+.option-card.secondary {
+  border-color: #e9ecef;
+  background: white;
+}
+
+.option-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.option-card h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.option-card p {
+  margin: 0;
+  color: #666;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.option-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #28a745;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* تحذير الصور الإلزامية */
+.required-warning {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 20px 0;
+  color: #856404;
+}
+
+.warning-icon {
+  font-size: 20px;
+}
+
+.required-warning p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* الأزرار العامة */
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+}
+
+.btn.primary:hover {
+  background: linear-gradient(135deg, #0056b3, #003d82);
+  transform: translateY(-2px);
+}
+
+.btn.secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn.secondary:hover {
+  background: #545b62;
+  transform: translateY(-2px);
+}
+
+.btn.close-option {
+  background: #f8f9fa;
+  color: #666;
+  border: 1px solid #dee2e6;
+}
+
+.btn.close-option:hover {
+  background: #e9ecef;
+}
+
+/* تصميم للجوال */
+@media (max-width: 768px) {
+  .camera-preview {
+    height: 300px;
+  }
+  
+  .options-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .photos-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .camera-controls {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .zoom-controls {
+    align-self: flex-end;
+  }
+}

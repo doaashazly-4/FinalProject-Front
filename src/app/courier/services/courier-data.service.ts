@@ -347,4 +347,33 @@ export class CourierDataService {
     return this.http.post<any>(`${this.apiUrl}/tickets`, ticket);
   }
 
+  //====================== Delivery Proof ==========
+
+  // في courier-data.service.ts أضف:
+  submitDeliveryProof(proofData: any): Observable<any> {
+  return this.http.post(`${this.apiUrl}/DeliverPackage/${proofData.jobId}`, proofData);
+  }
+
+   reportFailedDelivery(failureData: any): Observable<any> {
+  return this.http.post(`${this.apiUrl}/FailDelivery/${failureData.jobId}`, failureData);
+  }
+
+    //====================== Support Chat ==========
+  getSupportChat(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/SupportChat`);
+  }
+
+  sendSupportMessage(formData: FormData): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/SupportChat`, formData);
+  }
+
+  //====================== Image Upload ==========
+  uploadImage(data: FormData) {
+  return this.http.post<{url: string}>(`${this.apiUrl}/upload/image`, data);
+}
+//====================== Shift Management ==========
+  endShift(): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/EndShift`, {});
+  }
+
 }
