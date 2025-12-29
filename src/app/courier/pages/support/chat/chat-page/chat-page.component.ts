@@ -10,7 +10,8 @@ import { FormsModule } from '@angular/forms';
 @Component({
   standalone: true,
   imports: [CommonModule, FormsModule, ChatComponent, MatSnackBarModule],
-  templateUrl: './chat-page.component.html'
+  templateUrl: './chat-page.component.html',
+  styleUrls: ['./chat-page.component.css'],
 })
 export class ChatPageComponent implements OnInit, OnDestroy {
 

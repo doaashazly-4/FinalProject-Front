@@ -243,7 +243,11 @@ export class CourierDataService {
     return this.http.get<any[]>(`${this.apiUrl}/AvailableJobs`);
   }
 
+<<<<<<< HEAD
   getMyJobs(): Observable<DeliveryJob[]> {
+=======
+ getMyJobs(): Observable<DeliveryJob[]> {
+>>>>>>> 9930028 (Refactor user management and courier services)
     return this.http.get<DeliveryJob[]>(`${this.apiUrl}/MyAssignedPackages`);
   }
   getActiveJobs(): Observable<DeliveryJob[]> {
@@ -284,7 +288,11 @@ export class CourierDataService {
     return this.http.post(`${this.apiUrl}/StartDelivery/${jobId}`, {});
   }
 
+<<<<<<< HEAD
   completeDelivery(jobId: number, dto: any): Observable<any> {
+=======
+ completeDelivery(jobId: number, dto: any): Observable<any> {
+>>>>>>> 9930028 (Refactor user management and courier services)
     return this.http.post(`${this.apiUrl}/DeliverPackage/${jobId}`, dto);
   }
 
@@ -299,7 +307,11 @@ export class CourierDataService {
     return this.http.post<DeliveryJob>(`${this.apiUrl}/jobs/${jobId}/fail`, { reason });
   }
 
+<<<<<<< HEAD
   updateJobStatus(jobId: number, status: JobStatus, reason?: string, extraData?: any): Observable<any> {
+=======
+   updateJobStatus(jobId: number, status: JobStatus, reason?: string, extraData?: any): Observable<any> {
+>>>>>>> 9930028 (Refactor user management and courier services)
     if (status === 'failed') {
       return this.http.post(`${this.apiUrl}/FailDelivery/${jobId}`, reason);
     }
@@ -376,11 +388,19 @@ export class CourierDataService {
 
   //====================== Image Upload ==========
   uploadImage(data: FormData) {
+<<<<<<< HEAD
     return this.http.post<{ url: string }>(`${this.apiUrl}/upload/image`, data);
   }
   //====================== Shift Management ==========
   endShift(): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/EndShift`, {});
+=======
+  return this.http.post<{url: string}>(`${this.apiUrl}/upload/image`, data);
+}
+//====================== Shift Management ==========
+   endShift(): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/end-shift`, {});
+>>>>>>> 9930028 (Refactor user management and courier services)
   }
 
 }
