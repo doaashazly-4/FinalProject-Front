@@ -1,15 +1,41 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { SupplierRegisterDTO, CourierRegisterDTO } from '../../../models/user.models';
+
+/* ========= DTOs (محلي عشان مفيش Errors) ========= */
+export interface SupplierRegisterDTO {
+  userName: string;
+  email: string;
+  password: string;
+  address: string;
+  birthDate: string;
+  gender: string;
+  shopName: string;
+}
+
+export interface CourierRegisterDTO {
+  userName: string;
+  email: string;
+  password: string;
+  address: string;
+  birthDate: string;
+  gender: string;
+  vehicleType: number;
+  licenseNumber: string;
+  maxWeight: number;
+  status?: string;
+  isAvailable?: boolean;
+  isOnline?: boolean;
+  rating?: number;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class RegisterService {
 
+  // ✅ Backend URL
   private apiUrl = 'http://localhost:5000/api/Auth';
-
 
   constructor(private http: HttpClient) { }
 
@@ -21,7 +47,7 @@ export class RegisterService {
     );
   }
 
-  // -------- Courier Register (no files) --------
+  // -------- Courier Register (بدون صور) --------
   registerCourier(data: CourierRegisterDTO): Observable<any> {
     return this.http.post(
       `${this.apiUrl}/Register/Courier`,
@@ -29,7 +55,7 @@ export class RegisterService {
     );
   }
 
-  // -------- Courier Register (with files) --------
+  // -------- Courier Register (بصور) --------
   registerCourierWithFiles(
     data: CourierRegisterDTO,
     files: {
@@ -43,17 +69,15 @@ export class RegisterService {
 
     const formData = new FormData();
 
-    // Append DTO fields
-    Object.keys(data).forEach(key => {
-      const value = (data as any)[key];
+    // DTO fields
+    Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        formData.append(key, value);
+        formData.append(key, value as any);
       }
     });
 
-    // Append files
-    Object.keys(files).forEach(key => {
-      const file = (files as any)[key];
+    // Files
+    Object.entries(files).forEach(([key, file]) => {
       if (file) {
         formData.append(key, file);
       }

@@ -4,6 +4,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../shared/services/auth.service';
 import { SupplierRegisterDTO, CourierRegisterDTO } from '../../../models/user.models';
+import { RegisterService } from './register.service';
+
 
 @Component({
   selector: 'app-register',
@@ -20,11 +22,11 @@ export class RegisterComponent implements OnInit {
   successMessage: string = '';
 
   // Data for dropdowns - matching backend enums
- vehicleTypes = [
-  { name: 'Car', value: 0 },
-  { name: 'Bike', value: 1 },
-  { name: 'Foot', value: 2 }
-];
+  vehicleTypes = [
+    { name: 'Car', value: 0 },
+    { name: 'Bike', value: 1 },
+    { name: 'Foot', value: 2 }
+  ];
 
   genders = ['Male', 'Female', 'Other'];
 
@@ -50,7 +52,8 @@ export class RegisterComponent implements OnInit {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private registerService: RegisterService
   ) {
     this.registerForm = this.createForm();
   }
@@ -199,9 +202,9 @@ export class RegisterComponent implements OnInit {
 
   onSubmit(): void {
 
-   console.log('SUBMIT TRIGGERED');
-  console.log('Form valid:', this.registerForm.valid);
-  console.log(this.registerForm.value);
+    console.log('SUBMIT TRIGGERED');
+    console.log('Form valid:', this.registerForm.valid);
+    console.log(this.registerForm.value);
 
     if (this.registerForm.invalid || this.isLoading) {
       this.markFormAsTouched();
@@ -212,8 +215,8 @@ export class RegisterComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-     console.log('Form Data Before Sending:', this.registerForm.value);
-    
+    console.log('Form Data Before Sending:', this.registerForm.value);
+
     const formValue = this.registerForm.value;
     switch (this.selectedRole) {
       case 'Supplier': this.registerSupplier(formValue); break;
@@ -226,20 +229,20 @@ export class RegisterComponent implements OnInit {
   }
 
   registerSupplier(data: any): void {
-  const supplierDTO: SupplierRegisterDTO = {
-  userName: data.userName,
-  email: data.email,
-  password: data.password,
-  address: data.address,
-  birthDate: data.birthDate,
-  gender: data.gender,
-  shopName: data.shopName
-};
+    const supplierDTO: SupplierRegisterDTO = {
+      userName: data.userName,
+      email: data.email,
+      password: data.password,
+      address: data.address,
+      birthDate: data.birthDate,
+      gender: data.gender,
+      shopName: data.shopName
+    };
 
 
     console.log('Supplier DTO:', supplierDTO);
- 
-    this.authService.registerSupplier(supplierDTO).subscribe({
+
+    this.registerService.registerSupplier(supplierDTO).subscribe({
       next: (response) => {
         console.log('Supplier registration success:', response);
         // Try to auto-login the newly registered supplier
@@ -267,7 +270,7 @@ export class RegisterComponent implements OnInit {
 
   registerCourier(data: any): void {
     const hasFiles = this.photoFile || this.licensePhotoFrontFile || this.licensePhotoBackFile ||
-                     this.vehicleLicensePhotoFrontFile || this.vehicleLicensePhotoBackFile;
+      this.vehicleLicensePhotoFrontFile || this.vehicleLicensePhotoBackFile;
 
     if (hasFiles) {
       const courierDTO: CourierRegisterDTO = {
