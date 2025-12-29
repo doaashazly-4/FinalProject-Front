@@ -2,7 +2,7 @@ import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef } fr
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { SupplierDataService, CreateParcelDTO, DeliveryFeeResponse, SupplierProfile, CreateRequestDTO } from '../../services/supplier-data.service';
+import { SupplierDataService, CreateParcelDTO, DeliveryFeeResponse, SupplierProfile, CreateRequestDTO, Customer } from '../../services/supplier-data.service';
 import * as L from 'leaflet';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
@@ -27,6 +27,11 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
   showSuccessModal = false;
   createdTrackingNumber = '';
 
+  // Customers
+  customers: Customer[] = [];
+  filteredCustomers: Customer[] = [];
+  showDropdown = false;
+
   // Leaflet Map
   private map: L.Map | undefined;
   private marker: L.Marker | undefined;
@@ -47,15 +52,17 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     this.loadProfile();
     this.setupFeeCalculationTriggers();
 
-   // Get customers
+    // Load customers once
     this.dataService.getCustomers().subscribe({
       next: (customers) => {
-        console.log(customers);
+        this.customers = customers;
       },
       error: (error) => {
         console.error('Error fetching customers:', error);
       }
     });
+
+    this.setupPhoneAutocomplete();
   }
 
   ngAfterViewInit(): void {
@@ -76,11 +83,9 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
   private fixLeafletIcons(): void {
     const iconRetinaUrl = 'assets/Images/marker-icon.svg';
     const iconUrl = 'assets/Images/marker-icon.svg';
-    // const shadowUrl = 'assets/Images/marker-icon.svg';
     const iconDefault = L.icon({
       iconRetinaUrl,
       iconUrl,
-      // shadowUrl,
       iconSize: [25, 41],
       iconAnchor: [12, 41],
       popupAnchor: [1, -34],
@@ -93,12 +98,10 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
   private initMap(): void {
     if (!this.mapContainer) return;
 
-    // Check if map is already initialized
     if (this.map) {
       this.map.remove();
     }
 
-    // Default center (Cairo)
     const defaultLat = 30.0444;
     const defaultLng = 31.2357;
 
@@ -108,17 +111,14 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
       attribution: '© OpenStreetMap contributors'
     }).addTo(this.map);
 
-    // If we have saved coordinates, restore the marker
     if (this.deliveryLat && this.deliveryLng) {
       this.updateMarker(this.deliveryLat, this.deliveryLng);
     }
 
-    // Click handler
     this.map.on('click', (e: L.LeafletMouseEvent) => {
       this.updateMarker(e.latlng.lat, e.latlng.lng);
     });
 
-    // Fix for map resizing issues
     setTimeout(() => {
       this.map?.invalidateSize();
     }, 200);
@@ -134,7 +134,6 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
       if (this.map) {
         this.marker = L.marker([lat, lng], { draggable: true }).addTo(this.map);
 
-        // Handle drag end
         this.marker.on('dragend', () => {
           const position = this.marker!.getLatLng();
           this.deliveryLat = position.lat;
@@ -167,6 +166,10 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
       receiverPhone: ['', [Validators.required, Validators.pattern(/^01[0125][0-9]{8}$/)]],
       receiverEmail: ['', Validators.email],
 
+      // Hidden fields or auto-filled
+      customerID: [''],
+      expireDate: [new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()], // Default 1 week
+
       // Package Details
       description: ['', [Validators.required, Validators.minLength(3)]],
       weight: [1, [Validators.required, Validators.min(0.1), Validators.max(100)]],
@@ -179,12 +182,42 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     });
   }
 
+  setupPhoneAutocomplete(): void {
+    this.shipmentForm.get('receiverPhone')?.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe(value => {
+        if (!value) {
+          this.filteredCustomers = [];
+          this.showDropdown = false;
+          return;
+        }
+
+        const filterValue = value.toLowerCase();
+        this.filteredCustomers = this.customers.filter(customer =>
+          customer.phoneNumber.includes(filterValue)
+        );
+
+        this.showDropdown = this.filteredCustomers.length > 0;
+      });
+  }
+
+  selectCustomer(customer: Customer): void {
+    this.shipmentForm.patchValue({
+      receiverName: customer.name || '',
+      receiverPhone: customer.phoneNumber,
+      customerID: customer.id
+    });
+
+    // Hide dropdown
+    this.showDropdown = false;
+    this.filteredCustomers = [];
+  }
+
   loadProfile(): void {
     this.isLoading = true;
     this.dataService.getProfile().subscribe({
       next: (profile) => {
         this.profile = profile;
-        // Auto-fill pickup address from profile if empty
         if (!this.shipmentForm.get('pickupAddress')?.value) {
           this.shipmentForm.patchValue({
             pickupAddress: profile.address
@@ -199,7 +232,6 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   setupFeeCalculationTriggers(): void {
-    // Watch for changes in weight, priority, and deliveryAddress
     const weightSub = this.shipmentForm.get('weight')?.valueChanges
       .pipe(debounceTime(500), distinctUntilChanged())
       .subscribe(() => this.calculateDeliveryFee());
@@ -207,8 +239,6 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     const prioritySub = this.shipmentForm.get('priority')?.valueChanges
       .subscribe(() => this.calculateDeliveryFee());
 
-    // Even though deliveryAddress is updated programmatically, valueChanges *should* fire when we patchValue.
-    // However, patchValue often has emitEvent: true by default.
     const addressSub = this.shipmentForm.get('deliveryAddress')?.valueChanges
       .pipe(debounceTime(500), distinctUntilChanged())
       .subscribe(() => this.calculateDeliveryFee());
@@ -239,14 +269,12 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
       },
       error: () => {
         this.isCalculatingFee = false;
-        // Optional: Reset fee or show error
         this.deliveryFee = null;
       }
     });
   }
 
   onSubmit(): void {
-    console.log('Submit clicked');
     if (this.shipmentForm.invalid) {
       this.markAllAsTouched();
       return;
@@ -258,8 +286,8 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     const dto: CreateRequestDTO = {
       source: formValue.pickupAddress,
       priority: formValue.priority,
-      pickupLat: this.deliveryLat,
-      pickupLng: this.deliveryLng,
+      pickupLat: 0, // No pickup coordinates available in UI
+      pickupLng: 0,
       packages: [
         {
           description: formValue.description,
@@ -267,11 +295,11 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
           fragile: formValue.isFragile,
           shipmentCost: formValue.codAmount,
           destination: formValue.deliveryAddress,
-          lat: 0,
-          lng: 0,
+          lat: this.deliveryLat, // Map is for delivery
+          lng: this.deliveryLng,
           expireDate: formValue.expireDate,
           notes: formValue.notes,
-          customerID: formValue.customerID
+          customerID: formValue.customerID?.toString() || ''
         }
       ]
     };
@@ -305,22 +333,24 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
       weight: 1,
       codAmount: 0,
       isFragile: false,
-      requiresSignature: false
+      requiresSignature: false,
+      customerID: '',
+      expireDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
     });
 
     this.deliveryFee = null;
     this.deliveryLat = null;
     this.deliveryLng = null;
     this.marker = undefined;
+    this.filteredCustomers = [];
+    this.showDropdown = false;
 
-    // Clear map marker
     if (this.map) {
       this.map.eachLayer((layer) => {
         if (layer instanceof L.Marker) {
           this.map!.removeLayer(layer);
         }
       });
-      // Re-center map to default
       this.map.setView([30.0444, 31.2357], 13);
     }
   }
