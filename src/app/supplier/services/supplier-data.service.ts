@@ -295,6 +295,22 @@ export class SupplierDataService {
 
   // ================= PARCELS =================
 
+  // getParcels(filter?: ParcelFilter): Observable<Parcel[]> {
+  //   const params: any = {};
+  //   if (filter) {
+  //     if (filter.status) params.status = Array.isArray(filter.status) ? filter.status.join(',') : filter.status;
+  //     if (filter.priority) params.priority = filter.priority;
+  //     if (filter.dateFrom) params.dateFrom = filter.dateFrom;
+  //     if (filter.dateTo) params.dateTo = filter.dateTo;
+  //     if (filter.search) params.search = filter.search;
+  //   }
+  //   return this.http.get<Parcel[]>(`${this.apiUrl}/Request`, { params });
+  // }
+
+  // getParcelById(id: string): Observable<Parcel> {
+  //   return this.http.get<Parcel>(`${this.apiUrl}/Request/${id}`);
+  // }
+  
   getParcels(filter?: ParcelFilter): Observable<Parcel[]> {
     const params: any = {};
     if (filter) {
@@ -304,11 +320,17 @@ export class SupplierDataService {
       if (filter.dateTo) params.dateTo = filter.dateTo;
       if (filter.search) params.search = filter.search;
     }
-    return this.http.get<Parcel[]>(`${this.apiUrl}/Parcels`, { params });
+
+    return this.http.get<Parcel[]>(
+      `${environment.apiUrl}/Request`,
+      { params }
+    );
   }
 
   getParcelById(id: string): Observable<Parcel> {
-    return this.http.get<Parcel>(`${this.apiUrl}/Parcel/${id}`);
+    return this.http.get<Parcel>(
+      `${environment.apiUrl}/Request/${id}`
+    );
   }
 
   // ================= CREATE REQUEST =================
@@ -353,11 +375,11 @@ export class SupplierDataService {
   // ================= TRACKING METHODS =================
 
   getParcelTimeline(parcelId: string): Observable<ParcelTimelineEvent[]> {
-    return this.http.get<ParcelTimelineEvent[]>(`${this.apiUrl}/Parcel/${parcelId}/Timeline`);
+    return this.http.get<ParcelTimelineEvent[]>(`${this.apiUrl}/Request/${parcelId}/Timeline`);
   }
 
   getCarrierLiveLocation(parcelId: string): Observable<CarrierLiveLocation> {
-    return this.http.get<CarrierLiveLocation>(`${this.apiUrl}/Parcel/${parcelId}/CarrierLocation`);
+    return this.http.get<CarrierLiveLocation>(`${this.apiUrl}/Request/${parcelId}/CarrierLocation`);
   }
 
   rateCarrier(dto: RateCarrierDTO): Observable<any> {
