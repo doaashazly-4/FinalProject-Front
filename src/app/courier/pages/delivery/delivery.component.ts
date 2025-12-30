@@ -25,7 +25,7 @@ export class DeliveryComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private dataService: CourierDataService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const jobId = this.route.snapshot.paramMap.get('id');
@@ -80,12 +80,12 @@ export class DeliveryComponent implements OnInit {
   }
 
   markOutForDelivery(): void {
-  if (!this.job) return;
-  this.dataService.updateJobStatus(Number(this.job.id), 'out_for_delivery').subscribe({
-    next: () => this.job!.status = 'out_for_delivery',
-    error: (err) => console.error('Error updating status:', err)
-  });
-}
+    if (!this.job) return;
+    this.dataService.updateJobStatus(Number(this.job.id), 'out_for_delivery').subscribe({
+      next: () => this.job!.status = 'out_for_delivery',
+      error: (err) => console.error('Error updating status:', err)
+    });
+  }
 
   completeDelivery(): void { this.showProofModal = true; }
   unableToDeliver(reason: string): void {
@@ -127,16 +127,16 @@ export class DeliveryComponent implements OnInit {
   }
 
   // ===== Proof Modals =====
- handleDeliveryComplete(event: any): void {
-  if (!this.job) return;
-  this.dataService.completeDelivery(Number(this.job.id), event).subscribe({
-    next: () => { 
-      this.job!.status = 'delivered'; 
-      alert('تم التسليم بنجاح');
-    },
-    error: (err) => { console.error('Error completing delivery:', err); }
-  });
-}
+  handleDeliveryComplete(event: any): void {
+    if (!this.job) return;
+    this.dataService.completeDelivery(Number(this.job.id), event).subscribe({
+      next: () => {
+        this.job!.status = 'delivered';
+        alert('تم التسليم بنجاح');
+      },
+      error: (err) => { console.error('Error completing delivery:', err); }
+    });
+  }
 
   handleDeliveryFailure(event: any): void {
     if (!this.job) return;

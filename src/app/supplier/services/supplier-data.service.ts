@@ -61,8 +61,8 @@ export interface FailedAttempt {
 export interface CreateRequestDTO {
   source: string,
   priority: string,
-  pickupLat: number|null,
-  pickupLng: number|null,
+  pickupLat: number | null,
+  pickupLng: number | null,
   packages: [
     {
       description: string,
@@ -70,8 +70,9 @@ export interface CreateRequestDTO {
       fragile: boolean,
       shipmentCost: number,
       destination: string,
-      lat: number|null,
-      lng: number|null,
+
+      lat: number | null,
+      lng: number | null,
       expireDate: string,
       notes: string,
       customerID: string
@@ -335,7 +336,7 @@ export class SupplierDataService {
   // ================= CREATE REQUEST =================
 
   createParcel(dto: CreateRequestDTO): Observable<any> {
- 
+
 
     return this.http.post(`${this.apiUrl}/CreateRequest`, dto);
   }
