@@ -174,7 +174,7 @@ export class CourierDashboardComponent implements OnInit {
 
         if (act.type === 'accept') obs = this.dataService.acceptJob(act.jobId);
         else if (act.type === 'reject') obs = this.dataService.rejectJob(act.jobId, act.reason);
-        else if (act.type === 'updateStatus') 
+        else if (act.type === 'updateStatus')
           obs = this.dataService.updateJobStatus(act.jobId, act.status as JobStatus, act.reason, { photos: act.photos, otp: act.otp });
 
         obs?.subscribe(

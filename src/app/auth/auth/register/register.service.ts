@@ -66,17 +66,16 @@ export class RegisterService {
       vehicleLicensePhotoBack?: File;
     }
   ): Observable<any> {
-
     const formData = new FormData();
 
-    // DTO fields
+    // Append DTO fields
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         formData.append(key, value as any);
       }
     });
 
-    // Files
+    // Append Files
     Object.entries(files).forEach(([key, file]) => {
       if (file) {
         formData.append(key, file);

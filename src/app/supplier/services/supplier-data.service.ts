@@ -70,6 +70,7 @@ export interface CreateRequestDTO {
       fragile: boolean,
       shipmentCost: number,
       destination: string,
+
       lat: number | null,
       lng: number | null,
       expireDate: string,
