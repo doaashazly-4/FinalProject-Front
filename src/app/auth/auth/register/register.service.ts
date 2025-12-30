@@ -65,48 +65,26 @@ export class RegisterService {
       vehicleLicensePhotoFront?: File;
       vehicleLicensePhotoBack?: File;
     }
+  ): Observable<any> {
+    const formData = new FormData();
 
-    // -------- Courier Register (no files) --------
-    registerCourier(data: CourierRegisterDTO): Observable<any> {
-  return this.http.post(
-    `${this.apiUrl}/Register/Courier`,
-    data
-  );
-}
+    // Append DTO fields
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, value as any);
+      }
+    });
 
-// DTO fields
-Object.entries(data).forEach(([key, value]) => {
-  if (value !== undefined && value !== null) {
-    formData.append(key, value as any);
+    // Append Files
+    Object.entries(files).forEach(([key, file]) => {
+      if (file) {
+        formData.append(key, file);
+      }
+    });
+
+    return this.http.post(
+      `${this.apiUrl}/Register/Courier`,
+      formData
+    );
   }
-});
-
-// Files
-Object.entries(files).forEach(([key, file]) => {
-  if (file) {
-    formData.append(key, file);
-  }
-});
-
-// Append DTO fields
-Object.keys(data).forEach(key => {
-  const value = (data as any)[key];
-  if (value !== undefined && value !== null) {
-    formData.append(key, value);
-  }
-});
-
-// Append files
-Object.keys(files).forEach(key => {
-  const file = (files as any)[key];
-  if (file) {
-    formData.append(key, file);
-  }
-});
-
-return this.http.post(
-  `${this.apiUrl}/Register/Courier`,
-  formData
-);
-    }
 }
