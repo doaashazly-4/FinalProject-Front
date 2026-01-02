@@ -247,7 +247,7 @@ export class CourierDataService {
 }
 
 
- getMyJobs(): Observable<DeliveryJob[]> {
+  getMyJobs(): Observable<DeliveryJob[]> {
     return this.http.get<DeliveryJob[]>(`${this.apiUrl}/MyAssignedPackages`);
   }
   getActiveJobs(): Observable<DeliveryJob[]> {
@@ -288,7 +288,7 @@ export class CourierDataService {
     return this.http.post(`${this.apiUrl}/StartDelivery/${jobId}`, {});
   }
 
- completeDelivery(jobId: number, dto: any): Observable<any> {
+  completeDelivery(jobId: number, dto: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/DeliverPackage/${jobId}`, dto);
   }
 
@@ -303,7 +303,7 @@ export class CourierDataService {
     return this.http.post<DeliveryJob>(`${this.apiUrl}/jobs/${jobId}/fail`, { reason });
   }
 
-   updateJobStatus(jobId: number, status: JobStatus, reason?: string, extraData?: any): Observable<any> {
+  updateJobStatus(jobId: number, status: JobStatus, reason?: string, extraData?: any): Observable<any> {
     if (status === 'failed') {
       return this.http.post(`${this.apiUrl}/FailDelivery/${jobId}`, reason);
     }
@@ -368,14 +368,14 @@ export class CourierDataService {
 
   // في courier-data.service.ts أضف:
   submitDeliveryProof(proofData: any): Observable<any> {
-  return this.http.post(`${this.apiUrl}/DeliverPackage/${proofData.jobId}`, proofData);
+    return this.http.post(`${this.apiUrl}/DeliverPackage/${proofData.jobId}`, proofData);
   }
 
-   reportFailedDelivery(failureData: any): Observable<any> {
-  return this.http.post(`${this.apiUrl}/FailDelivery/${failureData.jobId}`, failureData);
+  reportFailedDelivery(failureData: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/FailDelivery/${failureData.jobId}`, failureData);
   }
 
-    //====================== Support Chat ==========
+  //====================== Support Chat ==========
   getSupportChat(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/SupportChat`);
   }

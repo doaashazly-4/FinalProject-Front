@@ -118,20 +118,42 @@
           <p *ngIf="hasError('receiverName')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('receiverName') }}</p>
         </div>
 
-        <!-- Receiver Phone -->
-        <div>
-          <label class="block text-sm font-bold text-primary-dark mb-2">
-            رقم الهاتف *
-          </label>
-          <input type="tel" 
-                 formControlName="receiverPhone"
-                 class="input"
-                 [ngClass]="{'input-error': hasError('receiverPhone')}"
-                 placeholder="01xxxxxxxxx"
-                 dir="ltr">
-          <p *ngIf="hasError('receiverPhone')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('receiverPhone') }}</p>
-          <p class="text-gray-400 text-xs mt-1">سيتم الاتصال على هذا الرقم عند التسليم</p>
-        </div>
+<!-- Receiver Phone -->
+<div class="relative">
+  <label class="block text-sm font-bold text-primary-dark mb-2">
+    رقم الهاتف *
+  </label>
+
+  <input type="tel"
+         formControlName="receiverPhone"
+         class="input"
+         [ngClass]="{'input-error': hasError('receiverPhone')}"
+         placeholder="01xxxxxxxxx / 05xxxxxxxx"
+         dir="ltr"
+         autocomplete="off">
+
+  <!-- Errors -->
+  <p *ngIf="hasError('receiverPhone')"
+     class="text-red-500 text-sm mt-1">
+    {{ getErrorMessage('receiverPhone') }}
+  </p>
+
+  <p class="text-gray-400 text-xs mt-1">
+    سيتم الاتصال على هذا الرقم عند التسليم
+  </p>
+
+  <!-- Dropdown -->
+  <ul *ngIf="showDropdown"
+      class="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto z-50">
+
+    <li *ngFor="let customer of filteredCustomers"
+        class="px-4 py-2 cursor-pointer hover:bg-blue-50 text-sm"
+        (click)="selectCustomer(customer)">
+      {{ customer.phoneNumber }}
+    </li>
+
+  </ul>
+</div>
 
         <!-- Receiver Email (Optional) -->
         <!-- <div>
