@@ -7,7 +7,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { withInterceptors } from '@angular/common/http';
 import { routes } from './app/app.routes';
 import { authInterceptor } from './app/shared/interceptors/auth.interceptor';
-
+import { provideServiceWorker } from '@angular/service-worker';
+import { environment } from './environments/environment';
 bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(routes),
@@ -16,6 +17,9 @@ bootstrapApplication(AppComponent, {
       withInterceptors([
         authInterceptor
       ])
-    )
+    ),
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: environment.production,
+    })
   ]
 });

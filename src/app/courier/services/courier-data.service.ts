@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import {  map , catchError} from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+
 
 // Delivery job interfaces for Courier/Carrier module
 export interface DeliveryJob {
@@ -167,7 +168,7 @@ export class CourierDataService {
    * POST /api/Courier/RejectPackage/{packageId}
    */
   rejectPackage(packageId: number, reason: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/RejectPackage/${packageId}`, reason);
+    return this.http.post(`${this.apiUrl}/RejectPackage/${packageId}/`, reason);
   }
 
   /**
@@ -227,8 +228,8 @@ export class CourierDataService {
 
 
   // ========== Stats ==========
-  getStats(): Observable<CourierStat[]> {
-    return this.http.get<CourierStat[]>(`${this.apiUrl}/stats`);
+  getStats(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/DashboardSummary`);
   }
 
   checkOTPStatus(packageId: number) {
@@ -239,15 +240,18 @@ export class CourierDataService {
 
 
   // ========== Jobs ==========
-  getAvailableJobs(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/AvailableJobs`);
-  }
+ getAvailableJobs(): Observable<DeliveryJob[]> {
+  return this.http.get<{ packages: DeliveryJob[] }>(`${this.apiUrl}/AvailableJobs`)
+             .pipe(map(res => {
+                console.log("available jobs response", res);return res.packages;}));
+}
+
 
  getMyJobs(): Observable<DeliveryJob[]> {
     return this.http.get<DeliveryJob[]>(`${this.apiUrl}/MyAssignedPackages`);
   }
   getActiveJobs(): Observable<DeliveryJob[]> {
-    return this.http.get<DeliveryJob[]>(`${this.apiUrl}/jobs/active`);
+    return this.http.get<DeliveryJob[]>(`${this.apiUrl}/activeJobs`);
   }
 
   getJobById(id: string): Observable<DeliveryJob> {
@@ -258,7 +262,7 @@ export class CourierDataService {
     // Try new API first, fallback to old
     const packageId = parseInt(jobId);
     if (!isNaN(packageId)) {
-      return this.http.post<DeliveryJob>(`${this.apiUrl}/AcceptPackage/${packageId}`, {}).pipe(
+      return this.http.post<DeliveryJob>(`${this.apiUrl}AcceptPackage/${packageId}`, {}).pipe(
         catchError(() => this.http.post<DeliveryJob>(`${this.apiUrl}/jobs/${jobId}/accept`, {}))
       );
     }
@@ -316,8 +320,14 @@ export class CourierDataService {
     return this.http.put(`${this.apiUrl}/Profile`, dto);
   }
 
-  toggleAvailability(isAvailable: boolean): Observable<CourierProfile> {
-    return this.http.patch<CourierProfile>(`${this.apiUrl}/availability`, { isAvailable });
+   // جلب الحالة الحالية
+  getAvailability(): Observable<{ isAvailable: boolean }> {
+    return this.http.get<{ isAvailable: boolean }>(`${this.apiUrl}/availability`);
+  }
+
+  // تبديل الحالة
+  toggleAvailability(): Observable<any> {
+    return this.http.post(`${this.apiUrl}/availability/toggle`, {});
   }
 
   toggleOnlineStatus(isOnline?: boolean): Observable<CourierProfile | any> {
@@ -379,8 +389,21 @@ export class CourierDataService {
   return this.http.post<{url: string}>(`${this.apiUrl}/upload/image`, data);
 }
 //====================== Shift Management ==========
-   endShift(): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/end-shift`, {});
-  }
+  // تغيير حالة المندوب (متاح / غير متاح)
+setAvailability(isAvailable: boolean) {
+  return this.http.put<any>(
+    `${this.apiUrl}/availability`,
+    { isAvailable }
+  );
+}
+
+// إنهاء الشِفت
+endShift() {
+  return this.http.post<any>(
+    `${this.apiUrl}/endshift`,
+    {}
+  );
+}
+
 
 }

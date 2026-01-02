@@ -33,7 +33,9 @@ export class CourierProfileComponent {
     rating: 0,
     completedDeliveries: 0,
     isAvailable: false,
-    isOnline: false
+    isOnline: false,
+    
+
   };
 
   save(): void {

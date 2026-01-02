@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { CourierDataService, DeliveryJob, CourierStat, CourierEarnings, JobStatus } from '../../services/courier-data.service';
 import { PushNotificationService } from '../../../shared/services/push-notification.service';
 import { Observable } from 'rxjs';
@@ -32,50 +32,133 @@ export class CourierDashboardComponent implements OnInit {
   showProofModal = false;
   showFailedModal = false;
 
-  constructor(private dataService: CourierDataService, private pushService: PushNotificationService) {
+  constructor(
+    private dataService: CourierDataService,
+    private pushService: PushNotificationService,
+    private router: Router
+  ) {
     window.addEventListener('online', () => {
       this.isOnline = true;
       this.syncOfflineData();
     });
-    window.addEventListener('offline', () => { this.isOnline = false; });
+    window.addEventListener('offline', () => {
+      this.isOnline = false;
+    });
   }
 
   ngOnInit(): void {
     this.loadData();
     this.loadEarnings();
-    this.checkForNewOrders();
+     this.loadAvailability();
+    // this.checkForNewOrders();
     this.pushService.requestPermissionAndRegister().catch(err => console.warn('Push init failed', err));
-    setInterval(() => this.checkForNewOrders(), 30000);
-    this.startAutoRefresh();
+    //setInterval(() => this.checkForNewOrders(), 30000);
+    // this.startAutoRefresh();
     this.syncQueuedJobActions();
-  }
-
-  // ===== Load Data =====
-  loadEarnings(): void {
-    this.dataService.getEarnings().subscribe({ next: e => this.earnings = e, error: err => console.error(err) });
-  }
-
-  loadData(): void {
-    this.isLoading = true;
-    this.dataService.getStats().subscribe({ next: s => this.stats = s, error: () => this.stats = [] });
-    this.dataService.getActiveJobs().subscribe({ next: j => this.activeJobs = j, error: () => this.activeJobs = [] });
-    this.dataService.getAvailableJobs().subscribe({
-      next: j => { this.availableJobs = j.slice(0, 3); this.isLoading = false },
-      error: () => { this.availableJobs = []; this.isLoading = false }
-    });
-    this.dataService.getMyJobs().subscribe({ next: j => this.jobs = j, error: () => this.jobs = [] });
   }
 
   toggleAvailability(): void {
     const newAvailability = !this.isAvailable;
-    this.dataService.toggleAvailability(newAvailability).subscribe({
-      next: () => {
-        if (newAvailability) this.startLocationTracking();
-        else { this.stopLocationTracking(); this.showEndShiftSummaryModal(); }
-        this.isAvailable = newAvailability;
-      },
-      error: err => console.error(err)
+
+    // غيّر حالة الزر فورًا لإحساس التفاعل
+    this.isAvailable = newAvailability;
+
+    if (newAvailability) {
+      // الضغط على "متاح" → شغّل التتبع
+      this.dataService.toggleAvailability().subscribe({
+        next: res => {
+          console.log('Courier is now AVAILABLE');
+        },
+        error: err => {
+          console.error('Error toggling availability:', err);
+          this.isAvailable = !newAvailability; // ارجع الحالة القديمة عند الخطأ
+        }
+      });
+    } else {
+      // الضغط على "غير متاح" → انهي المناوبة وادخل صفحة End Shift
+      this.dataService.endShift().subscribe({
+        next: res => {
+          console.log('Shift ended successfully');
+
+          // استخدم فقط Arrays اللي سيرفر بيرجعها لتجنب NG0900
+          const safeOrders = Array.isArray(res.orders) ? res.orders : [];
+          const safePreviousDays = Array.isArray(res.previousDays) ? res.previousDays : [];
+
+          // اعرض صفحة End Shift مع البيانات
+          this.router.navigate(['courier/endshift'], { state: { orders: safeOrders, previousDays: safePreviousDays } });
+
+          // بعد نهاية الشفت، المندوب يصبح غير متاح تلقائيًا
+          this.isAvailable = false;
+        },
+        error: err => {
+          console.error('Error ending shift:', err);
+          this.isAvailable = newAvailability; // ارجع الحالة القديمة عند الخطأ
+        }
+      });
+    }
+  }
+
+  // ===== Load Data =====
+  loadEarnings(): void {
+    this.dataService.getEarnings().subscribe({
+      next: e => {
+        console.log(e);
+
+        this.earnings = e
+      }, error: err => console.error(err)
     });
+  }
+
+loadAvailability(): void {
+  this.dataService.getAvailability().subscribe({
+    next: (res: { isAvailable: boolean }) => {
+    console.log(res);
+    
+      this.isAvailable = res.isAvailable; 
+    },
+    error: (err) => {
+      console.error('Failed to load availability:', err);
+    }
+  });
+}
+
+
+
+
+
+
+ loadData(): void {
+  this.isLoading = true;
+
+
+  this.dataService.getStats().subscribe({
+    next: (s: CourierStat[]) => this.stats = Array.isArray(s) ? s : [],
+    error: () => this.stats = []
+  });
+
+  this.dataService.getActiveJobs().subscribe({
+    next: (j: DeliveryJob[]) => this.activeJobs = Array.isArray(j) ? j : [],
+    error: () => this.activeJobs = []
+  });
+
+  this.dataService.getAvailableJobs().subscribe({
+    next: (j: DeliveryJob[]) => this.availableJobs = Array.isArray(j) ? j.slice(0, 3) : [],
+    error: () => this.availableJobs = [],
+    complete: () => this.isLoading = false
+  });
+
+
+    this.dataService.getMyJobs().subscribe({
+      next: (j) => {
+        console.log("jobs", j);
+        this.jobs = j
+      }, error: (err) => { console.log(err); this.jobs = [] }
+    });
+  }
+
+
+  goToEndShift(): void {
+    this.router.navigate(['/courier/shift']);
   }
 
   // ===== Job Status Management =====
@@ -88,7 +171,10 @@ export class CourierDashboardComponent implements OnInit {
     }
 
     this.dataService.updateJobStatus(Number(job.id), status, undefined, additionalData).subscribe({
-      next: () => job.status = status,
+      next: (res) => {
+        console.log("updateJobStatus",res);
+        job.status = status
+      },
       error: (err) => {
         console.error(err);
         this.queueJobAction({ type: 'updateStatus', jobId: job.id, status, photos, otp });
@@ -174,7 +260,7 @@ export class CourierDashboardComponent implements OnInit {
 
         if (act.type === 'accept') obs = this.dataService.acceptJob(act.jobId);
         else if (act.type === 'reject') obs = this.dataService.rejectJob(act.jobId, act.reason);
-        else if (act.type === 'updateStatus') 
+        else if (act.type === 'updateStatus')
           obs = this.dataService.updateJobStatus(act.jobId, act.status as JobStatus, act.reason, { photos: act.photos, otp: act.otp });
 
         obs?.subscribe(
