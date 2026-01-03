@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import {  map , catchError} from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 
@@ -55,26 +55,46 @@ export interface CourierStat {
   color?: string;
 }
 
-export interface CourierProfile {
+export interface CourierLocationDto {
+  lat: number;
+  lng: number;
+  recordedAt?: string;
+}
+
+export interface CourierCompleteProfileDTO {
   id: string;
   name: string;
   email: string;
   phone: string;
-  address: string;
   vehicleType: string;
   licenseNumber: string;
   rating: number;
   completedDeliveries: number;
   isAvailable: boolean;
   isOnline: boolean;
-  CourierLocationDto?: { lat: number; lng: number };
+  photoUrl?: string;
+  address?: string;
+  licensePhotoFront?: string;
+  licensePhotoBack?: string;
+  vehicleLicensePhotoFront?: string;
+  vehicleLicensePhotoBack?: string;
+  idPhotoUrl?: string;
+  locations?: CourierLocationDto[];
 }
 
-export interface UpdateProfileDto {
-  name?: string;
+export interface UpdateCourierProfileDTO {
   phone?: string;
-  vehicleType?: string;
   licenseNumber?: string;
+  address?: string;
+  vehicleType?: string;
+  isAvailable?: boolean;
+  isOnline?: boolean;
+  photo?: File;
+  licensePhotoFront?: File;
+  licensePhotoBack?: File;
+  vehicleLicensePhotoFront?: File;
+  vehicleLicensePhotoBack?: File;
+  idPhoto?: File;
 }
 
 export interface CourierEarnings {
@@ -240,11 +260,12 @@ export class CourierDataService {
 
 
   // ========== Jobs ==========
- getAvailableJobs(): Observable<DeliveryJob[]> {
-  return this.http.get<{ packages: DeliveryJob[] }>(`${this.apiUrl}/AvailableJobs`)
-             .pipe(map(res => {
-                console.log("available jobs response", res);return res.packages;}));
-}
+  getAvailableJobs(): Observable<DeliveryJob[]> {
+    return this.http.get<{ packages: DeliveryJob[] }>(`${this.apiUrl}/AvailableJobs`)
+      .pipe(map(res => {
+        console.log("available jobs response", res); return res.packages;
+      }));
+  }
 
 
   getMyJobs(): Observable<DeliveryJob[]> {
@@ -311,32 +332,42 @@ export class CourierDataService {
   }
 
   // ========== Profile & Status ==========
-  getProfile(): Observable<CourierProfile> {
-    return this.http.get<CourierProfile>(`${this.apiUrl}/Profile`);
+  getProfile(): Observable<CourierCompleteProfileDTO> {
+    return this.http.get<CourierCompleteProfileDTO>(`${this.apiUrl}/Profile?t=${new Date().getTime()}`);
   }
 
-  // تحديث بيانات البروفايل
-  updateProfile(dto: UpdateProfileDto): Observable<any> {
-    return this.http.put(`${this.apiUrl}/Profile`, dto);
+  updateProfile(data: any): Observable<any> {
+    // إذا كان FormData، لا تضيف headers
+    if (data instanceof FormData) {
+      return this.http.put(`${this.apiUrl}/updateProfile`, data);
+    } else {
+      // إذا كان JSON، أضف headers
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json'
+      });
+      return this.http.put(`${this.apiUrl}/updateProfile`, data, { headers });
+    }
   }
 
-   // جلب الحالة الحالية
+
+  // جلب الحالة الحالية
   getAvailability(): Observable<{ isAvailable: boolean }> {
     return this.http.get<{ isAvailable: boolean }>(`${this.apiUrl}/availability`);
   }
+
 
   // تبديل الحالة
   toggleAvailability(): Observable<any> {
     return this.http.post(`${this.apiUrl}/availability/toggle`, {});
   }
 
-  toggleOnlineStatus(isOnline?: boolean): Observable<CourierProfile | any> {
+  toggleOnlineStatus(isOnline?: boolean): Observable<CourierCompleteProfileDTO | any> {
     // New API doesn't require parameters - just toggles status
     return this.http.post<any>(`${this.apiUrl}/ToggleOnlineStatus`, {}).pipe(
       catchError(() => {
         // Fallback to old API if provided
         if (isOnline !== undefined) {
-          return this.http.patch<CourierProfile>(`${this.apiUrl}/online-status`, { isOnline });
+          return this.http.patch<CourierCompleteProfileDTO>(`${this.apiUrl}/online-status`, { isOnline });
         }
         throw new Error('Failed to toggle online status');
       })
@@ -386,24 +417,24 @@ export class CourierDataService {
 
   //====================== Image Upload ==========
   uploadImage(data: FormData) {
-  return this.http.post<{url: string}>(`${this.apiUrl}/upload/image`, data);
-}
-//====================== Shift Management ==========
+    return this.http.post<{ url: string }>(`${this.apiUrl}/upload/image`, data);
+  }
+  //====================== Shift Management ==========
   // تغيير حالة المندوب (متاح / غير متاح)
-setAvailability(isAvailable: boolean) {
-  return this.http.put<any>(
-    `${this.apiUrl}/availability`,
-    { isAvailable }
-  );
-}
+  setAvailability(isAvailable: boolean) {
+    return this.http.put<any>(
+      `${this.apiUrl}/availability`,
+      { isAvailable }
+    );
+  }
 
-// إنهاء الشِفت
-endShift() {
-  return this.http.post<any>(
-    `${this.apiUrl}/endshift`,
-    {}
-  );
-}
+  // إنهاء الشِفت
+  endShift() {
+    return this.http.post<any>(
+      `${this.apiUrl}/endshift`,
+      {}
+    );
+  }
 
 
 }
