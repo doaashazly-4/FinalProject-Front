@@ -218,15 +218,18 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     this.dataService.getProfile().subscribe({
       next: (profile) => {
         this.profile = profile;
-        if (!this.shipmentForm.get('pickupAddress')?.value) {
+        if (!this.shipmentForm.get('pickupAddress')?.value && profile.address) {
           this.shipmentForm.patchValue({
             pickupAddress: profile.address
           });
         }
         this.isLoading = false;
       },
-      error: () => {
+      error: (error) => {
+        // Handle 404 gracefully - profile might not exist yet or endpoint issue
+        console.warn('Could not load profile:', error);
         this.isLoading = false;
+        // Do not block the UI
       }
     });
   }
@@ -267,7 +270,11 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
         this.deliveryFee = fee;
         this.isCalculatingFee = false;
       },
-      error: () => {
+      error: (error) => {
+        // Suppress 404 errors for this specific endpoint as it might not be implemented yet
+        if (error.status !== 404) {
+          console.error('Error calculating fee:', error);
+        }
         this.isCalculatingFee = false;
         this.deliveryFee = null;
       }
@@ -286,7 +293,7 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     const dto: CreateRequestDTO = {
       source: formValue.pickupAddress,
       priority: formValue.priority,
-      pickupLat: 0, // No pickup coordinates available in UI
+      pickupLat: 0,
       pickupLng: 0,
       packages: [
         {
@@ -295,11 +302,11 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
           fragile: formValue.isFragile,
           shipmentCost: formValue.codAmount,
           destination: formValue.deliveryAddress,
-          lat: this.deliveryLat, // Map is for delivery
-          lng: this.deliveryLng,
+          lat: this.deliveryLat || 0,
+          lng: this.deliveryLng || 0,
           expireDate: formValue.expireDate,
           notes: formValue.notes,
-          customerID: formValue.customerID?.toString() || ''
+          customerID: formValue.customerID ? Number(formValue.customerID) : 0
         }
       ]
     };

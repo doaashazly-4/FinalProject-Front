@@ -61,8 +61,8 @@ export interface FailedAttempt {
 export interface CreateRequestDTO {
   source: string,
   priority: string,
-  pickupLat: number | null,
-  pickupLng: number | null,
+  pickupLat: number,
+  pickupLng: number,
   packages: [
     {
       description: string,
@@ -71,14 +71,13 @@ export interface CreateRequestDTO {
       shipmentCost: number,
       destination: string,
 
-      lat: number | null,
-      lng: number | null,
+      lat: number,
+      lng: number,
       expireDate: string,
       notes: string,
-      customerID: string
+      customerID: number
     }
   ]
-
 }
 
 
@@ -310,7 +309,7 @@ export class SupplierDataService {
   // getParcelById(id: string): Observable<Parcel> {
   //   return this.http.get<Parcel>(`${this.apiUrl}/Request/${id}`);
   // }
-  
+
   getParcels(filter?: ParcelFilter): Observable<Parcel[]> {
     const params: any = {};
     if (filter) {
