@@ -15,6 +15,45 @@
   <!-- Form Container -->
   <form [formGroup]="shipmentForm" (ngSubmit)="onSubmit()" class="space-y-6">
     
+    <!-- Customer Selection Section (New) -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative overflow-hidden">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600">
+            <i class="bi bi-people-fill text-xl"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-primary-dark">اختيار عميل (اختياري)</h2>
+            <p class="text-gray-500 text-sm">اختر عميلاً مسجلاً لتعبئة البيانات تلقائياً</p>
+          </div>
+        </div>
+        <button type="button" (click)="useNoCustomer()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-bold transition-colors whitespace-nowrap">
+          <i class="bi bi-box-seam mr-2"></i>
+          بدون عميل (ID: 0)
+        </button>
+      </div>
+
+      <!-- Quick List (First 6) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-48 overflow-y-auto custom-scrollbar">
+         <div *ngFor="let customer of customers" 
+              (click)="selectCustomer(customer)"
+              class="p-3 rounded-xl border border-gray-100 hover:border-indigo-500 hover:bg-indigo-50 cursor-pointer transition-all flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-full bg-gray-100 text-gray-500 group-hover:bg-white group-hover:text-indigo-500 border border-gray-200 flex items-center justify-center font-bold text-sm transition-colors">
+              {{customer.name?.charAt(0) || '?'}}
+            </div>
+            <div class="overflow-hidden">
+              <p class="font-bold text-gray-800 text-sm truncate">{{customer.name || 'عميل'}}</p>
+              <p class="text-xs text-gray-500 truncate">{{customer.phoneNumber}}</p>
+            </div>
+         </div>
+         
+         <div *ngIf="customers.length === 0" class="col-span-full py-8 text-center text-gray-400 text-sm flex flex-col items-center justify-center border-2 border-dashed border-gray-100 rounded-xl">
+           <div class="spinner-border w-6 h-6 border-2 border-gray-300 border-t-transparent rounded-full animate-spin mb-2"></div>
+           جاري تحميل العملاء...
+         </div>
+      </div>
+    </div>
+
     <!-- Addresses Section -->
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
       <div class="flex items-center gap-3 mb-6">
@@ -369,6 +408,36 @@
       </span>
     </button>
   </form>
+
+  <!-- Debug / Developer Tools (New) -->
+  <div class="mt-8 mb-12 p-6 bg-gray-50 rounded-2xl border border-gray-200 border-dashed">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-gray-600 flex items-center gap-2">
+        <i class="bi bi-bug-fill"></i> أدوات التصحيح (Debug Tools)
+      </h3>
+      <button (click)="showHelp()" class="text-primary-green hover:underline text-sm font-bold flex items-center gap-1">
+        <i class="bi bi-question-circle"></i> مساعدة
+      </button>
+    </div>
+    
+    <div class="flex flex-wrap gap-3">
+      <button type="button" (click)="debugTools.testBackend()" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-bold text-sm hover:bg-blue-200 transition-colors">
+        <i class="bi bi-wifi mr-2"></i> اختبار الاتصال
+      </button>
+      <button type="button" (click)="debugTools.validateData()" class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg font-bold text-sm hover:bg-purple-200 transition-colors">
+        <i class="bi bi-check-circle mr-2"></i> التحقق من البيانات
+      </button>
+      <button type="button" (click)="debugTools.showLogs()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-bold text-sm hover:bg-gray-300 transition-colors">
+        <i class="bi bi-terminal mr-2"></i> عرض السجلات (Logs)
+      </button>
+    </div>
+
+    <!-- Status Message -->
+    <div *ngIf="statusMessage" class="mt-4 p-4 bg-white border-l-4 border-blue-500 rounded-r-lg shadow-sm text-sm font-medium text-gray-700 flex items-center gap-3 animate-pulse">
+      <i class="bi bi-info-circle-fill text-blue-500 text-lg"></i>
+      {{ statusMessage }}
+    </div>
+  </div>
 </div>
 
 <!-- Success Modal -->
