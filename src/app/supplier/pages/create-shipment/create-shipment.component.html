@@ -2,7 +2,8 @@
   <!-- Header -->
   <div class="mb-8">
     <div class="flex items-center gap-3 mb-2">
-      <a routerLink="/supplier/dashboard" class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
+      <a routerLink="/supplier/dashboard"
+        class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
         <i class="bi bi-arrow-right"></i>
       </a>
       <div>
@@ -14,7 +15,7 @@
 
   <!-- Form Container -->
   <form [formGroup]="shipmentForm" (ngSubmit)="onSubmit()" class="space-y-6">
-    
+
     <!-- Addresses Section -->
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
       <div class="flex items-center gap-3 mb-6">
@@ -35,20 +36,17 @@
             عنوان الاستلام (موقعك)
           </label>
           <div class="relative">
-            <textarea formControlName="pickupAddress"
-                      rows="2"
-                      (blur)="calculateDeliveryFee()"
-                      class="input resize-none"
-                      [ngClass]="{'input-error': hasError('pickupAddress')}"
-                      placeholder="أدخل عنوان الاستلام التفصيلي"></textarea>
-            <button *ngIf="profile?.address" 
-                    type="button"
-                    (click)="shipmentForm.patchValue({pickupAddress: profile?.address || ''})"
-                    class="absolute top-2 left-2 px-3 py-1 bg-primary-green/10 text-primary-green text-xs font-bold rounded-lg hover:bg-primary-green/20">
+            <textarea formControlName="pickupAddress" rows="2" (blur)="calculateDeliveryFee()" class="input resize-none"
+              [ngClass]="{'input-error': hasError('pickupAddress')}"
+              placeholder="أدخل عنوان الاستلام التفصيلي"></textarea>
+            <button *ngIf="profile?.address" type="button"
+              (click)="shipmentForm.patchValue({pickupAddress: profile?.address || ''})"
+              class="absolute top-2 left-2 px-3 py-1 bg-primary-green/10 text-primary-green text-xs font-bold rounded-lg hover:bg-primary-green/20">
               استخدم العنوان المحفوظ
             </button>
           </div>
-          <p *ngIf="hasError('pickupAddress')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('pickupAddress') }}</p>
+          <p *ngIf="hasError('pickupAddress')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('pickupAddress') }}
+          </p>
         </div>
 
         <!-- Delivery Address -->
@@ -65,20 +63,23 @@
 
             <!-- Coordinates Overlay -->
             <div class="absolute bottom-4 left-4 right-4 z-[500] flex gap-2 transition-all duration-300"
-                 *ngIf="deliveryLat && deliveryLng">
-              <div class="bg-white/95 backdrop-blur-sm shadow-lg px-4 py-2 rounded-xl text-sm font-bold text-primary-dark flex-1 text-center border border-gray-100">
+              *ngIf="deliveryLat && deliveryLng">
+              <div
+                class="bg-white/95 backdrop-blur-sm shadow-lg px-4 py-2 rounded-xl text-sm font-bold text-primary-dark flex-1 text-center border border-gray-100">
                 <span class="text-xs text-gray-500 block">Latitude</span>
                 {{ deliveryLat.toFixed(6) }}
               </div>
-              <div class="bg-white/95 backdrop-blur-sm shadow-lg px-4 py-2 rounded-xl text-sm font-bold text-primary-dark flex-1 text-center border border-gray-100">
+              <div
+                class="bg-white/95 backdrop-blur-sm shadow-lg px-4 py-2 rounded-xl text-sm font-bold text-primary-dark flex-1 text-center border border-gray-100">
                 <span class="text-xs text-gray-500 block">Longitude</span>
                 {{ deliveryLng.toFixed(6) }}
               </div>
             </div>
 
             <!-- Hint Overlay (Visible when no location selected) -->
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[400] pointer-events-none bg-white/80 backdrop-blur-sm px-6 py-3 rounded-full text-sm font-bold text-gray-600 shadow-md border border-gray-100 transition-opacity duration-300"
-                 *ngIf="!deliveryLat">
+            <div
+              class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[400] pointer-events-none bg-white/80 backdrop-blur-sm px-6 py-3 rounded-full text-sm font-bold text-gray-600 shadow-md border border-gray-100 transition-opacity duration-300"
+              *ngIf="!deliveryLat">
               <i class="bi bi-geo-alt-fill text-red-500 mr-2"></i>
               اضغط على الخريطة لتحديد الموقع
             </div>
@@ -86,7 +87,7 @@
 
           <!-- Hidden input for form validation -->
           <input type="hidden" formControlName="deliveryAddress">
-          
+
           <p *ngIf="hasError('deliveryAddress')" class="text-red-500 text-sm mt-1">يرجى تحديد الموقع على الخريطة</p>
         </div>
       </div>
@@ -110,50 +111,42 @@
           <label class="block text-sm font-bold text-primary-dark mb-2">
             اسم المستلم *
           </label>
-          <input type="text" 
-                 formControlName="receiverName"
-                 class="input"
-                 [ngClass]="{'input-error': hasError('receiverName')}"
-                 placeholder="الاسم الكامل للمستلم">
-          <p *ngIf="hasError('receiverName')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('receiverName') }}</p>
+          <input type="text" formControlName="receiverName" class="input"
+            [ngClass]="{'input-error': hasError('receiverName')}" placeholder="الاسم الكامل للمستلم">
+          <p *ngIf="hasError('receiverName')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('receiverName') }}
+          </p>
         </div>
 
-<!-- Receiver Phone -->
-<div class="relative">
-  <label class="block text-sm font-bold text-primary-dark mb-2">
-    رقم الهاتف *
-  </label>
+        <!-- Receiver Phone -->
+        <div class="relative">
+          <label class="block text-sm font-bold text-primary-dark mb-2">
+            رقم الهاتف *
+          </label>
 
-  <input type="tel"
-         formControlName="receiverPhone"
-         class="input"
-         [ngClass]="{'input-error': hasError('receiverPhone')}"
-         placeholder="01xxxxxxxxx / 05xxxxxxxx"
-         dir="ltr"
-         autocomplete="off">
+          <input type="tel" formControlName="receiverPhone" class="input"
+            [ngClass]="{'input-error': hasError('receiverPhone')}" placeholder="01xxxxxxxxx / 05xxxxxxxx" dir="ltr"
+            autocomplete="off">
 
-  <!-- Errors -->
-  <p *ngIf="hasError('receiverPhone')"
-     class="text-red-500 text-sm mt-1">
-    {{ getErrorMessage('receiverPhone') }}
-  </p>
+          <!-- Errors -->
+          <p *ngIf="hasError('receiverPhone')" class="text-red-500 text-sm mt-1">
+            {{ getErrorMessage('receiverPhone') }}
+          </p>
 
-  <p class="text-gray-400 text-xs mt-1">
-    سيتم الاتصال على هذا الرقم عند التسليم
-  </p>
+          <p class="text-gray-400 text-xs mt-1">
+            سيتم الاتصال على هذا الرقم عند التسليم
+          </p>
 
-  <!-- Dropdown -->
-  <ul *ngIf="showDropdown"
-      class="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto z-50">
+          <!-- Dropdown -->
+          <ul *ngIf="showDropdown"
+            class="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto z-50">
 
-    <li *ngFor="let customer of filteredCustomers"
-        class="px-4 py-2 cursor-pointer hover:bg-blue-50 text-sm"
-        (click)="selectCustomer(customer)">
-      {{ customer.phoneNumber }}
-    </li>
+            <li *ngFor="let customer of filteredCustomers" class="px-4 py-2 cursor-pointer hover:bg-blue-50 text-sm"
+              (click)="selectCustomer(customer)">
+              {{ customer.phoneNumber }}
+            </li>
 
-  </ul>
-</div>
+          </ul>
+        </div>
 
         <!-- Receiver Email (Optional) -->
         <!-- <div>
@@ -190,11 +183,8 @@
           <label class="block text-sm font-bold text-primary-dark mb-2">
             وصف الشحنة *
           </label>
-          <input type="text" 
-                 formControlName="description"
-                 class="input"
-                 [ngClass]="{'input-error': hasError('description')}"
-                 placeholder="مثال: ملابس، إلكترونيات، مستندات...">
+          <input type="text" formControlName="description" class="input"
+            [ngClass]="{'input-error': hasError('description')}" placeholder="مثال: ملابس، إلكترونيات، مستندات...">
           <p *ngIf="hasError('description')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('description') }}</p>
         </div>
 
@@ -203,12 +193,8 @@
           <label class="block text-sm font-bold text-primary-dark mb-2">
             الوزن (كجم) *
           </label>
-          <input type="number" 
-                 formControlName="weight"
-                 class="input"
-                 [ngClass]="{'input-error': hasError('weight')}"
-                 min="0.1"
-                 step="0.1">
+          <input type="number" formControlName="weight" class="input" [ngClass]="{'input-error': hasError('weight')}"
+            min="0.1" step="0.1">
           <p *ngIf="hasError('weight')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('weight') }}</p>
         </div>
 
@@ -217,10 +203,7 @@
           <label class="block text-sm font-bold text-primary-dark mb-2">
             الأبعاد (اختياري)
           </label>
-          <input type="text" 
-                 formControlName="dimensions"
-                 class="input"
-                 placeholder="الطول × العرض × الارتفاع">
+          <input type="text" formControlName="dimensions" class="input" placeholder="الطول × العرض × الارتفاع">
         </div>
 
         <!-- COD Amount -->
@@ -230,12 +213,8 @@
             مبلغ الدفع عند الاستلام (COD)
           </label>
           <div class="relative">
-            <input type="number" 
-                   formControlName="codAmount"
-                   class="input pl-16"
-                   [ngClass]="{'input-error': hasError('codAmount')}"
-                   min="0"
-                   placeholder="0">
+            <input type="number" formControlName="codAmount" class="input pl-16"
+              [ngClass]="{'input-error': hasError('codAmount')}" min="0" placeholder="0">
             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">ج.م</span>
           </div>
           <p class="text-gray-400 text-xs mt-1">اتركه 0 إذا كان الطلب مدفوع مسبقاً</p>
@@ -248,11 +227,9 @@
           </label>
           <div class="grid grid-cols-2 gap-3">
             <label class="relative cursor-pointer">
-              <input type="radio" 
-                     formControlName="priority" 
-                     value="normal"
-                     class="peer sr-only">
-              <div class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-primary-green peer-checked:bg-primary-green/5 transition-all">
+              <input type="radio" formControlName="priority" value="normal" class="peer sr-only">
+              <div
+                class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-primary-green peer-checked:bg-primary-green/5 transition-all">
                 <div class="flex items-center gap-2">
                   <i class="bi bi-clock text-gray-500 peer-checked:text-primary-green"></i>
                   <span class="font-bold text-primary-dark">عادي</span>
@@ -261,11 +238,9 @@
               </div>
             </label>
             <label class="relative cursor-pointer">
-              <input type="radio" 
-                     formControlName="priority" 
-                     value="urgent"
-                     class="peer sr-only">
-              <div class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-red-500 peer-checked:bg-red-50 transition-all">
+              <input type="radio" formControlName="priority" value="urgent" class="peer sr-only">
+              <div
+                class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-red-500 peer-checked:bg-red-50 transition-all">
                 <div class="flex items-center gap-2">
                   <i class="bi bi-lightning-charge-fill text-red-500"></i>
                   <span class="font-bold text-primary-dark">عاجل</span>
@@ -281,27 +256,25 @@
           <label class="block text-sm font-bold text-primary-dark mb-2">
             ملاحظات إضافية (اختياري)
           </label>
-          <textarea formControlName="notes"
-                    rows="2"
-                    class="input resize-none"
-                    placeholder="أي تعليمات خاصة للمندوب..."></textarea>
+          <textarea formControlName="notes" rows="2" class="input resize-none"
+            placeholder="أي تعليمات خاصة للمندوب..."></textarea>
         </div>
 
         <!-- Options -->
         <div class="md:col-span-2 flex flex-wrap gap-4">
-          <label class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-gray-200 hover:border-primary-green/30 transition-colors">
-            <input type="checkbox" 
-                   formControlName="isFragile"
-                   class="w-5 h-5 rounded border-gray-300 text-primary-green focus:ring-primary-green">
+          <label
+            class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-gray-200 hover:border-primary-green/30 transition-colors">
+            <input type="checkbox" formControlName="isFragile"
+              class="w-5 h-5 rounded border-gray-300 text-primary-green focus:ring-primary-green">
             <div class="flex items-center gap-2">
               <i class="bi bi-exclamation-triangle text-amber-500"></i>
               <span class="font-medium text-primary-dark">قابل للكسر</span>
             </div>
           </label>
-          <label class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-gray-200 hover:border-primary-green/30 transition-colors">
-            <input type="checkbox" 
-                   formControlName="requiresSignature"
-                   class="w-5 h-5 rounded border-gray-300 text-primary-green focus:ring-primary-green">
+          <label
+            class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-gray-200 hover:border-primary-green/30 transition-colors">
+            <input type="checkbox" formControlName="requiresSignature"
+              class="w-5 h-5 rounded border-gray-300 text-primary-green focus:ring-primary-green">
             <div class="flex items-center gap-2">
               <i class="bi bi-pencil-square text-blue-500"></i>
               <span class="font-medium text-primary-dark">يتطلب توقيع</span>
@@ -317,12 +290,12 @@
         <i class="bi bi-calculator"></i>
         ملخص التكلفة
       </h3>
-      
+
       <div *ngIf="isCalculatingFee" class="text-center py-4">
         <div class="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent mx-auto mb-2"></div>
         <p class="text-white/70">جاري حساب التكلفة...</p>
       </div>
-      
+
       <div *ngIf="!isCalculatingFee && deliveryFee" class="space-y-3">
         <div class="flex justify-between items-center py-2 border-b border-white/10">
           <span class="text-white/70">رسوم التوصيل الأساسية</span>
@@ -336,7 +309,8 @@
           <span class="text-white/70">رسوم الوزن الزائد</span>
           <span>{{ deliveryFee.weightFee }} ج.م</span>
         </div>
-        <div *ngIf="deliveryFee.priorityFee > 0" class="flex justify-between items-center py-2 border-b border-white/10">
+        <div *ngIf="deliveryFee.priorityFee > 0"
+          class="flex justify-between items-center py-2 border-b border-white/10">
           <span class="text-white/70">رسوم الأولوية (عاجل)</span>
           <span class="text-red-400">{{ deliveryFee.priorityFee }} ج.م</span>
         </div>
@@ -349,16 +323,16 @@
           <span>{{ deliveryFee.estimatedDuration }}</span>
         </div>
       </div>
-      
-      <div *ngIf="!isCalculatingFee && !deliveryFee" class="text-center py-4 text-white/50 border border-dashed border-white/20 rounded-xl">
+
+      <div *ngIf="!isCalculatingFee && !deliveryFee"
+        class="text-center py-4 text-white/50 border border-dashed border-white/20 rounded-xl">
         إملأ بيانات الشحن لحساب التكلفة
       </div>
     </div>
 
     <!-- Submit Button -->
-    <button type="submit"
-            [disabled]="isSubmitting || shipmentForm.invalid"
-            class="w-full flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold text-lg rounded-xl shadow-green hover:shadow-green-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+    <button type="submit" [disabled]="isSubmitting || shipmentForm.invalid"
+      class="w-full flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold text-lg rounded-xl shadow-green hover:shadow-green-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
       <span *ngIf="!isSubmitting">
         <i class="bi bi-check-lg ml-2"></i>
         إنشاء الطلب
@@ -372,39 +346,47 @@
 </div>
 
 <!-- Success Modal -->
-<div *ngIf="showSuccessModal" 
-     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+<div *ngIf="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
   <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl">
     <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
       <i class="bi bi-check-lg text-green-500 text-4xl"></i>
     </div>
-    
+
     <h2 class="text-2xl font-black text-primary-dark mb-2">تم إنشاء الطلب بنجاح!</h2>
     <p class="text-gray-600 mb-4">رقم التتبع الخاص بك:</p>
-    
+
     <div class="bg-gray-100 rounded-xl p-4 mb-6">
       <p class="text-2xl font-black text-primary-green tracking-wider">{{ createdTrackingNumber }}</p>
     </div>
-    
+
     <p class="text-sm text-gray-500 mb-6">
       يمكنك الآن تأكيد جاهزية الطرد للاستلام من صفحة الطلبات
     </p>
-    
-    <div class="flex flex-col sm:flex-row gap-3">
-      <button (click)="trackShipment()" 
-              class="flex-1 px-4 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl hover:shadow-lg transition-all">
-        <i class="bi bi-geo-alt ml-2"></i>
-        تتبع الشحنة
-      </button>
-      <button (click)="createAnother()" 
-              class="flex-1 px-4 py-3 border-2 border-gray-200 text-primary-dark font-bold rounded-xl hover:bg-gray-50 transition-all">
-        <i class="bi bi-plus-lg ml-2"></i>
-        طلب جديد
-      </button>
+
+    <div class="flex flex-col gap-3">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <button (click)="viewDetails()"
+          class="flex-1 px-4 py-3 bg-primary-dark text-white font-bold rounded-xl hover:shadow-lg transition-all">
+          <i class="bi bi-info-circle ml-2"></i>
+          عرض التفاصيل الكاملة
+        </button>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3">
+        <button (click)="trackShipment()"
+          class="flex-1 px-4 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl hover:shadow-lg transition-all">
+          <i class="bi bi-geo-alt ml-2"></i>
+          تتبع الشحنة
+        </button>
+        <button (click)="createAnother()"
+          class="flex-1 px-4 py-3 border-2 border-gray-200 text-primary-dark font-bold rounded-xl hover:bg-gray-50 transition-all">
+          <i class="bi bi-plus-lg ml-2"></i>
+          طلب جديد
+        </button>
+      </div>
     </div>
-    
-    <button (click)="goToShipments()" 
-            class="mt-4 text-gray-500 hover:text-primary-dark text-sm font-medium">
+
+    <button (click)="goToShipments()" class="mt-4 text-gray-500 hover:text-primary-dark text-sm font-medium">
       الذهاب إلى قائمة الطلبات
     </button>
   </div>

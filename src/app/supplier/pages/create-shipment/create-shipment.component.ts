@@ -372,6 +372,10 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     });
   }
 
+  viewDetails(): void {
+    this.router.navigate(['/supplier/shipment-details', this.createdTrackingNumber]);
+  }
+
   hasError(field: string): boolean {
     const control = this.shipmentForm.get(field);
     return control ? control.invalid && control.touched : false;
