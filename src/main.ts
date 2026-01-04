@@ -9,6 +9,11 @@ import { routes } from './app/app.routes';
 import { authInterceptor } from './app/shared/interceptors/auth.interceptor';
 import { provideServiceWorker } from '@angular/service-worker';
 import { environment } from './environments/environment';
+import { registerLocaleData } from '@angular/common';
+import localeAr from '@angular/common/locales/ar';
+
+registerLocaleData(localeAr);
+
 bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(routes),
