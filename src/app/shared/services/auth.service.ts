@@ -22,8 +22,8 @@ export interface ClientLoginDTO {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly STORAGE_KEY = 'pickgo_role';
-  private readonly TOKEN_KEY = 'pickgo_token';
+  private readonly STORAGE_KEY = 'lynx_role';
+  private readonly TOKEN_KEY = 'lynx_token';
   private roleSignal = signal<UserRole>(this.readFromStorage());
 
   // API base - call backend directly

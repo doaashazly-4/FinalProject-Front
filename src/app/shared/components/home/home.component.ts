@@ -94,7 +94,7 @@ interface Testimonial {
 })
 export class HomeComponent implements OnInit {
   isScrolled = false;
-  
+
   stats: Stat[] = [
     { value: '50K+', label: 'عميل سعيد', icon: 'bi-people-fill' },
     { value: '100K+', label: 'طلب منجز', icon: 'bi-box-seam-fill' },
@@ -164,12 +164,12 @@ export class HomeComponent implements OnInit {
     {
       name: 'أحمد محمد',
       role: 'عميل منتظم',
-      comment: 'خدمة ممتازة وسريعة! طلبي وصل في أقل من ساعة. أنصح الجميع بتجربة PickGo'
+      comment: 'خدمة ممتازة وسريعة! طلبي وصل في أقل من ساعة. أنصح الجميع بتجربة Lynx'
     },
     {
       name: 'سارة العلي',
       role: 'مُرسلة طلبات',
-      comment: 'كمُرسلة، وجدت في PickGo الشريك المثالي. التواصل سهل والتوصيل دقيق جداً'
+      comment: 'كمُرسلة، وجدت في Lynx الشريك المثالي. التواصل سهل والتوصيل دقيق جداً'
     },
     {
       name: 'خالد الحربي',
@@ -187,5 +187,5 @@ export class HomeComponent implements OnInit {
     this.isScrolled = window.scrollY > 50;
   }
 
-  
+
 }

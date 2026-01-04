@@ -34,8 +34,8 @@ export class AdminLoginComponent implements OnInit {
 
   ngOnInit(): void {
     // تحقق من وجود توكن وصلاحية الادمن عند تحميل الصفحة
-    const token = localStorage.getItem('pickgo_token');
-    const role = localStorage.getItem('pickgo_role');
+    const token = localStorage.getItem('lynx_token');
+    const role = localStorage.getItem('lynx_role');
     const expiration = localStorage.getItem('token_expiration');
 
     // If user already has valid admin token, redirect to dashboard immediately
