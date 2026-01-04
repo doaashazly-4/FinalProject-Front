@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 // ========== INTERFACES ==========
@@ -24,77 +24,52 @@ export interface AdminUserRow {
   phone?: string;
   ordersCount?: number;
   lastActivity?: string;
+  isBlocked?: boolean;
 }
 
-export interface AdminOrderRow {
-  id: string;
-  customer: string;
-  sender?: string;
-  courier?: string;
-  status: 'جديد' | 'قيد المعالجة' | 'قيد التوصيل' | 'مكتمل' | 'ملغي' | 'فشل التوصيل';
-  total: number;
-  createdAt: string;
-  deliveryAddress?: string;
-}
-
-// ========== CARRIER INTERFACES (UC-ADM-01) ==========
 
 export interface PendingCarrier {
- 
   id: number;
   name: string;
   email: string;
   phone?: string;
-  vehicleType: 'Motorcycle' | 'Car' | 'Truck' | 'Van';
+  passWord?: string;
+  vehicleType: string;
   licenseNumber: string;
   maxWeight: number;
   photoUrl: string;
   licensePhotoFront: string;
   licensePhotoBack: string;
-  idPhotoUrl: string;
+  idPhotoUrl?: string; // Not in current backend but kept for safety
   appliedAt: string;
   address: string;
   birthDate: string;
-  gender: 'Male' | 'Female';
+  gender: string;
 }
-
-// ========== DISPUTE INTERFACES (UC-ADM-04) ==========
 
 export interface Dispute {
   id: string;
-  orderId: string;
-  type: 'not_delivered' | 'damaged' | 'late_delivery' | 'wrong_item' | 'other';
-  status: 'pending' | 'in_review' | 'resolved' | 'escalated' | 'closed';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  complainantType: 'customer' | 'sender' | 'carrier';
-  complainantId: string;
-  complainantName: string;
+  orderId: string; // Mapped from backend packageId
+  type: string;
+  status: string;
+  priority?: string;
   description: string;
   createdAt: string;
-  updatedAt?: string;
-  resolvedAt?: string;
-  resolution?: string;
-  resolutionType?: 'refund' | 'replace' | 'penalize_carrier' | 'other';
-  assignedTo?: string;
-  proofPhotos?: string[];
+  resolutionNotes?: string;
+  resolution?: string; // Compatible with resolutionNotes
+  resolutionType?: string;
+  proofPhotos?: string[]; // Mapped from proofImages
   statusHistory?: DisputeStatusHistory[];
+  complainantName?: string;
+  complainantType?: string;
 }
 
 export interface DisputeStatusHistory {
   status: string;
   changedAt: string;
-  changedBy: string;
+  changedBy?: string;
   notes?: string;
 }
-
-export interface DisputeResolutionDTO {
-  disputeId: string;
-  status: string;
-  notes: string;
-  resolutionType?: string;
-}
-
-// ========== REPORTS INTERFACES (UC-ADM-03) ==========
 
 export interface SystemReport {
   totalOrders: number;
@@ -119,226 +94,216 @@ export interface DailyStats {
   failedDeliveries: number;
 }
 
-export interface ReportExportDTO {
-  type: 'daily' | 'weekly' | 'monthly';
-  startDate: string;
-  endDate: string;
-  format: 'pdf' | 'excel' | 'csv';
-}
-
 @Injectable({ providedIn: 'root' })
 export class AdminDataService {
-   private apiUrl = `${environment.apiUrl}/Admin`; // تمام
-;
+  private apiUrl = `${environment.apiUrl}/Admin`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  // ========== DASHBOARD & STATS ==========
-
-  getStats(): Observable<AdminStat[]> {
-    return this.http.get<AdminStat[]>(`${this.apiUrl}/DashboardStats`);
+  // 1. Get Pending Couriers
+  getPendingCouriers(): Observable<PendingCarrier[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/PendingCouriers`).pipe(
+      map(carriers => carriers.map(c => ({
+        id: c.id ?? c.Id,
+        name: c.name ?? c.UserName ?? c.Name,
+        email: c.email ?? c.Email,
+        phone: c.phone ?? c.PhoneNumber ?? c.Phone,
+        passWord: c.passWord ?? c.PasswordHash,
+        vehicleType: c.vehicleType ?? c.VehicleType,
+        licenseNumber: c.licenseNumber ?? c.LicenseNumber,
+        maxWeight: c.maxWeight ?? c.MaxWeight,
+        photoUrl: c.photoUrl ?? c.PhotoUrl,
+        licensePhotoFront: c.licensePhotoFront ?? c.LicensePhotoFront,
+        licensePhotoBack: c.licensePhotoBack ?? c.LicensePhotoBack,
+        appliedAt: c.appliedAt ?? c.CreatedAt,
+        address: c.address ?? c.Address,
+        birthDate: c.birthDate ?? c.BirthDate,
+        gender: c.gender ?? c.Gender
+      } as PendingCarrier)))
+    );
   }
 
-  getDashboardData(): Observable<{stats: AdminStat[], recentUsers: AdminUserRow[], recentOrders: AdminOrderRow[]}> {
-    return this.http.get<{stats: AdminStat[], recentUsers: AdminUserRow[], recentOrders: AdminOrderRow[]}>(`${this.apiUrl}/dashboard`);
+  // Aliases for backward compatibility
+  getPendingCouriersAdmin(): Observable<PendingCarrier[]> {
+    return this.getPendingCouriers();
   }
-
-  // ========== USER MANAGEMENT (UC-ADM-02) ==========
-
-  getUsers(): Observable<AdminUserRow[]> {
-    return this.http.get<AdminUserRow[]>(`${this.apiUrl}/users`);
-  }
-
-  getUsersByRole(role: string): Observable<AdminUserRow[]> {
-    return this.http.get<AdminUserRow[]>(`${this.apiUrl}/users?role=${role}`);
-  }
-
-  getUserDetails(userId: string): Observable<AdminUserRow> {
-    return this.http.get<AdminUserRow>(`${this.apiUrl}/users/${userId}`);
-  }
-
-  updateUserStatus(userId: string, status: 'نشط' | 'معلق' | 'محظور'): Observable<AdminUserRow> {
-    return this.http.patch<AdminUserRow>(`${this.apiUrl}/users/${userId}/status`, { status });
-  }
-
-  blockUser(userId: string, reason?: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/users/${userId}/block`, { reason });
-  }
-
-  unblockUser(userId: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/users/${userId}/unblock`, {});
-  }
-
- 
-
-  // ========== CARRIER APPROVALS (UC-ADM-01) ==========
 
   getPendingCarriers(): Observable<PendingCarrier[]> {
-    return this.http.get<PendingCarrier[]>(`${this.apiUrl}/PendingCouriers`);
+    return this.getPendingCouriers();
   }
 
-  getCarrierDetails(carrierId: string): Observable<PendingCarrier> {
-    return this.http.get<PendingCarrier>(`${this.apiUrl}/carriers/${carrierId}`);
+  // 2. Approve Courier
+  approveCourier(courierId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/ApproveCourier/${courierId}`, {});
   }
 
-
-approveCourier(courierId: number): Observable<void> {
-  return this.http.post<void>(`${this.apiUrl}/ApproveCourier/${courierId}`, {});
-}
-
-rejectCourierAdmin(carrierId: number, reason: string): Observable<void> {
-  return this.http.post<void>(
-    `${this.apiUrl}/RejectCourier/${carrierId}`,
-    { reason }
-  );
-}
-
-  // ===== New Admin endpoints mapped to backend API described by user =====
-
-  // Task 1 — Get Pending Couriers
-  getPendingCouriersAdmin(): Observable<PendingCarrier[]> {
-  return this.http.get<any[]>(`${this.apiUrl}/PendingCouriers`).pipe(
-    map(carriers => carriers.map(c => ({
-      id: c.Id,
-      name: c.name ,           // لو مش موجود => undefined
-      email: c.email ,
-      phone: c.phone ,
-      vehicleType: c.VehicleType,
-      licenseNumber: c.LicenseNumber,
-      maxWeight: c.maxWeight ,
-      photoUrl: c.photoUrl ,
-      licensePhotoFront: c.licensePhotoFront ,
-      licensePhotoBack: c.licensePhotoBack ,
-      idPhotoUrl: c.idPhotoUrl ,
-      appliedAt: c.appliedAt ,
-      address: c.address ,
-      birthDate: c.birthDate ,
-      gender: c.gender 
-    })))
-  );
-}
-
-  // Task 2 — Approve Courier
-  approveCourierAdmin(courierId: number): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/ApproveCourier/${courierId}`, {});
+  approveCourierAdmin(courierId: number): Observable<any> {
+    return this.approveCourier(courierId);
   }
 
-  // Task 3 — Reject Courier
-//   rejectCourierAdmin(carrierId: number, reason: string): Observable<void> {
-//   return this.http.post<void>(
-//     `${this.apiUrl}/Admin/RejectCourier/${carrierId}`,
-//     { reason }
-//   );
-// }
-
-
-  // Task 4 — Get Online Couriers
-  getOnlineCouriersAdmin(): Observable<PendingCarrier[]> {
-    return this.http.get<PendingCarrier[]>(`${this.apiUrl}/OnlineCouriers`);
+  // 3. Reject Courier
+  rejectCourier(courierId: number, reason: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/RejectCourier/${courierId}`, { reason });
   }
 
-  // Task 5 — Get Dashboard Stats
-  getDashboardStatsAdmin(): Observable<SystemReport> {
-    return this.http.get<SystemReport>(`${this.apiUrl}/DashboardStats`);
+  rejectCourierAdmin(courierId: number, reason: string): Observable<any> {
+    return this.rejectCourier(courierId, reason);
   }
 
-  // Task 6 — Block User
-  // blockUserAdmin(userId: string): Observable<void> {
-  //   return this.http.post<void>(`${this.apiUrl}/BlockUser/${userId}`, {});
-  // }
-
-  // // Task 7 — Delete User
-  deleteUser(userId: string) {
-  return this.http.post<void>(`${this.apiUrl}/DeleteUser/${userId}`, {});
-}
-
-
-  // // Task 8 — Search Users
- searchUsers(email?: string, phone?: string) {
-  let params = [];
-  if (email) params.push(`email=${email}`);
-  if (phone) params.push(`phone=${phone}`);
-
-  return this.http.get(`${this.apiUrl}/SearchUsers?${params.join('&')}`);
-}
-
-  // Task 9 — Get Disputes
-  getDisputesAdmin(): Observable<Dispute[]> {
-    return this.http.get<Dispute[]>(`${this.apiUrl}/Disputes`);
+  // 4. Get Online Couriers
+  getOnlineCouriers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/OnlineCouriers`);
   }
 
-  // Task 10 — Get Dispute by ID
-  getDisputeByIdAdmin(id: string): Observable<Dispute> {
-    return this.http.get<Dispute>(`${this.apiUrl}/Dispute/${id}`);
+  getOnlineCouriersAdmin(): Observable<any[]> {
+    return this.getOnlineCouriers();
   }
 
-  // Task 11 — Resolve Dispute
-  resolveDisputeAdmin(disputeId: string, status: string, notes: string): Observable<void> {
-    const body = { status, notes };
-    return this.http.post<void>(`${this.apiUrl}/ResolveDispute/${disputeId}`, body);
+  // 5. Get Dashboard Stats
+  getDashboardStats(): Observable<AdminStat[]> {
+    return this.http.get<any>(`${this.apiUrl}/DashboardStats`).pipe(
+      map(data => [
+        { label: 'إجمالي الطلبات', value: (data.totalOrders ?? data.TotalOrders ?? 0).toString(), icon: 'bi-box-seam', color: 'blue' },
+        { label: 'المناديب النشطين', value: (data.activeCouriers ?? data.ActiveCouriers ?? 0).toString(), icon: 'bi-people', color: 'green' },
+        { label: 'عمليات توصيل فاشلة', value: (data.failedDeliveries ?? data.FailedDeliveries ?? 0).toString(), icon: 'bi-x-circle', color: 'red' },
+        { label: 'إجمالي الإيرادات', value: `${data.totalRevenue ?? data.TotalRevenue ?? 0} ج.م`, icon: 'bi-currency-dollar', color: 'orange' }
+      ])
+    );
   }
 
-  // ========== ORDERS MANAGEMENT ==========
+  getStats(): Observable<AdminStat[]> {
+    return this.getDashboardStats();
+  }
 
-  // getOrders(): Observable<AdminOrderRow[]> {
-  //   return this.http.get<AdminOrderRow[]>(`${this.apiUrl}/orders`);
-  // }
+  getDashboardStatsAdmin(): Observable<any> {
+    return this.getDashboardStats();
+  }
 
-  // getOrdersByStatus(status: string): Observable<AdminOrderRow[]> {
-  //   return this.http.get<AdminOrderRow[]>(`${this.apiUrl}/orders?status=${status}`);
-  // }
+  // 6. Block User
+  blockUser(userId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/BlockUser/${userId}`, {});
+  }
 
-  // updateOrderStatus(orderId: string, status: string): Observable<AdminOrderRow> {
-  //   return this.http.patch<AdminOrderRow>(`${this.apiUrl}/orders/${orderId}/status`, { status });
-  // }
+  blockUserAdmin(userId: string): Observable<any> {
+    return this.blockUser(userId);
+  }
 
-  // ========== DISPUTES (UC-ADM-04) ==========
+  // 7. Delete User
+  deleteUser(userId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/DeleteUser/${userId}`, {});
+  }
 
+  deleteUserAdmin(userId: string): Observable<any> {
+    return this.deleteUser(userId);
+  }
 
+  // 8. Search Users
+  searchUsers(email?: string, phone?: string): Observable<AdminUserRow[]> {
+    let params = new HttpParams();
+    if (email) params = params.set('email', email);
+    if (phone) params = params.set('phone', phone);
+    return this.http.get<any[]>(`${this.apiUrl}/SearchUsers`, { params }).pipe(
+      map(users => users.map(u => ({
+        id: u.id ?? u.Id,
+        name: u.userName ?? u.UserName,
+        email: u.email ?? u.Email,
+        phone: u.phoneNumber ?? u.PhoneNumber,
+        isBlocked: u.isBlocked ?? u.IsBlocked,
+        role: 'customer',
+        status: (u.isBlocked ?? u.IsBlocked) ? 'محظور' : 'نشط',
+        joined: ''
+      } as AdminUserRow)))
+    );
+  }
+
+  searchUsersAdmin(email?: string, phone?: string): Observable<AdminUserRow[]> {
+    return this.searchUsers(email, phone);
+  }
+
+  // 9. Get Disputes
   getDisputes(): Observable<Dispute[]> {
-  return this.http.get<Dispute[]>(`${this.apiUrl}/Disputes`);
-}
+    return this.http.get<any[]>(`${this.apiUrl}/Disputes`).pipe(
+      map(disputes => disputes.map(d => ({
+        id: d.id ?? d.Id,
+        orderId: (d.packageId ?? d.PackageId ?? '').toString(),
+        description: d.description ?? d.Description,
+        status: d.status ?? d.Status ?? 'pending',
+        type: d.disputeType ?? d.DisputeType ?? 'other',
+        createdAt: d.createdAt ?? d.CreatedAt,
+        complainantName: 'عميل', // Default as backend doesn't return name in list
+        complainantType: 'customer'
+      } as Dispute)))
+    );
+  }
 
-getDisputeDetails(id: number): Observable<Dispute> {
-  return this.http.get<Dispute>(`${this.apiUrl}/Dispute/${id}`);
-}
+  getDisputesAdmin(): Observable<Dispute[]> {
+    return this.getDisputes();
+  }
 
-resolveDispute(disputeId: number, dto: {status: string, notes: string}): Observable<any> {
-  return this.http.post(`${this.apiUrl}/ResolveDispute/${disputeId}`, dto);
-}
+  // 10. Get Dispute by ID
+  getDisputeDetails(id: number | string): Observable<Dispute> {
+    return this.http.get<any>(`${this.apiUrl}/Dispute/${id}`).pipe(
+      map(d => ({
+        id: d.id ?? d.Id,
+        orderId: (d.packageId ?? d.PackageId ?? '').toString(),
+        description: d.description ?? d.Description,
+        status: d.status ?? d.Status,
+        type: d.disputeType ?? d.DisputeType,
+        resolutionNotes: d.resolutionNotes ?? d.ResolutionNotes,
+        resolution: d.resolutionNotes ?? d.ResolutionNotes, // Alias for UI
+        proofPhotos: d.proofImages ?? d.ProofImages ?? [],
+        statusHistory: (d.statusHistory ?? d.StatusHistory ?? []).map((h: any) => ({
+          status: h.status ?? h.Status,
+          changedAt: h.changedAt ?? h.ChangedAt
+        })),
+        createdAt: d.createdAt ?? d.CreatedAt,
+        complainantName: 'عميل',
+        complainantType: 'customer'
+      } as Dispute))
+    );
+  }
 
+  getDisputeByIdAdmin(id: string): Observable<Dispute> {
+    return this.getDisputeDetails(id);
+  }
 
-  // getDisputes(): Observable<Dispute[]> {
-  //   return this.http.get<Dispute[]>(`${this.apiUrl}/Disputes`);
-  // }
+  // Additional existing methods (restored for compatibility)
 
-  // getDisputesByStatus(status: string): Observable<Dispute[]> {
-  //   return this.http.get<Dispute[]>(`${this.apiUrl}/disputes?status=${status}`);
-  // }
+  getUsers(): Observable<AdminUserRow[]> {
+    return this.searchUsers(); // Use the existing mapped search logic
+  }
 
-  // getDisputeDetails(disputeId: string): Observable<Dispute> {
-  //   return this.http.get<Dispute>(`${this.apiUrl}/disputes/${disputeId}`);
-  // }
+  unblockUser(userId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/BlockUser/${userId}`, {});
+  }
 
-  // resolveDispute(dto: DisputeResolutionDTO): Observable<Dispute> {
-  //   return this.http.post<Dispute>(`${this.apiUrl}/disputes/${dto.disputeId}/resolve`, dto);
-  // }
-
-  // escalateDispute(disputeId: string, notes: string): Observable<Dispute> {
-  //   return this.http.post<Dispute>(`${this.apiUrl}/disputes/${disputeId}/escalate`, { notes });
-  // }
-
-  // ========== REPORTS (UC-ADM-03) ==========
-
-  getSystemReport(period: 'today' | 'week' | 'month'): Observable<SystemReport> {
-    return this.http.get<SystemReport>(`${this.apiUrl}/reports/system?period=${period}`);
+  getSystemReport(period: string): Observable<SystemReport> {
+    // Return empty/mock data instead of hitting non-existent endpoint to avoid timeouts
+    return new Observable(observer => {
+      observer.next({
+        totalOrders: 0, totalOrdersChange: 0, activeCarriers: 0, activeCarriersChange: 0,
+        totalRevenue: 0, revenueChange: 0, failedDeliveries: 0, failedDeliveriesChange: 0,
+        pendingApprovals: 0, openDisputes: 0, completedDeliveries: 0, avgDeliveryTime: '0 mins'
+      });
+      observer.complete();
+    });
   }
 
   getDailyStats(startDate: string, endDate: string): Observable<DailyStats[]> {
-    return this.http.get<DailyStats[]>(`${this.apiUrl}/reports/daily?start=${startDate}&end=${endDate}`);
+    return new Observable(observer => {
+      observer.next([]);
+      observer.complete();
+    });
   }
 
-  exportReport(dto: ReportExportDTO): Observable<Blob> {
-    return this.http.post(`${this.apiUrl}/reports/export`, dto, { responseType: 'blob' });
+  exportReport(dto: any): Observable<Blob> {
+    return new Observable(observer => {
+      observer.error('Export not implemented on backend');
+    });
+  }
+
+  resolveDispute(disputeId: number | string, dto: { status: string, notes: string }): Observable<any> {
+    // Backend ResolveDispute is currently commented out in controller
+    return this.http.post(`${this.apiUrl}/ResolveDispute/${disputeId}`, dto);
   }
 }

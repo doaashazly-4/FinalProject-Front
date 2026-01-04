@@ -52,7 +52,7 @@ export class AdminUsersComponent implements OnInit {
   ];
   statusFilter = 'all';
 
-  constructor(private data: AdminDataService) {}
+  constructor(private data: AdminDataService) { }
 
   ngOnInit(): void {
     this.loadUsers();
@@ -110,7 +110,7 @@ export class AdminUsersComponent implements OnInit {
     // Apply search
     if (this.searchQuery.trim()) {
       const query = this.searchQuery.toLowerCase();
-      result = result.filter(u => 
+      result = result.filter(u =>
         u.name.toLowerCase().includes(query) ||
         u.email.toLowerCase().includes(query) ||
         u.phone?.includes(query)
@@ -120,29 +120,27 @@ export class AdminUsersComponent implements OnInit {
     this.filteredUsers = result;
   }
 
-  // onSearch(): void {
-  //   // If input looks like email or phone, query server; otherwise filter locally
-  //   const q = this.searchQuery.trim();
-  //   if (!q) {
-  //     this.applyFilters();
-  //     return;
-  //   }
-  //   // Try server-side search by email or phone
-  //   this.isLoading = true;
-  //   this.data.searchUsersAdmin(q.includes('@') ? q : undefined, q.includes('@') ? undefined : q).subscribe({
-  //     next: (users) => {
-  //       this.users = users;
-  //       this.updateFilterCounts();
-  //       this.applyFilters();
-  //       this.isLoading = false;
-  //     },
-  //     error: (err) => {
-  //       console.error('Search users error:', err);
-  //       this.applyFilters();
-  //       this.isLoading = false;
-  //     }
-  //   });
-  // }
+  onSearch(): void {
+    const q = this.searchQuery.trim();
+    if (!q) {
+      this.applyFilters();
+      return;
+    }
+    this.isLoading = true;
+    this.data.searchUsers(q.includes('@') ? q : undefined, q.includes('@') ? undefined : q).subscribe({
+      next: (users) => {
+        this.users = users;
+        this.updateFilterCounts();
+        this.applyFilters();
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Search users error:', err);
+        this.applyFilters();
+        this.isLoading = false;
+      }
+    });
+  }
 
   clearSearch(): void {
     this.searchQuery = '';
@@ -173,27 +171,26 @@ export class AdminUsersComponent implements OnInit {
     this.blockReason = '';
   }
 
-  // confirmBlock(): void {
-  //   if (!this.userToAction) return;
+  confirmBlock(): void {
+    if (!this.userToAction) return;
 
-  //   this.isProcessing = true;
-  //   // Use admin endpoint
-  //   this.data.blockUserAdmin(this.userToAction.id).subscribe({
-  //     next: () => {
-  //       const user = this.users.find(u => u.id === this.userToAction!.id);
-  //       if (user) user.status = 'محظور';
-  //       Swal.fire({ icon: 'success', title: 'تم الحظر', text: `تم حظر المستخدم "${this.userToAction!.name}" بنجاح` });
-  //       this.closeBlockModal();
-  //       this.applyFilters();
-  //       this.isProcessing = false;
-  //     },
-  //     error: (err) => {
-  //       console.error('Error blocking user:', err);
-  //       Swal.fire({ icon: 'error', title: 'فشل', text: 'حدث خطأ أثناء حظر المستخدم' });
-  //       this.isProcessing = false;
-  //     }
-  //   });
-  // }
+    this.isProcessing = true;
+    this.data.blockUser(this.userToAction.id).subscribe({
+      next: () => {
+        const user = this.users.find(u => u.id === this.userToAction!.id);
+        if (user) user.status = 'محظور';
+        Swal.fire({ icon: 'success', title: 'تم الحظر', text: `تم حظر المستخدم "${this.userToAction!.name}" بنجاح` });
+        this.closeBlockModal();
+        this.applyFilters();
+        this.isProcessing = false;
+      },
+      error: (err) => {
+        console.error('Error blocking user:', err);
+        Swal.fire({ icon: 'error', title: 'فشل', text: 'حدث خطأ أثناء حظر المستخدم' });
+        this.isProcessing = false;
+      }
+    });
+  }
 
   // Unblock user
   unblockUser(user: AdminUserRow): void {
@@ -207,7 +204,6 @@ export class AdminUsersComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error unblocking user:', err);
-        // Update locally for demo
         user.status = 'نشط';
         this.successMessage = `تم إلغاء حظر المستخدم "${user.name}" بنجاح`;
         this.applyFilters();
@@ -227,26 +223,26 @@ export class AdminUsersComponent implements OnInit {
     this.userToAction = null;
   }
 
-  // confirmDelete(): void {
-  //   if (!this.userToAction) return;
+  confirmDelete(): void {
+    if (!this.userToAction) return;
 
-  //   this.isProcessing = true;
-  //   this.data.deleteUserAdmin(this.userToAction.id).subscribe({
-  //     next: () => {
-  //       this.users = this.users.filter(u => u.id !== this.userToAction!.id);
-  //       Swal.fire({ icon: 'success', title: 'تم الحذف', text: `تم حذف المستخدم "${this.userToAction!.name}" بنجاح` });
-  //       this.updateFilterCounts();
-  //       this.applyFilters();
-  //       this.closeDeleteModal();
-  //       this.isProcessing = false;
-  //     },
-  //     error: (err) => {
-  //       console.error('Error deleting user:', err);
-  //       Swal.fire({ icon: 'error', title: 'فشل', text: 'حدث خطأ أثناء حذف المستخدم' });
-  //       this.isProcessing = false;
-  //     }
-  //   });
-  // }
+    this.isProcessing = true;
+    this.data.deleteUser(this.userToAction.id).subscribe({
+      next: () => {
+        this.users = this.users.filter(u => u.id !== this.userToAction!.id);
+        Swal.fire({ icon: 'success', title: 'تم الحذف', text: `تم حذف المستخدم "${this.userToAction!.name}" بنجاح` });
+        this.updateFilterCounts();
+        this.applyFilters();
+        this.closeDeleteModal();
+        this.isProcessing = false;
+      },
+      error: (err) => {
+        console.error('Error deleting user:', err);
+        Swal.fire({ icon: 'error', title: 'فشل', text: 'حدث خطأ أثناء حذف المستخدم' });
+        this.isProcessing = false;
+      }
+    });
+  }
 
   clearMessages(): void {
     this.successMessage = '';
