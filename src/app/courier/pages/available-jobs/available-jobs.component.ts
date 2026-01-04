@@ -18,7 +18,7 @@ export class AvailableJobsComponent implements OnInit {
   showRejectModal = false;
   rejectingJob: DeliveryJob | null = null;
 
-  constructor(private dataService: CourierDataService) {}
+  constructor(private dataService: CourierDataService) { }
 
   ngOnInit(): void {
     this.loadJobs();

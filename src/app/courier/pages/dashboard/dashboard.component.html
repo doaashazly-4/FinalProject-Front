@@ -85,7 +85,7 @@
   </div>
 
   <!-- Active Jobs Alert -->
-   @if(activeJobs) {
+  @if(activeJobs) {
   <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-5 border border-blue-100">
     <div class="flex items-start gap-4">
       <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
@@ -101,7 +101,7 @@
       </a>
     </div>
   </div>
-}
+  }
   <!-- Main Content Grid -->
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
     <!-- Active Jobs -->
@@ -176,7 +176,7 @@
                 <i class="bi bi-box-arrow-up ml-2"></i>
                 تأكيد الاستلام
               </button>
-              <button *ngIf="job.status === 'picked_up' || job.status === 'in_transit'"
+              <button *ngIf="job.status === 'picked_up' || job.status === 'in_transit'" (click)="openProofModal(job)"
                 class="flex-1 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold hover:shadow-lg transition-all">
                 <i class="bi bi-check-circle ml-2"></i>
                 تأكيد التسليم
@@ -218,7 +218,7 @@
             <h3 class="font-bold text-gray-800 mb-1">لا توجد مهام متاحة حالياً</h3>
             <p class="text-gray-500 text-sm">ستظهر المهام الجديدة هنا</p>
           </div>
-        }@else{
+          }@else{
           <!-- Jobs List -->
           <div *ngIf="!isLoading && availableJobs.length > 0" class="space-y-3">
             <div *ngFor="let job of availableJobs"
@@ -258,7 +258,7 @@
               </div>
             </div>
           </div>
-        }
+          }
         </div>
       </div>
     </div>
@@ -407,3 +407,13 @@
     </div>
   </div>
 </div>
+
+
+<!-- Proof Modals -->
+<app-delivery-proof [isVisible]="showProofModal" [job]="selectedJobForProof"
+  (onComplete)="handleDeliveryComplete($event)" (onCancel)="cancelModal()">
+</app-delivery-proof>
+
+<app-failed-delivery-proof [isVisible]="showFailedModal" [job]="selectedJobForProof"
+  (onComplete)="handleDeliveryFailure($event)" (onCancel)="cancelModal()">
+</app-failed-delivery-proof>

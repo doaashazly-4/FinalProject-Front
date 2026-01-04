@@ -392,28 +392,18 @@
     <p class="text-sm text-gray-500 mb-6">
       يمكنك الآن تأكيد جاهزية الطرد للاستلام من صفحة الطلبات
     </p>
-
-    <div class="flex flex-col gap-3">
-      <div class="flex flex-col sm:flex-row gap-3">
-        <button (click)="viewDetails()"
-          class="flex-1 px-4 py-3 bg-primary-dark text-white font-bold rounded-xl hover:shadow-lg transition-all">
-          <i class="bi bi-info-circle ml-2"></i>
-          عرض التفاصيل الكاملة
-        </button>
-      </div>
-
-      <div class="flex flex-col sm:flex-row gap-3">
-        <button (click)="trackShipment()"
-          class="flex-1 px-4 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl hover:shadow-lg transition-all">
-          <i class="bi bi-geo-alt ml-2"></i>
-          تتبع الشحنة
-        </button>
-        <button (click)="createAnother()"
-          class="flex-1 px-4 py-3 border-2 border-gray-200 text-primary-dark font-bold rounded-xl hover:bg-gray-50 transition-all">
-          <i class="bi bi-plus-lg ml-2"></i>
-          طلب جديد
-        </button>
-      </div>
+    
+    <div class="flex flex-col sm:flex-row gap-3">
+      <button (click)="trackShipment()" 
+              class="flex-1 px-4 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl hover:shadow-lg transition-all">
+        <i class="bi bi-geo-alt ml-2"></i>
+        تتبع الشحنة
+      </button>
+      <button (click)="createAnother()" 
+              class="flex-1 px-4 py-3 border-2 border-gray-200 text-primary-dark font-bold rounded-xl hover:bg-gray-50 transition-all">
+        <i class="bi bi-plus-lg ml-2"></i>
+        طلب جديد
+      </button>
     </div>
 
     <button (click)="goToShipments()" class="mt-4 text-gray-500 hover:text-primary-dark text-sm font-medium">

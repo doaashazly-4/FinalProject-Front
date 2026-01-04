@@ -26,6 +26,7 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
   isSubmitting = false;
   showSuccessModal = false;
   createdTrackingNumber = '';
+  createdId = '';
   statusMessage = '';
 
   debugTools = {
@@ -337,6 +338,7 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
       next: (parcel) => {
         this.isSubmitting = false;
         this.createdTrackingNumber = parcel.trackingNumber;
+        this.createdId = parcel.id || parcel.trackingNumber; // Fallback if ID not returned
         this.showSuccessModal = true;
       },
       error: (err) => {
@@ -413,6 +415,19 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     if (control.errors['max']) return `القيمة القصوى ${control.errors['max'].max}`;
 
     return 'خطأ في الإدخال';
+  }
+
+  assignNow(): void {
+    const idToAssign = this.createdId || this.createdTrackingNumber;
+    if (idToAssign) {
+      this.router.navigate(['/supplier/shipments'], {
+        queryParams: { assign: idToAssign }
+      });
+    }
+  }
+
+  get isUrgentOrder(): boolean {
+    return this.shipmentForm.get('priority')?.value === 'urgent';
   }
 
   useNoCustomer(): void {

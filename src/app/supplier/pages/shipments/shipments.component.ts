@@ -37,6 +37,7 @@ export class ShipmentsComponent implements OnInit {
 
   // Ready for Pickup
   markingReady: string | null = null;
+  pendingAssignId: string | null = null;
 
   statusFilters: { value: ParcelStatus | 'all'; label: string; count?: number }[] = [
     { value: 'all', label: 'الكل' },
@@ -60,7 +61,10 @@ export class ShipmentsComponent implements OnInit {
     // Check for assign query param
     this.route.queryParams.subscribe(params => {
       if (params['assign']) {
-        this.openAssignModalById(params['assign']);
+        this.pendingAssignId = params['assign'];
+        if (this.parcels.length > 0) {
+          this.openAssignModalById(this.pendingAssignId!);
+        }
       }
     });
   }
@@ -73,6 +77,12 @@ export class ShipmentsComponent implements OnInit {
         this.parcels = parcels;
         this.applyFilters();
         this.updateStatusCounts();
+
+        if (this.pendingAssignId) {
+          this.openAssignModalById(this.pendingAssignId);
+          this.pendingAssignId = null; // Clear it
+        }
+
         this.isLoading = false;
       },
       error: (err) => {
