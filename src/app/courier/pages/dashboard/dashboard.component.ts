@@ -11,6 +11,7 @@ import { FailedDeliveryProofComponent } from '../delivery/components/failed-deli
   selector: 'app-courier-dashboard',
   standalone: true,
   imports: [CommonModule, RouterModule, DeliveryProofComponent, FailedDeliveryProofComponent],
+  imports: [CommonModule, RouterModule, DeliveryProofComponent, FailedDeliveryProofComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -34,6 +35,7 @@ export class CourierDashboardComponent implements OnInit {
   showProofModal = false;
   showFailedModal = false;
   selectedJobForProof: DeliveryJob | null = null;
+  selectedJobForProof: DeliveryJob | null = null;
 
   constructor(
     private dataService: CourierDataService,
@@ -52,6 +54,7 @@ export class CourierDashboardComponent implements OnInit {
   ngOnInit(): void {
     this.loadData();
     this.loadEarnings();
+    this.loadAvailability();
     this.loadAvailability();
     // this.checkForNewOrders();
     this.pushService.requestPermissionAndRegister().catch(err => console.warn('Push init failed', err));
@@ -78,7 +81,7 @@ export class CourierDashboardComponent implements OnInit {
         }
       });
     } else {
-      // الضغط على "غير متاح" → انهي المناوبة وادخل صفحة End Shift
+      // الضغط على "غير متاح" → انهي المناوبة وادخل صفحة End Shift    
       this.dataService.endShift().subscribe({
         next: res => {
           console.log('Shift ended successfully');
@@ -124,6 +127,18 @@ export class CourierDashboardComponent implements OnInit {
       }
     });
   }
+  loadAvailability(): void {
+    this.dataService.getAvailability().subscribe({
+      next: (res: { isAvailable: boolean }) => {
+        console.log(res);
+
+        this.isAvailable = res.isAvailable;
+      },
+      error: (err) => {
+        console.error('Failed to load availability:', err);
+      }
+    });
+  }
 
 
 
@@ -132,8 +147,14 @@ export class CourierDashboardComponent implements OnInit {
 
   loadData(): void {
     this.isLoading = true;
+  loadData(): void {
+    this.isLoading = true;
 
 
+    this.dataService.getStats().subscribe({
+      next: (s: CourierStat[]) => this.stats = Array.isArray(s) ? s : [],
+      error: () => this.stats = []
+    });
     this.dataService.getStats().subscribe({
       next: (s: CourierStat[]) => this.stats = Array.isArray(s) ? s : [],
       error: () => this.stats = []
@@ -143,7 +164,16 @@ export class CourierDashboardComponent implements OnInit {
       next: (j: DeliveryJob[]) => this.activeJobs = Array.isArray(j) ? j : [],
       error: () => this.activeJobs = []
     });
+    this.dataService.getActiveJobs().subscribe({
+      next: (j: DeliveryJob[]) => this.activeJobs = Array.isArray(j) ? j : [],
+      error: () => this.activeJobs = []
+    });
 
+    this.dataService.getAvailableJobs().subscribe({
+      next: (j: DeliveryJob[]) => this.availableJobs = Array.isArray(j) ? j.slice(0, 3) : [],
+      error: () => this.availableJobs = [],
+      complete: () => this.isLoading = false
+    });
     this.dataService.getAvailableJobs().subscribe({
       next: (j: DeliveryJob[]) => this.availableJobs = Array.isArray(j) ? j.slice(0, 3) : [],
       error: () => this.availableJobs = [],
@@ -175,6 +205,7 @@ export class CourierDashboardComponent implements OnInit {
 
     this.dataService.updateJobStatus(Number(job.id), status, undefined, additionalData).subscribe({
       next: (res) => {
+        console.log("updateJobStatus", res);
         console.log("updateJobStatus", res);
         job.status = status
       },
@@ -332,6 +363,7 @@ export class CourierDashboardComponent implements OnInit {
   callReceiver(phone: string) { window.open(`tel:${phone}`, '_self'); }
 
   // ===== Delivery Proof Modals =====
+  // ===== Delivery Proof Modals =====
   openProofModal(job: DeliveryJob): void {
     this.selectedJobForProof = job;
     this.showProofModal = true;
@@ -344,24 +376,8 @@ export class CourierDashboardComponent implements OnInit {
 
   handleDeliveryComplete(event: any) {
     this.showProofModal = false;
-    if (this.selectedJobForProof && event.otp) {
-      // Use deliverPackage for OTP validation + status update
-      // event.photos handling might need to be separate or the backend handles it in simple update
-      // Assuming deliverPackage is sufficient for the requirements
-      this.dataService.deliverPackage(Number(this.selectedJobForProof.id), event.otp).subscribe({
-        next: () => {
-          this.selectedJobForProof!.status = 'delivered';
-          this.selectedJobForProof = null;
-          this.loadData(); // Refresh to move to completed
-        },
-        error: (err) => {
-          console.error('Delivery failed', err);
-          alert('فشل التحقق من رمز OTP');
-        }
-      });
-    } else if (this.selectedJobForProof) {
-      // Fallback or just photos?
-      this.updateJobStatus(this.selectedJobForProof, 'delivered', event.photos);
+    if (this.selectedJobForProof) {
+      this.updateJobStatus(this.selectedJobForProof, 'delivered', event.photos, event.otp);
       this.selectedJobForProof = null;
     }
   }
