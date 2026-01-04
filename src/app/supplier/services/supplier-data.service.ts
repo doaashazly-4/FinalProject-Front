@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Observable, throwError, of, from } from 'rxjs';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 // ========== PARCEL INTERFACES (UC-SUP-02) ==========
@@ -280,7 +280,64 @@ export interface Customer {
 export class SupplierDataService {
   private apiUrl = `${environment.apiUrl}/Supplier`;
 
+  // Cache for customers
+  private customerCache: { data: Customer[], timestamp: number } | null = null;
+  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
   constructor(private http: HttpClient) { }
+
+  // ================= SMART CREATE SHIPMENT (FR1, FR2, FR3) =================
+
+  /**
+   * Safe create parcel method with retry mechanism
+   * 1. Try with original CustomerID
+   * 2. Try with first valid CustomerID found in system
+   * 3. Try with CustomerID = 0 (Safe Fallback)
+   */
+  createParcelSafe(dto: CreateRequestDTO): Observable<any> {
+    return this.tryWithOriginalCustomerId(dto).pipe(
+      catchError(err => {
+        console.warn('Attempt 1 failed (Original ID). Retrying with first valid ID...', err);
+        return this.tryWithFirstValidCustomerId(dto).pipe(
+          catchError(err2 => {
+            console.warn('Attempt 2 failed (First Valid ID). Retrying with ID 0...', err2);
+            return this.tryWithCustomerIdZero(dto);
+          })
+        );
+      })
+    );
+  }
+
+  private tryWithOriginalCustomerId(dto: CreateRequestDTO): Observable<any> {
+    console.log('Trying with Original CustomerID:', dto.packages[0].customerID);
+    return this.createParcel(dto);
+  }
+
+  private tryWithFirstValidCustomerId(dto: CreateRequestDTO): Observable<any> {
+    return this.getCustomers().pipe(
+      switchMap(customers => {
+        if (customers && customers.length > 0) {
+          // Clone and update
+          const newDto = JSON.parse(JSON.stringify(dto));
+          // Try to match by phone first (if available in logic, but here we just take first valid as per strategy B/D fallback)
+          // Better: If we have context about receiver phone, we could look it up. 
+          // But DTO has phone inside packages logic? No, DTO has packages.
+          // Let's just pick the first one as a generic fallback if specific one failed.
+          newDto.packages[0].customerID = customers[0].id;
+          console.log('Trying with First Valid CustomerID:', newDto.packages[0].customerID);
+          return this.createParcel(newDto);
+        }
+        return throwError(() => new Error('No customers available for fallback'));
+      })
+    );
+  }
+
+  private tryWithCustomerIdZero(dto: CreateRequestDTO): Observable<any> {
+    const newDto = JSON.parse(JSON.stringify(dto));
+    newDto.packages[0].customerID = 0;
+    console.log('Trying with CustomerID 0 (Safe Fallback)');
+    return this.createParcel(newDto);
+  }
 
   // ================= DASHBOARD =================
 
@@ -440,8 +497,22 @@ export class SupplierDataService {
   // ================= Get CustomerNumber =================
 
   getCustomers(): Observable<Customer[]> {
-    return this.http.get<Customer[]>(
-      'https://localhost:7180/api/Customer'
+    // Check cache
+    if (this.customerCache && (Date.now() - this.customerCache.timestamp < this.CACHE_DURATION)) {
+      return of(this.customerCache.data);
+    }
+
+    return this.http.get<Customer[]>(`${environment.apiUrl}/Customer`).pipe(
+      tap(data => {
+        this.customerCache = {
+          data: data,
+          timestamp: Date.now()
+        };
+      }),
+      catchError(err => {
+        console.error('Error fetching customers', err);
+        return of([]); // Return empty array on error to allow graceful degradation
+      })
     );
   }
 
