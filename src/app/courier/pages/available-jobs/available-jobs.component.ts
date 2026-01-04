@@ -27,11 +27,13 @@ export class AvailableJobsComponent implements OnInit {
   loadJobs(): void {
     this.isLoading = true;
     this.dataService.getAvailableJobs().subscribe({
-      next: (jobs) => {
-        this.jobs = jobs;
-        this.isLoading = false;
-        this.isRefreshing = false;
-      },
+     next: (jobs) => {
+      console.log('API jobs:', jobs);
+  this.jobs = jobs ?? []; // ✅ حماية إضافية
+  this.isLoading = false;
+  this.isRefreshing = false;
+},
+
       error: (err) => {
         console.error('Error loading jobs:', err);
         this.jobs = [];

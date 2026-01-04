@@ -36,6 +36,16 @@ export const SUPPLIER_ROUTES: Routes = [
         loadComponent: () => import('./pages/settings/settings.component')
           .then(m => m.SettingsComponent)
       },
+      {
+        path: 'shipment-details',
+        loadComponent: () => import('./pages/shipment-details/shipment-details.component')
+          .then(m => m.ShipmentDetailsComponent)
+      },
+      {
+        path: 'shipment-details/:id',
+        loadComponent: () => import('./pages/shipment-details/shipment-details.component')
+          .then(m => m.ShipmentDetailsComponent)
+      },
       // Legacy routes - redirect to new ones
       {
         path: 'orders',

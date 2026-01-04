@@ -3,10 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SupplierDataService, Parcel, SenderStat, SenderDashboardData } from '../../services/supplier-data.service';
 
+import { ShipmentCardComponent } from '../../components/shipment-card/shipment-card.component';
+
 @Component({
   selector: 'app-supplier-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ShipmentCardComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
@@ -18,7 +20,7 @@ export class SupplierDashboardComponent implements OnInit {
   isLoading = true;
   today = new Date();
 
-  constructor(private dataService: SupplierDataService) {}
+  constructor(private dataService: SupplierDataService) { }
 
   ngOnInit(): void {
     this.loadDashboardData();
@@ -26,7 +28,7 @@ export class SupplierDashboardComponent implements OnInit {
 
   loadDashboardData(): void {
     this.isLoading = true;
-    
+
     this.dataService.getDashboardData().subscribe({
       next: (data) => {
         this.dashboardData = data;
@@ -95,8 +97,8 @@ export class SupplierDashboardComponent implements OnInit {
   }
 
   getPriorityClass(priority: string): string {
-    return priority === 'urgent' 
-      ? 'bg-red-100 text-red-700 border-red-200' 
+    return priority === 'urgent'
+      ? 'bg-red-100 text-red-700 border-red-200'
       : 'bg-gray-100 text-gray-600 border-gray-200';
   }
 

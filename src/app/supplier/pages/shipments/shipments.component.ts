@@ -4,10 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { SupplierDataService, Parcel, ParcelStatus, AvailableCarrier } from '../../services/supplier-data.service';
 
+import { ShipmentCardComponent } from '../../components/shipment-card/shipment-card.component';
+
 @Component({
   selector: 'app-shipments',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, ShipmentCardComponent],
   templateUrl: './shipments.component.html',
   styleUrl: './shipments.component.css'
 })
@@ -15,24 +17,24 @@ export class ShipmentsComponent implements OnInit {
   parcels: Parcel[] = [];
   filteredParcels: Parcel[] = [];
   availableCarriers: AvailableCarrier[] = [];
-  
+
   isLoading = true;
   isLoadingCarriers = false;
-  
+
   // Filters
   searchQuery = '';
   selectedStatus: ParcelStatus | 'all' = 'all';
-  
+
   // Assign Carrier Modal
   showAssignModal = false;
   selectedParcel: Parcel | null = null;
   selectedCarrier: AvailableCarrier | null = null;
   isAssigning = false;
-  
+
   // Order Details Modal
   showDetailsModal = false;
   detailsParcel: Parcel | null = null;
-  
+
   // Ready for Pickup
   markingReady: string | null = null;
 
@@ -50,11 +52,11 @@ export class ShipmentsComponent implements OnInit {
   constructor(
     private dataService: SupplierDataService,
     private route: ActivatedRoute
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadParcels();
-    
+
     // Check for assign query param
     this.route.queryParams.subscribe(params => {
       if (params['assign']) {
@@ -65,7 +67,7 @@ export class ShipmentsComponent implements OnInit {
 
   loadParcels(): void {
     this.isLoading = true;
-    
+
     this.dataService.getParcels().subscribe({
       next: (parcels) => {
         this.parcels = parcels;
@@ -92,26 +94,26 @@ export class ShipmentsComponent implements OnInit {
 
   applyFilters(): void {
     let result = [...this.parcels];
-    
+
     // Filter by status
     if (this.selectedStatus !== 'all') {
       result = result.filter(p => p.status === this.selectedStatus);
     }
-    
+
     // Filter by search
     if (this.searchQuery.trim()) {
       const query = this.searchQuery.toLowerCase();
-      result = result.filter(p => 
+      result = result.filter(p =>
         p.trackingNumber.toLowerCase().includes(query) ||
         p.receiverName.toLowerCase().includes(query) ||
         p.receiverPhone.includes(query) ||
         p.deliveryAddress.toLowerCase().includes(query)
       );
     }
-    
+
     // Sort by date (newest first)
     result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    
+
     this.filteredParcels = result;
   }
 
@@ -127,7 +129,7 @@ export class ShipmentsComponent implements OnInit {
   // UC-SUP-06: Mark Ready for Pickup
   markReadyForPickup(parcel: Parcel): void {
     this.markingReady = parcel.id;
-    
+
     this.dataService.markReadyForPickup(parcel.id).subscribe({
       next: (updated) => {
         parcel.status = 'ready_for_pickup';
@@ -159,7 +161,7 @@ export class ShipmentsComponent implements OnInit {
 
   loadAvailableCarriers(orderId: string): void {
     this.isLoadingCarriers = true;
-    
+
     this.dataService.getAvailableCarriers(orderId).subscribe({
       next: (carriers) => {
         this.availableCarriers = carriers;
@@ -178,9 +180,9 @@ export class ShipmentsComponent implements OnInit {
 
   assignCarrier(): void {
     if (!this.selectedParcel || !this.selectedCarrier) return;
-    
+
     this.isAssigning = true;
-    
+
     this.dataService.assignCarrier({
       orderId: this.selectedParcel.id,
       carrierId: this.selectedCarrier.id
@@ -191,7 +193,7 @@ export class ShipmentsComponent implements OnInit {
         if (index !== -1) {
           this.parcels[index] = updated;
         }
-        
+
         this.updateStatusCounts();
         this.applyFilters();
         this.closeAssignModal();
@@ -225,7 +227,7 @@ export class ShipmentsComponent implements OnInit {
   // Cancel Order
   cancelOrder(parcel: Parcel): void {
     if (!confirm('هل أنت متأكد من إلغاء هذا الطلب؟')) return;
-    
+
     this.dataService.cancelParcel(parcel.id).subscribe({
       next: () => {
         parcel.status = 'cancelled';
