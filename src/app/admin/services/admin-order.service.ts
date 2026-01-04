@@ -32,7 +32,7 @@ export interface AdminOrderRow {
 
 @Injectable({ providedIn: 'root' })
 export class AdminOrderService {
-  private apiUrl = `${environment.apiUrl}/Request`; // الربط بالباك
+  private apiUrl = `${environment.apiUrl}`; // الربط بالباك
 
   constructor(private http: HttpClient) { }
 

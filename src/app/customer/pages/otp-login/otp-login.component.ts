@@ -114,7 +114,7 @@ export class CustomerOTPLoginComponent implements OnInit {
           this.authService.setUserRole('customer', response.token, {
             userId: 'customer-' + normalizedPhone,
             userName: normalizedPhone,
-            email: normalizedPhone + '@customer.pickgo'
+            email: normalizedPhone + '@customer.lynx'
           });
           this.router.navigate(['/customer/dashboard']);
         } else {
@@ -129,7 +129,7 @@ export class CustomerOTPLoginComponent implements OnInit {
           this.authService.setUserRole('customer', 'demo-token', {
             userId: 'customer-' + normalizedPhone,
             userName: normalizedPhone,
-            email: normalizedPhone + '@customer.pickgo'
+            email: normalizedPhone + '@customer.lynx'
           });
           this.router.navigate(['/customer/dashboard']);
         } else {
@@ -141,7 +141,7 @@ export class CustomerOTPLoginComponent implements OnInit {
 
   resendOTP(): void {
     if (!this.resendAvailable || this.isLoading) return;
-    
+
     this.onPhoneSubmit();
   }
 

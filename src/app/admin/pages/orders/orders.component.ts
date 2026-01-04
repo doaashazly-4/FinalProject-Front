@@ -61,6 +61,7 @@ export class AdminOrdersComponent implements OnInit {
     this.isLoading = true;
     this.orderService.getOrders().subscribe({
       next: (orders) => {
+         console.log('Orders loaded:', orders);
         this.orders = orders.map(o => ({ ...o }));
         this.updateCounts();
         this.applyFilter();

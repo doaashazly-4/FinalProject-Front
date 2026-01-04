@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { AdminOrderRow } from './admin-order.service';
 
 // ========== INTERFACES ==========
 
@@ -306,4 +307,7 @@ export class AdminDataService {
     // Backend ResolveDispute is currently commented out in controller
     return this.http.post(`${this.apiUrl}/ResolveDispute/${disputeId}`, dto);
   }
-}
+
+  getOrders(): Observable<AdminOrderRow[]> {
+  return this.http.get<AdminOrderRow[]>(`${this.apiUrl}/orders`);
+}}
