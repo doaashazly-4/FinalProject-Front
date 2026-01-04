@@ -63,7 +63,7 @@ export class ReportsComponent implements OnInit {
   loadDailyStats(): void {
     const today = new Date();
     let startDate: Date;
-    
+
     switch (this.selectedPeriod) {
       case 'today':
         startDate = today;
@@ -80,11 +80,11 @@ export class ReportsComponent implements OnInit {
       startDate.toISOString().split('T')[0],
       today.toISOString().split('T')[0]
     ).subscribe({
-      next: (stats) => {
+      next: (stats: DailyStats[]) => {
         this.dailyStats = stats;
         this.isLoading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error loading daily stats:', error);
         this.isLoading = false;
       }
@@ -114,7 +114,7 @@ export class ReportsComponent implements OnInit {
       endDate: this.exportEndDate,
       format: this.exportFormat
     }).subscribe({
-      next: (blob) => {
+      next: (blob: Blob) => {
         // Create download link
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -122,12 +122,12 @@ export class ReportsComponent implements OnInit {
         link.download = `report-${this.exportType}-${this.exportStartDate}-to-${this.exportEndDate}.${this.exportFormat === 'excel' ? 'xlsx' : this.exportFormat}`;
         link.click();
         window.URL.revokeObjectURL(url);
-        
+
         this.successMessage = 'تم تصدير التقرير بنجاح';
         this.closeExportModal();
         this.isExporting = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error exporting report:', error);
         // For demo purposes, show success anyway
         this.successMessage = 'تم تصدير التقرير بنجاح (وضع تجريبي)';

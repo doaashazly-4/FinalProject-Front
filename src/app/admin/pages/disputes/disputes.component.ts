@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminDataService, Dispute, DisputeResolutionDTO } from '../../services/admin-data.service';
+import { AdminDataService, Dispute } from '../../services/admin-data.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -46,7 +46,7 @@ export class DisputesComponent implements OnInit {
     escalated: 0
   };
 
-  constructor(private dataService: AdminDataService) {}
+  constructor(private dataService: AdminDataService) { }
 
   ngOnInit(): void {
     this.loadDisputes();
@@ -113,9 +113,10 @@ export class DisputesComponent implements OnInit {
       return;
     }
 
-    this.isProcessing = true;
-    // Use admin resolve endpoint
-    this.dataService.resolveDisputeAdmin(this.selectedDispute.id, this.resolutionType === 'no_action' ? 'NoAction' : 'Resolved', this.resolutionNotes).subscribe({
+    this.dataService.resolveDispute(this.selectedDispute.id, {
+      status: this.resolutionType === 'no_action' ? 'NoAction' : 'Resolved',
+      notes: this.resolutionNotes
+    }).subscribe({
       next: () => {
         Swal.fire({ icon: 'success', title: 'تم الحل', text: 'تم حل النزاع بنجاح' });
         this.loadDisputes();
@@ -170,7 +171,8 @@ export class DisputesComponent implements OnInit {
     this.errorMessage = '';
   }
 
-  getDisputeTypeArabic(type: string): string {
+  getDisputeTypeArabic(type: string | undefined): string {
+    if (!type) return 'أخرى';
     const types: { [key: string]: string } = {
       'not_delivered': 'لم يتم التسليم',
       'damaged': 'تلف المنتج',
@@ -181,7 +183,8 @@ export class DisputesComponent implements OnInit {
     return types[type] || type;
   }
 
-  getDisputeTypeIcon(type: string): string {
+  getDisputeTypeIcon(type: string | undefined): string {
+    if (!type) return 'bi-question-circle';
     const icons: { [key: string]: string } = {
       'not_delivered': 'bi-x-circle',
       'damaged': 'bi-box-seam',
@@ -192,7 +195,8 @@ export class DisputesComponent implements OnInit {
     return icons[type] || 'bi-question-circle';
   }
 
-  getStatusArabic(status: string): string {
+  getStatusArabic(status: string | undefined): string {
+    if (!status) return 'غير محدد';
     const statuses: { [key: string]: string } = {
       'pending': 'قيد الانتظار',
       'in_review': 'قيد المراجعة',
@@ -202,7 +206,8 @@ export class DisputesComponent implements OnInit {
     return statuses[status] || status;
   }
 
-  getStatusClass(status: string): string {
+  getStatusClass(status: string | undefined): string {
+    if (!status) return 'bg-gray-100 text-gray-700 border-gray-200';
     const classes: { [key: string]: string } = {
       'pending': 'bg-yellow-100 text-yellow-700 border-yellow-200',
       'in_review': 'bg-blue-100 text-blue-700 border-blue-200',
@@ -212,7 +217,8 @@ export class DisputesComponent implements OnInit {
     return classes[status] || 'bg-gray-100 text-gray-700 border-gray-200';
   }
 
-  getPriorityArabic(priority: string): string {
+  getPriorityArabic(priority: string | undefined): string {
+    if (!priority) return 'عادي';
     const priorities: { [key: string]: string } = {
       'low': 'منخفضة',
       'medium': 'متوسطة',
@@ -222,7 +228,8 @@ export class DisputesComponent implements OnInit {
     return priorities[priority] || priority;
   }
 
-  getPriorityClass(priority: string): string {
+  getPriorityClass(priority: string | undefined): string {
+    if (!priority) return 'bg-gray-100 text-gray-700';
     const classes: { [key: string]: string } = {
       'low': 'bg-gray-100 text-gray-700',
       'medium': 'bg-blue-100 text-blue-700',
@@ -232,7 +239,8 @@ export class DisputesComponent implements OnInit {
     return classes[priority] || 'bg-gray-100 text-gray-700';
   }
 
-  getComplainantTypeArabic(type: string): string {
+  getComplainantTypeArabic(type: string | undefined): string {
+    if (!type) return 'غير معروف';
     const types: { [key: string]: string } = {
       'sender': 'مُرسل',
       'carrier': 'مندوب',
@@ -241,7 +249,8 @@ export class DisputesComponent implements OnInit {
     return types[type] || type;
   }
 
-  getResolutionTypeArabic(type: string): string {
+  getResolutionTypeArabic(type: string | undefined): string {
+    if (!type) return 'لا يوجد';
     const types: { [key: string]: string } = {
       'refund': 'استرداد كامل',
       'partial_refund': 'استرداد جزئي',
