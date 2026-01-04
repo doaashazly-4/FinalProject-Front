@@ -26,6 +26,26 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
   isSubmitting = false;
   showSuccessModal = false;
   createdTrackingNumber = '';
+  statusMessage = '';
+
+  debugTools = {
+    testBackend: () => {
+      this.statusMessage = 'جاري اختبار الاتصال...';
+      this.dataService.getCustomers().subscribe({
+        next: (res) => this.statusMessage = `نجح الاتصال! تم جلب ${res.length} عملاء.`,
+        error: (err) => this.statusMessage = `فشل الاتصال: ${err.message}`
+      });
+    },
+    validateData: () => {
+      if (this.shipmentForm.valid) this.statusMessage = 'البيانات صالحة ✅';
+      else this.statusMessage = 'البيانات غير مكتملة ❌';
+    },
+    showLogs: () => {
+      console.log('Form Value:', this.shipmentForm.value);
+      // console.log('Errors:', this.shipmentForm.errors); // Form group might not have errors, controls do
+      this.statusMessage = 'تم عرض السجلات في Console';
+    }
+  };
 
   // Customers
   customers: Customer[] = [];
@@ -313,7 +333,7 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
 
     console.log('Sending DTO:', dto);
 
-    this.dataService.createParcel(dto).subscribe({
+    this.dataService.createParcelSafe(dto).subscribe({
       next: (parcel) => {
         this.isSubmitting = false;
         this.createdTrackingNumber = parcel.trackingNumber;
@@ -393,5 +413,16 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     if (control.errors['max']) return `القيمة القصوى ${control.errors['max'].max}`;
 
     return 'خطأ في الإدخال';
+  }
+
+  useNoCustomer(): void {
+    this.shipmentForm.patchValue({
+      customerID: 0
+    });
+    this.statusMessage = 'تم اختيار "بدون عميل" (ID: 0)';
+  }
+
+  showHelp(): void {
+    this.statusMessage = 'قم باختيار عميل من القائمة أو استخدم "بدون عميل"';
   }
 }

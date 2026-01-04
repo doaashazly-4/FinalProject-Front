@@ -28,7 +28,7 @@ export class AuthService {
 
   // API base - call backend directly
   // FIXED [2025-12-25]: Point to HTTPS directly to avoid 307 Redirect from HTTP port (5166) which causes CORS/fetch failures
-  private apiUrl = 'https://localhost:7180/api/Auth';
+  private apiUrl = 'http://localhost:5166/api/Auth';
 
 
   constructor(private http: HttpClient) {
