@@ -7,6 +7,8 @@
     </div>
     <button (click)="refresh()" [disabled]="isRefreshing"
       class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 disabled:opacity-50 transition-all duration-300">
+    <button (click)="refresh()" [disabled]="isRefreshing"
+      class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 disabled:opacity-50 transition-all duration-300">
       <i class="bi bi-arrow-clockwise" [ngClass]="{'animate-spin': isRefreshing}"></i>
       <span>تحديث</span>
     </button>
@@ -28,6 +30,8 @@
   <!-- Loading State -->
   <div *ngIf="isLoading" class="flex justify-center items-center py-20">
     <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4">
+      </div>
       <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4">
       </div>
       <p class="text-gray-500">جاري البحث عن المهام...</p>
@@ -127,12 +131,12 @@
         <!-- Action -->
         <div class="flex gap-2">
           <button (click)="acceptJob(job)"
-            class="flex-1 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold">
+            class="flex-1 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold hover:shadow-green-lg transition-all duration-300">
             <i class="bi bi-check-circle ml-2"></i>
             قبول
           </button>
-
-          <button (click)="onRejectClick(job)" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold">
+          <button (click)="onRejectClick(job)"
+            class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-all duration-300">
             <i class="bi bi-x-circle ml-2"></i>
             رفض
           </button>
@@ -142,6 +146,8 @@
     </div>
   </div>
 
+  <!-- Reject Reason Modal -->
+  <app-reject-reason-modal [isVisible]="showRejectModal" (onConfirm)="handleRejectConfirm($event)"
   <!-- Reject Reason Modal -->
   <app-reject-reason-modal [isVisible]="showRejectModal" (onConfirm)="handleRejectConfirm($event)"
     (onCancel)="handleRejectCancel()">

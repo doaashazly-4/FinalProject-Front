@@ -838,6 +838,19 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     return 'قيمة غير صالحة';
   }
 
+  assignNow(): void {
+    const idToAssign = this.createdId || this.createdTrackingNumber;
+    if (idToAssign) {
+      this.router.navigate(['/supplier/shipments'], {
+        queryParams: { assign: idToAssign }
+      });
+    }
+  }
+
+  get isUrgentOrder(): boolean {
+    return this.shipmentForm.get('priority')?.value === 'urgent';
+  }
+
   useNoCustomer(): void {
     this.shipmentForm.patchValue({ customerID: 0 });
     this.shipmentForm.patchValue({ customerID: 0 });
