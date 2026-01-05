@@ -79,6 +79,22 @@
     </span>
   </div>
 
+  <!-- Simulation Status Dashboard -->
+  <div class="grid grid-cols-3 divide-x divide-x-reverse divide-gray-100 border-b border-gray-100 bg-white">
+    <div class="p-4 text-center">
+        <p class="text-xs text-gray-500 mb-1">الحالة</p>
+        <p class="font-bold text-primary-dark">{{ liveStatus }}</p>
+    </div>
+    <div class="p-4 text-center">
+        <p class="text-xs text-gray-500 mb-1">الوقت المتبقي</p>
+        <p class="font-bold text-primary-dark">{{ remainingTime }}</p>
+    </div>
+    <div class="p-4 text-center">
+        <p class="text-xs text-gray-500 mb-1">المسافة</p>
+        <p class="font-bold text-primary-dark">{{ remainingDistance }}</p>
+    </div>
+  </div>
+
   <!-- Leaflet Map -->
   <div
     #mapContainer
@@ -275,9 +291,14 @@
     </div>
     <h3 class="text-xl font-bold text-primary-dark mb-2">تتبع شحنتك</h3>
     <p class="text-gray-500 mb-6">أدخل رقم التتبع أعلاه لمعرفة حالة شحنتك</p>
-    <a routerLink="/supplier/shipments" class="text-primary-green font-semibold hover:text-secondary-teal">
+    <a routerLink="/supplier/shipments" class="text-primary-green font-semibold hover:text-secondary-teal block mb-4">
       أو اختر من قائمة الشحنات ←
     </a>
+    
+    <button (click)="loadDemoParcel()" class="px-6 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+      <i class="bi bi-play-circle ml-2"></i>
+      تجربة شحنة تجريبية (Demo)
+    </button>
   </div>
 </div>
 
