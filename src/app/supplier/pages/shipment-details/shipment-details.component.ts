@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SupplierDataService, Parcel } from '../../services/supplier-data.service';
 import { LynxTalismanComponent } from '../../../shared/components/lynx-talisman/lynx-talisman.component';
@@ -9,23 +9,31 @@ import { AssignmentObservation } from '../../../models/assignment-observation.mo
 interface PackageDetail {
     description: string;
     weight: number;
+    dimensions: string;
     fragile: boolean;
+    requiresSignature: boolean;
     expireDate: string;
     shipmentCost: number;
+    deliveryFee: number;
     destination: string;
     lat: number;
     lng: number;
     notes: string;
+    receiverName: string;
+    receiverPhone: string;
+    receiverEmail: string;
     customerID: string;
     status: string;
     isExpanded?: boolean;
 }
 
 interface ShipmentDetails {
+    id: string;
     source: string;
     pickupLat: number;
     pickupLng: number;
     priority: string;
+    createdAt: string;
     packages: PackageDetail[];
 }
 
@@ -47,6 +55,7 @@ export class ShipmentDetailsComponent implements OnInit {
 
     constructor(
         private route: ActivatedRoute,
+        private router: Router,
         private dataService: SupplierDataService
     ) { }
 
@@ -68,34 +77,45 @@ export class ShipmentDetailsComponent implements OnInit {
             error: () => this.explanation = null
         });
 
+        console.log('Fetching shipment data for ID:', id);
         this.dataService.getParcelById(id).subscribe({
             next: (parcel: Parcel) => {
+                console.log('Received parcel data mapped:', parcel);
                 this.shipment = {
-                    source: parcel.pickupAddress,
-                    pickupLat: 30.0444,
-                    pickupLng: 31.2357,
-                    priority: parcel.priority,
+                    id: String(parcel.trackingNumber || parcel.id || ''),
+                    source: String(parcel.pickupAddress || parcel.source || ''),
+                    pickupLat: Number(parcel.pickupLat || 0),
+                    pickupLng: Number(parcel.pickupLng || 0),
+                    priority: String(parcel.priority || 'normal'),
+                    createdAt: String(parcel.createdAt || new Date().toISOString()),
                     packages: [
                         {
-                            description: parcel.description,
-                            weight: parcel.weight,
-                            fragile: parcel.isFragile || false,
-                            expireDate: parcel.estimatedDelivery || new Date().toISOString(),
-                            shipmentCost: parcel.codAmount,
-                            destination: parcel.deliveryAddress,
-                            lat: 30.0444,
-                            lng: 31.2357,
-                            notes: parcel.notes || '',
-                            customerID: parcel.receiverName,
-                            status: parcel.status,
+                            description: String(parcel.description || ''),
+                            weight: Number(parcel.weight || 0),
+                            dimensions: String(parcel.dimensions || ''),
+                            fragile: Boolean(parcel.isFragile),
+                            requiresSignature: Boolean(parcel.requiresSignature),
+                            expireDate: String(parcel.estimatedDelivery || parcel.createdAt || new Date().toISOString()),
+                            shipmentCost: Number(parcel.codAmount || 0),
+                            deliveryFee: Number(parcel.deliveryFee || 0),
+                            destination: String(parcel.deliveryAddress || ''),
+                            lat: Number(parcel.destinationLat || 0),
+                            lng: Number(parcel.destinationLng || 0),
+                            notes: String(parcel.notes || ''),
+                            receiverName: String(parcel.receiverName || 'عميل'),
+                            receiverPhone: String(parcel.receiverPhone || '-'),
+                            receiverEmail: String(parcel.receiverEmail || ''),
+                            customerID: String(parcel.customerID || '-'),
+                            status: String(parcel.status || 'pending'),
                             isExpanded: false
                         }
                     ]
                 };
+                console.log('Formatted shipment object for view:', this.shipment);
                 this.isLoading = false;
             },
             error: (err) => {
-                console.error('Error loading shipment:', err);
+                console.error('Error loading shipment from API:', err);
                 this.loadMockData();
                 this.isLoading = false;
             }
@@ -104,65 +124,31 @@ export class ShipmentDetailsComponent implements OnInit {
 
     loadMockData(): void {
         this.shipment = {
+            id: 'TRK-MOCK-123',
             source: "Cairo Industrial Zone, Warehouse B4",
             pickupLat: 30.0444,
             pickupLng: 31.2357,
             priority: "high",
+            createdAt: new Date().toISOString(),
             packages: [
                 {
                     description: "Electronics - Smart Devices",
                     weight: 15.5,
+                    dimensions: '40x40x20',
                     fragile: true,
+                    requiresSignature: true,
                     expireDate: "2026-01-10T14:30:00.000Z",
                     shipmentCost: 200,
+                    deliveryFee: 45,
                     destination: "123 Main St, New Cairo, Egypt",
                     lat: 30.0263,
                     lng: 31.4913,
                     notes: "Handle with care, delicate sensors inside.",
-                    customerID: "CUST-001",
+                    receiverName: "Ahmed Mohamed",
+                    receiverPhone: "01012345678",
+                    receiverEmail: "ahmed@example.com",
+                    customerID: "CUST-334",
                     status: 'pending',
-                    isExpanded: false
-                },
-                {
-                    description: "Office Supplies - Batch A",
-                    weight: 42.0,
-                    fragile: false,
-                    expireDate: "2026-02-15T12:00:00.000Z",
-                    shipmentCost: 150,
-                    destination: "45 Business Ave, Maadi",
-                    lat: 29.9602,
-                    lng: 31.2569,
-                    notes: "Leave at reception if no one is available.",
-                    customerID: "CUST-104",
-                    status: 'in_transit',
-                    isExpanded: false
-                },
-                {
-                    description: "Perishable Goods - Fresh Produce",
-                    weight: 8.2,
-                    fragile: true,
-                    expireDate: "2026-01-05T09:00:00.000Z",
-                    shipmentCost: 350,
-                    destination: "78 Garden City, Cairo",
-                    lat: 30.0355,
-                    lng: 31.2327,
-                    notes: "Urgent delivery required due to expiration.",
-                    customerID: "CUST-089",
-                    status: 'delayed',
-                    isExpanded: false
-                },
-                {
-                    description: "Industrial Parts - Steel Gears",
-                    weight: 120.0,
-                    fragile: false,
-                    expireDate: "2026-03-20T17:00:00.000Z",
-                    shipmentCost: 500,
-                    destination: "Warehouse 12, 10th of Ramadan City",
-                    lat: 30.2974,
-                    lng: 31.7377,
-                    notes: "Heavy load, requires forklift at destination.",
-                    customerID: "CUST-256",
-                    status: 'delivered',
                     isExpanded: false
                 }
             ]
@@ -173,13 +159,41 @@ export class ShipmentDetailsComponent implements OnInit {
         pkg.isExpanded = !pkg.isExpanded;
     }
 
+    deleteShipment(): void {
+        if (!this.shipment) return;
+
+        const confirmMsg = 'هل أنت متأكد من حذف هذه الشحنة نهائياً؟ سيؤدي هذا لإزالتها من قاعدة البيانات.';
+        if (confirm(confirmMsg)) {
+            this.isLoading = true;
+            this.dataService.deleteRequest(this.shipment.id).subscribe({
+                next: () => {
+                    console.log('Shipment deleted successfully');
+                    this.router.navigate(['/supplier/shipments']);
+                },
+                error: (err) => {
+                    console.error('Error during shipment deletion:', err);
+
+                    // Check for database constraint error in the 500 response
+                    if (err.status === 500 && err.error?.includes('REFERENCE constraint')) {
+                        alert('فشل الحذف بسبب وجود محتويات (Packages) مرتبطة بهذه الشحنة. يجب تفعيل الحذف التلقائي (Cascade Delete) في خادم قاعدة البيانات أو حذف المحتويات أولاً.');
+                    } else {
+                        alert('حدث خطأ أثناء محاولة حذف الشحنة. يرجى مراجعة سجلات النظام.');
+                    }
+
+                    this.isLoading = false;
+                }
+            });
+        }
+    }
+
     get filteredPackages(): PackageDetail[] {
         if (!this.shipment) return [];
 
         let filtered = this.shipment.packages.filter(pkg => {
             const matchesSearch = pkg.description.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
                 pkg.destination.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                pkg.customerID.toLowerCase().includes(this.searchQuery.toLowerCase());
+                pkg.receiverName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                pkg.receiverPhone.includes(this.searchQuery);
 
             const matchesFilter = this.filterStatus === 'all' ||
                 (this.filterStatus === 'fragile' && pkg.fragile) ||
@@ -218,12 +232,25 @@ export class ShipmentDetailsComponent implements OnInit {
     }
 
     getStatusText(status: string): string {
-        return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const statuses: { [key: string]: string } = {
+            'pending': 'في الانتظار',
+            'ready_for_pickup': 'جاهز للاستلام',
+            'assigned': 'تم تعيين مندوب',
+            'picked_up': 'تم استلام الشحنة',
+            'in_transit': 'قيد التوصيل',
+            'out_for_delivery': 'خرجت للتوصيل',
+            'delivered': 'تم التسليم بنجاح',
+            'failed_delivery': 'فشل التسليم',
+            'returned': 'مرتجع',
+            'cancelled': 'ملغى'
+        };
+        return statuses[status.toLowerCase()] || status;
     }
 
     formatDate(dateStr: string): string {
-        return new Date(dateStr).toLocaleString('en-US', {
-            month: 'short',
+        if (!dateStr) return '-';
+        return new Date(dateStr).toLocaleDateString('ar-EG', {
+            month: 'long',
             day: 'numeric',
             year: 'numeric',
             hour: '2-digit',
@@ -241,16 +268,16 @@ export class ShipmentDetailsComponent implements OnInit {
 
     editPackage(pkg: PackageDetail, event: Event): void {
         event.stopPropagation();
-        console.log('Edit package:', pkg.customerID);
+        console.log('Edit package:', pkg.receiverName);
     }
 
     deletePackage(pkg: PackageDetail, event: Event): void {
         event.stopPropagation();
-        console.log('Delete package:', pkg.customerID);
+        console.log('Delete package:', pkg.receiverName);
     }
 
     trackPackage(pkg: PackageDetail, event: Event): void {
         event.stopPropagation();
-        console.log('Track package:', pkg.customerID);
+        console.log('Track package:', pkg.receiverName);
     }
 }

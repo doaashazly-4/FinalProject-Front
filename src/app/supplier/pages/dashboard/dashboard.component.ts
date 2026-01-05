@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { SupplierDataService, Parcel, SenderStat, SenderDashboardData } from '../../services/supplier-data.service';
 
 import { ShipmentCardComponent } from '../../components/shipment-card/shipment-card.component';
@@ -20,7 +20,10 @@ export class SupplierDashboardComponent implements OnInit {
   isLoading = true;
   today = new Date();
 
-  constructor(private dataService: SupplierDataService) { }
+  constructor(
+    private dataService: SupplierDataService,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     this.loadDashboardData();
@@ -29,23 +32,33 @@ export class SupplierDashboardComponent implements OnInit {
   loadDashboardData(): void {
     this.isLoading = true;
 
+    // Load both dashboard summary and pending parcels
     this.dataService.getDashboardData().subscribe({
       next: (data) => {
         this.dashboardData = data;
         this.stats = data.stats;
         this.recentParcels = data.recentParcels;
+
+        // If pendingParcels haven't loaded yet, we'll wait for the other call
+        // but we can already show the dashboard
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Error loading dashboard:', err);
+        console.error('Error loading dashboard summary:', err);
         this.isLoading = false;
       }
     });
 
-    // Load pending parcels that need action
     this.dataService.getParcels({ status: ['pending', 'ready_for_pickup'] }).subscribe({
       next: (parcels) => {
+        console.log('Pending Parcels:', parcels);
         this.pendingParcels = parcels;
+        // In case dashboard summary is slow/fails, ensure we stop loading
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error loading pending parcels:', err);
+        this.pendingParcels = [];
       }
     });
   }
@@ -53,9 +66,14 @@ export class SupplierDashboardComponent implements OnInit {
   markReadyForPickup(parcel: Parcel): void {
     this.dataService.markReadyForPickup(parcel.id).subscribe({
       next: (updated) => {
+        // تحديث الطلب مباشرة
         parcel.status = 'ready_for_pickup';
         parcel.isReadyForPickup = true;
-        // Refresh dashboard counts
+
+        // حذف الطلب من pendingParcels لو حابين
+        this.pendingParcels = this.pendingParcels.filter(p => p.id !== parcel.id);
+
+        // تحديث الإحصائيات
         this.loadDashboardData();
       },
       error: (err) => {
@@ -63,6 +81,7 @@ export class SupplierDashboardComponent implements OnInit {
       }
     });
   }
+
 
   getStatusText(status: string): string {
     const statusMap: { [key: string]: string } = {

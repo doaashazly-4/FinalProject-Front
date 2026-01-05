@@ -50,6 +50,15 @@ export interface Parcel {
   failedAttempts?: FailedAttempt[];
   carrierRating?: number;
   carrierReview?: string;
+  customerID?: string | number;
+
+  // Backend Raw Fields (for compatibility)
+  source?: string;
+  requestId?: string;
+  pickupLat?: number;
+  pickupLng?: number;
+  destinationLat?: number;
+  destinationLng?: number;
 }
 
 export interface FailedAttempt {
@@ -378,15 +387,74 @@ export class SupplierDataService {
       if (filter.search) params.search = filter.search;
     }
 
-    return this.http.get<Parcel[]>(
+    return this.http.get<any[]>(
       `${environment.apiUrl}/Request`,
       { params }
+    ).pipe(
+      map(requests => requests.map(req => this.mapToParcel(req)))
     );
   }
 
+  private mapToParcel(req: any): Parcel {
+    // Helper to map numeric status to string
+    const mapStatus = (s: any): string => {
+      if (typeof s === 'number') {
+        const statuses = ['pending', 'ready_for_pickup', 'assigned', 'picked_up', 'in_transit', 'delivered', 'cancelled', 'returned'];
+        return statuses[s] || 'pending';
+      }
+      return (s || 'pending').toString().toLowerCase();
+    };
+
+    // If it's already a Parcel object and has the main identifying field, return it
+    if (req.trackingNumber && req.deliveryAddress && req.status && typeof req.status === 'string') {
+      return {
+        ...req,
+        status: req.status.toLowerCase() as ParcelStatus,
+        isReadyForPickup: req.isReadyForPickup || (req.status.toLowerCase() === 'ready_for_pickup')
+      };
+    }
+
+    // Handle nested packages structure if present
+    const pkg = (req.packages && req.packages.length > 0) ? req.packages[0] : (req.package || {});
+
+    const status = mapStatus(req.status || pkg.status);
+
+    return {
+      id: (req.requestId || req.id || req.ID)?.toString() || 'ID-' + Math.random().toString(36).substr(2, 9),
+      trackingNumber: (req.trackingNumber || req.requestId || req.id || req.ID || req.RequestID)?.toString() || 'TRK-' + Math.random().toString(36).substr(2, 9),
+      description: pkg.description || req.description || req.Description || 'شحنة بدون وصف',
+      weight: pkg.weight || req.weight || req.Weight || 1,
+      dimensions: pkg.dimensions || req.dimensions || '',
+      pickupAddress: req.source || req.pickupAddress || req.Source || 'عنوان الاستلام',
+      deliveryAddress: pkg.destination || req.deliveryAddress || req.Destination || 'عنوان التسليم',
+      receiverName: pkg.receiverName || req.receiverName || req.CustomerName || pkg.customerName || 'عميل',
+      receiverPhone: pkg.receiverPhone || req.receiverPhone || req.CustomerPhone || '-',
+      receiverEmail: pkg.receiverEmail || req.receiverEmail || '',
+      customerID: pkg.customerID || req.customerID || pkg.CustomerID || req.CustomerID || '-',
+      status: status as ParcelStatus,
+      priority: (req.priority || req.Priority || 'normal').toLowerCase() as ParcelPriority,
+      createdAt: req.createDate || req.createdAt || req.CreatedAt || new Date().toISOString(),
+      updatedAt: req.updatedAt || req.UpdatedAt,
+      deliveryFee: req.deliveryFee || req.DeliveryFee || 0,
+      codAmount: pkg.shipmentCost || req.codAmount || req.CodAmount || 0,
+      isReadyForPickup: (status === 'ready_for_pickup') || req.isReadyForPickup || false,
+      isFragile: pkg.fragile || req.isFragile || false,
+      requiresSignature: pkg.requiresSignature || req.requiresSignature || false,
+      notes: pkg.notes || req.notes || req.Notes || '',
+      source: req.source || req.Source || req.pickupAddress,
+      requestId: (req.requestId || req.id || req.RequestID || req.ID)?.toString(),
+      pickupLat: req.pickupLat || req.PickupLat || 0,
+      pickupLng: req.pickupLng || req.PickupLng || 0,
+      destinationLat: pkg.lat || req.lat || 0,
+      destinationLng: pkg.lng || pkg.lang || req.lng || req.lang || 0
+    };
+  }
+
   getParcelById(id: string): Observable<Parcel> {
-    return this.http.get<Parcel>(
+    return this.http.get<any>(
       `${environment.apiUrl}/Request/${id}`
+    ).pipe(
+      map(res => this.mapToParcel(res))
     );
   }
 
@@ -397,6 +465,10 @@ export class SupplierDataService {
     ).pipe(
       catchError(() => of(null)) // Silent fail as per requirements
     );
+  }
+
+  deleteRequest(id: string | number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/Request/${id}`);
   }
 
   // ================= CREATE REQUEST =================
