@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { SupplierDataService, Parcel } from '../../services/supplier-data.service';
 import { LynxTalismanComponent } from '../../../shared/components/lynx-talisman/lynx-talisman.component';
 import { AssignmentObservation } from '../../../models/assignment-observation.model';
+import { LynxTalismanComponent } from '../../../shared/components/lynx-talisman/lynx-talisman.component';
+import { AssignmentObservation } from '../../../models/assignment-observation.model';
 
 interface PackageDetail {
     description: string;
@@ -41,6 +43,7 @@ interface ShipmentDetails {
     selector: 'app-shipment-details',
     standalone: true,
     imports: [CommonModule, RouterModule, FormsModule, LynxTalismanComponent],
+    imports: [CommonModule, RouterModule, FormsModule, LynxTalismanComponent],
     templateUrl: './shipment-details.component.html',
     styleUrl: './shipment-details.component.css'
 })
@@ -51,6 +54,7 @@ export class ShipmentDetailsComponent implements OnInit {
     sortBy: string = 'description';
     isLoading = false;
     trackingId: string | null = null;
+    explanation: AssignmentObservation | null = null;
     explanation: AssignmentObservation | null = null;
 
     constructor(
@@ -77,7 +81,6 @@ export class ShipmentDetailsComponent implements OnInit {
             error: () => this.explanation = null
         });
 
-        console.log('Fetching shipment data for ID:', id);
         this.dataService.getParcelById(id).subscribe({
             next: (parcel: Parcel) => {
                 console.log('Received parcel data mapped:', parcel);
