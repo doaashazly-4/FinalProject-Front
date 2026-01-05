@@ -10,7 +10,7 @@ import { NotificationsComponent } from './shared/notifications/notifications.com
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, NavbarComponent, FooterComponent , NotificationsComponent],
+  imports: [CommonModule, RouterOutlet, NavbarComponent, FooterComponent,],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
