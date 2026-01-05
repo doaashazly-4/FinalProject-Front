@@ -59,47 +59,14 @@ export const COURIER_ROUTES: Routes = [
       },
 
       {
-  path: 'support',
-  loadComponent: () =>
-    import('./pages/support/support.component')
-      .then(m => m.CourierSupportComponent)
-},
-{
-  path: 'chat',
-  loadComponent: () =>
-    import('./pages/support/chat/chat-page/chat-page.component')
-      .then(m => m.ChatPageComponent)
-},
-
- {
-  path: 'shift',
-  loadComponent: () =>
-    import('./pages/shift/shift.component').then(m => m.ShiftComponent)
-},
-
-
-
-
-
-      // إعادة توجيه قديم
+        path: 'chat',
+        loadComponent: () => import('../shared/pages/chat-page/chat-page.component')
+          .then(m => m.ChatPageComponent)
+      },
       {
-  path: 'support',
-  loadComponent: () =>
-    import('./pages/support/support.component')
-      .then(m => m.CourierSupportComponent)
-},
-{
-  path: 'chat',
-  loadComponent: () =>
-    import('./pages/support/chat/chat-page/chat-page.component')
-      .then(m => m.ChatPageComponent)
-},
-
- {
-  path: 'shift',
-  loadComponent: () =>
-    import('./pages/shift/shift.component').then(m => m.ShiftComponent)
-},
+        path: 'shift',
+        loadComponent: () => import('./pages/shift/shift.component').then(m => m.ShiftComponent)
+      },
 
 
 

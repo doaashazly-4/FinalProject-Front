@@ -16,6 +16,7 @@ export class CustomerComponent {
     { label: 'لوحة التحكم', path: 'dashboard', icon: 'bi-speedometer2' },
     { label: 'شحناتي الواردة', path: 'deliveries', icon: 'bi-box-arrow-in-down' },
     { label: 'تتبع شحنة', path: 'track', icon: 'bi-geo-alt' },
+    { label: 'المحادثات', path: 'chat', icon: 'bi-whatsapp' },
     { label: 'الملف الشخصي', path: 'profile', icon: 'bi-person-circle' },
     { label: 'الدعم', path: 'support', icon: 'bi-headset' }
   ];
