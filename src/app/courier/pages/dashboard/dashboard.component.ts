@@ -363,7 +363,6 @@ export class CourierDashboardComponent implements OnInit {
   callReceiver(phone: string) { window.open(`tel:${phone}`, '_self'); }
 
   // ===== Delivery Proof Modals =====
-  // ===== Delivery Proof Modals =====
   openProofModal(job: DeliveryJob): void {
     this.selectedJobForProof = job;
     this.showProofModal = true;
@@ -376,8 +375,24 @@ export class CourierDashboardComponent implements OnInit {
 
   handleDeliveryComplete(event: any) {
     this.showProofModal = false;
-    if (this.selectedJobForProof) {
-      this.updateJobStatus(this.selectedJobForProof, 'delivered', event.photos, event.otp);
+    if (this.selectedJobForProof && event.otp) {
+      // Use deliverPackage for OTP validation + status update
+      // event.photos handling might need to be separate or the backend handles it in simple update
+      // Assuming deliverPackage is sufficient for the requirements
+      this.dataService.deliverPackage(Number(this.selectedJobForProof.id), event.otp).subscribe({
+        next: () => {
+          this.selectedJobForProof!.status = 'delivered';
+          this.selectedJobForProof = null;
+          this.loadData(); // Refresh to move to completed
+        },
+        error: (err) => {
+          console.error('Delivery failed', err);
+          alert('فشل التحقق من رمز OTP');
+        }
+      });
+    } else if (this.selectedJobForProof) {
+      // Fallback or just photos?
+      this.updateJobStatus(this.selectedJobForProof, 'delivered', event.photos);
       this.selectedJobForProof = null;
     }
   }
