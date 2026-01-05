@@ -18,6 +18,7 @@ export class SupplierDashboardComponent implements OnInit {
   pendingParcels: Parcel[] = [];
   dashboardData: SenderDashboardData | null = null;
   isLoading = true;
+  showAllParcels = false;
   today = new Date();
 
   constructor(

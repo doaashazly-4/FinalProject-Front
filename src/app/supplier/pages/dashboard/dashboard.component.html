@@ -76,8 +76,8 @@
           </div>
 
           <div class="p-6">
-            <div *ngIf="displayParcels && displayParcels.length > 0" class="space-y-4">
-              <div *ngFor="let parcel of displayParcels"
+            <div *ngIf="pendingParcels && pendingParcels.length > 0" class="space-y-4">
+              <div *ngFor="let parcel of (showAllParcels ? pendingParcels : pendingParcels.slice(0, 5))"
                 class="group relative bg-white rounded-2xl border border-gray-100 hover:border-primary-green/30 hover:shadow-2xl hover:shadow-primary-green/5 transition-all duration-300 p-6">
 
                 <!-- 3D status ribbon visual -->
@@ -131,7 +131,6 @@
                     </div>
                   </div>
 
-                  <!-- Action -->
                   <div class="flex items-center gap-3">
                     <a [routerLink]="['/supplier/shipment-details', parcel.id]"
                       class="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 text-primary-dark font-black text-sm rounded-xl shadow-sm hover:shadow-md hover:border-primary-green hover:text-primary-green transition-all">
@@ -139,18 +138,29 @@
                       <i class="bi bi-eye"></i>
                     </a>
                   </div>
+
                 </div>
+              </div>
+
+              <!-- More Button -->
+              <div *ngIf="pendingParcels.length > 5" class="flex justify-center mt-8">
+                <button (click)="showAllParcels = !showAllParcels"
+                  class="px-8 py-3 bg-white border-2 border-primary-green/20 text-primary-green font-black rounded-2xl hover:bg-primary-green hover:text-white hover:border-primary-green transition-all flex items-center gap-2 shadow-sm">
+                  <span>{{ showAllParcels ? 'عرض أقل' : 'عرض المزيد' }}</span>
+                  <i class="bi" [ngClass]="showAllParcels ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+                </button>
               </div>
             </div>
 
             <!-- Empty State -->
-            <div *ngIf="displayParcels.length === 0"
+            <div *ngIf="pendingParcels.length === 0"
               class="flex flex-col items-center justify-center py-20 text-center">
               <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
                 <i class="bi bi-inbox text-5xl text-gray-200"></i>
               </div>
-              <h3 class="text-xl font-black text-primary-dark mb-2">لا توجد شحنات متاحة</h3>
-              <p class="text-gray-500 max-w-xs mb-8">لم تقم بإنشاء أي شحنات حتى الآن. ابدأ الآن بإنشاء أول شحنة لك.</p>
+              <h3 class="text-xl font-black text-primary-dark mb-2">لا توجد طلبات معلقة</h3>
+              <p class="text-gray-500 max-w-xs mb-8">كل شحناتك الحالية جاهزة أو تم استلامها. يمكنك متابعتها من صفحة
+                الشحنات.</p>
               <a routerLink="/supplier/create-shipment"
                 class="px-8 py-3 bg-primary-green text-white font-black rounded-xl shadow-green transition-all">
                 إنشاء شحنة جديدة

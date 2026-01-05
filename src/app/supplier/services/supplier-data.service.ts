@@ -405,48 +405,47 @@ export class SupplierDataService {
       return (s || 'pending').toString().toLowerCase();
     };
 
-    // If it's already a Parcel object and has the main identifying field, return it
-    if (req.trackingNumber && req.deliveryAddress && req.status && typeof req.status === 'string') {
-      return {
-        ...req,
-        status: req.status.toLowerCase() as ParcelStatus,
-        isReadyForPickup: req.isReadyForPickup || (req.status.toLowerCase() === 'ready_for_pickup')
-      };
+    // Base object construction
+    let parcelObj: Partial<Parcel> = {};
+
+    // If it's already a Parcel-like object, start with it
+    if (req.trackingNumber && req.status && typeof req.status === 'string') {
+      parcelObj = { ...req };
     }
 
     // Handle nested packages structure if present
     const pkg = (req.packages && req.packages.length > 0) ? req.packages[0] : (req.package || {});
-
     const status = mapStatus(req.status || pkg.status);
 
+    // Apply robust mappings and fallbacks
     return {
-      id: (req.requestId || req.id || req.ID)?.toString() || 'ID-' + Math.random().toString(36).substr(2, 9),
-      trackingNumber: (req.trackingNumber || req.requestId || req.id || req.ID || req.RequestID)?.toString() || 'TRK-' + Math.random().toString(36).substr(2, 9),
-      description: pkg.description || req.description || req.Description || 'شحنة بدون وصف',
-      weight: pkg.weight || req.weight || req.Weight || 1,
-      dimensions: pkg.dimensions || req.dimensions || '',
-      pickupAddress: req.source || req.pickupAddress || req.Source || 'عنوان الاستلام',
-      deliveryAddress: pkg.destination || req.deliveryAddress || req.Destination || 'عنوان التسليم',
-      receiverName: pkg.receiverName || req.receiverName || req.CustomerName || pkg.customerName || 'عميل',
-      receiverPhone: pkg.receiverPhone || req.receiverPhone || req.CustomerPhone || '-',
-      receiverEmail: pkg.receiverEmail || req.receiverEmail || '',
-      customerID: pkg.customerID || req.customerID || pkg.CustomerID || req.CustomerID || '-',
+      id: (req.requestId || req.id || req.ID || parcelObj.id)?.toString() || 'ID-' + Math.random().toString(36).substr(2, 9),
+      trackingNumber: (req.trackingNumber || req.requestId || req.id || req.ID || req.RequestID || parcelObj.trackingNumber)?.toString() || 'TRK-' + Math.random().toString(36).substr(2, 9),
+      description: pkg.description || req.description || req.Description || parcelObj.description || 'شحنة بدون وصف',
+      weight: pkg.weight || req.weight || req.Weight || parcelObj.weight || 1,
+      dimensions: pkg.dimensions || req.dimensions || parcelObj.dimensions || '',
+      pickupAddress: req.source || req.pickupAddress || req.Source || parcelObj.pickupAddress || 'عنوان الاستلام',
+      deliveryAddress: pkg.destination || req.deliveryAddress || req.Destination || parcelObj.deliveryAddress || 'عنوان التسليم',
+      receiverName: pkg.receiverName || pkg.customerName || req.receiverName || req.CustomerName || pkg.receiverName || parcelObj.receiverName || 'عميل',
+      receiverPhone: pkg.receiverPhone || pkg.phone || pkg.phoneNumber || req.receiverPhone || req.customerPhone || req.CustomerPhone || req.phone || req.phoneNumber || pkg.customerPhone || parcelObj.receiverPhone || '-',
+      receiverEmail: pkg.receiverEmail || req.receiverEmail || parcelObj.receiverEmail || '',
+      customerID: pkg.customerID || req.customerID || pkg.CustomerID || req.CustomerID || parcelObj.customerID || '-',
       status: status as ParcelStatus,
-      priority: (req.priority || req.Priority || 'normal').toLowerCase() as ParcelPriority,
-      createdAt: req.createDate || req.createdAt || req.CreatedAt || new Date().toISOString(),
-      updatedAt: req.updatedAt || req.UpdatedAt,
-      deliveryFee: req.deliveryFee || req.DeliveryFee || 0,
-      codAmount: pkg.shipmentCost || req.codAmount || req.CodAmount || 0,
-      isReadyForPickup: (status === 'ready_for_pickup') || req.isReadyForPickup || false,
-      isFragile: pkg.fragile || req.isFragile || false,
-      requiresSignature: pkg.requiresSignature || req.requiresSignature || false,
-      notes: pkg.notes || req.notes || req.Notes || '',
-      source: req.source || req.Source || req.pickupAddress,
-      requestId: (req.requestId || req.id || req.RequestID || req.ID)?.toString(),
-      pickupLat: req.pickupLat || req.PickupLat || 0,
-      pickupLng: req.pickupLng || req.PickupLng || 0,
-      destinationLat: pkg.lat || req.lat || 0,
-      destinationLng: pkg.lng || pkg.lang || req.lng || req.lang || 0
+      priority: (req.priority || req.Priority || parcelObj.priority || 'normal').toLowerCase() as ParcelPriority,
+      createdAt: req.createDate || req.createdAt || req.CreatedAt || parcelObj.createdAt || new Date().toISOString(),
+      updatedAt: req.updatedAt || req.UpdatedAt || parcelObj.updatedAt,
+      deliveryFee: req.deliveryFee || req.DeliveryFee || parcelObj.deliveryFee || 0,
+      codAmount: pkg.shipmentCost || req.codAmount || req.CodAmount || parcelObj.codAmount || 0,
+      isReadyForPickup: (status === 'ready_for_pickup') || req.isReadyForPickup || parcelObj.isReadyForPickup || false,
+      isFragile: pkg.fragile || req.isFragile || parcelObj.isFragile || false,
+      requiresSignature: pkg.requiresSignature || req.requiresSignature || parcelObj.requiresSignature || false,
+      notes: pkg.notes || req.notes || req.Notes || parcelObj.notes || '',
+      source: req.source || req.Source || req.pickupAddress || parcelObj.source,
+      requestId: (req.requestId || req.id || req.RequestID || req.ID || parcelObj.requestId)?.toString(),
+      pickupLat: req.pickupLat || req.PickupLat || parcelObj.pickupLat || 0,
+      pickupLng: req.pickupLng || req.PickupLng || parcelObj.pickupLng || 0,
+      destinationLat: pkg.lat || req.lat || parcelObj.destinationLat || 0,
+      destinationLng: pkg.lng || pkg.lang || req.lng || req.lang || parcelObj.destinationLng || 0
     };
   }
 

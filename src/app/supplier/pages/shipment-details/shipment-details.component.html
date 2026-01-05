@@ -319,7 +319,8 @@
         </div>
 
         <!-- Quick Actions Card -->
-        <div class="bg-red-50 border border-red-200 rounded-[2rem] p-8 text-center">
+        <div *ngIf="shipment.packages[0].status === 'pending'"
+          class="bg-red-50 border border-red-200 rounded-[2rem] p-8 text-center">
           <p class="text-sm font-bold text-red-600 mb-4">هل ترغب في إزالة هذه الشحنة نهائياً؟</p>
           <button (click)="deleteShipment()"
             class="w-full py-3 bg-red-600 text-white font-black rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-600/20">
