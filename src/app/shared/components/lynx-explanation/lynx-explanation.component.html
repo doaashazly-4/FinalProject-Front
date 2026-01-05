@@ -1,0 +1,29 @@
+<div *ngIf="observation" class="lynx-container max-w-2xl mt-4">
+    <div
+        class="lynx-content flex items-start gap-4 p-4 rounded-xl bg-gradient-to-br from-slate-50 to-indigo-50/30 border border-indigo-100/50 shadow-sm backdrop-blur-sm">
+        <!-- Identity Icon -->
+        <div
+            class="lynx-icon flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-indigo-100/50 text-xl border border-indigo-200/50">
+            🐆
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 space-y-1">
+            <h4
+                class="text-sm font-bold text-indigo-900/80 uppercase tracking-wider text-xs mb-1 flex items-center gap-2">
+                <span>Lynx Insight</span>
+                <span class="w-1 h-1 rounded-full bg-indigo-300"></span>
+                <span class="font-normal normal-case text-indigo-400">{{ observation.source }}</span>
+            </h4>
+
+            <p class="text-slate-700 leading-relaxed text-sm">
+                {{ observation.explanation }}
+            </p>
+
+            <div class="pt-2 flex items-center gap-2 text-xs text-slate-400">
+                <i class="bi bi-clock"></i>
+                <span>{{ observation.timestamp | date:'medium' }}</span>
+            </div>
+        </div>
+    </div>
+</div>

@@ -55,6 +55,25 @@ export class AuthService {
     }
   }
 
+  /**
+   * Mock login for development to match login.component.ts usage
+   */
+  loginWithCredentials(email: string, pass: string): UserRole {
+    // Simple mock logic matching the fillDemo values
+    if (pass !== '123456') return null;
+
+    let role: UserRole = null;
+    if (email.includes('admin')) role = 'admin';
+    else if (email.includes('courier')) role = 'courier';
+    else if (email.includes('customer')) role = 'customer';
+    else if (email.includes('supplier')) role = 'supplier';
+
+    if (role) {
+      this.devSetRole(role);
+    }
+    return role;
+  }
+
   // ========== COMPUTED SIGNALS ==========
   role = computed(() => this.roleSignal());
   isAuthenticated = computed(() => !!this.roleSignal());

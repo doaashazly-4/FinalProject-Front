@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminOrderService, AdminOrderRow, OrderStatus, PackageRow } from '../../services/admin-order.service';
+import { LynxExplanationComponent } from '../../../shared/components/lynx-explanation/lynx-explanation.component';
+import { LynxTalismanComponent } from '../../../shared/components/lynx-talisman/lynx-talisman.component';
+import { AssignmentObservation } from '../../../models/assignment-observation.model';
 
 interface ExtendedOrder extends AdminOrderRow {
   packages?: PackageRow[];
@@ -9,7 +12,7 @@ interface ExtendedOrder extends AdminOrderRow {
 @Component({
   selector: 'app-admin-orders',
   standalone: true,
-  imports: [CommonModule],
+  imports: [LynxTalismanComponent, CommonModule],
   templateUrl: './orders.component.html',
   styleUrls: ['./orders.component.css']
 })
@@ -24,6 +27,10 @@ export class AdminOrdersComponent implements OnInit {
   deliveredCount = 0;
   cancelledCount = 0;
   failedCount = 0; // للعرض
+
+  // Lynx Explanations
+  explanations: { [orderId: string]: AssignmentObservation | null } = {};
+  showExplanation: { [orderId: string]: boolean } = {};
 
   statusLabelsAr: Record<OrderStatus, string> = {
     Pending: 'جديد',
@@ -44,7 +51,7 @@ export class AdminOrdersComponent implements OnInit {
     { value: 'Cancelled', label: 'ملغي' }
   ];
 
-  constructor(private orderService: AdminOrderService) {}
+  constructor(private orderService: AdminOrderService) { }
 
   ngOnInit(): void {
     this.loadOrders();
@@ -130,5 +137,27 @@ export class AdminOrdersComponent implements OnInit {
       Cancelled: 'bg-red-100 text-red-800 border-red-200'
     };
     return classMap[status];
+  }
+
+  toggleExplanation(orderId: string): void {
+    if (this.showExplanation[orderId]) {
+      this.showExplanation[orderId] = false;
+      return;
+    }
+
+    this.showExplanation[orderId] = true;
+
+    // Fetch if not already loaded
+    if (this.explanations[orderId] === undefined) {
+      this.orderService.getAssignmentExplanation(orderId).subscribe({
+        next: (exp) => {
+          this.explanations[orderId] = exp;
+          // If null (no explanation), maybe auto-hide or show "No explanation"?
+          // Requirement: "If no explanation exists -> hide component silently"
+          // So if exp is null, the component won't render inside the *ngIf="explanations[id]" check anyway.
+        },
+        error: () => this.explanations[orderId] = null
+      });
+    }
   }
 }

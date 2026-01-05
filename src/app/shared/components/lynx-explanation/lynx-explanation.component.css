@@ -1,0 +1,9 @@
+/* No specific complex styles needed as we use Tailwind classes, 
+   but ensuring the container feels distinct yet non-intrusive. */
+.lynx-container {
+    transition: all 0.3s ease;
+}
+
+.lynx-container:hover {
+    transform: translateY(-1px);
+}

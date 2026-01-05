@@ -1,26 +1,28 @@
 <div class="min-h-screen bg-gray-50/50 p-4 md:p-8" dir="ltr">
   <div class="max-w-7xl mx-auto space-y-8">
-    
+
     <!-- Header Section -->
-    <header class="relative overflow-hidden bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-10 transition-all duration-500 hover:shadow-2xl">
+    <header
+      class="relative overflow-hidden bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-10 transition-all duration-500 hover:shadow-2xl">
       <div class="absolute top-0 right-0 w-64 h-64 bg-primary-green/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
       <div class="absolute bottom-0 left-0 w-64 h-64 bg-secondary-teal/5 rounded-full -ml-32 -mb-32 blur-3xl"></div>
-      
+
       <div class="relative flex flex-col lg:flex-row lg:items-center justify-between gap-8">
         <div class="space-y-4">
           <div class="flex items-center gap-3">
-             <div class="p-3 bg-primary-green/10 rounded-2xl text-primary-green">
-               <i class="bi bi-box-seam-fill text-3xl"></i>
-             </div>
-             <div>
-               <h1 class="text-3xl font-black text-gray-900 tracking-tight">Shipment Summary</h1>
-               <p class="text-gray-500 font-medium">Detailed breakdown of your shipment request</p>
-             </div>
+            <div class="p-3 bg-primary-green/10 rounded-2xl text-primary-green">
+              <i class="bi bi-box-seam-fill text-3xl"></i>
+            </div>
+            <div>
+              <h1 class="text-3xl font-black text-gray-900 tracking-tight">Shipment Summary</h1>
+              <p class="text-gray-500 font-medium">Detailed breakdown of your shipment request</p>
+            </div>
           </div>
-          
+
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
             <div class="flex items-center gap-4 group">
-              <div class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-primary-green/10 group-hover:text-primary-green transition-all duration-300">
+              <div
+                class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-primary-green/10 group-hover:text-primary-green transition-all duration-300">
                 <i class="bi bi-geo-alt-fill text-xl"></i>
               </div>
               <div>
@@ -28,9 +30,10 @@
                 <p class="font-bold text-gray-800">{{ shipment?.source }}</p>
               </div>
             </div>
-            
+
             <div class="flex items-center gap-4 group">
-              <div class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-blue-500/10 group-hover:text-blue-500 transition-all duration-300">
+              <div
+                class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-blue-500/10 group-hover:text-blue-500 transition-all duration-300">
                 <i class="bi bi-pin-map-fill text-xl"></i>
               </div>
               <div>
@@ -43,18 +46,27 @@
 
         <div class="flex flex-wrap items-center gap-4">
           <!-- Priority Badge -->
-          <div [ngClass]="getPriorityClass(shipment?.priority || 'normal')" class="px-6 py-4 rounded-2xl flex flex-col items-center justify-center min-w-[120px] shadow-sm">
+          <div [ngClass]="getPriorityClass(shipment?.priority || 'normal')"
+            class="px-6 py-4 rounded-2xl flex flex-col items-center justify-center min-w-[120px] shadow-sm">
             <i class="bi bi-lightning-charge-fill text-2xl mb-1"></i>
             <span class="text-xs font-black uppercase tracking-widest">{{ shipment?.priority }} Priority</span>
           </div>
 
           <!-- Total Packages -->
-          <div class="bg-gray-900 text-white px-6 py-4 rounded-2xl flex flex-col items-center justify-center min-w-[120px] shadow-lg shadow-gray-200">
+          <div
+            class="bg-gray-900 text-white px-6 py-4 rounded-2xl flex flex-col items-center justify-center min-w-[120px] shadow-lg shadow-gray-200">
             <span class="text-3xl font-black">{{ shipment?.packages?.length }}</span>
             <span class="text-xs font-medium uppercase tracking-widest text-gray-400">Packages</span>
           </div>
         </div>
       </div>
+
+      <!-- Lynx Talisman Explanation -->
+      <div *ngIf="trackingId"
+        class="mt-8 border-t border-gray-100 pt-6 flex justify-center sm:justify-start animate-fadeIn">
+        <app-lynx-talisman [requestId]="trackingId"></app-lynx-talisman>
+      </div>
+
     </header>
 
     <!-- Filters & Actions -->
@@ -63,28 +75,29 @@
         <!-- Search bar -->
         <div class="relative w-full sm:w-80">
           <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-          <input type="text" [(ngModel)]="searchQuery" 
-                 class="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-primary-green/10 focus:border-primary-green outline-none transition-all shadow-sm font-medium" 
-                 placeholder="Search description or ID...">
+          <input type="text" [(ngModel)]="searchQuery"
+            class="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-primary-green/10 focus:border-primary-green outline-none transition-all shadow-sm font-medium"
+            placeholder="Search description or ID...">
         </div>
-        
+
         <!-- Filter chips -->
         <div class="flex bg-white p-1 rounded-2xl border border-gray-100 shadow-sm">
-          <button (click)="filterStatus = 'all'" 
-                  [ngClass]="filterStatus === 'all' ? 'bg-primary-green text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'"
-                  class="px-4 py-2 rounded-xl text-sm font-bold transition-all">All</button>
-          <button (click)="filterStatus = 'fragile'" 
-                  [ngClass]="filterStatus === 'fragile' ? 'bg-amber-500 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'"
-                  class="px-4 py-2 rounded-xl text-sm font-bold transition-all">Fragile</button>
-          <button (click)="filterStatus = 'urgent'" 
-                  [ngClass]="filterStatus === 'urgent' ? 'bg-red-500 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'"
-                  class="px-4 py-2 rounded-xl text-sm font-bold transition-all">Urgent</button>
+          <button (click)="filterStatus = 'all'"
+            [ngClass]="filterStatus === 'all' ? 'bg-primary-green text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'"
+            class="px-4 py-2 rounded-xl text-sm font-bold transition-all">All</button>
+          <button (click)="filterStatus = 'fragile'"
+            [ngClass]="filterStatus === 'fragile' ? 'bg-amber-500 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'"
+            class="px-4 py-2 rounded-xl text-sm font-bold transition-all">Fragile</button>
+          <button (click)="filterStatus = 'urgent'"
+            [ngClass]="filterStatus === 'urgent' ? 'bg-red-500 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'"
+            class="px-4 py-2 rounded-xl text-sm font-bold transition-all">Urgent</button>
         </div>
       </div>
 
       <div class="flex items-center gap-3 w-full md:w-auto">
         <label class="text-sm font-bold text-gray-400 uppercase tracking-tight hidden sm:block">Sort by:</label>
-        <select [(ngModel)]="sortBy" class="px-4 py-3 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-primary-green/10 focus:border-primary-green outline-none transition-all shadow-sm font-bold text-gray-700">
+        <select [(ngModel)]="sortBy"
+          class="px-4 py-3 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-primary-green/10 focus:border-primary-green outline-none transition-all shadow-sm font-bold text-gray-700">
           <option value="description">Description</option>
           <option value="cost">Cost (High to Low)</option>
           <option value="weight">Weight (Heavy to Light)</option>
@@ -95,14 +108,15 @@
 
     <!-- Packages Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      <div *ngFor="let pkg of filteredPackages; let i = index" 
-           class="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col">
-        
+      <div *ngFor="let pkg of filteredPackages; let i = index"
+        class="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col">
+
         <!-- Package Header -->
         <div class="p-5 border-b border-gray-100 relative">
           <div class="flex justify-between items-start mb-4">
             <span class="text-xs font-black text-gray-300 uppercase tracking-widest">Package #{{ i + 1 }}</span>
-            <div [ngClass]="getStatusClass(pkg.status)" class="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-transparent shadow-sm">
+            <div [ngClass]="getStatusClass(pkg.status)"
+              class="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-transparent shadow-sm">
               <i class="bi" [ngClass]="getStatusIcon(pkg.status)"></i>
               {{ getStatusText(pkg.status) }}
             </div>
@@ -128,56 +142,66 @@
             </div>
           </div>
           <div class="text-right">
-             <p class="text-[10px] font-bold text-gray-400 uppercase leading-none">Cost</p>
-             <p class="text-xl font-black text-primary-green">${{ pkg.shipmentCost }}</p>
+            <p class="text-[10px] font-bold text-gray-400 uppercase leading-none">Cost</p>
+            <p class="text-xl font-black text-primary-green">${{ pkg.shipmentCost }}</p>
           </div>
         </div>
 
         <!-- Compact Details -->
         <div class="p-5 space-y-3 flex-grow">
           <div class="grid grid-cols-2 gap-3">
-             <div class="p-3 bg-gray-50 rounded-2xl border border-gray-100">
-                <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Weight</p>
-                <p class="font-black text-gray-800">{{ pkg.weight }} kg</p>
-             </div>
-             <div class="p-3 rounded-2xl border border-gray-100 transition-colors" [ngClass]="pkg.fragile ? 'bg-amber-50 border-amber-100' : 'bg-gray-50'">
-                <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Fragile</p>
-                <div class="flex items-center gap-1.5 font-black" [ngClass]="pkg.fragile ? 'text-amber-600' : 'text-gray-800'">
-                  <span>{{ pkg.fragile ? 'Yes' : 'No' }}</span>
-                  <i *ngIf="pkg.fragile" class="bi bi-exclamation-triangle-fill text-amber-500"></i>
-                </div>
-             </div>
+            <div class="p-3 bg-gray-50 rounded-2xl border border-gray-100">
+              <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Weight</p>
+              <p class="font-black text-gray-800">{{ pkg.weight }} kg</p>
+            </div>
+            <div class="p-3 rounded-2xl border border-gray-100 transition-colors"
+              [ngClass]="pkg.fragile ? 'bg-amber-50 border-amber-100' : 'bg-gray-50'">
+              <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Fragile</p>
+              <div class="flex items-center gap-1.5 font-black"
+                [ngClass]="pkg.fragile ? 'text-amber-600' : 'text-gray-800'">
+                <span>{{ pkg.fragile ? 'Yes' : 'No' }}</span>
+                <i *ngIf="pkg.fragile" class="bi bi-exclamation-triangle-fill text-amber-500"></i>
+              </div>
+            </div>
           </div>
 
           <div class="p-3 bg-gray-50 rounded-2xl border border-gray-100">
-             <p class="text-[10px] font-bold text-gray-400 uppercase mb-1 flex items-center gap-1">
-               <i class="bi bi-alarm text-blue-400"></i> Expiration Deadline
-             </p>
-             <p class="text-xs font-black text-gray-800">{{ formatDate(pkg.expireDate) }}</p>
+            <p class="text-[10px] font-bold text-gray-400 uppercase mb-1 flex items-center gap-1">
+              <i class="bi bi-alarm text-blue-400"></i> Expiration Deadline
+            </p>
+            <p class="text-xs font-black text-gray-800">{{ formatDate(pkg.expireDate) }}</p>
           </div>
         </div>
 
         <!-- Actions -->
         <div class="p-5 pt-0 mt-auto">
           <div class="flex gap-2">
-            <button (click)="trackPackage(pkg, $event)" class="flex-1 py-3 bg-primary-green text-white rounded-xl font-bold text-xs shadow-lg shadow-primary-green/20 hover:shadow-primary-green/40 hover:-translate-y-0.5 transition-all">Track</button>
-            <button (click)="editPackage(pkg, $event)" class="w-12 h-12 bg-gray-100 text-gray-600 rounded-xl flex items-center justify-center hover:bg-gray-200 transition-colors"><i class="bi bi-pencil-square"></i></button>
-            <button (click)="deletePackage(pkg, $event)" class="w-12 h-12 bg-red-50 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-100 transition-colors"><i class="bi bi-trash3-fill"></i></button>
+            <button (click)="trackPackage(pkg, $event)"
+              class="flex-1 py-3 bg-primary-green text-white rounded-xl font-bold text-xs shadow-lg shadow-primary-green/20 hover:shadow-primary-green/40 hover:-translate-y-0.5 transition-all">Track</button>
+            <button (click)="editPackage(pkg, $event)"
+              class="w-12 h-12 bg-gray-100 text-gray-600 rounded-xl flex items-center justify-center hover:bg-gray-200 transition-colors"><i
+                class="bi bi-pencil-square"></i></button>
+            <button (click)="deletePackage(pkg, $event)"
+              class="w-12 h-12 bg-red-50 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-100 transition-colors"><i
+                class="bi bi-trash3-fill"></i></button>
           </div>
 
           <!-- Expandable Details Trigger -->
-          <button (click)="toggleExpand(pkg)" class="w-full mt-3 py-2 text-xs font-bold text-gray-400 hover:text-primary-green transition-colors flex items-center justify-center gap-2">
+          <button (click)="toggleExpand(pkg)"
+            class="w-full mt-3 py-2 text-xs font-bold text-gray-400 hover:text-primary-green transition-colors flex items-center justify-center gap-2">
             {{ pkg.isExpanded ? 'Hide Details' : 'View Full Details' }}
             <i class="bi" [ngClass]="pkg.isExpanded ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
           </button>
-          
+
           <!-- Expandable Content -->
           <div *ngIf="pkg.isExpanded" class="mt-4 pt-4 border-t border-dashed border-gray-200 space-y-4 animate-fadeIn">
             <div>
               <p class="text-[10px] font-bold text-gray-400 uppercase mb-1 flex items-center gap-1">
                 <i class="bi bi-sticky text-amber-400"></i> Handling Notes
               </p>
-              <p class="text-xs text-gray-600 bg-gray-50 p-3 rounded-xl italic border-l-4 border-amber-300">"{{ pkg.notes }}"</p>
+              <p class="text-xs text-gray-600 bg-gray-50 p-3 rounded-xl italic border-l-4 border-amber-300">"{{
+                pkg.notes
+                }}"</p>
             </div>
 
             <div>
@@ -186,13 +210,17 @@
               </p>
               <div class="w-full h-32 bg-gray-200 rounded-2xl relative overflow-hidden group/map">
                 <!-- Static Map Placeholder -->
-                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://img.freepik.com/premium-vector/vector-city-map-with-pin-street-plan-navigation-concept_533410-441.jpg'); filter: grayscale(0.5) contrast(1.2);"></div>
+                <div class="absolute inset-0 bg-cover bg-center"
+                  style="background-image: url('https://img.freepik.com/premium-vector/vector-city-map-with-pin-street-plan-navigation-concept_533410-441.jpg'); filter: grayscale(0.5) contrast(1.2);">
+                </div>
                 <div class="absolute inset-0 bg-blue-500/10 group-hover/map:bg-transparent transition-all"></div>
                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                   <div class="relative">
-                     <i class="bi bi-geo-alt-fill text-3xl text-red-500 animate-bounce"></i>
-                     <div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-4 h-1 bg-black/20 rounded-full blur-[1px]"></div>
-                   </div>
+                  <div class="relative">
+                    <i class="bi bi-geo-alt-fill text-3xl text-red-500 animate-bounce"></i>
+                    <div
+                      class="absolute bottom-1 left-1/2 -translate-x-1/2 w-4 h-1 bg-black/20 rounded-full blur-[1px]">
+                    </div>
+                  </div>
                 </div>
               </div>
               <p class="text-[10px] text-gray-400 mt-2 text-center font-medium">GPS: {{ pkg.lat }}, {{ pkg.lng }}</p>
@@ -204,13 +232,15 @@
     </div>
 
     <!-- Empty State -->
-    <div *ngIf="filteredPackages.length === 0" class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-dashed border-gray-300">
+    <div *ngIf="filteredPackages.length === 0"
+      class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-dashed border-gray-300">
       <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
         <i class="bi bi-box-seam text-4xl text-gray-300"></i>
       </div>
       <h3 class="text-xl font-bold text-gray-800">No matching packages found</h3>
       <p class="text-gray-500">Try adjusting your filters or search query</p>
-      <button (click)="searchQuery = ''; filterStatus = 'all'" class="mt-4 text-primary-green font-bold hover:underline">Clear all filters</button>
+      <button (click)="searchQuery = ''; filterStatus = 'all'"
+        class="mt-4 text-primary-green font-bold hover:underline">Clear all filters</button>
     </div>
 
   </div>

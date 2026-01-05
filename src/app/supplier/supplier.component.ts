@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../shared/services/auth.service';
 import { SupplierDataService } from './services/supplier-data.service';
+import { LynxTalismanComponent } from '../shared/components/lynx-talisman/lynx-talisman.component';
+import { LynxExplanationComponent } from '../shared/components/lynx-explanation/lynx-explanation.component';
 
 interface NavItem {
   path: string;
@@ -14,7 +16,7 @@ interface NavItem {
 @Component({
   selector: 'app-supplier',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, LynxTalismanComponent, LynxExplanationComponent],
   templateUrl: './supplier.component.html',
   styleUrl: './supplier.component.css'
 })
@@ -35,7 +37,7 @@ export class SupplierComponent implements OnInit {
   isMobileMenuOpen: boolean = false;
 
   constructor(
-    private auth: AuthService, 
+    private auth: AuthService,
     private router: Router,
     private supplierData: SupplierDataService
   ) {

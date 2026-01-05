@@ -15,7 +15,7 @@ import { forkJoin } from 'rxjs';
 export class InventoryComponent implements OnInit {
   inventory: SupplierProduct[] = [];
   filteredInventory: SupplierProduct[] = [];
-  
+
   // إحصائيات المخزون
   stats = {
     totalItems: 0,
@@ -30,7 +30,7 @@ export class InventoryComponent implements OnInit {
   selectedStatus: string = 'all';
   selectedCategory: string = 'all';
   isLoading = true;
-  
+
   // أنواع التصفية
   statuses = [
     { value: 'all', label: 'جميع الحالات' },
@@ -41,7 +41,7 @@ export class InventoryComponent implements OnInit {
 
   categories: string[] = [];
 
-  constructor(private data: SupplierDataService) {}
+  constructor(private data: SupplierDataService) { }
 
   ngOnInit(): void {
     this.loadInventory();
@@ -49,7 +49,7 @@ export class InventoryComponent implements OnInit {
 
   loadInventory(): void {
     this.isLoading = true;
-    
+
     forkJoin({
       products: this.data.getProducts(),
       categories: this.data.getProductCategories(),
@@ -60,16 +60,16 @@ export class InventoryComponent implements OnInit {
         this.inventory = result.products;
         this.filteredInventory = [...this.inventory];
         this.categories = result.categories;
-        
+
         // Calculate stats
         this.stats.totalItems = this.inventory.length;
-        this.stats.totalValue = this.inventory.reduce((sum, item) => 
+        this.stats.totalValue = this.inventory.reduce((sum, item) =>
           sum + (item.price * item.quantity), 0
         );
         this.stats.lowStockItems = result.lowStock.length;
         this.stats.outOfStockItems = result.outOfStock.length;
         this.stats.activeProducts = this.inventory.filter(item => item.isActive).length;
-        
+
         this.isLoading = false;
       },
       error: (err) => {
@@ -84,20 +84,20 @@ export class InventoryComponent implements OnInit {
   filterInventory(): void {
     this.filteredInventory = this.inventory.filter(item => {
       // البحث
-      const matchesSearch = this.searchTerm === '' || 
+      const matchesSearch = this.searchTerm === '' ||
         item.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         item.description.toLowerCase().includes(this.searchTerm.toLowerCase());
-      
+
       // التصفية حسب الفئة
-      const matchesCategory = this.selectedCategory === 'all' || 
+      const matchesCategory = this.selectedCategory === 'all' ||
         item.category === this.selectedCategory;
-      
+
       // التصفية حسب حالة المخزون
       const matchesStatus = this.selectedStatus === 'all' ||
         (this.selectedStatus === 'in-stock' && item.quantity > 10) ||
         (this.selectedStatus === 'low-stock' && item.quantity > 0 && item.quantity <= 10) ||
         (this.selectedStatus === 'out-of-stock' && item.quantity === 0);
-      
+
       return matchesSearch && matchesCategory && matchesStatus;
     });
   }
@@ -150,7 +150,7 @@ export class InventoryComponent implements OnInit {
 
   // الحصول على حالة المنتج كنص
   getProductStatusText(status: string): string {
-    const statusMap: {[key: string]: string} = {
+    const statusMap: { [key: string]: string } = {
       'active': 'نشط',
       'inactive': 'غير نشط',
       'pending': 'قيد المراجعة'
@@ -167,7 +167,7 @@ export class InventoryComponent implements OnInit {
       'حالة المخزون': this.getStockStatus(item.quantity),
       'السعر': item.price,
       'القيمة الإجمالية': item.price * item.quantity,
-      'الحالة': this.getProductStatusText(item.status),
+      'الحالة': this.getProductStatusText(item.isActive ? 'active' : 'inactive'),
       'تاريخ الإضافة': new Date(item.createdAt).toLocaleDateString('ar-SA')
     }));
 

@@ -9,11 +9,12 @@ import {
   DeliveryStatus
 } from '../../services/customer-data.service';
 import { Subscription, interval } from 'rxjs';
+import { LynxTalismanComponent } from '../../../shared/components/lynx-talisman/lynx-talisman.component'; // AI Dispatcher UI
 
 @Component({
   selector: 'app-order-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, LynxTalismanComponent],
   templateUrl: './order-detail.component.html',
   styleUrls: ['./order-detail.component.css']
 })

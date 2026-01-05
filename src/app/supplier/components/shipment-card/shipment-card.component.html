@@ -18,6 +18,9 @@
             <i class="bi bi-geo-alt text-red-400"></i>
             {{ parcel.deliveryAddress }}
         </p>
+        <div class="absolute top-16 left-5 z-20">
+            <app-lynx-talisman [requestId]="parcel.id"></app-lynx-talisman>
+        </div>
     </div>
 
     <!-- Price & ID -->

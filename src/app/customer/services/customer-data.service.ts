@@ -66,6 +66,14 @@ export interface CustomerProfile {
   plan?: string;
 }
 
+export interface CustomerOrder {
+  id: string;
+  status: 'جارٍ التنفيذ' | 'مكتمل' | 'ملغي';
+  destination: string;
+  date: Date;
+  amount: number;
+}
+
 export interface SupportTicket {
   id: string;
   subject: string;
@@ -226,6 +234,35 @@ export class CustomerDataService {
     const customerId = this.getCustomerId();
     return this.http.get<IncomingDelivery[]>(
       `${environment.apiUrl}/Customer/${customerId}/packages`
+    );
+  }
+
+  getOrders(): Observable<CustomerOrder[]> {
+    return this.getDeliveries().pipe(
+      map(deliveries => deliveries.map(d => {
+        let status: 'جارٍ التنفيذ' | 'مكتمل' | 'ملغي' = 'جارٍ التنفيذ';
+
+        switch (d.status) {
+          case 'delivered':
+            status = 'مكتمل';
+            break;
+          case 'cancelled':
+          case 'returned':
+          case 'failed_delivery':
+            status = 'ملغي';
+            break;
+          default:
+            status = 'جارٍ التنفيذ';
+        }
+
+        return {
+          id: d.id,
+          status: status,
+          destination: d.deliveryAddress,
+          date: d.createdAt,
+          amount: d.deliveryFee || 0
+        };
+      }))
     );
   }
 

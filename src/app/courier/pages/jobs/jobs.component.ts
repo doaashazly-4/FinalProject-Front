@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CourierDataService, CourierJob } from '../../services/courier-data.service';
+import { CourierDataService, DeliveryJob, JobStatus } from '../../services/courier-data.service';
 
 @Component({
   selector: 'app-courier-jobs',
@@ -10,11 +10,11 @@ import { CourierDataService, CourierJob } from '../../services/courier-data.serv
   styleUrl: './jobs.component.css'
 })
 export class CourierJobsComponent implements OnInit {
-  jobs: CourierJob[] = [];
+  jobs: DeliveryJob[] = [];
   filter = 'الكل';
   isLoading = true;
 
-  constructor(private data: CourierDataService) {}
+  constructor(private data: CourierDataService) { }
 
   ngOnInit(): void {
     this.loadJobs();
@@ -22,7 +22,7 @@ export class CourierJobsComponent implements OnInit {
 
   loadJobs(): void {
     this.isLoading = true;
-    this.data.getJobs().subscribe({
+    this.data.getMyJobs().subscribe({
       next: (jobs) => {
         this.jobs = jobs;
         this.isLoading = false;
@@ -35,8 +35,15 @@ export class CourierJobsComponent implements OnInit {
     });
   }
 
-  filteredJobs(): CourierJob[] {
+  filteredJobs(): DeliveryJob[] {
     if (this.filter === 'الكل') return this.jobs;
-    return this.jobs.filter(j => j.status === this.filter);
+
+    return this.jobs.filter(j => {
+      if (this.filter === 'جديد') return j.status === 'accepted' || j.status === 'available';
+      if (this.filter === 'جارٍ التسليم') return ['picked_up', 'in_transit', 'out_for_delivery'].includes(j.status);
+      if (this.filter === 'مكتمل') return j.status === 'delivered';
+      if (this.filter === 'مؤجل') return ['failed', 'returned'].includes(j.status);
+      return false;
+    });
   }
 }

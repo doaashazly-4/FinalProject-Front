@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { AssignmentObservation } from '../../models/assignment-observation.model';
 
 // ======== TYPES ========
 export type OrderStatus = 'Pending' | 'Assigned' | 'Accepted' | 'PickupInProgress' | 'Delivered' | 'Cancelled';
@@ -32,7 +34,7 @@ export interface AdminOrderRow {
 export class AdminOrderService {
   private apiUrl = `${environment.apiUrl}/Request`; // الربط بالباك
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // ======== GET ALL ORDERS ========
   getOrders(): Observable<AdminOrderRow[]> {
@@ -57,5 +59,14 @@ export class AdminOrderService {
   // ======== DELETE ORDER ========
   deleteOrder(orderId: number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/admin/orders/${orderId}`);
+  }
+
+  // ================= LYNX TALISMAN =================
+  getAssignmentExplanation(requestId: string): Observable<AssignmentObservation | null> {
+    return this.http.get<AssignmentObservation>(
+      `${this.apiUrl}/admin/orders/${requestId}/explanation`
+    ).pipe(
+      catchError(() => of(null)) // Silent fail
+    );
   }
 }

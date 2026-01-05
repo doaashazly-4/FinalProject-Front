@@ -94,7 +94,7 @@ interface Testimonial {
 })
 export class HomeComponent implements OnInit {
   isScrolled = false;
-  
+
   stats: Stat[] = [
     { value: '50K+', label: 'عميل سعيد', icon: 'bi-people-fill' },
     { value: '100K+', label: 'طلب منجز', icon: 'bi-box-seam-fill' },
@@ -182,10 +182,10 @@ export class HomeComponent implements OnInit {
     // Initialize component
   }
 
-  @HostListener('window:scroll', ['$event'])
+  @HostListener('window:scroll')
   onWindowScroll() {
     this.isScrolled = window.scrollY > 50;
   }
 
-  
+
 }

@@ -2,11 +2,12 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Parcel } from '../../services/supplier-data.service';
+import { LynxTalismanComponent } from '../../../shared/components/lynx-talisman/lynx-talisman.component';
 
 @Component({
     selector: 'app-shipment-card',
     standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule, LynxTalismanComponent],
     templateUrl: './shipment-card.component.html',
     styleUrl: './shipment-card.component.css'
 })

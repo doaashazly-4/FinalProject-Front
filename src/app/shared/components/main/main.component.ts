@@ -145,7 +145,7 @@ export class MainComponent implements OnInit {
     console.log('Services:', this.services);
   }
 
-  @HostListener('window:scroll', ['$event'])
+  @HostListener('window:scroll')
   onWindowScroll() {
     this.isScrolled = window.scrollY > 50;
   }

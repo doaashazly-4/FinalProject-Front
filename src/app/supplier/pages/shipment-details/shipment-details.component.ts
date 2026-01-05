@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SupplierDataService, Parcel } from '../../services/supplier-data.service';
+import { LynxTalismanComponent } from '../../../shared/components/lynx-talisman/lynx-talisman.component';
+import { AssignmentObservation } from '../../../models/assignment-observation.model';
 
 interface PackageDetail {
     description: string;
@@ -30,7 +32,7 @@ interface ShipmentDetails {
 @Component({
     selector: 'app-shipment-details',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule],
+    imports: [CommonModule, RouterModule, FormsModule, LynxTalismanComponent],
     templateUrl: './shipment-details.component.html',
     styleUrl: './shipment-details.component.css'
 })
@@ -41,6 +43,7 @@ export class ShipmentDetailsComponent implements OnInit {
     sortBy: string = 'description';
     isLoading = false;
     trackingId: string | null = null;
+    explanation: AssignmentObservation | null = null;
 
     constructor(
         private route: ActivatedRoute,
@@ -58,6 +61,13 @@ export class ShipmentDetailsComponent implements OnInit {
 
     loadShipmentData(id: string): void {
         this.isLoading = true;
+
+        // Fetch explanation non-blocking
+        this.dataService.getAssignmentExplanation(id).subscribe({
+            next: (explanation) => this.explanation = explanation,
+            error: () => this.explanation = null
+        });
+
         this.dataService.getParcelById(id).subscribe({
             next: (parcel: Parcel) => {
                 this.shipment = {

@@ -131,7 +131,7 @@ export class PushNotificationService {
 
       // ✅ الحل النهائي للمشكلة
       const applicationServerKey =
-        this.urlBase64ToUint8Array(vapidKey).buffer;
+        this.urlBase64ToUint8Array(vapidKey).buffer as ArrayBuffer;
 
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,

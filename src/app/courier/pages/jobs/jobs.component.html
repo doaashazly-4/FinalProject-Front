@@ -7,7 +7,8 @@
     <div class="filters">
       <button class="chip" [class.active]="filter === 'الكل'" (click)="filter = 'الكل'">الكل</button>
       <button class="chip" [class.active]="filter === 'جديد'" (click)="filter = 'جديد'">جديد</button>
-      <button class="chip" [class.active]="filter === 'جارٍ التسليم'" (click)="filter = 'جارٍ التسليم'">جارٍ التسليم</button>
+      <button class="chip" [class.active]="filter === 'جارٍ التسليم'" (click)="filter = 'جارٍ التسليم'">جارٍ
+        التسليم</button>
       <button class="chip" [class.active]="filter === 'مكتمل'" (click)="filter = 'مكتمل'">مكتمل</button>
       <button class="chip" [class.active]="filter === 'مؤجل'" (click)="filter = 'مؤجل'">مؤجل</button>
     </div>
@@ -20,12 +21,12 @@
         <div class="status" [ngClass]="job.status">{{ job.status }}</div>
       </div>
       <div class="loc">
-        <span><i class="bi bi-geo-alt"></i> {{ job.pickup }}</span>
-        <span><i class="bi bi-flag"></i> {{ job.dropoff }}</span>
+        <span><i class="bi bi-geo-alt"></i> {{ job.pickupAddress }}</span>
+        <span><i class="bi bi-flag"></i> {{ job.deliveryAddress }}</span>
       </div>
       <div class="meta">
-        <span class="eta"><i class="bi bi-clock"></i> {{ job.eta }}</span>
-        <span class="payout">{{ job.payout | currency:'EGP':'symbol':'1.0-0' }}</span>
+        <span class="eta"><i class="bi bi-clock"></i> {{ job.estimatedDelivery | date:'short' }}</span>
+        <span class="payout">{{ job.courierEarning | currency:'EGP':'symbol':'1.0-0' }}</span>
       </div>
       <div class="actions">
         <button class="ghost">تفاصيل</button>
@@ -34,4 +35,3 @@
     </div>
   </div>
 </div>
-
