@@ -2,15 +2,16 @@ import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef } fr
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { SupplierDataService, CreateParcelDTO, DeliveryFeeResponse, SupplierProfile, CreateRequestDTO, Customer } from '../../services/supplier-data.service';
 import * as L from 'leaflet';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
+import { Subscription, of, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-create-shipment',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, HttpClientModule],
   templateUrl: './create-shipment.component.html',
   styleUrl: './create-shipment.component.css'
 })
@@ -19,7 +20,7 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
 
   shipmentForm!: FormGroup;
   profile: SupplierProfile | null = null;
-  deliveryFee: DeliveryFeeResponse | null = null;
+  deliveryFee: { baseFee: number, distanceFee: number, weightFee: number, priorityFee: number, totalFee: number, estimatedDistance: number, estimatedDuration: string } | null = null;
 
   isLoading = false;
   isCalculatingFee = false;
@@ -27,6 +28,18 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
   showSuccessModal = false;
   createdTrackingNumber = '';
   statusMessage = '';
+
+  // Map State
+  activeField: 'pickup' | 'delivery' = 'pickup'; // Default active field
+  private map: L.Map | undefined;
+  private pickupMarker: L.Marker | undefined;
+  private deliveryMarker: L.Marker | undefined;
+  private routeLine: L.Polyline | undefined;
+
+  pickupLat: number | null = null;
+  pickupLng: number | null = null;
+  deliveryLat: number | null = null;
+  deliveryLng: number | null = null;
 
   debugTools = {
     testBackend: () => {
@@ -42,7 +55,6 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     },
     showLogs: () => {
       console.log('Form Value:', this.shipmentForm.value);
-      // console.log('Errors:', this.shipmentForm.errors); // Form group might not have errors, controls do
       this.statusMessage = 'تم عرض السجلات في Console';
     }
   };
@@ -52,18 +64,14 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
   filteredCustomers: Customer[] = [];
   showDropdown = false;
 
-  // Leaflet Map
-  private map: L.Map | undefined;
-  private marker: L.Marker | undefined;
-  deliveryLat: number | null = null;
-  deliveryLng: number | null = null;
-
   private subscriptions: Subscription = new Subscription();
+  private addressSearchSubject = new Subject<{ query: string, type: 'pickup' | 'delivery' }>();
 
   constructor(
     private fb: FormBuilder,
     private dataService: SupplierDataService,
-    private router: Router
+    private router: Router,
+    private http: HttpClient
   ) { }
 
   ngOnInit(): void {
@@ -72,21 +80,15 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     this.loadProfile();
     this.setupFeeCalculationTriggers();
 
-    // Load customers once
     this.dataService.getCustomers().subscribe({
-      next: (customers) => {
-        this.customers = customers;
-      },
-      error: (error) => {
-        console.error('Error fetching customers:', error);
-      }
+      next: (customers) => this.customers = customers,
+      error: (error) => console.error('Error fetching customers:', error)
     });
 
     this.setupPhoneAutocomplete();
   }
 
   ngAfterViewInit(): void {
-    // Initialize map once view is ready
     setTimeout(() => {
       this.initMap();
     }, 100);
@@ -125,72 +127,263 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     const defaultLat = 30.0444;
     const defaultLng = 31.2357;
 
-    this.map = L.map(this.mapContainer.nativeElement).setView([defaultLat, defaultLng], 13);
+    this.map = L.map(this.mapContainer.nativeElement).setView([defaultLat, defaultLng], 12);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(this.map);
 
-    if (this.deliveryLat && this.deliveryLng) {
-      this.updateMarker(this.deliveryLat, this.deliveryLng);
-    }
-
     this.map.on('click', (e: L.LeafletMouseEvent) => {
-      this.updateMarker(e.latlng.lat, e.latlng.lng);
+      this.handleMapClick(e.latlng.lat, e.latlng.lng);
     });
+
+    // Initial Markers if exists
+    if (this.pickupLat && this.pickupLng) this.updateMapVisuals();
+    if (this.deliveryLat && this.deliveryLng) this.updateMapVisuals();
 
     setTimeout(() => {
       this.map?.invalidateSize();
     }, 200);
   }
 
-  private updateMarker(lat: number, lng: number): void {
-    this.deliveryLat = lat;
-    this.deliveryLng = lng;
-
-    if (this.marker) {
-      this.marker.setLatLng([lat, lng]);
-    } else {
-      if (this.map) {
-        this.marker = L.marker([lat, lng], { draggable: true }).addTo(this.map);
-
-        this.marker.on('dragend', () => {
-          const position = this.marker!.getLatLng();
-          this.deliveryLat = position.lat;
-          this.deliveryLng = position.lng;
-          this.updateFormCoordinates();
-        });
-      }
-    }
-
-    this.updateFormCoordinates();
+  setActiveField(field: 'pickup' | 'delivery'): void {
+    this.activeField = field;
+    this.statusMessage = field === 'pickup' ? 'حدد موقع الاستلام على الخريطة' : 'حدد موقع التسليم على الخريطة';
   }
 
-  private updateFormCoordinates(): void {
-    if (this.deliveryLat && this.deliveryLng) {
-      this.shipmentForm.patchValue({
-        deliveryAddress: `${this.deliveryLat.toFixed(6)},${this.deliveryLng.toFixed(6)}`
-      });
-      this.shipmentForm.get('deliveryAddress')?.markAsTouched();
+  handleMapClick(lat: number, lng: number): void {
+    if (this.activeField === 'pickup') {
+      this.pickupLat = lat;
+      this.pickupLng = lng;
+      this.reverseGeocode(lat, lng, 'pickup');
+    } else {
+      this.deliveryLat = lat;
+      this.deliveryLng = lng;
+      this.reverseGeocode(lat, lng, 'delivery');
     }
+
+    this.updateMapVisuals();
+    this.localCalculateFee();
+  }
+
+  updateMapVisuals(): void {
+    if (!this.map) return;
+
+    if (this.pickupMarker) this.map.removeLayer(this.pickupMarker);
+    if (this.deliveryMarker) this.map.removeLayer(this.deliveryMarker);
+    if (this.routeLine) this.map.removeLayer(this.routeLine);
+
+    const bounds = L.latLngBounds([]);
+
+    // Pickup Marker (Green)
+    if (this.pickupLat && this.pickupLng) {
+      const pickupIcon = L.icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      });
+
+      this.pickupMarker = L.marker([this.pickupLat, this.pickupLng], { icon: pickupIcon, draggable: true })
+        .bindPopup('موقع الاستلام')
+        .addTo(this.map);
+
+      this.pickupMarker.on('dragend', (e) => {
+        const pos = e.target.getLatLng();
+        this.pickupLat = pos.lat;
+        this.pickupLng = pos.lng;
+        // Check if we need to update active field? Maybe not, just update data
+        // this.reverseGeocode(pos.lat, pos.lng, 'pickup'); // Optional: Update text on drag?
+        this.localCalculateFee();
+      });
+
+      bounds.extend([this.pickupLat, this.pickupLng]);
+    }
+
+    // Delivery Marker (Red)
+    if (this.deliveryLat && this.deliveryLng) {
+      const deliveryIcon = L.icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      });
+
+      this.deliveryMarker = L.marker([this.deliveryLat, this.deliveryLng], { icon: deliveryIcon, draggable: true })
+        .bindPopup('موقع التسليم')
+        .addTo(this.map);
+
+      this.deliveryMarker.on('dragend', (e) => {
+        const pos = e.target.getLatLng();
+        this.deliveryLat = pos.lat;
+        this.deliveryLng = pos.lng;
+        // this.reverseGeocode(pos.lat, pos.lng, 'delivery');
+        this.localCalculateFee();
+      });
+
+      bounds.extend([this.deliveryLat, this.deliveryLng]);
+    }
+
+    // Draw Route
+    if (this.pickupLat && this.pickupLng && this.deliveryLat && this.deliveryLng) {
+      this.fetchRouteAndDraw(this.pickupLat, this.pickupLng, this.deliveryLat, this.deliveryLng);
+    }
+
+    // Fit bounds only if we have points and not just initialized
+    if (this.pickupLat || this.deliveryLat) {
+      // Only fit bounds if they are not the default 0,0
+      // Also avoid jumping too much if user is clicking around
+    }
+
+    // Initial view set
+  }
+
+  fetchRouteAndDraw(lat1: number, lng1: number, lat2: number, lng2: number): void {
+    const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${lng1},${lat1};${lng2},${lat2}?overview=full&geometries=geojson`;
+
+    this.http.get(osrmUrl).subscribe({
+      next: (res: any) => {
+        if (res.routes && res.routes.length > 0) {
+          const coordinates = res.routes[0].geometry.coordinates.map((coord: number[]) => [coord[1], coord[0]]);
+
+          if (this.routeLine) this.map?.removeLayer(this.routeLine);
+
+          this.routeLine = L.polyline(coordinates, { color: 'blue', weight: 4, opacity: 0.7 }).addTo(this.map!);
+
+          const distanceMeters = res.routes[0].distance;
+          this.updateFeeWithDistance(distanceMeters / 1000);
+
+          // Fit bounds to route
+          if (this.map) this.map.fitBounds(this.routeLine.getBounds(), { padding: [50, 50] });
+        }
+      },
+      error: (err) => {
+        console.error('OSRM Routing failed', err);
+        if (this.routeLine) this.map?.removeLayer(this.routeLine);
+        this.routeLine = L.polyline([[lat1, lng1], [lat2, lng2]], { color: 'blue', weight: 4, dashArray: '10, 10' }).addTo(this.map!);
+        this.localCalculateFee();
+      }
+    });
+  }
+
+  // triggered by (blur) or Enter on input
+  geocodeAddress(query: string, type: 'pickup' | 'delivery'): void {
+    if (!query || query.length < 3) return;
+
+    this.isLoading = true;
+    this.http.get<any[]>(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
+      .subscribe({
+        next: (results) => {
+          this.isLoading = false;
+          if (results && results.length > 0) {
+            const lat = parseFloat(results[0].lat);
+            const lng = parseFloat(results[0].lon);
+
+            if (type === 'pickup') {
+              this.pickupLat = lat;
+              this.pickupLng = lng;
+              // Move view
+              this.map?.setView([lat, lng], 14);
+            } else {
+              this.deliveryLat = lat;
+              this.deliveryLng = lng;
+              this.map?.setView([lat, lng], 14);
+            }
+            this.updateMapVisuals();
+            this.localCalculateFee();
+          }
+        },
+        error: () => this.isLoading = false
+      });
+  }
+
+  reverseGeocode(lat: number, lng: number, type: 'pickup' | 'delivery'): void {
+    this.http.get<any>(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+      .subscribe(res => {
+        if (res && res.display_name) {
+          this.shipmentForm.patchValue({
+            [type === 'pickup' ? 'pickupAddress' : 'deliveryAddress']: res.display_name
+          });
+        }
+      });
+  }
+
+  setupFeeCalculationTriggers(): void {
+    this.shipmentForm.get('weight')?.valueChanges.subscribe(() => this.localCalculateFee());
+    this.shipmentForm.get('priority')?.valueChanges.subscribe(() => this.localCalculateFee());
+  }
+
+  localCalculateFee(): void {
+    if (!this.pickupLat || !this.pickupLng || !this.deliveryLat || !this.deliveryLng) {
+      this.deliveryFee = null;
+      return;
+    }
+
+    // Fallback calc if OSRM hasn't run yet
+    const dist = this.getDistanceFromLatLonInKm(this.pickupLat, this.pickupLng, this.deliveryLat, this.deliveryLng);
+    this.updateFeeWithDistance(dist);
+  }
+
+  updateFeeWithDistance(distanceKm: number): void {
+    const weight = this.shipmentForm.get('weight')?.value || 1;
+    const priority = this.shipmentForm.get('priority')?.value;
+
+    // 20 currency units for the first 10 km
+    // +1 currency unit for every 3 km beyond the first 10 km.
+    const baseFare = 20;
+    let distanceCost = 0;
+
+    if (distanceKm > 10) {
+      const excess = distanceKm - 10;
+      distanceCost = Math.ceil(excess / 3) * 1;
+    }
+
+    const priorityFee = priority === 'urgent' ? 20 : 0;
+
+    const total = baseFare + distanceCost + priorityFee;
+
+    this.deliveryFee = {
+      baseFee: baseFare,
+      distanceFee: distanceCost,
+      weightFee: 0,
+      priorityFee: priorityFee,
+      totalFee: total,
+      estimatedDistance: parseFloat(distanceKm.toFixed(2)),
+      estimatedDuration: `${Math.round(distanceKm * 2)} دقيقة` // Estimate 2 min per km driving?
+    };
+
+    // Update form values?
+  }
+
+  getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371;
+    const dLat = this.deg2rad(lat2 - lat1);
+    const dLon = this.deg2rad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  deg2rad(deg: number): number {
+    return deg * (Math.PI / 180);
   }
 
   initForm(): void {
     this.shipmentForm = this.fb.group({
-      // Addresses
       pickupAddress: ['', Validators.required],
       deliveryAddress: ['', Validators.required],
-
-      // Receiver Info
       receiverName: ['', [Validators.required, Validators.minLength(3)]],
       receiverPhone: ['', [Validators.required, Validators.pattern(/^(01|05)[0-9]{8,9}$/)]],
       receiverEmail: ['', Validators.email],
-
-      // Hidden fields or auto-filled
       customerID: [''],
-      expireDate: [new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()], // Default 1 week
-
-      // Package Details
+      expireDate: [new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()],
       description: ['', [Validators.required, Validators.minLength(3)]],
       weight: [1, [Validators.required, Validators.min(0.1), Validators.max(100)]],
       dimensions: [''],
@@ -211,12 +404,10 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
           this.showDropdown = false;
           return;
         }
-
         const filterValue = value.toLowerCase();
         this.filteredCustomers = this.customers.filter(customer =>
           customer.phoneNumber.includes(filterValue)
         );
-
         this.showDropdown = this.filteredCustomers.length > 0;
       });
   }
@@ -227,8 +418,6 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
       receiverPhone: customer.phoneNumber,
       customerID: customer.id
     });
-
-    // Hide dropdown
     this.showDropdown = false;
     this.filteredCustomers = [];
   }
@@ -239,66 +428,22 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
       next: (profile) => {
         this.profile = profile;
         if (!this.shipmentForm.get('pickupAddress')?.value && profile.address) {
-          this.shipmentForm.patchValue({
-            pickupAddress: profile.address
-          });
+          this.shipmentForm.patchValue({ pickupAddress: profile.address });
+          // Optional: Geocode the profile address
+          this.geocodeAddress(profile.address, 'pickup');
         }
         this.isLoading = false;
       },
       error: (error) => {
-        // Handle 404 gracefully - profile might not exist yet or endpoint issue
         console.warn('Could not load profile:', error);
         this.isLoading = false;
-        // Do not block the UI
       }
     });
   }
 
-  setupFeeCalculationTriggers(): void {
-    const weightSub = this.shipmentForm.get('weight')?.valueChanges
-      .pipe(debounceTime(500), distinctUntilChanged())
-      .subscribe(() => this.calculateDeliveryFee());
-
-    const prioritySub = this.shipmentForm.get('priority')?.valueChanges
-      .subscribe(() => this.calculateDeliveryFee());
-
-    const addressSub = this.shipmentForm.get('deliveryAddress')?.valueChanges
-      .pipe(debounceTime(500), distinctUntilChanged())
-      .subscribe(() => this.calculateDeliveryFee());
-
-    this.subscriptions.add(weightSub);
-    this.subscriptions.add(prioritySub);
-    this.subscriptions.add(addressSub);
-  }
-
+  // Legacy stub, no longer used but keeping to avoid template errors if any
   calculateDeliveryFee(): void {
-    const formValue = this.shipmentForm.value;
-
-    if (!formValue.pickupAddress || !formValue.deliveryAddress || !formValue.weight) {
-      return;
-    }
-
-    this.isCalculatingFee = true;
-
-    this.dataService.calculateDeliveryFee({
-      pickupAddress: formValue.pickupAddress,
-      deliveryAddress: formValue.deliveryAddress,
-      weight: formValue.weight,
-      priority: formValue.priority
-    }).subscribe({
-      next: (fee) => {
-        this.deliveryFee = fee;
-        this.isCalculatingFee = false;
-      },
-      error: (error) => {
-        // Suppress 404 errors for this specific endpoint as it might not be implemented yet
-        if (error.status !== 404) {
-          console.error('Error calculating fee:', error);
-        }
-        this.isCalculatingFee = false;
-        this.deliveryFee = null;
-      }
-    });
+    this.localCalculateFee();
   }
 
   onSubmit(): void {
@@ -313,8 +458,8 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     const dto: CreateRequestDTO = {
       source: formValue.pickupAddress,
       priority: formValue.priority,
-      pickupLat: 0,
-      pickupLng: 0,
+      pickupLat: this.pickupLat ?? 0,
+      pickupLng: this.pickupLng ?? 0,
       packages: [
         {
           description: formValue.description,
@@ -368,13 +513,20 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     this.deliveryFee = null;
     this.deliveryLat = null;
     this.deliveryLng = null;
-    this.marker = undefined;
+    this.pickupLat = null;
+    this.pickupLng = null;
+    this.deliveryMarker = undefined;
+    this.pickupMarker = undefined;
+    this.routeLine = undefined;
+
     this.filteredCustomers = [];
     this.showDropdown = false;
+    this.activeField = 'pickup';
 
     if (this.map) {
       this.map.eachLayer((layer) => {
-        if (layer instanceof L.Marker) {
+        // Clear markers and lines logic
+        if (layer instanceof L.Marker || layer instanceof L.Polyline) {
           this.map!.removeLayer(layer);
         }
       });
@@ -404,21 +556,18 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
   getErrorMessage(field: string): string {
     const control = this.shipmentForm.get(field);
     if (!control || !control.errors) return '';
-
     if (control.errors['required']) return 'هذا الحقل مطلوب';
     if (control.errors['minlength']) return `الحد الأدنى ${control.errors['minlength'].requiredLength} أحرف`;
-    if (control.errors['pattern']) return 'صيغة غير صحيحة';
-    if (control.errors['email']) return 'بريد إلكتروني غير صحيح';
-    if (control.errors['min']) return `القيمة الدنيا ${control.errors['min'].min}`;
-    if (control.errors['max']) return `القيمة القصوى ${control.errors['max'].max}`;
-
-    return 'خطأ في الإدخال';
+    if (control.errors['maxlength']) return `الحد الأقصى ${control.errors['maxlength'].requiredLength} أحرف`;
+    if (control.errors['email']) return 'البريد الإلكتروني غير صحيح';
+    if (control.errors['pattern']) return 'رقم الهاتف غير صحيح';
+    if (control.errors['min']) return `القيمة لا يجب أن تقل عن ${control.errors['min'].min}`;
+    if (control.errors['max']) return `القيمة لا يجب أن تزيد عن ${control.errors['max'].max}`;
+    return 'قيمة غير صالحة';
   }
 
   useNoCustomer(): void {
-    this.shipmentForm.patchValue({
-      customerID: 0
-    });
+    this.shipmentForm.patchValue({ customerID: 0 });
     this.statusMessage = 'تم اختيار "بدون عميل" (ID: 0)';
   }
 
