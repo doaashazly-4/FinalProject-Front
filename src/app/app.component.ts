@@ -9,7 +9,7 @@ import { OfflineService } from './courier/services/offline.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, NavbarComponent, FooterComponent],
+  imports: [CommonModule, RouterOutlet, NavbarComponent, FooterComponent,],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
