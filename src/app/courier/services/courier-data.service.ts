@@ -177,12 +177,12 @@ export class CourierDataService {
     return this.http.get<CourierEarnings>(`${this.apiUrl}/Earnings`);
   }
 
-  /* ===================== JOBS ===================== */
-
-  getAvailableJobs(): Observable<DeliveryJob[]> {
-    return this.http
-      .get<any[]>(`${this.apiUrl}/AvailableJobs`)
-      .pipe(map(jobs => jobs.map(j => this.mapBackendJob(j))));
+  // ========== Jobs ==========
+getAvailableJobs(): Observable<DeliveryJob[]> {
+    return this.http.get<DeliveryJob[]>(`${this.apiUrl}/AvailableJobs`)
+      .pipe(map(res => {
+        console.log("available jobs response", res); return res;
+      }));
   }
 
   getMyJobs(): Observable<DeliveryJob[]> {
