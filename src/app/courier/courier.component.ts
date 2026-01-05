@@ -17,6 +17,7 @@ export class CourierComponent {
     { label: 'المهام المتاحة', path: 'available-jobs', icon: 'bi-box-seam' },
     { label: 'مهامي', path: 'my-jobs', icon: 'bi-list-check' },
     { label: 'الأرباح', path: 'earnings', icon: 'bi-cash-stack' },
+    { label: 'المحادثات', path: 'chat', icon: 'bi-whatsapp' },
     { label: 'الملف الشخصي', path: 'profile', icon: 'bi-person-badge' },
     { label: 'الدعم', path: 'support', icon: 'bi-headset' }
   ];

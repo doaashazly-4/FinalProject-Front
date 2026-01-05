@@ -1,0 +1,111 @@
+<div class="chat-page-container" dir="rtl">
+    <!-- Sidebar -->
+    <div class="chat-sidebar">
+        <header class="sidebar-header">
+            <div class="avatar">
+                <img src="assets/Images/lynx-logo.png" alt="Profile">
+            </div>
+            <div class="header-actions">
+                <button class="action-btn"><i class="bi bi-three-dots-vertical"></i></button>
+                <button class="action-btn"><i class="bi bi-chat-left-text-fill"></i></button>
+            </div>
+        </header>
+
+        <div class="search-container">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" [(ngModel)]="searchQuery" placeholder="بحث أو بدء دردشة جديدة">
+            </div>
+        </div>
+
+        <div class="conversations-list">
+            <div *ngFor="let convo of filteredConversations" class="conversation-item"
+                [class.active]="selectedConversation?.id === convo.id" (click)="selectConversation(convo)">
+
+                <div class="avatar">
+                    <img [src]="getPartner(convo).avatar || 'https://ui-avatars.com/api/?name=' + getPartner(convo).name + '&background=random'"
+                        alt="Avatar">
+                </div>
+
+                <div class="convo-info">
+                    <div class="convo-header">
+                        <span class="convo-name">{{ getPartner(convo).name }}</span>
+                        <span class="convo-time" *ngIf="convo.lastMessage">
+                            {{ formatTime(convo.lastMessage.timestamp) }}
+                        </span>
+                    </div>
+                    <div class="convo-footer">
+                        <span class="last-msg" *ngIf="convo.lastMessage">
+                            {{ convo.lastMessage.content }}
+                        </span>
+                        <span class="unread-badge" *ngIf="convo.unreadCount > 0">
+                            {{ convo.unreadCount }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chat Area -->
+    <div class="chat-main" *ngIf="selectedConversation; else emptyState">
+        <header class="chat-header">
+            <div class="avatar">
+                <img [src]="getPartner(selectedConversation).avatar || 'https://ui-avatars.com/api/?name=' + getPartner(selectedConversation).name + '&background=random'"
+                    alt="Avatar">
+            </div>
+            <div class="header-info">
+                <div class="header-name">{{ getPartner(selectedConversation).name }}</div>
+                <div class="header-status">
+                    {{ getPartner(selectedConversation).isOnline ? 'متصل الآن' : 'آخر ظهور مؤخراً' }}
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="action-btn"><i class="bi bi-search"></i></button>
+                <button class="action-btn"><i class="bi bi-three-dots-vertical"></i></button>
+            </div>
+        </header>
+
+        <div class="messages-area" #messagesArea>
+            <div *ngFor="let msg of messages" class="msg-bubble" [class.msg-sent]="msg.senderId === currentUser.id"
+                [class.msg-received]="msg.senderId !== currentUser.id">
+
+                <div class="msg-content">{{ msg.content }}</div>
+                <div class="msg-footer">
+                    <span class="msg-time">{{ formatTime(msg.timestamp) }}</span>
+                    <i class="bi bi-check2-all" *ngIf="msg.senderId === currentUser.id"></i>
+                </div>
+            </div>
+        </div>
+
+        <footer class="chat-footer">
+            <button class="action-btn"><i class="bi bi-emoji-smile"></i></button>
+            <button class="action-btn"><i class="bi bi-plus-lg"></i></button>
+
+            <div class="input-container">
+                <input type="text" [(ngModel)]="newMessageText" (keyup.enter)="sendMessage()" placeholder="اكتب رسالة">
+            </div>
+
+            <button class="action-btn send-btn" (click)="sendMessage()" *ngIf="newMessageText.trim()">
+                <i class="bi bi-send-fill"></i>
+            </button>
+            <button class="action-btn" *ngIf="!newMessageText.trim()">
+                <i class="bi bi-mic-fill"></i>
+            </button>
+        </footer>
+    </div>
+
+    <ng-template #emptyState>
+        <div class="empty-chat">
+            <div class="empty-content">
+                <i class="bi bi-whatsapp"></i>
+                <h2>Lynx Chat</h2>
+                <p>أرسل واستقبل الرسائل مع المناديب والعملاء بسهولة.<br>
+                    استخدم Lynx Chat لمتابعة شحناتك في الوقت الفعلي.</p>
+                <div class="mt-8 text-xs text-gray-400">
+                    <i class="bi bi-lock-fill"></i> مشفر تقنياً من الطرفين
+                </div>
+            </div>
+        </div>
+    </ng-template>
+</div>

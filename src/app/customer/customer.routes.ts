@@ -47,6 +47,11 @@ export const CUSTOMER_ROUTES: Routes = [
         path: 'orders',
         redirectTo: 'deliveries',
         pathMatch: 'full'
+      },
+      {
+        path: 'chat',
+        loadComponent: () => import('../shared/pages/chat-page/chat-page.component')
+          .then(m => m.ChatPageComponent)
       }
     ]
   }

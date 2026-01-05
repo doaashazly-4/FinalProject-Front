@@ -61,6 +61,11 @@ export const SUPPLIER_ROUTES: Routes = [
         path: 'inventory',
         redirectTo: 'dashboard',
         pathMatch: 'full'
+      },
+      {
+        path: 'chat',
+        loadComponent: () => import('../shared/pages/chat-page/chat-page.component')
+          .then(m => m.ChatPageComponent)
       }
     ]
   }

@@ -26,6 +26,7 @@ export class SupplierComponent implements OnInit {
     { path: '/supplier/shipments', label: 'طلباتي', icon: 'bi-box-seam' },
     { path: '/supplier/track', label: 'تتبع الشحنات', icon: 'bi-geo-alt-fill' },
     { path: '/supplier/reports', label: 'التقارير', icon: 'bi-bar-chart-line-fill' },
+    { path: '/supplier/chat', label: 'المحادثات', icon: 'bi-whatsapp' },
     { path: '/supplier/settings', label: 'الإعدادات', icon: 'bi-gear-fill' }
   ];
 
@@ -35,7 +36,7 @@ export class SupplierComponent implements OnInit {
   isMobileMenuOpen: boolean = false;
 
   constructor(
-    private auth: AuthService, 
+    private auth: AuthService,
     private router: Router,
     private supplierData: SupplierDataService
   ) {
