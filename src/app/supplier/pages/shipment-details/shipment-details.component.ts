@@ -83,6 +83,13 @@ export class ShipmentDetailsComponent implements OnInit {
 
     loadShipmentData(id: string): void {
         this.isLoading = true;
+
+        // Fetch explanation non-blocking
+        this.dataService.getAssignmentExplanation(id).subscribe({
+            next: (explanation) => this.explanation = explanation,
+            error: () => this.explanation = null
+        });
+
         console.log('Fetching shipment data for ID:', id);
         this.dataService.getParcelById(id).subscribe({
             next: (parcel: Parcel) => {
@@ -198,6 +205,33 @@ export class ShipmentDetailsComponent implements OnInit {
 
     toggleExpand(pkg: PackageDetail): void {
         pkg.isExpanded = !pkg.isExpanded;
+    }
+
+    deleteShipment(): void {
+        if (!this.shipment) return;
+
+        const confirmMsg = 'هل أنت متأكد من حذف هذه الشحنة نهائياً؟ سيؤدي هذا لإزالتها من قاعدة البيانات.';
+        if (confirm(confirmMsg)) {
+            this.isLoading = true;
+            this.dataService.deleteRequest(this.shipment.id).subscribe({
+                next: () => {
+                    console.log('Shipment deleted successfully');
+                    this.router.navigate(['/supplier/shipments']);
+                },
+                error: (err) => {
+                    console.error('Error during shipment deletion:', err);
+
+                    // Check for database constraint error in the 500 response
+                    if (err.status === 500 && err.error?.includes('REFERENCE constraint')) {
+                        alert('فشل الحذف بسبب وجود محتويات (Packages) مرتبطة بهذه الشحنة. يجب تفعيل الحذف التلقائي (Cascade Delete) في خادم قاعدة البيانات أو حذف المحتويات أولاً.');
+                    } else {
+                        alert('حدث خطأ أثناء محاولة حذف الشحنة. يرجى مراجعة سجلات النظام.');
+                    }
+
+                    this.isLoading = false;
+                }
+            });
+        }
     }
 
     deleteShipment(): void {

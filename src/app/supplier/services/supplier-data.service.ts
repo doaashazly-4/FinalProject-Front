@@ -473,6 +473,15 @@ export class SupplierDataService {
     );
   }
 
+  // ================= LYNX TALISMAN =================
+  getAssignmentExplanation(requestId: string): Observable<AssignmentObservation | null> {
+    return this.http.get<AssignmentObservation>(
+      `${this.apiUrl}/Explanation/${requestId}`
+    ).pipe(
+      catchError(() => of(null)) // Silent fail as per requirements
+    );
+  }
+
   deleteRequest(id: string | number): Observable<void> {
     return this.http.delete<void>(`${environment.apiUrl}/Request/${id}`);
   }
