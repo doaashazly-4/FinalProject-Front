@@ -27,12 +27,12 @@ export class AvailableJobsComponent implements OnInit {
   loadJobs(): void {
     this.isLoading = true;
     this.dataService.getAvailableJobs().subscribe({
-     next: (jobs) => {
-      console.log('API jobs:', jobs);
-  this.jobs = jobs ?? []; // ✅ حماية إضافية
-  this.isLoading = false;
-  this.isRefreshing = false;
-},
+      next: (jobs) => {
+        console.log('API jobs:', jobs);
+        this.jobs = jobs ?? []; // ✅ حماية إضافية
+        this.isLoading = false;
+        this.isRefreshing = false;
+      },
 
       error: (err) => {
         console.error('Error loading jobs:', err);
@@ -51,12 +51,24 @@ export class AvailableJobsComponent implements OnInit {
   acceptJob(job: DeliveryJob): void {
     this.dataService.acceptJob(job.id).subscribe({
       next: () => {
+        alert('تم قبول المهمة بنجاح! ستجدها في قسم مهامي.');
         this.jobs = this.jobs.filter(j => j.id !== job.id);
-        alert('تم قبول المهمة بنجاح! يمكنك رؤيتها في قسم مهامي.');
       },
       error: (err) => {
-        console.error('Error accepting job:', err);
+        console.error(err);
         alert('حدث خطأ أثناء قبول المهمة');
+      }
+    });
+  }
+
+  startDelivery(job: any): void {
+    this.dataService.startDelivery(job.id).subscribe({
+      next: () => {
+        job.status = 'out_for_delivery';
+        alert('تم بدء التوصيل');
+      },
+      error: () => {
+        alert('حدث خطأ أثناء بدء التوصيل');
       }
     });
   }

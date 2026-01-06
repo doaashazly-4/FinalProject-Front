@@ -16,7 +16,7 @@ export class CustomerDashboardComponent implements OnInit {
   activeDeliveries: IncomingDelivery[] = [];
   isLoading = true;
 
-  constructor(private dataService: CustomerDataService) {}
+  constructor(private dataService: CustomerDataService) { }
 
   ngOnInit(): void {
     this.loadData();
@@ -38,16 +38,36 @@ export class CustomerDashboardComponent implements OnInit {
     this.dataService.getDeliveries().subscribe({
       next: (deliveries) => {
         this.recentDeliveries = deliveries.slice(0, 5);
-        this.activeDeliveries = deliveries.filter(d => 
+        this.activeDeliveries = deliveries.filter(d =>
           !['delivered', 'cancelled', 'returned'].includes(d.status)
         );
+
+        // 🔥 LOAD OTP FOR ACTIVE DELIVERIES
+        this.activeDeliveries.forEach(d => this.loadOTPForDelivery(d));
+
         this.isLoading = false;
       },
+
       error: (err) => {
         console.error('Error loading deliveries:', err);
         this.recentDeliveries = [];
         this.activeDeliveries = [];
         this.isLoading = false;
+      }
+    });
+  }
+
+  loadOTPForDelivery(delivery: IncomingDelivery): void {
+    // Only fetch OTP when courier is on the way
+    if (delivery.status !== 'out_for_delivery') return;
+
+    this.dataService.trackPackage(Number(delivery.id)).subscribe({
+      next: (res) => {
+        delivery.deliveryOTP = res?.Courier?.DeliveryOTP;
+        delivery.otpVerified = res?.Courier?.OTPVerified;
+      },
+      error: (err) => {
+        console.error('Failed to load OTP', err);
       }
     });
   }

@@ -60,6 +60,9 @@ export class CourierDashboardComponent implements OnInit {
     this.syncQueuedJobActions();
   }
 
+
+
+
   toggleAvailability(): void {
     const newAvailability = !this.isAvailable;
 
@@ -185,7 +188,7 @@ export class CourierDashboardComponent implements OnInit {
   }
 
   acceptJob(job: DeliveryJob): void {
-    this.dataService.acceptJob(job.id).subscribe({
+    this.dataService.acceptJob(Number(job.id)).subscribe({
       next: () => {
         this.availableJobs = this.availableJobs.filter(j => j.id !== job.id);
         job.status = 'accepted' as JobStatus;
@@ -238,7 +241,7 @@ export class CourierDashboardComponent implements OnInit {
   }
 
   // ===== Offline Queue =====
-  queueJobAction(action: { type: 'accept' | 'reject' | 'updateStatus', jobId: string, status?: JobStatus, reason?: string, photos?: File[], otp?: string }) {
+  queueJobAction(action: { type: 'accept' | 'reject' | 'updateStatus', jobId: string | number, status?: JobStatus, reason?: string, photos?: File[], otp?: string }) {
     try {
       const raw = localStorage.getItem('courier_pending_actions_v1');
       const list = raw ? JSON.parse(raw) : [];

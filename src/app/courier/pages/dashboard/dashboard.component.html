@@ -9,7 +9,7 @@
         </div>
         <div class="flex-1">
           <h3 class="font-bold text-lg mb-1">طلب جديد متاح!</h3>
-          <p class="text-white/90 text-sm mb-2">{{ newOrderNotification.trackingNumber }}</p>
+          <p class="text-white/90 text-sm mb-2">#{{ newOrderNotification.id }}</p>
           <p class="text-white/80 text-xs">{{ newOrderNotification.description }}</p>
           <div class="flex gap-2 mt-3">
             <button (click)="viewNewOrder()"
@@ -118,7 +118,7 @@
           <div *ngFor="let job of activeJobs.slice(0, 1)" class="space-y-4">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="font-bold text-primary-dark text-lg">{{ job.trackingNumber }}</h3>
+                <h3 class="font-bold text-primary-dark text-lg">طلب #{{ job.id }}</h3>
                 <p class="text-gray-600">{{ job.description }}</p>
               </div>
               <span class="px-3 py-1 rounded-full text-sm font-bold" [ngClass]="getStatusClass(job.status)">
@@ -134,11 +134,7 @@
                 </div>
                 <div>
                   <p class="text-xs text-gray-500">الاستلام من</p>
-                  <p class="font-medium text-primary-dark">{{ job.senderName }}</p>
                   <p class="text-sm text-gray-600">{{ job.pickupAddress }}</p>
-                  <button (click)="callSender(job.senderPhone)" class="mt-1 text-sm text-blue-600 hover:underline">
-                    <i class="bi bi-telephone ml-1"></i>{{ job.senderPhone }}
-                  </button>
                 </div>
               </div>
               <div class="border-r-2 border-dashed border-gray-300 h-4 mr-4"></div>
@@ -148,8 +144,8 @@
                 </div>
                 <div>
                   <p class="text-xs text-gray-500">التسليم إلى</p>
-                  <p class="font-medium text-primary-dark">{{ job.receiverName }}</p>
-                  <p class="text-sm text-gray-600">{{ job.deliveryAddress }}</p>
+                  <p class="font-medium text-primary-dark">{{ job.customerName }}</p>
+                  <p class="text-sm text-gray-600">{{ job.dropoffAddress }}</p>
                   <button (click)="callReceiver(job.receiverPhone)" class="mt-1 text-sm text-green-600 hover:underline">
                     <i class="bi bi-telephone ml-1"></i>{{ job.receiverPhone }}
                   </button>
@@ -157,17 +153,7 @@
               </div>
             </div>
 
-            <!-- Special Notes -->
-            <div *ngIf="job.isFragile || job.requiresSignature" class="flex gap-2">
-              <span *ngIf="job.isFragile"
-                class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
-                <i class="bi bi-exclamation-diamond ml-1"></i>قابل للكسر
-              </span>
-              <span *ngIf="job.requiresSignature"
-                class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                <i class="bi bi-pen ml-1"></i>يتطلب توقيع
-              </span>
-            </div>
+
 
             <!-- Action Buttons -->
             <div class="flex gap-3 pt-4 border-t border-gray-100">
@@ -225,23 +211,20 @@
               class="p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-primary-green/30 hover:shadow-md transition-all duration-200">
               <div class="flex items-center justify-between mb-3">
                 <div>
-                  <h4 class="font-bold text-primary-dark">{{ job.trackingNumber }}</h4>
+                  <h4 class="font-bold text-primary-dark">#{{ job.id }}</h4>
                   <p class="text-sm text-gray-600">{{ job.description }}</p>
                 </div>
                 <div class="text-left">
-                  <p class="font-bold text-primary-green text-lg">{{ job.courierEarning }} ج.م</p>
-                  <p *ngIf="job.distance" class="text-xs text-gray-500">{{ job.distance }} كم</p>
+                  <p class="font-bold text-primary-green text-lg">{{ job.shipmentCost }} ج.م</p>
                 </div>
               </div>
               <div class="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                <span><i class="bi bi-geo-alt ml-1"></i>{{ job.pickupAddress.split(',')[0] }}</span>
+                <span><i class="bi bi-geo-alt ml-1"></i>{{ job.pickupAddress }}</span>
                 <span>→</span>
-                <span>{{ job.deliveryAddress.split(',')[0] }}</span>
+                <span>{{ job.dropoffAddress }}</span>
               </div>
               <div class="flex items-center justify-between">
                 <div class="flex gap-2">
-                  <span *ngIf="job.isFragile"
-                    class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium">قابل للكسر</span>
                   <span class="px-2 py-1 bg-gray-200 text-gray-700 rounded text-xs font-medium">{{ job.weight }}
                     كجم</span>
                 </div>

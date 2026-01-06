@@ -35,7 +35,8 @@
   </div>
 
   <!-- Empty State -->
-  <div *ngIf="!isLoading && jobs.length === 0" class="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
+  <div *ngIf="!isLoading && jobs.length === 0"
+    class="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
     <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
       <i class="bi bi-inbox text-gray-400 text-4xl"></i>
     </div>
@@ -55,11 +56,11 @@
         <!-- Header -->
         <div class="flex items-start justify-between mb-4">
           <div>
-            <h3 class="font-bold text-primary-dark text-lg">{{ job.trackingNumber }}</h3>
+            <h3 class="font-bold text-primary-dark text-lg">طلب #{{ job.id }}</h3>
             <p class="text-gray-600">{{ job.description }}</p>
           </div>
           <div class="text-left">
-            <p class="text-2xl font-black text-primary-green">{{ job.courierEarning }}</p>
+            <p class="text-2xl font-black text-primary-green">{{ job.shipmentCost }}</p>
             <p class="text-xs text-gray-500">جنيه مصري</p>
           </div>
         </div>
@@ -73,9 +74,6 @@
             <div class="flex-1">
               <p class="text-xs text-gray-500">الاستلام من</p>
               <p class="font-medium text-primary-dark text-sm">{{ job.pickupAddress }}</p>
-              <button (click)="callSender(job.senderPhone, $event)" class="text-xs text-blue-600 hover:underline mt-1">
-                <i class="bi bi-telephone ml-1"></i>{{ job.senderName }}
-              </button>
             </div>
           </div>
           <div class="border-r-2 border-dashed border-gray-300 h-3 mr-3 mb-3"></div>
@@ -85,8 +83,12 @@
             </div>
             <div class="flex-1">
               <p class="text-xs text-gray-500">التسليم إلى</p>
-              <p class="font-medium text-primary-dark text-sm">{{ job.deliveryAddress }}</p>
-              <p class="text-xs text-gray-500 mt-1">{{ job.receiverName }}</p>
+              <p class="font-medium text-primary-dark text-sm">{{ job.dropoffAddress }}</p>
+              <p class="text-xs text-gray-500 mt-1">{{ job.customerName }}</p>
+              <button (click)="callSender(job.receiverPhone, $event)" class="text-xs text-blue-600 hover:underline mt-1"
+                *ngIf="job.receiverPhone">
+                <i class="bi bi-telephone ml-1"></i>{{ job.receiverPhone }}
+              </button>
             </div>
           </div>
         </div>
@@ -96,30 +98,46 @@
           <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium">
             <i class="bi bi-box ml-1"></i>{{ job.weight }} كجم
           </span>
-          <span *ngIf="job.distance" class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium">
-            <i class="bi bi-signpost-2 ml-1"></i>{{ job.distance }} كم
-          </span>
-          <span *ngIf="job.isFragile" class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium">
-            <i class="bi bi-exclamation-diamond ml-1"></i>قابل للكسر
-          </span>
-          <span *ngIf="job.requiresSignature" class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
-            <i class="bi bi-pen ml-1"></i>يتطلب توقيع
-          </span>
+        </div>
+
+        <!-- ✅ ADDED: Package Status Bar (READ-ONLY FOR NOW) -->
+        <div class="mb-4">
+          <div class="flex items-center justify-between text-xs text-gray-500 mb-2">
+            <span>الحالة</span>
+            <span class="font-semibold text-primary-dark">{{ job.status }}</span>
+          </div>
+          <div class="flex gap-1">
+            <div class="flex-1 h-2 rounded-full" [ngClass]="
+                (job.status === 'accepted' || job.status === 'in_transit' || job.status === 'out_for_delivery' || job.status === 'delivered')
+                ? 'bg-primary-green' : 'bg-gray-200'"></div>
+            <div class="flex-1 h-2 rounded-full" [ngClass]="
+                (job.status === 'out_for_delivery' || job.status === 'delivered')
+                ? 'bg-primary-green' : 'bg-gray-200'"></div>
+            <div class="flex-1 h-2 rounded-full" [ngClass]="
+                (job.status === 'delivered')
+                ? 'bg-primary-green' : 'bg-gray-200'"></div>
+          </div>
+          <div class="flex justify-between text-[10px] text-gray-400 mt-1">
+            <span>تم القبول</span>
+            <span>قيد التوصيل</span>
+            <span>تم التسليم</span>
+          </div>
         </div>
 
         <!-- Action -->
         <div class="flex gap-2">
           <button (click)="acceptJob(job)"
-            class="flex-1 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold hover:shadow-green-lg transition-all duration-300">
+            class="flex-1 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold">
             <i class="bi bi-check-circle ml-2"></i>
             قبول
           </button>
-          <button (click)="onRejectClick(job)"
-            class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-all duration-300">
+
+          <button (click)="onRejectClick(job)" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold">
             <i class="bi bi-x-circle ml-2"></i>
             رفض
           </button>
         </div>
+
       </div>
     </div>
   </div>

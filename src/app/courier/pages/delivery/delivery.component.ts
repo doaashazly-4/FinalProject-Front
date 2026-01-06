@@ -28,29 +28,51 @@ export class DeliveryComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    const jobId = this.route.snapshot.paramMap.get('id');
-    if (jobId) this.loadJob(+jobId);
+    const jobId = Number(this.route.snapshot.paramMap.get('id'));
+    this.loadJobFromAssignedPackages(jobId);
+  }
+
+  loadJobFromAssignedPackages(jobId: number): void {
+    this.dataService.getMyJobs().subscribe({
+      next: (jobs: DeliveryJob[]) => {
+        const foundJob = jobs.find((j: DeliveryJob) => j.id === jobId);
+
+        if (!foundJob) {
+          alert('لا يمكن العثور على هذه الشحنة');
+          this.isLoading = false;
+          return;
+        }
+
+        this.job = foundJob;
+        this.isLoading = false;
+      },
+      error: (err: any) => {
+        console.error('Error loading assigned packages', err);
+        alert('حدث خطأ أثناء تحميل بيانات الشحنة');
+        this.isLoading = false;
+      }
+    });
   }
 
   // ===== Load Job =====
   loadJob(id: number): void {
     this.isLoading = true;
     this.dataService.getJobById(id.toString()).subscribe({
-      next: (job) => { this.job = job; this.isLoading = false; },
-      error: (err) => { console.error('Error loading job:', err); this.isLoading = false; }
+      next: (job: DeliveryJob) => { this.job = job; this.isLoading = false; },
+      error: (err: any) => { console.error('Error loading job:', err); this.isLoading = false; }
     });
   }
 
   // ===== Navigation =====
   navigateToPickup(): void {
     if (!this.job) return;
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${this.job.pickupLocation.lat},${this.job.pickupLocation.lng}`;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${this.job.pickupLat},${this.job.pickupLng}`;
     window.open(url, '_blank');
   }
 
   navigateToDropoff(): void {
     if (!this.job) return;
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${this.job.dropoffLocation.lat},${this.job.dropoffLocation.lng}`;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${this.job.destinationLat},${this.job.destinationLng}`;
     window.open(url, '_blank');
   }
 
@@ -93,8 +115,6 @@ export class DeliveryComponent implements OnInit {
   }
 
   // ===== Call =====
-  callSender(phone: string): void { window.open(`tel:${phone}`, '_self'); }
-  callReceiver(phone: string): void { window.open(`tel:${phone}`, '_self'); }
   callCustomer(): void { if (this.job) window.open(`tel:${this.job.receiverPhone}`, '_self'); }
 
   // ===== Helpers =====

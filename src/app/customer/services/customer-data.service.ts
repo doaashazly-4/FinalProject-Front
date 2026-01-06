@@ -26,6 +26,8 @@ export interface IncomingDelivery {
   deliveryFee?: number;
   deliveryProofImage?: string;
   notes?: string;
+  deliveryOTP?: string;
+  otpVerified?: boolean;
 }
 
 
@@ -230,12 +232,12 @@ export class CustomerDataService {
 
 
   //========== Deliveries ==========
-  getDeliveries() {
-    const customerId = this.getCustomerId();
-    return this.http.get<IncomingDelivery[]>(
-      `${environment.apiUrl}/Customer/${customerId}/packages`
-    );
-  }
+  // getDeliveries() {
+  //   const customerId = this.getCustomerId();
+  //   return this.http.get<IncomingDelivery[]>(
+  //     `${environment.apiUrl}/Customer/${customerId}/packages`
+  //   );
+  // }
 
   getOrders(): Observable<CustomerOrder[]> {
     return this.getDeliveries().pipe(
@@ -266,8 +268,18 @@ export class CustomerDataService {
     );
   }
 
+  getDeliveries() {
+    return this.http.get<any[]>(
+      `${environment.apiUrl}/Customer/packages`
+    );
+  }
 
 
+  getDeliveriesByPhoneNumber(phoneNumber: string) {
+    return this.http.get<IncomingDelivery[]>(
+      `${environment.apiUrl}/Customer/packages/${phoneNumber}`
+    );
+  }
 
 
   getRecentDeliveries(): Observable<IncomingDelivery[]> {

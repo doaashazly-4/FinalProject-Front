@@ -5,16 +5,6 @@
       <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">لوحة تحكم المُستلم</h1>
       <p class="text-gray-600 mt-1">تابع شحناتك الواردة من هنا</p>
     </div>
-    <!-- <a routerLink="/customer/track" 
-       class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl shadow-green hover:shadow-green-lg hover:-translate-y-0.5 transition-all duration-300">
-      <i class="bi bi-geo-alt"></i>
-      <span>تتبع شحنة</span>
-    </a> -->
-    <!-- <a routerLink="/customer-otp-login" 
-       class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-100 text-blue-700 font-bold rounded-xl hover:bg-blue-200 transition-all duration-300">
-      <i class="bi bi-telephone"></i>
-      <span>دخول عبر OTP</span>
-    </a> -->
   </div>
 
   <!-- Stats Cards -->
@@ -133,6 +123,30 @@
                 <i class="bi bi-telephone ml-1"></i>
                 اتصال
               </button>
+
+              <!-- 🔐 OTP Section (Customer) -->
+              <div *ngIf="delivery.deliveryOTP && !delivery.otpVerified"
+                class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
+                <p class="text-sm font-semibold text-yellow-800 mb-1">
+                  رمز الاستلام (OTP)
+                </p>
+
+                <div class="flex items-center justify-between">
+                  <span class="text-2xl font-black tracking-widest text-yellow-900">
+                    {{ delivery.deliveryOTP }}
+                  </span>
+                  <span class="text-xs text-yellow-700">
+                    أعطه للمندوب عند التسليم
+                  </span>
+                </div>
+              </div>
+
+              <!-- ✅ OTP Verified -->
+              <div *ngIf="delivery.otpVerified"
+                class="mt-3 p-3 bg-green-50 border border-green-200 rounded-xl text-sm font-semibold text-green-800">
+                ✔️ تم تأكيد الاستلام
+              </div>
+
             </div>
           </div>
         </div>

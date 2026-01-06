@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { CourierDataService, DeliveryJob, JobStatus } from '../../services/courier-data.service';
 
 @Component({
   selector: 'app-my-jobs',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './my-jobs.component.html',
   styleUrls: ['./my-jobs.component.css']
 })
@@ -16,7 +17,7 @@ export class MyJobsComponent implements OnInit {
   filter: 'all' | 'active' | 'completed' = 'active';
   isLoading = true;
 
-  constructor(private dataService: CourierDataService) {}
+  constructor(private dataService: CourierDataService) { }
 
   ngOnInit(): void {
     this.loadJobs();
@@ -26,6 +27,7 @@ export class MyJobsComponent implements OnInit {
     this.isLoading = true;
     this.dataService.getMyJobs().subscribe({
       next: (jobs) => {
+        console.log('MY JOBS RAW RESPONSE:', jobs);
         this.jobs = jobs;
         this.applyFilter();
         this.isLoading = false;
@@ -60,7 +62,7 @@ export class MyJobsComponent implements OnInit {
         this.dataService.pickupJob(job.id).subscribe({
           next: () => {
             job.status = 'picked_up';
-            job.pickedUpAt = new Date();
+            // Removed pickedUpAt assignment as property is removed from interface
           },
           error: (err) => {
             console.error('Error updating job:', err);
@@ -87,7 +89,7 @@ export class MyJobsComponent implements OnInit {
         }).subscribe({
           next: () => {
             job.status = 'delivered';
-            job.deliveredAt = new Date();
+            // Removed deliveredAt assignment as property is removed from interface
             this.applyFilter();
           },
           error: (err) => {
@@ -153,5 +155,42 @@ export class MyJobsComponent implements OnInit {
       minute: '2-digit'
     });
   }
+
+  startDelivery(job: any): void {
+    this.dataService.startDelivery(job.id).subscribe({
+      next: () => {
+        job.status = 'out_for_delivery';
+        alert('تم بدء التوصيل');
+      },
+      error: () => {
+        alert('حدث خطأ أثناء بدء التوصيل');
+      }
+    });
+  }
+
+  dropDelivery(job: any): void {
+    job.awaitingOTP = true;
+  }
+  confirmOTP(job: any): void {
+    if (!job.otp || job.otp.length !== 6) {
+      alert('يرجى إدخال رمز OTP صحيح');
+      return;
+    }
+
+    this.dataService.verifyDeliveryOTP(Number(job.id), job.otp).subscribe({
+      next: () => {
+        job.status = 'delivered';
+        job.awaitingOTP = false;
+        job.otp = '';
+        this.applyFilter();
+        alert('تم تسليم الشحنة بنجاح');
+      },
+      error: () => {
+        alert('رمز OTP غير صحيح');
+      }
+    });
+  }
+
+
 }
 

@@ -146,7 +146,7 @@
             <div class="relative">
               <span
                 class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl group-focus-within:text-emerald-600 transition-colors">📱</span>
-              <input type="tel" formControlName="mobileNumber" placeholder="05XXXXXXXX" dir="ltr"
+              <input type="tel" formControlName="mobileNumber" placeholder="01XXXXXXXXX" dir="ltr"
                 class="w-full pr-12 pl-4 py-4 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all duration-300 text-lg bg-gray-50 focus:bg-white text-left"
                 [class.border-red-400]="clientLoginForm.get('mobileNumber')?.invalid && clientLoginForm.get('mobileNumber')?.touched">
             </div>
@@ -156,7 +156,7 @@
             </p>
             <p class="text-red-600 text-sm mt-2 font-semibold"
               *ngIf="clientLoginForm.get('mobileNumber')?.hasError('pattern') && clientLoginForm.get('mobileNumber')?.touched">
-              الرجاء إدخال رقم جوال صحيح (يبدأ بـ 05)
+              الرجاء إدخال رقم جوال صحيح (يبدأ بـ 01)
             </p>
           </div>
 

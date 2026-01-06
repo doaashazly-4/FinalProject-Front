@@ -40,7 +40,14 @@ export class LoginComponent implements OnInit {
 
     // Form for Client (mobile number only)
     this.clientLoginForm = this.fb.group({
-      mobileNumber: ['', [Validators.required, Validators.pattern(/^(\+966|0)?5[0-9]{8}$/)]],
+      mobileNumber: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(/^[0-9]{11}$/)
+        ]
+      ],
+
       rememberMe: [false]
     });
   }
