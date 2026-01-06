@@ -28,6 +28,8 @@ export interface IncomingDelivery {
   notes?: string;
   deliveryOTP?: string;
   otpVerified?: boolean;
+  deliveryOTP?: string;
+  otpVerified?: boolean;
 }
 
 
@@ -239,10 +241,6 @@ export class CustomerDataService {
   //   );
   // }
 
-
-
-
-
   getOrders(): Observable<CustomerOrder[]> {
     return this.getDeliveries().pipe(
       map(deliveries => deliveries.map(d => {
@@ -278,8 +276,10 @@ export class CustomerDataService {
     );
   }
 
+
   getDeliveriesByPhoneNumber(phoneNumber: string) {
     return this.http.get<IncomingDelivery[]>(
+      `${environment.apiUrl}/Customer/packages/${phoneNumber}`
       `${environment.apiUrl}/Customer/packages/${phoneNumber}`
     );
   }

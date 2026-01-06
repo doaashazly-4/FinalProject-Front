@@ -150,17 +150,27 @@
         </div>
       </form>
 
-      <!-- Client Form -->
-      <form *ngIf="loginMode === 'client'" [formGroup]="clientLoginForm" (ngSubmit)="onSubmit()" class="space-y-5 animate-fade-in-up">
-        
-        <div class="bg-blue-50/60 p-4 rounded-xl border border-blue-100 flex items-start gap-3 mb-6">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p class="text-sm text-blue-800 leading-relaxed">
-            يمكنك تسجيل الدخول بسهولة باستخدام رقم جوالك فقط، دون الحاجة لكلمة مرور.
-          </p>
-        </div>
+        <!-- Client Login Form (Mobile Number Only) -->
+        <form *ngIf="loginMode === 'client'" [formGroup]="clientLoginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+          <!-- Mobile Number -->
+          <div class="group">
+            <label class="block text-gray-800 font-bold mb-3 text-lg">رقم الجوال *</label>
+            <div class="relative">
+              <span
+                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl group-focus-within:text-emerald-600 transition-colors">📱</span>
+              <input type="tel" formControlName="mobileNumber" placeholder="01XXXXXXXXX" dir="ltr"
+                class="w-full pr-12 pl-4 py-4 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all duration-300 text-lg bg-gray-50 focus:bg-white text-left"
+                [class.border-red-400]="clientLoginForm.get('mobileNumber')?.invalid && clientLoginForm.get('mobileNumber')?.touched">
+            </div>
+            <p class="text-red-600 text-sm mt-2 font-semibold"
+              *ngIf="clientLoginForm.get('mobileNumber')?.hasError('required') && clientLoginForm.get('mobileNumber')?.touched">
+              رقم الجوال مطلوب
+            </p>
+            <p class="text-red-600 text-sm mt-2 font-semibold"
+              *ngIf="clientLoginForm.get('mobileNumber')?.hasError('pattern') && clientLoginForm.get('mobileNumber')?.touched">
+              الرجاء إدخال رقم جوال صحيح (يبدأ بـ 01)
+            </p>
+          </div>
 
         <div>
            <label class="block text-sm font-semibold text-gray-700 mb-2">رقم الجوال</label>
@@ -249,6 +259,21 @@
           </div>
         </div>
 
+        <!-- Stats -->
+        <div class="flex justify-center gap-12">
+          <div class="text-center">
+            <h3
+              class="text-4xl font-black bg-gradient-to-br from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+              +1000</h3>
+            <p class="text-gray-700 font-semibold">مستخدم نشط</p>
+          </div>
+          <div class="text-center">
+            <h3
+              class="text-4xl font-black bg-gradient-to-br from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+              99%</h3>
+            <p class="text-gray-700 font-semibold">معدل الرضا</p>
+          </div>
+        </div>
       </div>
     </div>
 
