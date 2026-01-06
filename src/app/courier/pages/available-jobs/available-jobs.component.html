@@ -131,12 +131,12 @@
         <!-- Action -->
         <div class="flex gap-2">
           <button (click)="acceptJob(job)"
-            class="flex-1 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold hover:shadow-green-lg transition-all duration-300">
+            class="flex-1 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold">
             <i class="bi bi-check-circle ml-2"></i>
             قبول
           </button>
-          <button (click)="onRejectClick(job)"
-            class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-all duration-300">
+
+          <button (click)="onRejectClick(job)" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold">
             <i class="bi bi-x-circle ml-2"></i>
             رفض
           </button>

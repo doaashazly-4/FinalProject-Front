@@ -303,6 +303,11 @@ export class CustomerDataService {
     );
   }
 
+  getDeliveries() {
+    return this.http.get<any[]>(
+      `${environment.apiUrl}/Customer/packages`
+    );
+  }
 
   getDeliveriesByPhoneNumber(phoneNumber: string) {
     return this.http.get<IncomingDelivery[]>(
