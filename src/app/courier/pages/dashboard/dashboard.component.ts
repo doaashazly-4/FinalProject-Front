@@ -6,8 +6,7 @@ import { PushNotificationService } from '../../../shared/services/push-notificat
 import { Observable } from 'rxjs';
 import { DeliveryProofComponent } from '../delivery/components/delivery-proof.component';
 import { FailedDeliveryProofComponent } from '../delivery/components/failed-delivery-proof.component';
-import { DeliveryProofComponent } from '../delivery/components/delivery-proof.component';
-import { FailedDeliveryProofComponent } from '../delivery/components/failed-delivery-proof.component';
+
 
 @Component({
   selector: 'app-courier-dashboard',

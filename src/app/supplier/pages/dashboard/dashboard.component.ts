@@ -3,12 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { SupplierDataService, Parcel, SenderStat, SenderDashboardData } from '../../services/supplier-data.service';
 
-import { ShipmentCardComponent } from '../../components/shipment-card/shipment-card.component';
+
 
 @Component({
   selector: 'app-supplier-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, ShipmentCardComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })

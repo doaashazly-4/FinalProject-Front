@@ -239,40 +239,9 @@ export class CustomerDataService {
   //   );
   // }
 
-  getOrders(): Observable<CustomerOrder[]> {
-    return this.getDeliveries().pipe(
-      map(deliveries => deliveries.map(d => {
-        let status: 'جارٍ التنفيذ' | 'مكتمل' | 'ملغي' = 'جارٍ التنفيذ';
 
-        switch (d.status) {
-          case 'delivered':
-            status = 'مكتمل';
-            break;
-          case 'cancelled':
-          case 'returned':
-          case 'failed_delivery':
-            status = 'ملغي';
-            break;
-          default:
-            status = 'جارٍ التنفيذ';
-        }
 
-        return {
-          id: d.id,
-          status: status,
-          destination: d.deliveryAddress,
-          date: d.createdAt,
-          amount: d.deliveryFee || 0
-        };
-      }))
-    );
-  }
 
-  getDeliveries() {
-    return this.http.get<any[]>(
-      `${environment.apiUrl}/Customer/packages`
-    );
-  }
 
   getOrders(): Observable<CustomerOrder[]> {
     return this.getDeliveries().pipe(

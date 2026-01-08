@@ -5,8 +5,7 @@
       <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">المهام المتاحة</h1>
       <p class="text-gray-600 mt-1">اختر المهام التي تريد توصيلها</p>
     </div>
-    <button (click)="refresh()" [disabled]="isRefreshing"
-      class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 disabled:opacity-50 transition-all duration-300">
+
     <button (click)="refresh()" [disabled]="isRefreshing"
       class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 disabled:opacity-50 transition-all duration-300">
       <i class="bi bi-arrow-clockwise" [ngClass]="{'animate-spin': isRefreshing}"></i>
@@ -32,8 +31,7 @@
     <div class="text-center">
       <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4">
       </div>
-      <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4">
-      </div>
+
       <p class="text-gray-500">جاري البحث عن المهام...</p>
     </div>
   </div>
@@ -147,8 +145,7 @@
   </div>
 
   <!-- Reject Reason Modal -->
-  <app-reject-reason-modal [isVisible]="showRejectModal" (onConfirm)="handleRejectConfirm($event)"
-  <!-- Reject Reason Modal -->
+
   <app-reject-reason-modal [isVisible]="showRejectModal" (onConfirm)="handleRejectConfirm($event)"
     (onCancel)="handleRejectCancel()">
   </app-reject-reason-modal>
