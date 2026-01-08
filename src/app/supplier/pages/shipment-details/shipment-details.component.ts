@@ -6,8 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { SupplierDataService, Parcel } from '../../services/supplier-data.service';
 import { LynxTalismanComponent } from '../../../shared/components/lynx-talisman/lynx-talisman.component';
 import { AssignmentObservation } from '../../../models/assignment-observation.model';
-import { LynxTalismanComponent } from '../../../shared/components/lynx-talisman/lynx-talisman.component';
-import { AssignmentObservation } from '../../../models/assignment-observation.model';
+
 
 interface PackageDetail {
     description: string;
@@ -52,7 +51,7 @@ interface ShipmentDetails {
     selector: 'app-shipment-details',
     standalone: true,
     imports: [CommonModule, RouterModule, FormsModule, LynxTalismanComponent],
-    imports: [CommonModule, RouterModule, FormsModule, LynxTalismanComponent],
+
     templateUrl: './shipment-details.component.html',
     styleUrl: './shipment-details.component.css'
 })
@@ -64,7 +63,7 @@ export class ShipmentDetailsComponent implements OnInit {
     isLoading = false;
     trackingId: string | null = null;
     explanation: AssignmentObservation | null = null;
-    explanation: AssignmentObservation | null = null;
+
 
     constructor(
         private route: ActivatedRoute,
@@ -213,12 +212,12 @@ export class ShipmentDetailsComponent implements OnInit {
         const confirmMsg = 'هل أنت متأكد من حذف هذه الشحنة نهائياً؟ سيؤدي هذا لإزالتها من قاعدة البيانات.';
         if (confirm(confirmMsg)) {
             this.isLoading = true;
-            this.dataService.deleteRequest(this.shipment.id).subscribe({
+            this.dataService.cancelParcel(this.shipment.id).subscribe({
                 next: () => {
                     console.log('Shipment deleted successfully');
                     this.router.navigate(['/supplier/shipments']);
                 },
-                error: (err) => {
+                error: (err: any) => {
                     console.error('Error during shipment deletion:', err);
 
                     // Check for database constraint error in the 500 response

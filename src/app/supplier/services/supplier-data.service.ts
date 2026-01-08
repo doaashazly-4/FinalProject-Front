@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError, of, from } from 'rxjs';
 import { AssignmentObservation } from '../../models/assignment-observation.model';
-import { AssignmentObservation } from '../../models/assignment-observation.model';
+
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
@@ -614,106 +614,6 @@ export class SupplierDataService {
   }
 
 
-  // ================= INVENTORY HELPERS =================
-
-  getProductCategories(): Observable<string[]> {
-    return this.getProducts().pipe(
-      map(products => [...new Set(products.map(p => p.category))])
-    );
-  }
-
-  getLowStockProducts(): Observable<SupplierProduct[]> {
-    return this.getProducts().pipe(
-      map(products => products.filter(p => p.quantity > 0 && p.quantity <= 10))
-    );
-  }
-
-  getOutOfStockProducts(): Observable<SupplierProduct[]> {
-    return this.getProducts().pipe(
-      map(products => products.filter(p => p.quantity === 0))
-    );
-  }
-
-  updateProductQuantity(id: string, quantity: number): Observable<void> {
-    return this.http.patch<void>(`${this.apiUrl}/Products/${id}`, { quantity });
-  }
-
-  // ================= ORDERS (Mapped from Parcels for UI) =================
-
-  getOrders(): Observable<SupplierOrderRow[]> {
-    return this.getParcels().pipe(
-      map(parcels => parcels.map(p => this.mapParcelToOrderRow(p)))
-    );
-  }
-
-  private mapParcelToOrderRow(p: Parcel): SupplierOrderRow {
-    let uiStatus = 'pending';
-
-    // Map backend status to UI status
-    switch (p.status) {
-      case 'ready_for_pickup':
-        uiStatus = 'ready';
-        break;
-      case 'assigned':
-      case 'picked_up':
-      case 'in_transit':
-      case 'out_for_delivery':
-        uiStatus = 'shipping';
-        break;
-      case 'delivered':
-        uiStatus = 'delivered';
-        break;
-      case 'cancelled':
-      case 'failed_delivery':
-      case 'returned':
-        uiStatus = 'cancelled';
-        break;
-      default:
-        uiStatus = 'pending';
-    }
-
-    return {
-      id: p.id,
-      customer: p.receiverName || 'Unknown Customer',
-      destination: p.deliveryAddress || 'Unknown Destination',
-      total: p.codAmount || 0,
-      createdAt: p.createdAt,
-      status: uiStatus
-    };
-  }
-
-  updateOrderStatus(orderId: string, newStatus: string): Observable<SupplierOrderRow> {
-    let action$: Observable<any>;
-
-    switch (newStatus) {
-      case 'ready':
-        action$ = this.markReadyForPickup(orderId);
-        break;
-      case 'cancelled':
-        action$ = this.cancelParcel(orderId);
-        break;
-      default:
-        // For statuses we can't trigger, we just re-fetch to see if it changed externally 
-        // or return current state.
-        action$ = of({});
-        console.log(`Update status to ${newStatus} requested but no API action mapped.`);
-    }
-
-    return action$.pipe(
-      switchMap(() => this.getParcelById(orderId)),
-      map(parcel => this.mapParcelToOrderRow(parcel))
-    );
-  }
-
-}
-
-export interface SupplierOrderRow {
-  id: string;
-  customer: string;
-  destination: string;
-  total: number;
-  createdAt: string | Date;
-  status: string;
   // ================= INVENTORY HELPERS =================
 
   getProductCategories(): Observable<string[]> {
