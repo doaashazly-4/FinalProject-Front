@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ParticleBackgroundComponent } from '../../../shared/components/particle-background/particle-background.component';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService, ClientLoginDTO } from '../../../shared/services/auth.service';
@@ -10,7 +11,7 @@ import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ParticleBackgroundComponent],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
@@ -83,6 +84,7 @@ export class LoginComponent implements OnInit {
       this.selectedSubRole = role as 'supplier' | 'courier';
     }
   }
+
 
   setLoginMode(mode: 'supplier_courier' | 'client'): void {
     this.loginMode = mode;
@@ -256,3 +258,5 @@ export class LoginComponent implements OnInit {
     this.hidePassword = !this.hidePassword;
   }
 }
+
+
