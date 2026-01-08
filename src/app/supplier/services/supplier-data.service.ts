@@ -519,8 +519,12 @@ export class SupplierDataService {
   // ================= TRACKING METHODS =================
 
   getParcelTimeline(parcelId: string): Observable<ParcelTimelineEvent[]> {
-    return this.http.get<ParcelTimelineEvent[]>(`${this.apiUrl}/Request/${parcelId}/Timeline`);
-  }
+  return this.http.get<{ timeline: ParcelTimelineEvent[] }>(`${this.apiUrl}/TrackOrder/${parcelId}`)
+    .pipe(
+      map(res => res.timeline ?? []) // لو السيرفر بيرجع timeline جوه object
+    );
+}
+
 
   getCarrierLiveLocation(parcelId: string): Observable<CarrierLiveLocation> {
     return this.http.get<CarrierLiveLocation>(`${this.apiUrl}/Request/${parcelId}/CarrierLocation`);

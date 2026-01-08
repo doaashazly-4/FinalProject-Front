@@ -18,6 +18,8 @@ import {
 } from '../../services/supplier-data.service';
 import { interval, Subscription, timer } from 'rxjs';
 import * as L from 'leaflet';
+import { AuthService } from '../../../shared/services/auth.service';
+import { SignalRService } from '../../../shared/services/signalr.service';
 
 @Component({
   selector: 'app-track',
@@ -73,7 +75,10 @@ export class TrackComponent
 
   constructor(
     private dataService: SupplierDataService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private signalR: SignalRService,
+    private auth: AuthService
+    
   ) { }
 
   /* ================= INIT ================= */
@@ -96,6 +101,13 @@ export class TrackComponent
         this.searchParcel();
       }
     });
+
+    this.route.queryParams.subscribe(params => {
+    if (params['id']) {
+      this.trackingNumber = params['id'];
+      this.searchParcel();
+    }
+  });
   }
 
   ngAfterViewInit(): void {
@@ -112,45 +124,60 @@ export class TrackComponent
 
   /* ================= SEARCH ================= */
 
-  searchParcel(): void {
-    if (!this.trackingNumber.trim()) {
-      this.errorMessage = 'يرجى إدخال رقم التتبع';
-      return;
-    }
-
-    this.isSearching = true;
-    this.errorMessage = '';
-    this.parcel = null;
-    this.timeline = [];
-    this.stopLiveTracking();
-    this.destroyMap();
-
-    // Mock search for demo purposes if real API fails or to force success
-    // For now, we use the real service, but if it fails we might autofill a mock for the user to see the map
-    this.dataService.trackParcel(this.trackingNumber).subscribe({
-      next: (parcel) => {
-        this.parcel = parcel;
-        // Forcing status to in_transit for demo purposes if it's not
-        // this.parcel.status = 'in_transit'; 
-
-        this.loadTimeline();
-        this.isSearching = false;
-
-        if (this.shouldShowLiveTracking()) {
-          // Delay slightly to let DOM render
-          setTimeout(() => {
-            this.initMap();
-            this.startSimulation();
-          }, 100);
-        }
-      },
-      error: () => {
-        // Fallback or error message
-        this.errorMessage = 'لم يتم العثور على شحنة بهذا الرقم';
-        this.isSearching = false;
-      }
-    });
+ searchParcel(): void {
+  if (!this.trackingNumber.trim()) {
+    this.errorMessage = 'يرجى إدخال رقم التتبع';
+    return;
   }
+
+  this.isSearching = true;
+  this.errorMessage = '';
+  this.parcel = null;
+  this.timeline = [];
+
+  // إيقاف أي تتبع سابق
+  this.stopLiveTracking();
+  this.destroyMap();
+
+  this.dataService.trackParcel(this.trackingNumber).subscribe({
+    next: (parcel) => {
+      this.parcel = parcel;
+      this.loadTimeline();
+      this.isSearching = false;
+
+      if (this.shouldShowLiveTracking()) {
+        setTimeout(() => {
+          // 1️⃣ إنشاء الخريطة
+          this.initMap();
+
+          // 2️⃣ تشغيل SignalR
+          const token = this.auth.getToken();
+          if (!token) return;
+
+       this.signalR.startConnection(token).then(() => {
+  if (this.parcel && this.parcel.id) {
+    this.signalR.joinOrderGroup(this.parcel.id);
+  }
+});
+
+
+
+          // 4️⃣ استقبال الموقع اللايف وتحديث الماركر
+          this.signalR.location$.subscribe(location => {
+            if (location) {
+              this.updateCarrierMarker(location.lat, location.lng);
+            }
+          });
+        }, 100);
+      }
+    },
+    error: () => {
+      this.errorMessage = 'لم يتم العثور على شحنة بهذا الرقم';
+      this.isSearching = false;
+    }
+  });
+}
+
 
   loadDemoParcel(): void {
     this.isSearching = true;
@@ -160,25 +187,25 @@ export class TrackComponent
     this.trackingNumber = 'DEMO-123456';
 
     // Fake Parcel Data
-    this.parcel = {
-      id: 'demo-123',
-      trackingNumber: 'DEMO-123456',
-      description: 'Demo Electronics Package',
-      weight: 2.5,
-      pickupAddress: 'Cairo, Tahrir Square',
-      deliveryAddress: 'Cairo, Ramses Station',
-      receiverName: 'Ahmed Mohamed',
-      receiverPhone: '01012345678',
-      status: 'in_transit',
-      priority: 'normal',
-      createdAt: new Date().toISOString(),
-      courierId: 'courier-007',
-      courierName: 'Fast Courier',
-      courierPhone: '01234567890',
-      deliveryFee: 50,
-      codAmount: 1500,
-      isReadyForPickup: true
-    };
+    // this.parcel = {
+    //   id: 'demo-123',
+    //   trackingNumber: 'DEMO-123456',
+    //   description: 'Demo Electronics Package',
+    //   weight: 2.5,
+    //   pickupAddress: 'Cairo, Tahrir Square',
+    //   deliveryAddress: 'Cairo, Ramses Station',
+    //   receiverName: 'Ahmed Mohamed',
+    //   receiverPhone: '01012345678',
+    //   status: 'in_transit',
+    //   priority: 'normal',
+    //   createdAt: new Date().toISOString(),
+    //   courierId: 'courier-007',
+    //   courierName: 'Fast Courier',
+    //   courierPhone: '01234567890',
+    //   deliveryFee: 50,
+    //   codAmount: 1500,
+    //   isReadyForPickup: true
+    // };
 
     // Fake Timeline
     this.timeline = [
@@ -192,7 +219,7 @@ export class TrackComponent
     // Start Simulation
     setTimeout(() => {
       this.initMap();
-      this.startSimulation();
+    //  this.startSimulation();
     }, 100);
   }
 
