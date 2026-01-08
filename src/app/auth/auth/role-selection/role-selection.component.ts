@@ -1,22 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ParticleBackgroundComponent } from '../../../shared/components/particle-background/particle-background.component';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-role-selection',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ParticleBackgroundComponent],
   templateUrl: './role-selection.component.html',
   styleUrls: ['./role-selection.component.css']
 })
 export class RoleSelectionComponent implements OnInit {
   selectedRole: string = '';
   showCombinedDropdown = false;
-  
-  constructor(private router: Router) {}
 
-  ngOnInit(): void {}
+  constructor(private router: Router) { }
+
+  ngOnInit(): void { }
 
   selectRole(roleId: string): void {
     this.selectedRole = roleId;
