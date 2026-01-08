@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ParticleBackgroundComponent } from '../../../shared/components/particle-background/particle-background.component';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../shared/services/auth.service';
@@ -7,7 +8,7 @@ import { AuthService } from '../../../shared/services/auth.service';
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ParticleBackgroundComponent],
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.css']
 })
@@ -37,7 +38,7 @@ export class ResetPasswordComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       this.token = params['token'] || '';
       this.email = params['email'] || '';
-      
+
       if (!this.token || !this.email) {
         this.errorMessage = 'رابط غير صالح. يرجى طلب رابط جديد.';
         setTimeout(() => {

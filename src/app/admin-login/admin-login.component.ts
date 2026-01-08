@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ParticleBackgroundComponent } from '../shared/components/particle-background/particle-background.component';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -10,7 +11,7 @@ import { environment } from '../../environments/environment';
 @Component({
   selector: 'app-admin-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ParticleBackgroundComponent],
   templateUrl: './admin-login.component.html',
   styleUrls: ['./admin-login.component.css']
 })
