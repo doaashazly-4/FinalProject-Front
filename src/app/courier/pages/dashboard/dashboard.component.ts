@@ -4,11 +4,13 @@ import { RouterModule, Router } from '@angular/router';
 import { CourierDataService, DeliveryJob, CourierStat, CourierEarnings, JobStatus } from '../../services/courier-data.service';
 import { PushNotificationService } from '../../../shared/services/push-notification.service';
 import { Observable } from 'rxjs';
+import { DeliveryProofComponent } from '../delivery/components/delivery-proof.component';
+import { FailedDeliveryProofComponent } from '../delivery/components/failed-delivery-proof.component';
 
 @Component({
   selector: 'app-courier-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, DeliveryProofComponent, FailedDeliveryProofComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -31,6 +33,7 @@ export class CourierDashboardComponent implements OnInit {
   // ===== Modals =====
   showProofModal = false;
   showFailedModal = false;
+  selectedJobForProof: DeliveryJob | null = null;
 
   constructor(
     private dataService: CourierDataService,
@@ -49,7 +52,7 @@ export class CourierDashboardComponent implements OnInit {
   ngOnInit(): void {
     this.loadData();
     this.loadEarnings();
-     this.loadAvailability();
+    this.loadAvailability();
     // this.checkForNewOrders();
     this.pushService.requestPermissionAndRegister().catch(err => console.warn('Push init failed', err));
     //setInterval(() => this.checkForNewOrders(), 30000);
@@ -109,43 +112,43 @@ export class CourierDashboardComponent implements OnInit {
     });
   }
 
-loadAvailability(): void {
-  this.dataService.getAvailability().subscribe({
-    next: (res: { isAvailable: boolean }) => {
-    console.log(res);
-    
-      this.isAvailable = res.isAvailable; 
-    },
-    error: (err) => {
-      console.error('Failed to load availability:', err);
-    }
-  });
-}
+  loadAvailability(): void {
+    this.dataService.getAvailability().subscribe({
+      next: (res: { isAvailable: boolean }) => {
+        console.log(res);
+
+        this.isAvailable = res.isAvailable;
+      },
+      error: (err) => {
+        console.error('Failed to load availability:', err);
+      }
+    });
+  }
 
 
 
 
 
 
- loadData(): void {
-  this.isLoading = true;
+  loadData(): void {
+    this.isLoading = true;
 
 
-  this.dataService.getStats().subscribe({
-    next: (s: CourierStat[]) => this.stats = Array.isArray(s) ? s : [],
-    error: () => this.stats = []
-  });
+    this.dataService.getStats().subscribe({
+      next: (s: CourierStat[]) => this.stats = Array.isArray(s) ? s : [],
+      error: () => this.stats = []
+    });
 
-  this.dataService.getActiveJobs().subscribe({
-    next: (j: DeliveryJob[]) => this.activeJobs = Array.isArray(j) ? j : [],
-    error: () => this.activeJobs = []
-  });
+    this.dataService.getActiveJobs().subscribe({
+      next: (j: DeliveryJob[]) => this.activeJobs = Array.isArray(j) ? j : [],
+      error: () => this.activeJobs = []
+    });
 
-  this.dataService.getAvailableJobs().subscribe({
-    next: (j: DeliveryJob[]) => this.availableJobs = Array.isArray(j) ? j.slice(0, 3) : [],
-    error: () => this.availableJobs = [],
-    complete: () => this.isLoading = false
-  });
+    this.dataService.getAvailableJobs().subscribe({
+      next: (j: DeliveryJob[]) => this.availableJobs = Array.isArray(j) ? j.slice(0, 3) : [],
+      error: () => this.availableJobs = [],
+      complete: () => this.isLoading = false
+    });
 
 
     this.dataService.getMyJobs().subscribe({
@@ -172,7 +175,7 @@ loadAvailability(): void {
 
     this.dataService.updateJobStatus(Number(job.id), status, undefined, additionalData).subscribe({
       next: (res) => {
-        console.log("updateJobStatus",res);
+        console.log("updateJobStatus", res);
         job.status = status
       },
       error: (err) => {
@@ -297,8 +300,37 @@ loadAvailability(): void {
   callReceiver(phone: string) { window.open(`tel:${phone}`, '_self'); }
 
   // ===== Delivery Proof Modals =====
-  handleDeliveryComplete(event: any) { this.showProofModal = false; this.updateJobStatus(event.job, 'delivered', event.photos, event.otp); }
-  cancelModal() { this.showProofModal = false; this.showFailedModal = false; }
-  handleDeliveryFailure(event: any) { this.showFailedModal = false; this.updateJobStatus(event.job, 'failed', event.photos); }
+  // ===== Delivery Proof Modals =====
+  openProofModal(job: DeliveryJob): void {
+    this.selectedJobForProof = job;
+    this.showProofModal = true;
+  }
+
+  openFailedModal(job: DeliveryJob): void {
+    this.selectedJobForProof = job;
+    this.showFailedModal = true;
+  }
+
+  handleDeliveryComplete(event: any) {
+    this.showProofModal = false;
+    if (this.selectedJobForProof) {
+      this.updateJobStatus(this.selectedJobForProof, 'delivered', event.photos, event.otp);
+      this.selectedJobForProof = null;
+    }
+  }
+
+  cancelModal() {
+    this.showProofModal = false;
+    this.showFailedModal = false;
+    this.selectedJobForProof = null;
+  }
+
+  handleDeliveryFailure(event: any) {
+    this.showFailedModal = false;
+    if (this.selectedJobForProof) {
+      this.updateJobStatus(this.selectedJobForProof, 'failed', event.photos);
+      this.selectedJobForProof = null;
+    }
+  }
 
 }

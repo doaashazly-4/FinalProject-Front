@@ -27,6 +27,7 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
   isSubmitting = false;
   showSuccessModal = false;
   createdTrackingNumber = '';
+  createdId = '';
   statusMessage = '';
 
   // Map State
@@ -482,6 +483,7 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
       next: (parcel) => {
         this.isSubmitting = false;
         this.createdTrackingNumber = parcel.trackingNumber;
+        this.createdId = parcel.id || parcel.trackingNumber; // Fallback if ID not returned
         this.showSuccessModal = true;
       },
       error: (err) => {
@@ -564,6 +566,19 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     if (control.errors['min']) return `القيمة لا يجب أن تقل عن ${control.errors['min'].min}`;
     if (control.errors['max']) return `القيمة لا يجب أن تزيد عن ${control.errors['max'].max}`;
     return 'قيمة غير صالحة';
+  }
+
+  assignNow(): void {
+    const idToAssign = this.createdId || this.createdTrackingNumber;
+    if (idToAssign) {
+      this.router.navigate(['/supplier/shipments'], {
+        queryParams: { assign: idToAssign }
+      });
+    }
+  }
+
+  get isUrgentOrder(): boolean {
+    return this.shipmentForm.get('priority')?.value === 'urgent';
   }
 
   useNoCustomer(): void {
