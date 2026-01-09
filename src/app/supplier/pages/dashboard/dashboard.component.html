@@ -1,260 +1,366 @@
-<div class="space-y-6">
-  <!-- Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <div>
-      <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">لوحة تحكم المُرسل</h1>
-      <p class="text-gray-600 mt-1">مرحباً بك، إليك نظرة عامة على شحناتك</p>
-    </div>
-    <div class="flex items-center gap-3">
-      <div class="text-sm text-gray-500 bg-white px-4 py-2 rounded-xl border border-gray-200">
-        <i class="bi bi-calendar3 ml-2 text-primary-green"></i>
-        {{ today | date:'fullDate':'':'ar' }}
+<div class="space-y-10 animate-fade-in pb-12 selection:bg-primary-green/30">
+
+  <!-- Premium Command Header -->
+  <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8 pt-4">
+    <div class="space-y-3" [ngClass]="langService.isRtl() ? 'text-right' : 'text-left'">
+      <div class="flex items-center gap-3 mb-1">
+        <span
+          class="inline-flex items-center gap-2 px-3 py-1 bg-primary-green/10 text-primary-green text-[10px] font-black uppercase tracking-widest rounded-full border border-primary-green/20">
+          <lucide-icon name="activity" [size]="12"></lucide-icon>
+          {{ langService.currentLang() === 'ar' ? 'البوابة اللوجستية' : 'Logistics Portal' }}
+        </span>
+        <div
+          class="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 text-blue-500 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-500/20">
+          <div class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
+          {{ langService.currentLang() === 'ar' ? 'مباشر' : 'Live' }}
+        </div>
       </div>
+      <h1 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+        {{ langService.currentLang() === 'ar' ? 'لوحة تحكم كبار المُرسلين' : 'Elite Supplier Hub' }}
+      </h1>
+      <p class="text-slate-500 dark:text-slate-400 font-medium text-lg max-w-2xl leading-relaxed">
+        {{ langService.currentLang() === 'ar' ? 'مرحباً بعودتك! شاشتك الموحدة لمتابعة كل الشحنات والعمليات الميدانية
+        بكفاءة عالية واحترافية.' : 'Welcome back! Your unified command center for monitoring all shipments and field
+        operations with high efficiency and professionalism.' }}
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-4">
+      <div class="glass flex items-center gap-4 px-6 py-4 rounded-[2rem] border-subtle shadow-premium">
+        <div
+          class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 flex items-center justify-center">
+          <lucide-icon name="calendar" [size]="24"></lucide-icon>
+        </div>
+        <div [ngClass]="langService.isRtl() ? 'text-right' : 'text-left'">
+          <p class="text-[10px] font-black text-slate-400 tracking-widest uppercase mb-0.5">
+            {{ langService.currentLang() === 'ar' ? 'التاريخ اليومي' : 'System Date' }}
+          </p>
+          <p class="text-sm font-black text-slate-900 dark:text-white">{{ today | date:'MMMM d, yyyy' }}</p>
+        </div>
+      </div>
+
       <a routerLink="/supplier/create-shipment"
-        class="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl shadow-green hover:shadow-green-lg transition-all">
-        <i class="bi bi-plus-lg"></i>
-        <span>طلب جديد</span>
+        class="btn-primary py-4 px-8 shadow-green-soft hover:shadow-green-lg group">
+        <lucide-icon name="plus" [size]="20"
+          class="group-hover:rotate-90 transition-transform duration-500"></lucide-icon>
+        <span>{{ langService.currentLang() === 'ar' ? 'إنشاء شحنة جديدة' : 'New Dispatch' }}</span>
       </a>
     </div>
   </div>
 
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="flex justify-center items-center py-20">
-    <div class="text-center">
-      <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4">
-      </div>
-      <p class="text-gray-500">جاري تحميل البيانات...</p>
-    </div>
+  <!-- Loading State Skeleton -->
+  <div *ngIf="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div *ngFor="let i of [1,2,3,4]" class="h-32 rounded-[2rem] bg-slate-100 dark:bg-slate-800 animate-pulse"></div>
   </div>
 
-  <div *ngIf="!isLoading" class="space-y-8">
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+  <div *ngIf="!isLoading" class="space-y-12">
+
+    <!-- High-Definition Metrics Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       <div *ngFor="let stat of stats; let i = index"
-        class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-        <div class="flex items-center gap-4">
-          <div class="w-14 h-14 rounded-2xl flex items-center justify-center shadow-md bg-gradient-to-br"
-            [ngClass]="getStatIconBg(i)">
-            <i class="bi text-white text-2xl" [ngClass]="stat.icon"></i>
-          </div>
-          <div class="flex-1">
-            <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">{{ stat.label }}</p>
-            <div class="flex items-baseline gap-2 mt-1">
-              <span class="text-2xl font-black text-primary-dark">{{ stat.value }}</span>
-              <span *ngIf="stat.trend" class="text-xs font-black px-2 py-0.5 rounded-lg"
-                [ngClass]="stat.trend.startsWith('+') ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'">
-                {{ stat.trend }}
-              </span>
+        class="group relative p-6 bg-white dark:bg-slate-900/50 rounded-[2rem] border border-slate-200 dark:border-slate-800 hover:border-primary-green/30 hover:shadow-premium transition-all duration-500 overflow-hidden">
+
+        <!-- Abstract Glass Background Decorations -->
+        <div
+          class="absolute -top-12 -right-12 w-32 h-32 bg-slate-50 dark:bg-slate-800/50 rounded-full group-hover:scale-110 transition-transform duration-700">
+        </div>
+        <div
+          class="absolute -bottom-10 -left-10 w-24 h-24 bg-primary-green/5 rounded-full blur-2xl group-hover:bg-primary-green/10 transition-all">
+        </div>
+
+        <div class="relative z-10 flex flex-col gap-6">
+          <div class="flex items-center justify-between">
+            <div
+              class="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3"
+              [ngClass]="i === 0 ? 'bg-slate-900 shadow-slate-900/20' : i === 1 ? 'bg-amber-500 shadow-amber-500/20' : i === 2 ? 'bg-primary-green shadow-primary-green/20' : 'bg-red-500 shadow-red-500/20'">
+              <lucide-icon [name]="i === 0 ? 'package' : i === 1 ? 'clock' : i === 2 ? 'check-circle-2' : 'x-circle'"
+                [size]="28"></lucide-icon>
             </div>
+            <div *ngIf="stat.trend"
+              class="px-3 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase flex items-center gap-1.5"
+              [ngClass]="stat.trend.startsWith('+') ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'">
+              <lucide-icon [name]="stat.trend.startsWith('+') ? 'trending-up' : 'trending-down'"
+                [size]="12"></lucide-icon>
+              {{ stat.trend }}
+            </div>
+          </div>
+
+          <div [ngClass]="langService.isRtl() ? 'text-right' : 'text-left'">
+            <p class="text-[11px] text-slate-400 font-black uppercase tracking-[0.2em] mb-1.5">{{
+              getStatLabel(stat.label) }}</p>
+            <p class="text-4xl font-black text-slate-900 dark:text-white tracking-tight">{{ stat.value }}</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Main Content Layout -->
-    <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+    <!-- Main Operational Workspace -->
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
 
-      <!-- Left Column: Order Monitor (Takes 3/4 space) -->
-      <div class="xl:col-span-3 space-y-6">
-        <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+      <!-- Left: Real-Time Shipment Matrix (8 columns) -->
+      <div class="xl:col-span-8 space-y-6">
+        <div class="card-premium overflow-hidden bg-white dark:bg-slate-900/40">
+          <!-- Table Header / Card Title -->
           <div
-            class="p-8 border-b border-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-gradient-to-r from-gray-50/50 to-white">
-            <div>
-              <h2 class="text-2xl font-black text-primary-dark flex items-center gap-3">
-                <div
-                  class="w-10 h-10 rounded-xl bg-primary-green/10 text-primary-green flex items-center justify-center">
-                  <i class="bi bi-clipboard2-data-fill"></i>
-                </div>
-                مراقبة الشحنات الجارية
-              </h2>
-              <p class="text-gray-500 mt-1 text-sm">أحدث 10 شحنات تم إنشاؤها وتتبع حالاتها الحالية</p>
+            class="p-8 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div class="flex items-center gap-5">
+              <div
+                class="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center shadow-inner">
+                <lucide-icon name="layout-dashboard" [size]="28"></lucide-icon>
+              </div>
+              <div>
+                <h2 class="text-2xl font-black text-slate-900 dark:text-white">{{ langService.currentLang() === 'ar' ?
+                  'مراقبة العمليات الجارية' : 'Operational Workspace' }}</h2>
+                <p class="text-sm text-slate-400 font-medium mt-1">{{ langService.currentLang() === 'ar' ? 'بث مباشر
+                  لأحدث الشحنات وحالة تنفيذهل' : 'Real-time orchestration of active field logistics' }}</p>
+              </div>
             </div>
             <a routerLink="/supplier/shipments"
-              class="px-6 py-2.5 bg-primary-dark text-white font-bold text-sm rounded-xl hover:bg-black transition-all shadow-lg hover:shadow-primary-dark/20">
-              شاهد الكل
+              class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+              <span>{{ langService.currentLang() === 'ar' ? 'الأرشيف الكامل' : 'Full Registry' }}</span>
+              <lucide-icon [name]="langService.isRtl() ? 'arrow-left' : 'arrow-right'" [size]="16"></lucide-icon>
             </a>
           </div>
 
-          <div class="p-6">
-            <div *ngIf="pendingParcels && pendingParcels.length > 0" class="space-y-4">
-              <div *ngFor="let parcel of (showAllParcels ? pendingParcels : pendingParcels.slice(0, 5))"
-                class="group relative bg-white rounded-2xl border border-gray-100 hover:border-primary-green/30 hover:shadow-2xl hover:shadow-primary-green/5 transition-all duration-300 p-6">
+          <!-- The Matrix Table -->
+          <div class="overflow-x-auto">
+            <div *ngIf="pendingParcels && pendingParcels.length > 0; else emptyState">
 
-                <!-- 3D status ribbon visual -->
-                <div
-                  class="absolute right-0 top-6 bottom-6 w-1.5 rounded-l-full shadow-[2px_0_8px_rgba(0,0,0,0.1)] transition-all duration-300"
-                  [ngClass]="{
-                    'bg-yellow-400 shadow-yellow-400/20': parcel.status === 'pending',
-                    'bg-blue-400 shadow-blue-400/20': parcel.status === 'ready_for_pickup' || parcel.status === 'assigned',
-                    'bg-purple-500 shadow-purple-500/20': parcel.status === 'picked_up' || parcel.status === 'in_transit',
-                    'bg-green-500 shadow-green-500/20': parcel.status === 'delivered',
-                    'bg-red-500 shadow-red-500/20': parcel.status === 'cancelled' || parcel.status === 'failed_delivery',
-                    'bg-gray-400': parcel.status === 'returned'
-                  }">
-                </div>
+              <!-- Desktop Header -->
+              <table class="w-full text-left" [dir]="langService.isRtl() ? 'rtl' : 'ltr'">
+                <thead class="bg-slate-50/50 dark:bg-slate-800/30">
+                  <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <th class="px-8 py-5">{{ langService.currentLang() === 'ar' ? 'تعريف الشحنة' : 'Logistics ID' }}
+                    </th>
+                    <th class="px-6 py-5">{{ langService.currentLang() === 'ar' ? 'المستلم والوجهة' : 'Receiver & Hub'
+                      }}</th>
+                    <th class="px-6 py-5">{{ langService.currentLang() === 'ar' ? 'الحالة الحالية' : 'Execution Status'
+                      }}</th>
+                    <th class="px-8 py-5 text-right" [class.text-left]="langService.isRtl()">{{
+                      langService.currentLang() === 'ar' ? 'تحكم' : 'Control' }}</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                  <tr *ngFor="let parcel of (showAllParcels ? pendingParcels : pendingParcels.slice(0, 8))"
+                    class="group hover:bg-slate-50/80 dark:hover:bg-slate-800/20 transition-all duration-300">
 
-                <div class="flex flex-col lg:flex-row lg:items-center gap-6">
-                  <!-- Order Identity -->
-                  <div class="flex items-center gap-5 flex-1">
-                    <div
-                      class="w-14 h-14 rounded-[1.25rem] flex items-center justify-center bg-gray-50 text-gray-400 group-hover:bg-primary-green/10 group-hover:text-primary-green group-hover:rotate-6 transition-all duration-500">
-                      <i class="bi bi-box-seam text-2xl"></i>
-                    </div>
-                    <div class="flex flex-col min-w-0">
-                      <div class="flex items-center gap-3 mb-1.5 flex-wrap">
-                        <span class="font-black text-xl text-primary-dark">#{{ parcel.id }}</span>
-                        <span
-                          class="px-3 py-1 rounded-lg text-[10px] font-black tracking-widest uppercase border-2 shadow-sm"
-                          [ngClass]="getStatusClass(parcel.status)">
-                          {{ getStatusText(parcel.status) }}
-                        </span>
+                    <!-- ID & Details -->
+                    <td class="px-8 py-6">
+                      <div class="flex items-center gap-4">
+                        <div
+                          class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center group-hover:bg-primary-green group-hover:text-white transition-all transform group-hover:scale-105 duration-300">
+                          <lucide-icon name="package" [size]="20"></lucide-icon>
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                          <span class="text-sm font-black text-slate-900 dark:text-white tracking-tight">LX-{{ parcel.id
+                            }}</span>
+                          <span class="text-xs text-slate-400 font-bold truncate max-w-[120px]">{{ parcel.description
+                            }}</span>
+                        </div>
                       </div>
-                      <div class="flex items-center gap-4 text-xs text-gray-500 font-bold">
-                        <span class="flex items-center gap-1.5">
-                          <i class="bi bi-calendar3 text-primary-green"></i>
-                          {{ formatDate(parcel.createdAt) }}
-                        </span>
-                        <span class="flex items-center gap-1.5">
-                          <i class="bi bi-geo-alt text-primary-green"></i>
-                          <span class="truncate max-w-[150px]">{{ parcel.deliveryAddress }}</span>
-                        </span>
+                    </td>
+
+                    <!-- Hub / Receiver -->
+                    <td class="px-6 py-6">
+                      <div class="flex flex-col">
+                        <span class="text-sm font-black text-slate-800 dark:text-slate-200">{{ parcel.receiverName
+                          }}</span>
+                        <div
+                          class="flex items-center gap-1.5 mt-1 text-slate-400 group-hover:text-primary-green transition-colors">
+                          <lucide-icon name="map-pin" [size]="12"></lucide-icon>
+                          <span class="text-[10px] font-bold truncate max-w-[180px]">{{ parcel.deliveryAddress }}</span>
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    </td>
 
-                  <!-- Financials (3D feel) -->
-                  <div class="hidden md:flex items-center gap-8 px-8 border-x border-gray-100">
-                    <div class="text-center">
-                      <p class="text-[10px] text-gray-400 font-black uppercase tracking-tighter mb-1">قيمة COD</p>
-                      <p class="text-lg font-black text-primary-green bg-primary-green/5 px-3 py-1 rounded-lg">{{
-                        formatCurrency(parcel.codAmount) }}</p>
-                    </div>
-                  </div>
+                    <!-- Professional Status Badges -->
+                    <td class="px-6 py-6">
+                      <div [ngClass]="getStatusClass(parcel.status)"
+                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border transition-all duration-500 whitespace-nowrap">
+                        <div class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></div>
+                        {{ getStatusText(parcel.status) }}
+                      </div>
+                    </td>
 
-                  <div class="flex items-center gap-3">
-                    <a [routerLink]="['/supplier/shipment-details', parcel.id]"
-                      class="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 text-primary-dark font-black text-sm rounded-xl shadow-sm hover:shadow-md hover:border-primary-green hover:text-primary-green transition-all">
-                      <span>تفاصيل الطلب</span>
-                      <i class="bi bi-eye"></i>
-                    </a>
-                  </div>
+                    <!-- Dynamic Action Pad -->
+                    <td class="px-8 py-6 text-right" [class.text-left]="langService.isRtl()">
+                      <div class="flex items-center justify-end gap-2.5">
+                        <button *ngIf="parcel.status === 'pending'" (click)="markReadyForPickup(parcel)"
+                          class="px-4 py-2 bg-primary-green text-white text-[10px] font-black rounded-lg shadow-green-soft hover:shadow-green-lg transition-all hover:-translate-y-0.5">
+                          {{ langService.currentLang() === 'ar' ? 'تعميد للاستلام' : 'Authorize Pickup' }}
+                        </button>
+                        <a [routerLink]="['/supplier/track']" [queryParams]="{ id: parcel.id }"
+                          class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all"
+                          [title]="langService.currentLang() === 'ar' ? 'تتبع' : 'Track'">
+                          <lucide-icon name="navigation" [size]="18"></lucide-icon>
+                        </a>
+                        <a [routerLink]="['/supplier/shipment-details', parcel.id]"
+                          class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+                          <lucide-icon name="eye" [size]="18"></lucide-icon>
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
-                </div>
-              </div>
-
-              <!-- More Button -->
-              <div *ngIf="pendingParcels.length > 5" class="flex justify-center mt-8">
+              <!-- Load More with Modern Visuals -->
+              <div *ngIf="pendingParcels.length > 8"
+                class="p-8 border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/20 text-center">
                 <button (click)="showAllParcels = !showAllParcels"
-                  class="px-8 py-3 bg-white border-2 border-primary-green/20 text-primary-green font-black rounded-2xl hover:bg-primary-green hover:text-white hover:border-primary-green transition-all flex items-center gap-2 shadow-sm">
-                  <span>{{ showAllParcels ? 'عرض أقل' : 'عرض المزيد' }}</span>
-                  <i class="bi" [ngClass]="showAllParcels ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+                  class="inline-flex items-center gap-3 px-6 py-2 rounded-full text-xs font-black text-slate-400 hover:text-primary-green hover:bg-white dark:hover:bg-slate-900 shadow-sm transition-all border border-transparent hover:border-primary-green/20 uppercase tracking-[0.2em]">
+                  <span>{{ showAllParcels ? (langService.currentLang() === 'ar' ? 'ضغط البيانات' : 'Compress View') :
+                    (langService.currentLang() === 'ar' ? 'توسيع القائمة' : 'Expand Live Operations') }}</span>
+                  <lucide-icon [name]="showAllParcels ? 'chevron-up' : 'chevron-down'" [size]="16"
+                    class="animate-bounce"></lucide-icon>
                 </button>
               </div>
             </div>
 
-            <!-- Empty State -->
-            <div *ngIf="pendingParcels.length === 0"
-              class="flex flex-col items-center justify-center py-20 text-center">
-              <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
-                <i class="bi bi-inbox text-5xl text-gray-200"></i>
+            <ng-template #emptyState>
+              <div class="py-32 flex flex-col items-center justify-center text-center">
+                <div
+                  class="w-28 h-28 bg-slate-50 dark:bg-slate-800/50 rounded-full flex items-center justify-center mb-8 relative">
+                  <lucide-icon name="package" [size]="48" class="text-slate-200 dark:text-slate-700"></lucide-icon>
+                  <div
+                    class="absolute -top-1 -right-1 w-12 h-12 bg-primary-green rounded-2xl flex items-center justify-center text-white shadow-green-lg animate-bounce">
+                    <lucide-icon name="check-circle-2" [size]="24"></lucide-icon>
+                  </div>
+                </div>
+                <h3 class="text-2xl font-black text-slate-900 dark:text-white">{{ langService.currentLang() === 'ar' ?
+                  'لا يوجد مهام معلقة' : 'System Status Optimal' }}</h3>
+                <p class="text-slate-400 font-bold max-w-sm mx-auto mt-3 leading-relaxed">
+                  {{ langService.currentLang() === 'ar' ? 'جميع شحناتك تم توجيهها ومعالجتها بنجاح. لا يوجد طرود بحاجة
+                  لتدخل حالياً.' : 'Every asset is assigned and in motion. No immediate logistical intervention
+                  required.' }}
+                </p>
+                <a routerLink="/supplier/create-shipment" class="btn-primary mt-10 scale-110 px-10">
+                  <lucide-icon name="plus" [size]="20"></lucide-icon>
+                  {{ langService.currentLang() === 'ar' ? 'بدء شحنة جديدة' : 'Initiate New Transfer' }}
+                </a>
               </div>
-              <h3 class="text-xl font-black text-primary-dark mb-2">لا توجد طلبات معلقة</h3>
-              <p class="text-gray-500 max-w-xs mb-8">كل شحناتك الحالية جاهزة أو تم استلامها. يمكنك متابعتها من صفحة
-                الشحنات.</p>
-              <a routerLink="/supplier/create-shipment"
-                class="px-8 py-3 bg-primary-green text-white font-black rounded-xl shadow-green transition-all">
-                إنشاء شحنة جديدة
-              </a>
-            </div>
+            </ng-template>
           </div>
         </div>
       </div>
 
-      <!-- Right Column: Quick Actions & Brief Status -->
-      <div class="xl:col-span-1 space-y-6">
-        <!-- Reorganized Quick Actions -->
-        <div
-          class="bg-primary-dark rounded-[2.5rem] p-8 text-white shadow-xl shadow-primary-dark/20 overflow-hidden relative group">
-          <!-- Background accent -->
+      <!-- Right: Intelligence & Quick Action Panel (4 columns) -->
+      <div class="xl:col-span-4 space-y-8">
+
+        <!-- Intelligent Launchpad -->
+        <div class="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden group">
+          <!-- Premium Visual Treatments -->
+          <div class="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-primary-green via-blue-500 to-indigo-600">
+          </div>
           <div
-            class="absolute -top-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-3xl group-hover:bg-primary-green/10 transition-colors duration-700">
+            class="absolute -bottom-24 -left-24 w-80 h-80 bg-primary-green/20 rounded-full blur-[100px] group-hover:blur-[120px] transition-all duration-1000">
           </div>
 
-          <h2 class="text-xl font-black mb-8 flex items-center gap-3 relative">
-            <i class="bi bi-lightning-charge-fill text-accent-gold"></i>
-            إجراءات سريعة
-          </h2>
-
-          <div class="grid grid-cols-1 gap-4 relative">
-            <a routerLink="/supplier/create-shipment"
-              class="flex items-center gap-4 p-5 bg-gradient-to-br from-primary-green to-secondary-teal rounded-3xl hover:scale-[1.03] transition-all shadow-lg shadow-primary-green/20">
-              <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-2xl">
-                <i class="bi bi-plus-lg"></i>
-              </div>
-              <div>
-                <p class="font-black text-lg leading-tight">شحنة جديدة</p>
-                <p class="text-xs text-white/70">أضف طلباً فورياً</p>
-              </div>
-            </a>
-
-            <div class="grid grid-cols-2 gap-4">
-              <a routerLink="/supplier/track"
-                class="flex flex-col items-center justify-center p-5 bg-white/10 hover:bg-white/15 rounded-3xl transition-all border border-white/5">
-                <i class="bi bi-geo-alt text-2xl text-accent-gold mb-2"></i>
-                <span class="text-xs font-black">تتبع حي</span>
-              </a>
-              <a routerLink="/supplier/reports"
-                class="flex flex-col items-center justify-center p-5 bg-white/10 hover:bg-white/15 rounded-3xl transition-all border border-white/5">
-                <i class="bi bi-bar-chart text-2xl text-blue-400 mb-2"></i>
-                <span class="text-xs font-black">التقارير</span>
-              </a>
+          <div class="relative z-10">
+            <div class="flex items-center justify-between mb-10">
+              <h3 class="text-xl font-black flex items-center gap-3">
+                <lucide-icon name="zap" [size]="24" class="text-amber-400"></lucide-icon>
+                {{ langService.currentLang() === 'ar' ? 'مركز التحكم السريع' : 'Tactical Launchpad' }}
+              </h3>
+              <span
+                class="p-2 rounded-lg bg-white/5 border border-white/10 text-[10px] font-black tracking-widest uppercase">Premium
+                Hub</span>
             </div>
 
-            <a routerLink="/supplier/settings"
-              class="flex items-center justify-between p-5 bg-white/5 hover:bg-white/10 rounded-2xl transition-all group/opt">
-              <div class="flex items-center gap-3">
-                <i class="bi bi-gear-fill text-gray-400 group-hover/opt:rotate-90 transition-transform"></i>
-                <span class="text-sm font-bold">الإعدادات</span>
+            <div class="grid grid-cols-1 gap-4">
+              <a routerLink="/supplier/create-shipment"
+                class="group/btn flex items-center gap-5 p-5 bg-white/5 hover:bg-white/10 rounded-2xl transition-all border border-white/5 hover:border-white/20 backdrop-blur-xl">
+                <div
+                  class="w-14 h-14 rounded-2xl bg-primary-green text-white flex items-center justify-center shadow-green-soft group-hover/btn:scale-110 transition-transform duration-500">
+                  <lucide-icon name="plus" [size]="32"></lucide-icon>
+                </div>
+                <div>
+                  <p class="font-black text-lg leading-tight">{{ langService.currentLang() === 'ar' ? 'طلب إرسال' :
+                    'Instant Dispatch' }}</p>
+                  <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1.5">{{
+                    langService.currentLang() === 'ar' ? 'توجيه طرد بضغطة واحدة' : 'One-Tap Logistical Order' }}</p>
+                </div>
+              </a>
+
+              <div class="grid grid-cols-2 gap-4">
+                <a routerLink="/supplier/track"
+                  class="flex flex-col items-center justify-center p-6 bg-white/5 hover:bg-white/10 rounded-[2rem] transition-all border border-white/5 hover:-translate-y-1">
+                  <lucide-icon name="navigation" [size]="28" class="text-amber-400 mb-4"></lucide-icon>
+                  <span class="text-[10px] font-black tracking-[0.2em] uppercase text-white/70">{{
+                    langService.currentLang() === 'ar' ? 'تتبع العمليات' : 'Radar' }}</span>
+                </a>
+                <a routerLink="/supplier/reports"
+                  class="flex flex-col items-center justify-center p-6 bg-white/5 hover:bg-white/10 rounded-[2rem] transition-all border border-white/5 hover:-translate-y-1">
+                  <lucide-icon name="bar-chart-3" [size]="28" class="text-blue-400 mb-4"></lucide-icon>
+                  <span class="text-[10px] font-black tracking-[0.2em] uppercase text-white/70">{{
+                    langService.currentLang() === 'ar' ? 'التقارير' : 'Insights' }}</span>
+                </a>
               </div>
-              <i class="bi bi-chevron-left text-xs text-gray-500"></i>
-            </a>
+            </div>
           </div>
         </div>
 
-        <!-- Status Distribution Distribution -->
-        <div class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm">
-          <h3 class="text-lg font-black text-primary-dark mb-6">توزيع الحالات</h3>
-          <div class="space-y-4" *ngIf="dashboardData">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-3 h-3 rounded-full bg-amber-400"></div>
-                <span class="text-sm font-bold text-gray-600">في الانتظار</span>
+        <!-- Performance Distribution -->
+        <div class="card-premium p-8 bg-white dark:bg-slate-900/40">
+          <div class="flex items-center justify-between mb-8">
+            <h3 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-3">
+              <lucide-icon name="activity" [size]="20" class="text-primary-green"></lucide-icon>
+              {{ langService.currentLang() === 'ar' ? 'تحليل مسارات الشحن' : 'Traffic Intelligence' }}
+            </h3>
+            <div
+              class="px-2 py-1 rounded-md bg-slate-50 dark:bg-slate-800 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+              Real-time</div>
+          </div>
+
+          <div class="space-y-8" *ngIf="dashboardData">
+            <!-- Progress Bar: Pending -->
+            <div class="space-y-3">
+              <div class="flex items-center justify-between text-[11px] font-black uppercase tracking-widest">
+                <span class="text-slate-400">{{ langService.currentLang() === 'ar' ? 'في انتظار البدء' : 'Queue Depth'
+                  }}</span>
+                <span class="text-slate-900 dark:text-white">{{ dashboardData.pendingCount }} Assets</span>
               </div>
-              <span class="text-sm font-black text-primary-dark">{{ dashboardData.pendingCount }}</span>
+              <div class="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-slate-900 dark:bg-slate-200 transition-all duration-1000"
+                  [style.width.%]="(dashboardData.pendingCount / (dashboardData.totalCount || 1)) * 100"></div>
+              </div>
             </div>
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-3 h-3 rounded-full bg-blue-400"></div>
-                <span class="text-sm font-bold text-gray-600">جاهز للشحن</span>
+
+            <!-- Progress Bar: In Transit -->
+            <div class="space-y-3">
+              <div class="flex items-center justify-between text-[11px] font-black uppercase tracking-widest">
+                <span class="text-slate-400">{{ langService.currentLang() === 'ar' ? 'نشط ميدانياً' : 'Fleet Active'
+                  }}</span>
+                <span class="text-primary-green">{{ dashboardData.inTransitCount }} Pathfinding</span>
               </div>
-              <span class="text-sm font-black text-primary-dark">{{ dashboardData.readyForPickupCount }}</span>
+              <div class="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
+                <div class="h-full bg-primary-green transition-all duration-1000 shadow-[0_0_10px_rgba(76,175,80,0.5)]"
+                  [style.width.%]="(dashboardData.inTransitCount / (dashboardData.totalCount || 1)) * 100"></div>
+              </div>
             </div>
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-3 h-3 rounded-full bg-purple-500"></div>
-                <span class="text-sm font-bold text-gray-600">قيد التوصيل</span>
+
+            <!-- Featured Delivered Stat -->
+            <div class="pt-8 mt-8 border-t border-slate-100 dark:border-slate-800">
+              <div
+                class="group flex items-center justify-between p-5 bg-gradient-to-br from-emerald-500/10 to-transparent dark:from-emerald-500/5 rounded-3xl border border-emerald-500/20 hover:border-emerald-500/40 transition-all cursor-default">
+                <div class="flex items-center gap-4">
+                  <div
+                    class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-green-soft group-hover:scale-110 transition-transform">
+                    <lucide-icon name="check-circle-2" [size]="24"></lucide-icon>
+                  </div>
+                  <div>
+                    <p class="text-[10px] font-black text-emerald-600/60 uppercase tracking-widest leading-none mb-1.5">
+                      {{ langService.currentLang() === 'ar' ? 'الإنجاز اليومي' : 'Daily Quota' }}</p>
+                    <p class="font-black text-slate-900 dark:text-white">{{ langService.currentLang() === 'ar' ? 'طرود
+                      تم تسليمها' : 'Deliveries Successful' }}</p>
+                  </div>
+                </div>
+                <div class="text-3xl font-black text-emerald-500">{{ dashboardData.deliveredTodayCount }}</div>
               </div>
-              <span class="text-sm font-black text-primary-dark">{{ dashboardData.inTransitCount }}</span>
-            </div>
-            <div class="flex items-center justify-between pt-4 border-t border-gray-50">
-              <div class="flex items-center gap-3">
-                <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                <span class="text-sm font-bold text-gray-600">تم التسليم</span>
-              </div>
-              <span class="text-sm font-black text-green-600">{{ dashboardData.deliveredTodayCount }}</span>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>

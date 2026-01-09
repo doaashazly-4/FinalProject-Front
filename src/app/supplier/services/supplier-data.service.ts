@@ -183,6 +183,7 @@ export interface SenderDashboardData {
   inTransitCount: number;
   deliveredTodayCount: number;
   totalCodToday: number;
+  totalCount: number;
 }
 
 // ========== REPORTS INTERFACES (UC-SUP-05) ==========
@@ -502,11 +503,11 @@ export class SupplierDataService {
   // ================= TRACKING METHODS =================
 
   getParcelTimeline(parcelId: string): Observable<ParcelTimelineEvent[]> {
-  return this.http.get<{ timeline: ParcelTimelineEvent[] }>(`${this.apiUrl}/TrackOrder/${parcelId}`)
-    .pipe(
-      map(res => res.timeline ?? []) // لو السيرفر بيرجع timeline جوه object
-    );
-}
+    return this.http.get<{ timeline: ParcelTimelineEvent[] }>(`${this.apiUrl}/TrackOrder/${parcelId}`)
+      .pipe(
+        map(res => res.timeline ?? []) // لو السيرفر بيرجع timeline جوه object
+      );
+  }
 
 
   getCarrierLiveLocation(parcelId: string): Observable<CarrierLiveLocation> {
