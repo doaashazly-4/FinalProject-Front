@@ -1,112 +1,77 @@
 <!-- Hero Section -->
-<section id="home" class="relative min-h-[90vh] flex items-center overflow-hidden pt-24 pb-16 lg:pt-32 lg:pb-20">
-  <!-- Dynamic Background -->
-  <div class="absolute inset-0 z-0 bg-slate-900">
-    <img src="/assets/Images/pexels-norma-mortenson-4393668.jpg" alt="توصيل سريع"
-      class="w-full h-full object-cover opacity-20 mix-blend-overlay">
-    <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-brand-900/40 to-slate-900"></div>
-    <div
-      class="absolute -top-[20%] -right-[10%] w-[60%] h-[60%] bg-brand-500/20 rounded-full blur-[120px] animate-pulse-slow">
-    </div>
-    <div
-      class="absolute -bottom-[20%] -left-[10%] w-[60%] h-[60%] bg-secondary-teal/10 rounded-full blur-[120px] animate-pulse-slow"
-      style="animation-delay: 2s"></div>
+<section id="home" class="relative min-h-screen flex items-center overflow-hidden pt-24 pb-16 lg:pt-32 lg:pb-20">
+  <!-- Background Image with Overlay -->
+  <div class="absolute inset-0 z-0">
+    <img src="/assets/Images/pexels-norma-mortenson-4393668.jpg" alt="توصيل سريع" class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-br from-primary-dark/95 to-secondary-teal/90"></div>
   </div>
-
+  
   <div class="container mx-auto px-4 lg:px-8 relative z-10">
-    <div class="grid lg:grid-cols-2 gap-16 items-center">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
       <!-- Content -->
-      <div class="text-white space-y-8" [@fadeInLeft]>
+      <div class="text-white" [@fadeInLeft]>
         <!-- Badge -->
-        <div
-          class="inline-flex items-center gap-3 px-5 py-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full shadow-lg group hover:bg-white/10 transition-all cursor-default">
-          <div class="w-6 h-6 rounded-full bg-brand-400 text-brand-900 flex items-center justify-center animate-pulse">
-            <lucide-icon name="sparkles" [size]="14"></lucide-icon>
-          </div>
-          <span class="text-xs font-black uppercase tracking-widest text-brand-200">الجيل القادم من الخدمات
-            اللوجستية</span>
+        <div class="inline-flex items-center gap-2 px-6 py-3 bg-primary-green/20 backdrop-blur-md border border-primary-green/40 rounded-full mb-8 shadow-lg">
+          <i class="bi bi-lightning-charge-fill text-accent-gold text-lg"></i>
+          <span class="text-primary-green font-bold">خدمة توصيل رائدة</span>
         </div>
-
+        
         <!-- Title -->
-        <h1 class="text-5xl lg:text-7xl font-black leading-tight tracking-tight">
-          توصيل ذكي
-          <span class="block bg-gradient-to-l from-brand-300 to-secondary-teal bg-clip-text text-transparent">بلا
-            حدود</span>
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-6">
+          توصيل سريع
+          <span class="block bg-gradient-to-l from-accent-gold to-accent-gold-dark bg-clip-text text-transparent">ومضمون</span>
+          لجميع احتياجاتك
         </h1>
-
+        
         <!-- Description -->
-        <p class="text-xl text-slate-300 font-medium leading-relaxed max-w-xl border-r-4 border-brand-500 pr-6">
-          نحن نعيد تعريف مفهوم التوصيل السريع من خلال شبكة ذكية تربطك بأقرب المندوبين لضمان وصول شحناتك في وقت قياسي
-          وبأمان تام.
+        <p class="text-lg md:text-xl text-white/90 leading-relaxed mb-10 max-w-xl">
+          نحن نقدم خدمة توصيل سريعة وموثوقة لجميع منتجاتك. 
+          اطلب الآن واحصل على توصيل مجاني للطلبات التي تزيد عن 100 ريال
         </p>
-
+        
         <!-- Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 pt-4" [@fadeInUp]>
-          <a routerLink="/register"
-            class="flex items-center justify-center gap-4 px-10 py-5 bg-brand-500 text-white font-black text-sm uppercase tracking-widest rounded-[2rem] shadow-glow-blue hover:bg-brand-400 hover:scale-105 transition-all duration-300 group">
-            <span>ابدأ تجربة الشحن</span>
-            <lucide-icon name="arrow-left" [size]="20"
-              class="group-hover:-translate-x-1 transition-transform"></lucide-icon>
+        <div class="flex flex-col sm:flex-row gap-4 mb-12" [@fadeInUp]>
+          <a routerLink="/register" 
+             class="flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-br from-primary-green to-primary-green-dark text-white font-bold text-lg rounded-2xl shadow-green-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <i class="bi bi-cart-plus"></i>
+            <span>اطلب الآن</span>
           </a>
-          <a routerLink="/available-couriers"
-            class="flex items-center justify-center gap-4 px-10 py-5 bg-white/5 backdrop-blur-md border border-white/10 text-white font-black text-sm uppercase tracking-widest rounded-[2rem] hover:bg-white/10 hover:border-white/20 transition-all duration-300 group">
-            <lucide-icon name="map" [size]="20"
-              class="text-secondary-teal group-hover:scale-110 transition-transform"></lucide-icon>
-            <span>خريطة التغطية</span>
+          <a routerLink="/available-couriers" 
+             class="flex items-center justify-center gap-3 px-8 py-4 bg-white/10 backdrop-blur-md border-2 border-white/30 text-white font-bold text-lg rounded-2xl hover:bg-white/20 hover:-translate-y-1 transition-all duration-300">
+            <i class="bi bi-truck"></i>
+            <span>الموصلون المتاحون</span>
           </a>
         </div>
-
+        
         <!-- Stats -->
-        <div class="grid grid-cols-2 lg:grid-cols-3 gap-6 pt-8 border-t border-white/5" [@slideInUp]>
-          <div *ngFor="let stat of stats"
-            class="group p-4 rounded-2xl bg-white/5 backdrop-blur border border-white/5 hover:bg-white/10 transition-all">
-            <div class="flex items-center gap-3 mb-2">
-              <lucide-icon [name]="stat.icon" [size]="20" [class]="stat.color"></lucide-icon>
-              <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ stat.label }}</span>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" [@slideInUp]>
+          <div *ngFor="let stat of stats" 
+               class="flex items-center gap-4 p-5 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl hover:bg-white/20 hover:-translate-y-2 transition-all duration-300">
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-green/30 to-secondary-teal/30 border border-primary-green/30 flex items-center justify-center">
+              <i [class]="'bi ' + stat.icon + ' text-primary-green text-2xl'"></i>
             </div>
-            <h3 class="text-2xl font-black text-white group-hover:scale-105 transition-transform origin-right">{{
-              stat.value }}</h3>
+            <div>
+              <h3 class="text-2xl font-black text-white">{{ stat.value }}</h3>
+              <p class="text-sm text-white/75">{{ stat.label }}</p>
+            </div>
           </div>
         </div>
       </div>
-
-      <!-- Hero Visual -->
-      <div class="relative hidden lg:block perspective-1000" [@fadeInRight]>
-        <div
-          class="relative transform rotate-y-6 hover:rotate-y-0 transition-transform duration-700 ease-out preserve-3d">
-          <img src="/assets/Images/pexels-rdne-7362949.jpg" alt="توصيل"
-            class="w-full rounded-[3.5rem] shadow-2xl border-8 border-white/5 object-cover h-[700px]">
-
-          <!-- Floating UI Cards -->
-          <div
-            class="absolute -top-10 -right-10 bg-white p-6 rounded-[2rem] shadow-premium animate-float z-20 max-w-[200px]">
-            <div class="flex items-center gap-4 mb-4">
-              <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                <lucide-icon name="check-circle-2" [size]="24"></lucide-icon>
-              </div>
-              <div>
-                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">الحالة الآن</p>
-                <p class="font-bold text-slate-900">تم التسليم</p>
-              </div>
-            </div>
-            <div class="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
-              <div class="h-full bg-green-500 w-full"></div>
-            </div>
+      
+      <!-- Hero Image -->
+      <div class="relative hidden lg:block" [@fadeInRight]>
+        <div class="relative">
+          <img src="/assets/Images/pexels-rdne-7362949.jpg" alt="توصيل" 
+               class="w-full rounded-3xl shadow-2xl border-4 border-white/20">
+          
+          <!-- Floating Badges -->
+          <div class="absolute -top-5 right-5 flex items-center gap-2 px-5 py-3 bg-white rounded-full shadow-xl animate-float">
+            <i class="bi bi-lightning-charge text-primary-green text-lg"></i>
+            <span class="font-bold text-primary-dark">توصيل سريع</span>
           </div>
-
-          <div
-            class="absolute -bottom-10 -left-10 bg-slate-900 p-6 rounded-[2rem] shadow-premium animate-float z-20 max-w-[240px]"
-            style="animation-delay: 2s">
-            <div class="flex items-center gap-4">
-              <div
-                class="w-12 h-12 rounded-full bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center text-white">
-                <lucide-icon name="truck" [size]="24"></lucide-icon>
-              </div>
-              <div class="text-white">
-                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">أسطول التوصيل</p>
-                <p class="font-bold text-lg">+1,200 مندوب</p>
-              </div>
-            </div>
+          <div class="absolute -bottom-5 left-5 flex items-center gap-2 px-5 py-3 bg-white rounded-full shadow-xl animate-float" style="animation-delay: 1.5s">
+            <i class="bi bi-shield-check text-primary-green text-lg"></i>
+            <span class="font-bold text-primary-dark">آمن ومضمون</span>
           </div>
         </div>
       </div>
@@ -115,89 +80,63 @@
 </section>
 
 <!-- Services Section -->
-<section id="services" class="py-24 bg-white relative">
-  <div
-    class="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-slate-900 to-transparent opacity-5 pointer-events-none">
-  </div>
-
+<section id="services" class="py-20 lg:py-28 bg-white">
   <div class="container mx-auto px-4 lg:px-8">
     <!-- Section Header -->
-    <div class="text-center mb-20 space-y-4" [@fadeInUp]>
-      <span
-        class="inline-block px-4 py-1.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">Our
-        Solutions</span>
-      <h2 class="text-4xl lg:text-5xl font-black text-slate-900">خدمات متكاملة لأعمالك</h2>
-      <p class="text-lg text-slate-500 max-w-2xl mx-auto font-medium">صممنا حلولنا اللوجستية لتناسب كافة الاحتياجات، من
-        الأفراد إلى الشركات الكبرى.</p>
+    <div class="text-center mb-16" [@fadeInUp]>
+      <span class="section-badge mb-4">خدماتنا</span>
+      <h2 class="section-title">خدماتنا المميزة</h2>
+      <p class="section-description">نقدم لك أفضل خدمات التوصيل بأعلى معايير الجودة والسرعة</p>
     </div>
-
+    
     <!-- Services Grid -->
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" [@slideInCards]>
-      <div *ngFor="let service of services; let i = index"
-        class="group bg-white p-8 lg:p-10 rounded-[3rem] border border-slate-100 shadow-soft hover:shadow-premium hover:-translate-y-2 transition-all duration-500 relative overflow-hidden">
-
-        <!-- Gradient Hover -->
-        <div class="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-5 transition-opacity duration-500"
-          [style.background-image]="'linear-gradient(to bottom right, ' + service.color + ', transparent)'"></div>
-
-        <div class="relative z-10">
-          <!-- Icon -->
-          <div
-            class="w-20 h-20 rounded-3xl flex items-center justify-center mb-10 shadow-sm transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6"
-            [style.background-color]="service.color + '15'" [style.color]="service.color">
-            <lucide-icon [name]="service.icon" [size]="32"></lucide-icon>
-          </div>
-
-          <h3 class="text-2xl font-black text-slate-900 mb-4 group-hover:text-brand-600 transition-colors">{{
-            service.title }}</h3>
-          <p class="text-slate-500 leading-relaxed font-medium">{{ service.description }}</p>
+      <div *ngFor="let service of services" 
+           class="group bg-white p-8 rounded-3xl border-2 border-gray-100 shadow-sm hover:shadow-dark hover:border-primary-green hover:-translate-y-3 transition-all duration-300 text-center relative overflow-hidden">
+        <!-- Top Border Animation -->
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-l from-primary-green to-secondary-teal scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-right"></div>
+        
+        <!-- Icon -->
+        <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary-green to-secondary-teal flex items-center justify-center shadow-green group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+          <i [class]="'bi ' + service.icon + ' text-white text-3xl'"></i>
         </div>
+        
+        <h3 class="text-xl font-bold text-primary-dark mb-4">{{ service.title }}</h3>
+        <p class="text-gray-600 leading-relaxed">{{ service.description }}</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- How It Works Section -->
-<section id="how-it-works" class="py-24 bg-slate-50 relative overflow-hidden">
-  <div class="absolute inset-0 pointer-events-none">
-    <div class="absolute top-20 right-0 w-[500px] h-[500px] bg-white rounded-full blur-[100px] opacity-60"></div>
-    <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-brand-100 rounded-full blur-[100px] opacity-40"></div>
-  </div>
-
-  <div class="container mx-auto px-4 lg:px-8 relative z-10">
-    <div class="grid lg:grid-cols-2 gap-20 items-center">
+<section id="how-it-works" class="py-20 lg:py-28 bg-gradient-to-br from-gray-50 to-gray-100">
+  <div class="container mx-auto px-4 lg:px-8">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
       <!-- Image -->
-      <div class="order-2 lg:order-1 relative" [@fadeInLeft]>
-        <div class="relative z-10 rounded-[3.5rem] overflow-hidden shadow-2xl border-8 border-white">
-          <img src="/assets/Images/Dropshipping model-bro.png" alt="كيف يعمل" class="w-full bg-brand-50 object-cover">
-        </div>
-        <!-- Decorative elements -->
-        <div class="absolute -top-10 -left-10 w-40 h-40 bg-slate-900 rounded-[2rem] -z-0"></div>
-        <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-secondary-teal/20 rounded-full blur-xl -z-0"></div>
+      <div class="order-2 lg:order-1" [@fadeInLeft]>
+        <img src="/assets/Images/Dropshipping model-bro.png" alt="كيف يعمل" 
+             class="w-full rounded-3xl shadow-dark-lg hover:scale-[1.02] transition-transform duration-300">
       </div>
-
+      
       <!-- Steps -->
-      <div class="order-1 lg:order-2 space-y-12">
-        <div class="lg:text-right" [@fadeInUp]>
-          <span
-            class="inline-block px-4 py-1.5 rounded-full bg-white border border-slate-200 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Workflow</span>
-          <h2 class="text-4xl lg:text-5xl font-black text-slate-900 mb-6">رحلة الطلب في 3 خطوات</h2>
-          <p class="text-lg text-slate-500 font-medium">تجربة مستخدم مصممة لتكون بديهية وسهلة، دون أي تعقيدات تقنية.</p>
+      <div class="order-1 lg:order-2">
+        <div class="text-center lg:text-right mb-12" [@fadeInUp]>
+          <span class="section-badge mb-4">كيف يعمل</span>
+          <h2 class="section-title">كيف يعمل نظامنا</h2>
+          <p class="section-description lg:mx-0">عملية بسيطة وسريعة في 3 خطوات فقط</p>
         </div>
-
+        
         <div class="space-y-6" [@fadeInRight]>
-          <div *ngFor="let step of steps"
-            class="flex items-center gap-8 p-6 lg:p-8 bg-white rounded-[2.5rem] shadow-sm hover:shadow-lg transition-all duration-300 group"
-            [@scaleIn]>
-            <!-- Number -->
-            <div
-              class="w-20 h-20 shrink-0 rounded-[2rem] bg-slate-50 flex flex-col items-center justify-center border border-slate-100 group-hover:bg-slate-900 group-hover:text-white transition-colors duration-500">
-              <lucide-icon [name]="step.icon" [size]="24" class="mb-1"></lucide-icon>
+          <div *ngFor="let step of steps" 
+               class="group flex items-start gap-5 p-6 bg-white rounded-2xl border-2 border-gray-100 shadow-sm hover:shadow-lg hover:border-primary-green hover:translate-x-2 transition-all duration-300" [@scaleIn]>
+            <!-- Step Number -->
+            <div class="w-16 h-16 flex-shrink-0 rounded-xl bg-gradient-to-br from-primary-green to-secondary-teal flex items-center justify-center shadow-green group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+              <span class="text-2xl font-black text-white">{{ step.number }}</span>
             </div>
             <!-- Content -->
             <div>
-              <h4 class="text-xl font-black text-slate-900 mb-2">{{ step.title }}</h4>
-              <p class="text-slate-500 font-medium text-sm leading-relaxed">{{ step.description }}</p>
+              <h4 class="text-xl font-bold text-primary-dark mb-2">{{ step.title }}</h4>
+              <p class="text-gray-600 leading-relaxed">{{ step.description }}</p>
             </div>
           </div>
         </div>
@@ -207,75 +146,60 @@
 </section>
 
 <!-- Features Section -->
-<section class="py-24 bg-white">
+<section class="py-20 lg:py-28 bg-white">
   <div class="container mx-auto px-4 lg:px-8">
-    <div class="grid lg:grid-cols-2 gap-20 items-center">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
       <!-- Features List -->
-      <div class="order-2 lg:order-1 space-y-12">
-        <div class="text-center lg:text-right" [@fadeInLeft]>
-          <span
-            class="inline-block px-4 py-1.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Why
-            Us</span>
-          <h2 class="text-4xl lg:text-5xl font-black text-slate-900">مزايا حصرية لعملائنا</h2>
+      <div class="order-2 lg:order-1">
+        <div class="text-center lg:text-right mb-12" [@fadeInLeft]>
+          <span class="section-badge mb-4">لماذا نحن</span>
+          <h2 class="section-title">لماذا تختارنا؟</h2>
         </div>
-
-        <div class="grid sm:grid-cols-2 gap-6">
-          <div *ngFor="let feature of features"
-            class="p-8 bg-slate-50 rounded-[2.5rem] hover:bg-slate-900 hover:text-white transition-all duration-500 group"
-            [@fadeInUp]>
+        
+        <div class="space-y-5">
+          <div *ngFor="let feature of features" 
+               class="group flex items-start gap-5 p-5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-transparent hover:bg-white hover:border-primary-green hover:shadow-lg hover:translate-x-2 transition-all duration-300" [@fadeInUp]>
             <!-- Icon -->
-            <div
-              class="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-6 text-slate-900 group-hover:bg-white/10 group-hover:text-white transition-colors">
-              <lucide-icon [name]="feature.icon" [size]="24"></lucide-icon>
+            <div class="w-14 h-14 flex-shrink-0 rounded-xl bg-gradient-to-br from-primary-green to-secondary-teal flex items-center justify-center shadow-green">
+              <i [class]="'bi ' + feature.icon + ' text-white text-xl'"></i>
             </div>
             <!-- Content -->
-            <h5 class="text-lg font-black mb-3">{{ feature.title }}</h5>
-            <p class="text-sm font-medium opacity-70 leading-relaxed">{{ feature.description }}</p>
+            <div>
+              <h5 class="text-lg font-bold text-primary-dark mb-1">{{ feature.title }}</h5>
+              <p class="text-gray-600 text-sm leading-relaxed">{{ feature.description }}</p>
+            </div>
           </div>
         </div>
       </div>
-
+      
       <!-- Image -->
       <div class="order-1 lg:order-2" [@fadeInRight]>
-        <div class="relative">
-          <img src="/assets/Images/Successful purchase-cuate.png" alt="مميزات" class="w-full relative z-10">
-          <div
-            class="absolute inset-0 bg-gradient-to-tr from-brand-500/10 to-transparent rounded-full blur-[100px] z-0">
-          </div>
-        </div>
+        <img src="/assets/Images/Successful purchase-cuate.png" alt="مميزات" 
+             class="w-full rounded-3xl shadow-dark-lg hover:scale-[1.02] transition-transform duration-300">
       </div>
     </div>
   </div>
 </section>
 
 <!-- CTA Section -->
-<section class="relative py-32 overflow-hidden">
-  <!-- Dynamic BG -->
-  <div class="absolute inset-0 z-0 bg-slate-900">
-    <div class="absolute inset-0 bg-[url('/assets/Images/noise.png')] opacity-20"></div>
-    <div
-      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-600/30 rounded-full blur-[150px] animate-pulse-slow">
-    </div>
+<section class="relative py-20 lg:py-28 overflow-hidden">
+  <!-- Background -->
+  <div class="absolute inset-0 z-0">
+    <img src="/assets/Images/pexels-artempodrez-5025669.jpg" alt="CTA" class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-br from-primary-dark/95 to-secondary-teal/90"></div>
   </div>
-
-  <div class="container mx-auto px-4 lg:px-8 relative z-10 text-center">
-    <div class="max-w-3xl mx-auto space-y-10" [@fadeInUp]>
-      <h2 class="text-4xl md:text-5xl lg:text-7xl font-black text-white leading-tight">جاهز لإطلاق العنان لأعمالك؟</h2>
-      <p class="text-xl md:text-2xl text-slate-300 font-medium leading-relaxed">
-        انضم اليوم إلى أكبر شبكة توصيل ذكية في المنطقة واعثر على المندوب المثالي في ثوانٍ.
+  
+  <div class="container mx-auto px-4 lg:px-8 relative z-10">
+    <div class="text-center text-white" [@fadeInUp]>
+      <h2 class="text-3xl md:text-4xl lg:text-5xl font-black mb-6">جاهز للبدء؟</h2>
+      <p class="text-xl md:text-2xl text-white/90 mb-10 max-w-2xl mx-auto">
+        انضم إلى آلاف العملاء الراضين واحصل على أفضل تجربة توصيل
       </p>
-
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
-        <a routerLink="/register"
-          class="w-full sm:w-auto px-12 h-20 bg-white text-slate-900 font-black text-lg uppercase tracking-widest rounded-[2rem] hover:scale-105 transition-all flex items-center justify-center gap-4 shadow-xl">
-          <span>إنشاء حساب جديد</span>
-          <lucide-icon name="user-plus" [size]="24"></lucide-icon>
-        </a>
-        <a routerLink="/login"
-          class="w-full sm:w-auto px-12 h-20 bg-transparent border-2 border-white/20 text-white font-black text-lg uppercase tracking-widest rounded-[2rem] hover:bg-white/10 transition-all flex items-center justify-center gap-4">
-          <span>تسجيل الدخول</span>
-        </a>
-      </div>
+      <a routerLink="/register" 
+         class="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-br from-primary-green to-primary-green-dark text-white font-bold text-lg rounded-2xl shadow-green-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        <span>ابدأ التسوق الآن</span>
+        <i class="bi bi-arrow-left"></i>
+      </a>
     </div>
   </div>
 </section>

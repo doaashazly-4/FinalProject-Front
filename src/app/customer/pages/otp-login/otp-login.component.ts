@@ -4,12 +4,11 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { CustomerDataService } from '../../services/customer-data.service';
 import { AuthService } from '../../../shared/services/auth.service';
-import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-customer-otp-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, LucideAngularModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './otp-login.component.html',
   styleUrl: './otp-login.component.css'
 })

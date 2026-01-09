@@ -2,24 +2,23 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../shared/services/auth.service';
-import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-customer-shell',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, LucideAngularModule],
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './customer.component.html',
   styleUrl: './customer.component.css'
 })
 export class CustomerComponent {
   // Navigation items for Receiver (delivery-focused)
   navItems = [
-    { label: 'لوحة التحكم', path: 'dashboard', icon: 'layout-dashboard' },
-    { label: 'شحناتي الواردة', path: 'deliveries', icon: 'package' },
-    { label: 'تتبع شحنة', path: 'track', icon: 'map-pin' },
-    { label: 'المحادثات', path: 'message-square' },
-    { label: 'الملف الشخصي', path: 'profile', icon: 'user' },
-    { label: 'الدعم', path: 'support', icon: 'headphones' }
+    { label: 'لوحة التحكم', path: 'dashboard', icon: 'bi-speedometer2' },
+    { label: 'شحناتي الواردة', path: 'deliveries', icon: 'bi-box-arrow-in-down' },
+    { label: 'تتبع شحنة', path: 'track', icon: 'bi-geo-alt' },
+    { label: 'المحادثات', path: 'chat', icon: 'bi-whatsapp' },
+    { label: 'الملف الشخصي', path: 'profile', icon: 'bi-person-circle' },
+    { label: 'الدعم', path: 'support', icon: 'bi-headset' }
   ];
 
   userName: string = '';

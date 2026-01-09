@@ -2,7 +2,6 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
-import { LucideAngularModule } from 'lucide-angular';
 
 interface Stat {
   value: string;
@@ -37,34 +36,56 @@ interface Testimonial {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
   animations: [
     trigger('fadeInUp', [
       transition(':enter', [
         style({ opacity: 0, transform: 'translateY(30px)' }),
-        animate('0.6s cubic-bezier(0.16, 1, 0.3, 1)', style({ opacity: 1, transform: 'translateY(0)' }))
+        animate('0.6s ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ]),
+    trigger('fadeInDown', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-30px)' }),
+        animate('0.6s ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
       ])
     ]),
     trigger('fadeInLeft', [
       transition(':enter', [
         style({ opacity: 0, transform: 'translateX(-30px)' }),
-        animate('0.8s cubic-bezier(0.16, 1, 0.3, 1)', style({ opacity: 1, transform: 'translateX(0)' }))
+        animate('0.8s ease-out', style({ opacity: 1, transform: 'translateX(0)' }))
       ])
     ]),
     trigger('fadeInRight', [
       transition(':enter', [
         style({ opacity: 0, transform: 'translateX(30px)' }),
-        animate('0.8s cubic-bezier(0.16, 1, 0.3, 1)', style({ opacity: 1, transform: 'translateX(0)' }))
+        animate('0.8s ease-out', style({ opacity: 1, transform: 'translateX(0)' }))
       ])
     ]),
-    trigger('staggerDown', [
+    trigger('scaleIn', [
       transition(':enter', [
-        query('.stagger-item', [
-          style({ opacity: 0, transform: 'translateY(-20px)' }),
+        style({ opacity: 0, transform: 'scale(0.9)' }),
+        animate('0.5s ease-out', style({ opacity: 1, transform: 'scale(1)' }))
+      ])
+    ]),
+    trigger('slideInUp', [
+      transition(':enter', [
+        query('.stat-item', [
+          style({ opacity: 0, transform: 'translateY(20px)' }),
           stagger(100, [
-            animate('0.5s cubic-bezier(0.16, 1, 0.3, 1)', style({ opacity: 1, transform: 'translateY(0)' }))
+            animate('0.5s ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+          ])
+        ], { optional: true })
+      ])
+    ]),
+    trigger('slideInCards', [
+      transition(':enter', [
+        query('.service-card', [
+          style({ opacity: 0, transform: 'translateY(30px)' }),
+          stagger(150, [
+            animate('0.6s ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
           ])
         ], { optional: true })
       ])
@@ -75,24 +96,24 @@ export class HomeComponent implements OnInit {
   isScrolled = false;
 
   stats: Stat[] = [
-    { value: '50K+', label: 'عميل سعيد', icon: 'user' },
-    { value: '100K+', label: 'طلب منجز', icon: 'package' },
-    { value: '4.9', label: 'تقييم العملاء', icon: 'star' }
+    { value: '50K+', label: 'عميل سعيد', icon: 'bi-people-fill' },
+    { value: '100K+', label: 'طلب منجز', icon: 'bi-box-seam-fill' },
+    { value: '4.9', label: 'تقييم العملاء', icon: 'bi-star-fill' }
   ];
 
   services: Service[] = [
     {
-      icon: 'truck',
+      icon: 'bi-lightning-charge-fill',
       title: 'توصيل سريع',
       description: 'توصيل خلال 24 ساعة لجميع المناطق مع تتبع مباشر لطلبك في الوقت الحقيقي'
     },
     {
-      icon: 'map-pin',
+      icon: 'bi-geo-alt-fill',
       title: 'تتبع مباشر',
       description: 'تتبع شحنتك لحظة بلحظة من خلال تطبيقنا أو الموقع الإلكتروني'
     },
     {
-      icon: 'message-square',
+      icon: 'bi-headset',
       title: 'دعم 24/7',
       description: 'فريق دعم متاح على مدار الساعة لمساعدتك في أي استفسار'
     }
@@ -118,22 +139,22 @@ export class HomeComponent implements OnInit {
 
   features: Feature[] = [
     {
-      icon: 'shield',
+      icon: 'bi-shield-check',
       title: 'موثوقية عالية',
       description: 'نضمن لك تجربة توصيل موثوقة وآمنة في كل مرة'
     },
     {
-      icon: 'clock',
+      icon: 'bi-clock',
       title: 'توصيل في الوقت المحدد',
       description: 'نلتزم بالمواعيد ونوصل طلباتك في الوقت المحدد دون تأخير'
     },
     {
-      icon: 'wallet',
+      icon: 'bi-cash-coin',
       title: 'أسعار تنافسية',
       description: 'نقدم أفضل الأسعار لخدمات التوصيل دون المساومة على الجودة'
     },
     {
-      icon: 'briefcase',
+      icon: 'bi-award',
       title: 'جودة مضمونة',
       description: 'جميع موصلينا مدربون ومعتمدون لضمان أفضل خدمة'
     }
@@ -158,10 +179,13 @@ export class HomeComponent implements OnInit {
   ];
 
   ngOnInit() {
+    // Initialize component
   }
 
   @HostListener('window:scroll', ['$event'])
   onWindowScroll() {
     this.isScrolled = window.scrollY > 50;
   }
+
+
 }

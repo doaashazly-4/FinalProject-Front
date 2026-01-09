@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { CustomerDataService, IncomingDelivery, DeliveryStatus, CarrierLocation } from '../../services/customer-data.service';
 import { Subscription, interval } from 'rxjs';
-import { LucideAngularModule } from 'lucide-angular';
 
 interface StatusStep {
   status: DeliveryStatus;
@@ -16,7 +15,7 @@ interface StatusStep {
 @Component({
   selector: 'app-customer-track',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './track.component.html',
   styleUrls: ['./track.component.css']
 })
@@ -31,18 +30,18 @@ export class CustomerTrackComponent implements OnInit, OnDestroy {
   mapUrl = '';
 
   statusSteps: StatusStep[] = [
-    { status: 'pending', label: 'تم الطلب', icon: 'clock', description: 'المُرسل أنشأ الشحنة' },
-    { status: 'assigned', label: 'تم التعيين', icon: 'user-check', description: 'تم تعيين مندوب' },
-    { status: 'picked_up', label: 'تم الاستلام', icon: 'package', description: 'المندوب استلم الشحنة' },
-    { status: 'in_transit', label: 'في الطريق', icon: 'truck', description: 'الشحنة في الطريق إليك' },
-    { status: 'out_for_delivery', label: 'قريب منك', icon: 'map-pin', description: 'المندوب في منطقتك' },
-    { status: 'delivered', label: 'تم التسليم', icon: 'check-circle', description: 'استلمت الشحنة بنجاح' }
+    { status: 'pending', label: 'تم الطلب', icon: 'bi-clock', description: 'المُرسل أنشأ الشحنة' },
+    { status: 'assigned', label: 'تم التعيين', icon: 'bi-person-check', description: 'تم تعيين مندوب' },
+    { status: 'picked_up', label: 'تم الاستلام', icon: 'bi-box-arrow-up', description: 'المندوب استلم الشحنة' },
+    { status: 'in_transit', label: 'في الطريق', icon: 'bi-truck', description: 'الشحنة في الطريق إليك' },
+    { status: 'out_for_delivery', label: 'قريب منك', icon: 'bi-geo-alt', description: 'المندوب في منطقتك' },
+    { status: 'delivered', label: 'تم التسليم', icon: 'bi-check-circle', description: 'استلمت الشحنة بنجاح' }
   ];
 
   constructor(
     private dataService: CustomerDataService,
     private route: ActivatedRoute
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -81,67 +80,67 @@ export class CustomerTrackComponent implements OnInit, OnDestroy {
   // }
 
   search() {
-    this.searchPerformed = true;
-    this.error = '';
-    this.selectedDelivery = null;
+  this.searchPerformed = true;
+  this.error = '';
+  this.selectedDelivery = null;
 
-    if (!this.trackingNumber) {
-      this.error = 'من فضلك أدخل رقم التتبع';
-      return;
-    }
-
-    // ⚠️ Backend expects packageId (number)
-    const packageId = Number(this.trackingNumber);
-
-    if (isNaN(packageId)) {
-      this.error = 'رقم التتبع غير صالح حالياً (يجب أن يكون رقم)';
-      return;
-    }
-
-    this.isLoading = true;
-
-    this.dataService.trackPackage(packageId).subscribe({
-      next: (data) => {
-        this.selectedDelivery = data;
-        this.isLoading = false;
-      },
-      error: () => {
-        this.error = 'لم يتم العثور على الشحنة';
-        this.isLoading = false;
-      }
-    });
+  if (!this.trackingNumber) {
+    this.error = 'من فضلك أدخل رقم التتبع';
+    return;
   }
 
+  // ⚠️ Backend expects packageId (number)
+  const packageId = Number(this.trackingNumber);
+
+  if (isNaN(packageId)) {
+    this.error = 'رقم التتبع غير صالح حالياً (يجب أن يكون رقم)';
+    return;
+  }
+
+  this.isLoading = true;
+
+  this.dataService.trackPackage(packageId).subscribe({
+    next: (data) => {
+      this.selectedDelivery = data;
+      this.isLoading = false;
+    },
+    error: () => {
+      this.error = 'لم يتم العثور على الشحنة';
+      this.isLoading = false;
+    }
+  });
+}
+  
   mapBackendPackage(pkg: any) {
-    return {
-      id: pkg.id,
-      trackingNumber: `PKG-${pkg.id}`, // temporary
-      description: 'شحنة قيد التتبع',
-      senderName: 'غير محدد',
-      pickupAddress: '',
-      deliveryAddress: '',
-      status: this.mapStatus(pkg.status),
-      createdAt: new Date(),
-      weight: 0,
-      courierName: pkg.courier ? `Courier #${pkg.courier.id}` : null,
-      courierPhone: null,
-      isFragile: false,
-      requiresSignature: false
-    };
-  }
+  return {
+    id: pkg.id,
+    trackingNumber: `PKG-${pkg.id}`, // temporary
+    description: 'شحنة قيد التتبع',
+    senderName: 'غير محدد',
+    pickupAddress: '',
+    deliveryAddress: '',
+    status: this.mapStatus(pkg.status),
+    createdAt: new Date(),
+    weight: 0,
+    courierName: pkg.courier ? `Courier #${pkg.courier.id}` : null,
+    courierPhone: null,
+    isFragile: false,
+    requiresSignature: false
+  };
+}
 
-  mapStatus(status: number | string): any {
-    // adapt if enum is numeric
-    switch (status) {
-      case 0: return 'pending';
-      case 1: return 'assigned';
-      case 2: return 'picked_up';
-      case 3: return 'in_transit';
-      case 4: return 'out_for_delivery';
-      case 5: return 'delivered';
-      default: return 'pending';
-    }
+mapStatus(status: number | string): any {
+  // adapt if enum is numeric
+  switch (status) {
+    case 0: return 'pending';
+    case 1: return 'assigned';
+    case 2: return 'picked_up';
+    case 3: return 'in_transit';
+    case 4: return 'out_for_delivery';
+    case 5: return 'delivered';
+    default: return 'pending';
   }
+}
 
   loadDeliveryById(id: string): void {
     this.isLoading = true;
@@ -163,7 +162,7 @@ export class CustomerTrackComponent implements OnInit, OnDestroy {
   private loadFromMock(): void {
     this.dataService.getDeliveries().subscribe({
       next: (deliveries) => {
-        const found = deliveries.find(d =>
+        const found = deliveries.find(d => 
           d.trackingNumber.toLowerCase() === this.trackingNumber.toLowerCase() ||
           d.id === this.trackingNumber
         );
@@ -190,7 +189,7 @@ export class CustomerTrackComponent implements OnInit, OnDestroy {
   getStatusProgress(): number {
     if (!this.selectedDelivery) return 0;
     if (['cancelled', 'failed_delivery', 'returned'].includes(this.selectedDelivery.status)) return 0;
-
+    
     const currentIndex = this.statusSteps.findIndex(s => s.status === this.selectedDelivery!.status);
     return ((currentIndex + 1) / this.statusSteps.length) * 100;
   }

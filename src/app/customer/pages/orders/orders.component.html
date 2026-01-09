@@ -1,127 +1,33 @@
-<div class="space-y-10 animate-fade-in pb-20">
+<div class="orders-page">
+  <header class="orders-head">
+    <div>
+      <p class="overline">إدارة الطلبات</p>
+      <h2>جميع طلباتك في مكان واحد</h2>
+    </div>
+    <div class="filters">
+      <button class="chip" [class.active]="filter === 'الكل'" (click)="filter = 'الكل'">الكل</button>
+      <button class="chip" [class.active]="filter === 'جارٍ التنفيذ'" (click)="filter = 'جارٍ التنفيذ'">جارٍ التنفيذ</button>
+      <button class="chip" [class.active]="filter === 'مكتمل'" (click)="filter = 'مكتمل'">مكتمل</button>
+      <button class="chip" [class.active]="filter === 'ملغي'" (click)="filter = 'ملغي'">ملغي</button>
+    </div>
+  </header>
 
-  <!-- Strategic Header -->
-  <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-    <div class="space-y-3">
-      <div class="flex items-center gap-3">
-        <span
-          class="inline-flex items-center gap-2 px-3 py-1 bg-brand-500/10 text-brand-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-brand-500/20">
-          <lucide-icon name="history" [size]="12"></lucide-icon>
-          سجل المعاملات والطلبات
-        </span>
+  <div class="orders-grid">
+    <div class="order-card" *ngFor="let order of filteredOrders()">
+      <div class="order-card-head">
+        <div class="order-id">{{ order.id }}</div>
+        <div class="status" [ngClass]="order.status">{{ order.status }}</div>
       </div>
-      <h1 class="text-3xl lg:text-5xl font-black text-slate-900 tracking-tight leading-none">أرشيف الطلبات</h1>
-      <p class="text-slate-500 font-medium text-lg leading-relaxed">استعرض كافة طلباتك السابقة والحالية وتفاصيل الدفع
-        الخاصة بها.</p>
-    </div>
-
-    <div class="flex items-center gap-4">
-      <!-- Any secondary action could go here -->
-    </div>
-  </div>
-
-  <!-- Filtration Ribbon -->
-  <div class="flex items-center gap-2 overflow-x-auto pb-4 custom-scrollbar lg:pb-0 underline-none">
-    <button (click)="filter = 'الكل'"
-      class="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border shrink-0"
-      [ngClass]="filter === 'الكل' ? 'bg-slate-900 text-white border-slate-900 shadow-premium' : 'bg-white text-slate-500 border-slate-100 hover:bg-slate-50'">
-      كافة الطلبات
-    </button>
-    <button (click)="filter = 'جارٍ التنفيذ'"
-      class="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border shrink-0"
-      [ngClass]="filter === 'جارٍ التنفيذ' ? 'bg-slate-900 text-white border-slate-900 shadow-premium' : 'bg-white text-slate-500 border-slate-100 hover:bg-slate-50'">
-      قيد التنفيذ
-    </button>
-    <button (click)="filter = 'مكتمل'"
-      class="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border shrink-0"
-      [ngClass]="filter === 'مكتمل' ? 'bg-slate-900 text-white border-slate-900 shadow-premium' : 'bg-white text-slate-500 border-slate-100 hover:bg-slate-50'">
-      الطلبات المكتملة
-    </button>
-    <button (click)="filter = 'ملغي'"
-      class="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border shrink-0"
-      [ngClass]="filter === 'ملغي' ? 'bg-slate-900 text-white border-slate-900 shadow-premium' : 'bg-white text-slate-500 border-slate-100 hover:bg-slate-50'">
-      الطلبات الملغاة
-    </button>
-  </div>
-
-  <!-- Main Grid Viewport -->
-  <div class="relative min-h-[400px]">
-
-    <!-- Sync Overlay -->
-    <div *ngIf="isLoading"
-      class="absolute inset-0 flex flex-col items-center justify-center gap-4 animate-fade-in bg-white/50 backdrop-blur-sm z-10 rounded-[3rem]">
-      <div class="w-12 h-12 border-4 border-brand-200 border-t-brand-500 rounded-full animate-spin"></div>
-      <span class="text-xs font-black text-slate-400 uppercase tracking-widest">جاري سحب الأرشيف...</span>
-    </div>
-
-    <!-- Empty Discovery -->
-    <div *ngIf="!isLoading && filteredOrders().length === 0"
-      class="py-32 text-center bg-white rounded-[3rem] border border-dashed border-slate-200 animate-fade-in">
-      <div
-        class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner relative overflow-hidden">
-        <lucide-icon name="clipboard-list" class="text-slate-200" [size]="48"></lucide-icon>
-        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-white/50"></div>
+      <p class="dest">{{ order.destination }}</p>
+      <div class="order-meta">
+        <span><i class="bi bi-calendar-event"></i> {{ order.date }}</span>
+        <span><i class="bi bi-currency-dollar"></i> {{ order.amount | currency:'EGP':'symbol':'1.0-0' }}</span>
       </div>
-      <h3 class="text-2xl font-black text-slate-900 mb-2">لا توجد سجلات مطابقة</h3>
-      <p class="text-slate-400 font-medium max-w-sm mx-auto leading-relaxed mb-10">
-        لم نجد أي طلبات في هذا التصنيف حالياً. تأكد من حاله الطلب الذي تبحث عنه.
-      </p>
-    </div>
-
-    <!-- The Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
-      <div
-        class="group bg-white rounded-[2.5rem] border border-slate-100 shadow-soft hover:shadow-premium hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col h-full relative"
-        *ngFor="let order of filteredOrders()">
-
-        <!-- Order Identification Hub -->
-        <div class="p-8 pb-4 relative z-10">
-          <div class="flex justify-between items-start mb-6">
-            <span
-              class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] font-mono leading-none">ORDER-{{
-              order.id }}</span>
-            <div
-              class="px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border border-slate-100 bg-slate-50 text-slate-500 group-hover:bg-slate-900 group-hover:text-white transition-all">
-              {{ getStatusText(order.status) }}
-            </div>
-          </div>
-
-          <h3 class="text-xl font-black text-slate-900 leading-tight mb-4 group-hover:text-brand-600 transition-colors">
-            {{ order.description || 'طلب شحن طرد' }}
-          </h3>
-
-          <div class="flex items-center gap-2 text-slate-400">
-            <lucide-icon name="map-pin" [size]="14" class="text-brand-500"></lucide-icon>
-            <span class="text-xs font-medium truncate">{{ order.deliveryAddress }}</span>
-          </div>
-        </div>
-
-        <!-- Meta Matrix -->
-        <div class="flex items-center justify-between px-8 py-5 bg-slate-50 relative z-10 border-y border-slate-100/50">
-          <div class="flex items-center gap-3">
-            <lucide-icon name="calendar" [size]="16" class="text-slate-400"></lucide-icon>
-            <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">{{ order.createdAt |
-              date:'shortDate' }}</span>
-          </div>
-          <div class="text-left">
-            <p class="text-[9px] font-black text-slate-400 uppercase leading-none mb-1">القيمة الإجمالية</p>
-            <p class="text-lg font-black text-brand-600 tracking-tight">{{ (order.deliveryFee || 0) + (order.weight * 5)
-              }} <span class="text-[10px]">ج.م</span></p>
-          </div>
-        </div>
-
-        <!-- Actions Launchpad -->
-        <div class="p-8 mt-auto relative z-10 flex gap-3">
-          <button
-            class="flex-1 h-12 bg-white text-slate-900 border border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 transition-all flex items-center justify-center gap-2">
-            <lucide-icon name="file-text" [size]="14"></lucide-icon> التفاصيل
-          </button>
-          <a [routerLink]="['/customer/track']" [queryParams]="{id: order.trackingNumber}"
-            class="w-12 h-12 bg-brand-500 text-white rounded-2xl flex items-center justify-center shadow-glow-blue hover:bg-brand-600 transition-all active:scale-90">
-            <lucide-icon name="navigation" [size]="18"></lucide-icon>
-          </a>
-        </div>
+      <div class="order-actions">
+        <button class="ghost">تفاصيل</button>
+        <button class="primary">تتبع</button>
       </div>
     </div>
   </div>
 </div>
+

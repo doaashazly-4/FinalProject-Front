@@ -1,319 +1,288 @@
-<div class="space-y-10 animate-fade-in pb-20" *ngIf="delivery && !isLoading">
-
-  <!-- Strategic Header -->
-  <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-    <div class="space-y-4">
-      <div class="flex items-center gap-3">
-        <a routerLink="/customer/deliveries"
-          class="w-10 h-10 rounded-xl bg-white shadow-soft flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all border border-slate-100 group">
-          <lucide-icon name="arrow-right" class="w-5 h-5 group-hover:-translate-x-1 transition-transform"></lucide-icon>
-        </a>
-        <span
-          class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] font-mono leading-none">PKG-DETAILS-VIEW</span>
-      </div>
-      <div>
-        <div class="flex items-center gap-4 mb-2">
-          <h1 class="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-none">{{
-            delivery.trackingNumber }}</h1>
-          <span class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border"
-            [ngClass]="getStatusClass(delivery.status)">
-            {{ getStatusText(delivery.status) }}
-          </span>
-        </div>
-        <p class="text-slate-500 font-medium text-lg leading-relaxed">{{ delivery.description }}</p>
-      </div>
+<div class="space-y-6" *ngIf="delivery && !isLoading">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <a routerLink="/customer/deliveries"
+        class="inline-flex items-center gap-2 text-gray-500 hover:text-primary-green transition-colors mb-4">
+        <i class="bi bi-arrow-right"></i>
+        <span>العودة للشحنات</span>
+      </a>
+      <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">{{ delivery.trackingNumber }}</h1>
+      <p class="text-gray-600 mt-1">{{ delivery.description }}</p>
     </div>
+    <span class="px-5 py-2 rounded-full text-sm font-bold" [ngClass]="getStatusClass(delivery.status)">
+      {{ getStatusText(delivery.status) }}
+    </span>
   </div>
 
-  <!-- Critical Alert: Delivered -->
+  <!-- Delivered Banner -->
   <div *ngIf="delivery.status === 'delivered'"
-    class="relative bg-success-50 rounded-[2.5rem] p-8 lg:p-10 border border-success-100 overflow-hidden group">
-    <div
-      class="absolute inset-0 bg-gradient-to-r from-success-100/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+    class="bg-green-100 border border-green-300 text-green-800 p-5 rounded-xl">
+    <p class="font-bold text-lg">
+      ✅ تم تسليم الشحنة بنجاح
+    </p>
+    <p class="text-sm mt-1">
+      نشكرك على استخدام Lynx
+    </p>
+  </div>
+
+
+  <!-- Real-time Map (if in transit) -->
+  <div *ngIf="carrierLocation && ['in_transit', 'out_for_delivery', 'picked_up'].includes(delivery.status)"
+    class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="p-5 border-b border-gray-100 bg-gradient-to-l from-blue-50 to-indigo-50">
+      <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+        <i class="bi bi-geo-alt text-blue-600"></i>
+        موقع المندوب الآن
+      </h2>
     </div>
-    <div class="relative z-10 flex items-center gap-6">
-      <div
-        class="w-16 h-16 rounded-[1.5rem] bg-white text-success-600 flex items-center justify-center shadow-soft shrink-0">
-        <lucide-icon name="check-circle-2" [size]="32"></lucide-icon>
+    <div class="p-5">
+      <div class="aspect-video bg-gray-100 rounded-xl mb-4 flex items-center justify-center relative overflow-hidden">
+        <iframe *ngIf="mapUrl" [src]="mapUrl" class="w-full h-full border-0 rounded-xl" allowfullscreen>
+        </iframe>
+        <div *ngIf="!mapUrl" class="text-center text-gray-500">
+          <i class="bi bi-map text-4xl mb-2"></i>
+          <p>جاري تحميل الخريطة...</p>
+        </div>
       </div>
-      <div>
-        <h3 class="text-xl font-black text-success-800 leading-none mb-2">اكتملت المهمة بنجاح</h3>
-        <p class="text-success-700 font-medium text-sm">تم تسليم الشحنة في {{ formatDate(delivery.actualDelivery) ||
-          'الوقت المحدد' }}. شكراً لاختيارك Lynx.</p>
+      <p class="text-sm text-gray-600 text-center">
+        <i class="bi bi-clock ml-1"></i>
+        آخر تحديث: {{ formatDate(carrierLocation.timestamp) }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Communication Actions -->
+  <div *ngIf="delivery.status !== 'delivered'"
+    class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="p-5 border-b border-gray-100 bg-gray-50/50">
+      <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+        <i class="bi bi-chat-dots text-primary-green"></i>
+        التواصل
+      </h2>
+    </div>
+    <div class="p-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Call Carrier -->
+        <button *ngIf="delivery.courierPhone" (click)="callCarrier()"
+          class="flex items-center justify-center gap-3 p-4 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold hover:shadow-green-lg transition-all">
+          <i class="bi bi-telephone-fill text-xl"></i>
+          <span>اتصال بالمندوب</span>
+        </button>
+
+        <!-- Call Supplier -->
+        <button *ngIf="delivery.senderPhone" (click)="callSupplier()"
+          class="flex items-center justify-center gap-3 p-4 bg-blue-100 text-blue-700 rounded-xl font-bold hover:bg-blue-200 transition-colors">
+          <i class="bi bi-telephone text-xl"></i>
+          <span>اتصال بالمُرسل</span>
+        </button>
+
+        <!-- Update Notes -->
+        <button (click)="showNoteModal = true"
+          class="flex items-center justify-center gap-3 p-4 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors">
+          <i class="bi bi-pencil text-xl"></i>
+          <span>تحديث الملاحظات</span>
+        </button>
+
+        <!-- Change Time -->
+        <button (click)="showTimeChangeModal = true"
+          class="flex items-center justify-center gap-3 p-4 bg-orange-100 text-orange-700 rounded-xl font-bold hover:bg-orange-200 transition-colors">
+          <i class="bi bi-clock text-xl"></i>
+          <span>تغيير الوقت</span>
+        </button>
+
+        <!-- Not Available Today -->
+        <button (click)="markNotAvailableToday()"
+          class="flex items-center justify-center gap-3 p-4 bg-red-100 text-red-700 rounded-xl font-bold hover:bg-red-200 transition-colors">
+          <i class="bi bi-x-circle text-xl"></i>
+          <span>غير متاح اليوم</span>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Control & Intelligence Grid -->
-  <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-
-    <!-- Left Column: Primary Data -->
-    <div class="xl:col-span-2 space-y-8">
-      <!-- Active Map Engine -->
-      <div *ngIf="carrierLocation && ['in_transit', 'out_for_delivery', 'picked_up'].includes(delivery.status)"
-        class="bg-white rounded-[3rem] shadow-premium border border-slate-100 overflow-hidden group/map relative">
-        <div class="p-8 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
-          <h2 class="text-xl font-black text-slate-900 flex items-center gap-3">
-            <lucide-icon name="map" [size]="20" class="text-brand-500"></lucide-icon>
-            التتبع الميداني المباشر
-          </h2>
-          <div class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-            <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
-            تحديث حي
-          </div>
-        </div>
-
-        <div class="aspect-video relative bg-slate-100">
-          <iframe *ngIf="mapUrl" [src]="mapUrl"
-            class="w-full h-full border-0 grayscale-[0.5] hover:grayscale-0 transition-all duration-700"
-            allowfullscreen></iframe>
-          <div *ngIf="!mapUrl" class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-slate-400">
-            <lucide-icon name="satellite" [size]="32" class="animate-pulse"></lucide-icon>
-            <span class="text-xs font-black uppercase tracking-widest">جاري الاتصال بالقمر الصناعي...</span>
-          </div>
-
-          <!-- Map Overlay -->
-          <div
-            class="absolute bottom-6 right-6 bg-white/90 backdrop-blur rounded-2xl p-4 shadow-soft border border-white/50 text-[10px] font-black text-slate-600 uppercase tracking-widest">
-            آخر رصد: {{ formatDate(carrierLocation?.timestamp) }}
-          </div>
-        </div>
+  <!-- Delivery Info Cards -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Sender Info -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-4 border-b border-gray-100 bg-gray-50/50">
+        <h3 class="font-bold text-primary-dark flex items-center gap-2">
+          <i class="bi bi-person text-primary-green"></i>
+          المُرسل
+        </h3>
       </div>
-
-      <!-- Detailed Info Matrix -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Sender Node -->
-        <div
-          class="bg-white rounded-[2.5rem] p-8 shadow-soft border border-slate-100 hover:shadow-premium transition-all group/card">
-          <div class="flex items-center gap-4 mb-6">
-            <div
-              class="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 group-hover/card:bg-slate-900 group-hover/card:text-white transition-colors flex items-center justify-center">
-              <lucide-icon name="package-check" [size]="24"></lucide-icon>
-            </div>
-            <div>
-              <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">جهة الشحن (المُرسل)</p>
-              <p class="text-lg font-black text-slate-900 leading-none mt-1">{{ delivery.senderName }}</p>
-            </div>
-          </div>
-          <div class="pl-16 space-y-3">
-            <div *ngIf="delivery.senderPhone" class="flex items-center gap-2 text-xs font-bold text-slate-500">
-              <lucide-icon name="phone" [size]="14"></lucide-icon> {{ delivery.senderPhone }}
-            </div>
-            <p class="text-xs font-medium text-slate-400 leading-relaxed">{{ delivery.pickupAddress }}</p>
-          </div>
-        </div>
-
-        <!-- Destination Node -->
-        <div
-          class="bg-white rounded-[2.5rem] p-8 shadow-soft border border-slate-100 hover:shadow-premium transition-all group/card">
-          <div class="flex items-center gap-4 mb-6">
-            <div
-              class="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 group-hover/card:bg-brand-500 group-hover/card:text-white transition-colors flex items-center justify-center">
-              <lucide-icon name="map-pin" [size]="24"></lucide-icon>
-            </div>
-            <div>
-              <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">نقطة الوصول (المستلم)</p>
-              <p class="text-lg font-black text-slate-900 leading-none mt-1">عنوان التسليم</p>
-            </div>
-          </div>
-          <div class="pl-16 space-y-3">
-            <p class="text-sm font-bold text-slate-700 leading-relaxed">{{ delivery.deliveryAddress }}</p>
-            <div *ngIf="delivery.notes"
-              class="p-3 bg-amber-50 rounded-xl border border-amber-100 text-[10px] font-bold text-amber-700 leading-relaxed flex gap-2">
-              <lucide-icon name="sticky-note" [size]="14" class="shrink-0"></lucide-icon>
-              {{ delivery.notes }}
-            </div>
-          </div>
-        </div>
+      <div class="p-4">
+        <p class="font-bold text-primary-dark">{{ delivery.senderName }}</p>
+        <p *ngIf="delivery.senderPhone" class="text-sm text-gray-500 mt-1">{{ delivery.senderPhone }}</p>
       </div>
     </div>
 
-    <!-- Right Column: Command Center -->
-    <div class="space-y-8">
-
-      <!-- Communication Hub -->
-      <div *ngIf="delivery.status !== 'delivered'"
-        class="bg-slate-900 text-white rounded-[3rem] p-8 lg:p-10 shadow-glow-blue relative overflow-hidden">
-        <div class="absolute -right-20 -top-20 w-64 h-64 bg-brand-500/20 rounded-full blur-[80px]"></div>
-
-        <h2 class="text-2xl font-black mb-8 relative z-10">مركز التحكم</h2>
-
-        <div class="space-y-4 relative z-10">
-          <button *ngIf="delivery.courierPhone" (click)="callCarrier()"
-            class="w-full h-16 bg-brand-500 hover:bg-brand-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-lg hover:-translate-y-1">
-            <lucide-icon name="phone-call" [size]="18"></lucide-icon> اتصال بالمندوب
-          </button>
-
-          <button *ngIf="delivery.senderPhone" (click)="callSupplier()"
-            class="w-full h-16 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all flex items-center justify-center gap-3 border border-white/5">
-            <lucide-icon name="user" [size]="18"></lucide-icon> تواصل مع المُرسل
-          </button>
-
-          <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
-            <button (click)="showNoteModal = true"
-              class="h-24 bg-slate-800 hover:bg-slate-700 rounded-2xl border border-slate-700 flex flex-col items-center justify-center gap-2 transition-all group/btn">
-              <lucide-icon name="edit-3" [size]="20"
-                class="text-slate-400 group-hover/btn:text-white transition-colors"></lucide-icon>
-              <span
-                class="text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover/btn:text-white">ملاحظات</span>
-            </button>
-            <button (click)="showTimeChangeModal = true"
-              class="h-24 bg-slate-800 hover:bg-slate-700 rounded-2xl border border-slate-700 flex flex-col items-center justify-center gap-2 transition-all group/btn">
-              <lucide-icon name="clock" [size]="20"
-                class="text-slate-400 group-hover/btn:text-white transition-colors"></lucide-icon>
-              <span
-                class="text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover/btn:text-white">تغيير
-                الوقت</span>
-            </button>
-            <button (click)="markNotAvailableToday()"
-              class="col-span-2 h-14 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/20 hover:border-red-500 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2">
-              <lucide-icon name="x-circle" [size]="16"></lucide-icon> غير متاح اليوم للاستلام
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Specs Card -->
-      <div class="bg-white rounded-[2.5rem] p-8 shadow-soft border border-slate-100">
-        <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-          <lucide-icon name="sliders" [size]="14"></lucide-icon> مواصفات الشحنة
+    <!-- Delivery Address -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-4 border-b border-gray-100 bg-gray-50/50">
+        <h3 class="font-bold text-primary-dark flex items-center gap-2">
+          <i class="bi bi-geo-alt text-primary-green"></i>
+          عنوان التسليم
         </h3>
-        <div class="space-y-4">
-          <div class="flex justify-between items-center py-3 border-b border-slate-50">
-            <span class="text-sm font-bold text-slate-600">الوزن المسجل</span>
-            <span class="font-black text-slate-900">{{ delivery.weight }} <span
-                class="text-xs text-slate-400">كجم</span></span>
-          </div>
-          <div class="flex justify-between items-center py-3 border-b border-slate-50">
-            <span class="text-sm font-bold text-slate-600">تاريخ الإنشاء</span>
-            <span class="font-black text-slate-900 text-xs">{{ formatDate(delivery.createdAt) }}</span>
-          </div>
-          <div *ngIf="delivery.estimatedDelivery"
-            class="flex justify-between items-center py-3 border-b border-slate-50">
-            <span class="text-sm font-bold text-slate-600">التسليم المتوقع</span>
-            <span class="font-black text-brand-600 text-xs">{{ formatDate(delivery.estimatedDelivery) }}</span>
-          </div>
-        </div>
+      </div>
+      <div class="p-4">
+        <p class="font-medium text-primary-dark">{{ delivery.deliveryAddress }}</p>
+        <p *ngIf="delivery.notes" class="text-sm text-gray-600 mt-2 p-2 bg-gray-50 rounded-lg">
+          <i class="bi bi-info-circle ml-1"></i>
+          {{ delivery.notes }}
+        </p>
+      </div>
+    </div>
 
-        <div *ngIf="delivery.courierName"
-          class="mt-8 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-4">
-          <div class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-900">
-            <lucide-icon name="truck" [size]="18"></lucide-icon>
-          </div>
-          <div>
-            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">المندوب المسؤول</p>
-            <p class="font-bold text-slate-900">{{ delivery.courierName }}</p>
-          </div>
+    <!-- Courier Info -->
+    <div *ngIf="delivery.courierName" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-4 border-b border-gray-100 bg-blue-50">
+        <h3 class="font-bold text-blue-800 flex items-center gap-2">
+          <i class="bi bi-truck text-blue-600"></i>
+          المندوب
+        </h3>
+      </div>
+      <div class="p-4">
+        <p class="font-bold text-primary-dark">{{ delivery.courierName }}</p>
+        <p *ngIf="delivery.courierPhone" class="text-sm text-gray-500 mt-1">{{ delivery.courierPhone }}</p>
+      </div>
+    </div>
+
+    <!-- Delivery Details -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-4 border-b border-gray-100 bg-gray-50/50">
+        <h3 class="font-bold text-primary-dark flex items-center gap-2">
+          <i class="bi bi-info-circle text-primary-green"></i>
+          التفاصيل
+        </h3>
+      </div>
+      <div class="p-4 space-y-2">
+        <div class="flex justify-between">
+          <span class="text-gray-500 text-sm">الوزن:</span>
+          <span class="font-medium">{{ delivery.weight }} كجم</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-500 text-sm">تاريخ الإنشاء:</span>
+          <span class="font-medium">{{ formatDate(delivery.createdAt) }}</span>
+        </div>
+        <div *ngIf="delivery.estimatedDelivery" class="flex justify-between">
+          <span class="text-gray-500 text-sm">التوصيل المتوقع:</span>
+          <span class="font-medium text-primary-green">{{ formatDate(delivery.estimatedDelivery) }}</span>
         </div>
       </div>
-
     </div>
   </div>
 </div>
 
 <!-- Loading State -->
-<div *ngIf="isLoading" class="flex flex-col items-center justify-center py-32 gap-6 animate-fade-in">
-  <div class="w-16 h-16 border-4 border-slate-100 border-t-brand-500 rounded-full animate-spin"></div>
-  <p class="text-sm font-black text-slate-400 uppercase tracking-widest">جاري استدعاء الملفات...</p>
+<div *ngIf="isLoading" class="flex justify-center items-center py-20">
+  <div class="text-center">
+    <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4">
+    </div>
+    <p class="text-gray-500">جاري تحميل تفاصيل الشحنة...</p>
+  </div>
 </div>
 
-<!-- Modals: Rating -->
-<div *ngIf="showRatingModal"
-  class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-slate-900/40 animate-fade-in">
-  <div
-    class="bg-white rounded-[2.5rem] shadow-2xl max-w-md w-full p-8 border border-slate-100 relative overflow-hidden">
-    <div class="flex items-center justify-between mb-8">
-      <h2 class="text-2xl font-black text-slate-900">تقييم التجربة</h2>
-      <button (click)="showRatingModal = false"
-        class="w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center transition-colors">
-        <lucide-icon name="x" [size]="20" class="text-slate-500"></lucide-icon>
+<!-- Rating Modal -->
+<div *ngIf="showRatingModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50" (click)="showRatingModal = false"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-2xl font-black text-primary-dark">قيم التوصيل</h2>
+      <button (click)="showRatingModal = false" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+        <i class="bi bi-x text-gray-500 text-xl"></i>
       </button>
     </div>
 
-    <div class="space-y-8">
-      <div class="flex justify-center gap-3">
+    <div class="space-y-6">
+      <!-- Stars -->
+      <div class="flex justify-center gap-2">
         <button *ngFor="let i of [1,2,3,4,5]" (click)="setRating(i)"
-          class="transition-all hover:scale-110 active:scale-95">
-          <lucide-icon name="star" [size]="32"
-            [class]="i <= rating ? 'text-amber-400 fill-amber-400' : 'text-slate-200'"></lucide-icon>
+          class="text-4xl transition-transform hover:scale-110"
+          [ngClass]="i <= rating ? 'text-accent-gold' : 'text-gray-300'">
+          <i class="bi" [ngClass]="i <= rating ? 'bi-star-fill' : 'bi-star'"></i>
         </button>
       </div>
 
-      <div class="space-y-3">
-        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ملاحظات إضافية</label>
-        <textarea [(ngModel)]="ratingComment" rows="3" placeholder="كيف كانت خدمة التوصيل؟"
-          class="w-full p-4 rounded-2xl bg-slate-50 border-0 focus:ring-2 focus:ring-brand-500/20 font-medium text-slate-700 resize-none transition-all placeholder:text-slate-300"></textarea>
+      <!-- Comment -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">تعليق (اختياري)</label>
+        <textarea [(ngModel)]="ratingComment" rows="3" placeholder="شاركنا تجربتك..."
+          class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary-green focus:ring-2 focus:ring-primary-green/20 outline-none resize-none"></textarea>
       </div>
 
+      <!-- Submit -->
       <button (click)="submitRating()" [disabled]="rating === 0"
-        class="w-full h-14 bg-slate-900 text-white font-black rounded-2xl text-sm uppercase tracking-widest hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-premium">
+        class="w-full py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl hover:shadow-green-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
         إرسال التقييم
       </button>
     </div>
   </div>
 </div>
 
-<!-- Modals: Notes -->
-<div *ngIf="showNoteModal"
-  class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-slate-900/40 animate-fade-in">
-  <div class="bg-white rounded-[2.5rem] shadow-2xl max-w-md w-full p-8 border border-slate-100 relative">
+<!-- Note Modal -->
+<div *ngIf="showNoteModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50" (click)="showNoteModal = false"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-xl font-black text-slate-900">تحديث التعليمات</h2>
-      <button (click)="showNoteModal = false"
-        class="w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center transition-colors">
-        <lucide-icon name="x" [size]="20" class="text-slate-500"></lucide-icon>
+      <h2 class="text-xl font-bold text-primary-dark">تحديث الملاحظات</h2>
+      <button (click)="showNoteModal = false" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+        <i class="bi bi-x text-gray-500 text-xl"></i>
       </button>
     </div>
 
-    <div class="space-y-6">
-      <p class="text-sm text-slate-500 font-medium">أضف أي تعليمات خاصة للمندوب لتسهيل عملية التوصيل.</p>
-      <textarea [(ngModel)]="deliveryNote" rows="4"
-        placeholder="مثال: يرجى الاتصال عند الوصول، او ترك الطرد في الاستقبال..."
-        class="w-full p-4 rounded-2xl bg-slate-50 border-0 focus:ring-2 focus:ring-brand-500/20 font-medium text-slate-700 resize-none transition-all placeholder:text-slate-300"></textarea>
+    <div class="space-y-4">
+      <textarea [(ngModel)]="deliveryNote" rows="4" placeholder="مثال: اترك الطرد عند الاستقبال"
+        class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary-green focus:ring-2 focus:ring-primary-green/20 outline-none resize-none"></textarea>
 
-      <div class="flex gap-4">
+      <div class="flex gap-3">
+        <button (click)="showNoteModal = false"
+          class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors">
+          إلغاء
+        </button>
         <button (click)="updateDeliveryNote()"
-          class="flex-1 h-14 bg-brand-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-brand-600 transition-all shadow-glow-blue">
-          حفظ التعليمات
+          class="flex-1 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold hover:shadow-green-lg transition-all">
+          حفظ
         </button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Modals: Time Change -->
-<div *ngIf="showTimeChangeModal"
-  class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-slate-900/40 animate-fade-in">
-  <div class="bg-white rounded-[3rem] shadow-2xl max-w-md w-full p-8 border border-slate-100">
-    <div class="flex items-center justify-between mb-8">
-      <h2 class="text-xl font-black text-slate-900">إعادة جدولة التسليم</h2>
-      <button (click)="showTimeChangeModal = false"
-        class="w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center transition-colors">
-        <lucide-icon name="x" [size]="20" class="text-slate-500"></lucide-icon>
+<!-- Time Change Modal -->
+<div *ngIf="showTimeChangeModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50" (click)="showTimeChangeModal = false"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold text-primary-dark">تغيير وقت التسليم</h2>
+      <button (click)="showTimeChangeModal = false" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+        <i class="bi bi-x text-gray-500 text-xl"></i>
       </button>
     </div>
 
-    <div class="space-y-6">
-      <div class="space-y-3">
-        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">الموعد الجديد المقترح</label>
-        <div class="relative">
-          <lucide-icon name="calendar-clock" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
-            [size]="20"></lucide-icon>
-          <input type="datetime-local" [(ngModel)]="newTime"
-            class="w-full p-4 pr-12 rounded-2xl bg-slate-50 border-0 focus:ring-2 focus:ring-brand-500/20 font-medium text-slate-900 transition-all appearance-none">
-        </div>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">الوقت الجديد</label>
+        <input type="datetime-local" [(ngModel)]="newTime"
+          class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary-green focus:ring-2 focus:ring-primary-green/20 outline-none">
       </div>
 
-      <div class="space-y-3">
-        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">سبب التغيير (اختياري)</label>
-        <textarea [(ngModel)]="timeChangeReason" rows="2" placeholder="لماذا تريد تغيير الموعد؟"
-          class="w-full p-4 rounded-2xl bg-slate-50 border-0 focus:ring-2 focus:ring-brand-500/20 font-medium text-slate-700 resize-none transition-all placeholder:text-slate-300"></textarea>
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">السبب (اختياري)</label>
+        <textarea [(ngModel)]="timeChangeReason" rows="2" placeholder="اذكر سبب تغيير الوقت..."
+          class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary-green focus:ring-2 focus:ring-primary-green/20 outline-none resize-none"></textarea>
       </div>
 
-      <button (click)="requestTimeChange()"
-        class="w-full h-14 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all shadow-premium mt-2">
-        إرسال طلب الجدولة
-      </button>
+      <div class="flex gap-3">
+        <button (click)="showTimeChangeModal = false"
+          class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors">
+          إلغاء
+        </button>
+        <button (click)="requestTimeChange()"
+          class="flex-1 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold hover:shadow-green-lg transition-all">
+          إرسال الطلب
+        </button>
+      </div>
     </div>
   </div>
 </div>

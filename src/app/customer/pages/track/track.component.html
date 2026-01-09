@@ -1,303 +1,284 @@
-<div class="max-w-6xl mx-auto space-y-12 animate-fade-in pb-20 px-4">
-
-  <!-- Strategic Navigation & Header -->
-  <div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
-    <div class="space-y-4">
-      <div class="flex items-center gap-3">
-        <a routerLink="/customer/dashboard"
-          class="w-12 h-12 rounded-2xl bg-white shadow-soft flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all border border-slate-100 group">
-          <lucide-icon name="arrow-right" class="w-6 h-6 group-hover:-translate-x-1 transition-transform"></lucide-icon>
-        </a>
-        <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">رادار التتبع الحي</span>
-      </div>
-      <h1 class="text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-none">تتبع الشحنة</h1>
-      <p class="text-slate-500 font-medium text-lg">أدخل رمز البوليصة لرؤية المسار المباشر وحالة التسليم الحالية.</p>
-    </div>
+<div class="space-y-6">
+  <!-- Header -->
+  <div>
+    <a routerLink="/customer/dashboard" class="inline-flex items-center gap-2 text-gray-500 hover:text-primary-green transition-colors mb-4">
+      <i class="bi bi-arrow-right"></i>
+      <span>العودة للوحة التحكم</span>
+    </a>
+    <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">تتبع الشحنة</h1>
+    <p class="text-gray-600 mt-1">تابع حالة شحنتك الواردة</p>
   </div>
 
-  <!-- Central Intelligence Search Bar -->
-  <div class="relative group">
-    <div
-      class="absolute -inset-1 bg-gradient-to-r from-brand-500 to-cyan-400 rounded-[3rem] blur opacity-10 group-hover:opacity-20 transition-all">
-    </div>
-    <div class="relative bg-white rounded-[3rem] p-4 lg:p-6 shadow-premium border border-slate-100">
-      <div class="flex flex-col lg:flex-row gap-6">
-        <div class="flex-1 space-y-3 px-4">
-          <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">رقم بوليصة
-            الشحن (Tracking ID)</label>
-          <div class="relative">
-            <lucide-icon name="search" class="absolute right-0 top-1/2 -translate-y-1/2 text-slate-300"
-              [size]="24"></lucide-icon>
-            <input type="text" [(ngModel)]="trackingNumber" (keyup.enter)="search()"
-              placeholder="أدخل الرمز هنا (مثال: 450912)"
-              class="w-full pr-10 pl-4 py-4 bg-transparent text-xl font-black text-slate-900 placeholder:text-slate-200 focus:outline-none tracking-wider">
-          </div>
-          <p *ngIf="error" class="text-xs font-black text-red-500 uppercase tracking-widest animate-slide-up">{{ error
-            }}</p>
+  <!-- Search Box -->
+  <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+    <div class="flex flex-col sm:flex-row gap-4">
+      <div class="flex-1">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">رقم التتبع</label>
+        <div class="relative">
+          <i class="bi bi-search absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <input type="text" 
+                 [(ngModel)]="trackingNumber"
+                 (keyup.enter)="search()"
+                 placeholder="أدخل رقم التتبع (مثال: PKG-2024-001)"
+                 class="w-full pr-12 pl-4 py-4 rounded-xl border-2 border-gray-200 focus:border-primary-green focus:ring-2 focus:ring-primary-green/20 outline-none transition-all text-lg">
         </div>
-
-        <button (click)="search()" [disabled]="isLoading"
-          class="h-20 lg:h-auto px-12 bg-slate-900 text-white font-black rounded-[2rem] shadow-premium hover:bg-black active:scale-95 disabled:opacity-50 disabled:grayscale transition-all flex items-center justify-center gap-4 group/btn overflow-hidden relative">
-          <div
-            class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000">
-          </div>
-          <span *ngIf="!isLoading" class="flex items-center gap-3 relative z-10">
-            <lucide-icon name="radar" class="w-6 h-6 animate-pulse"></lucide-icon>
-            <span class="text-lg uppercase tracking-widest">تحليل المسار</span>
+        <p *ngIf="error" class="mt-2 text-sm text-red-500">{{ error }}</p>
+      </div>
+      <div class="flex items-end">
+        <button (click)="search()" 
+                [disabled]="isLoading"
+                class="w-full sm:w-auto px-8 py-4 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl shadow-green hover:shadow-green-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300">
+          <span *ngIf="!isLoading" class="flex items-center gap-2">
+            <i class="bi bi-geo-alt"></i>
+            تتبع
           </span>
-          <span *ngIf="isLoading" class="flex items-center gap-4 relative z-10">
-            <div class="w-6 h-6 border-3 border-white/20 border-t-white rounded-full animate-spin"></div>
-            <span class="text-lg uppercase tracking-widest">جاري الرصد...</span>
+          <span *ngIf="isLoading" class="flex items-center gap-2">
+            <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+            جاري البحث...
           </span>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Deployment Viewport -->
-  <div *ngIf="!isLoading && selectedDelivery" class="space-y-12 animate-fade-in">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-center py-12">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4"></div>
+      <p class="text-gray-500">جاري البحث عن الشحنة...</p>
+    </div>
+  </div>
 
-    <!-- Active Proximity Alert -->
-    <div *ngIf="selectedDelivery.status === 'out_for_delivery'"
-      class="bg-slate-900 rounded-[3rem] p-8 lg:p-12 text-white relative overflow-hidden group/alert shadow-glow-blue border border-white/5">
-      <div
-        class="absolute -top-20 -right-20 w-80 h-80 bg-brand-500/10 rounded-full blur-[100px] group-hover/alert:scale-125 transition-transform duration-1000">
-      </div>
-
-      <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
-        <div
-          class="w-24 h-24 rounded-[2rem] bg-brand-500 text-white flex items-center justify-center shadow-glow-blue animate-float shrink-0">
-          <lucide-icon name="navigation" [size]="48" class="animate-pulse"></lucide-icon>
+  <!-- Results -->
+  <div *ngIf="!isLoading && selectedDelivery" class="space-y-6">
+    <!-- Near Delivery Alert -->
+    <div *ngIf="selectedDelivery.status === 'out_for_delivery'" 
+         class="bg-gradient-to-l from-cyan-500 to-blue-500 rounded-2xl p-6 text-white">
+      <div class="flex items-center gap-4">
+        <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
+          <i class="bi bi-geo-alt-fill text-3xl animate-bounce"></i>
         </div>
-        <div class="flex-1 text-center md:text-right space-y-3">
-          <h2 class="text-3xl lg:text-4xl font-black tracking-tight leading-none">المندوب على بعد دقائق!</h2>
-          <p class="text-slate-400 font-medium text-lg leading-relaxed">يرجى البقاء متاحاً على هاتفك المسجل، المندوب
-            يقترب الآن من وجهتك النهائية.</p>
+        <div class="flex-1">
+          <h2 class="text-xl font-bold mb-1">المندوب قريب منك!</h2>
+          <p class="text-white/90">استعد لاستلام شحنتك - المندوب في منطقتك الآن</p>
         </div>
-        <button *ngIf="selectedDelivery.courierPhone" (click)="callCourier()"
-          class="w-full md:w-auto px-10 h-16 bg-white text-slate-900 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-slate-50 active:scale-95 transition-all flex items-center justify-center gap-3 shadow-soft group/call">
-          <lucide-icon name="phone-forwarded" [size]="20"
-            class="text-brand-500 group-hover/call:scale-110 transition-transform"></lucide-icon>
-          تحدث مع المندوب
+        <button *ngIf="selectedDelivery.courierPhone" 
+                (click)="callCourier()"
+                class="px-6 py-3 bg-white text-blue-600 rounded-xl font-bold hover:bg-blue-50 transition-colors">
+          <i class="bi bi-telephone ml-2"></i>
+          اتصل بالمندوب
         </button>
       </div>
     </div>
 
-    <!-- Live Geographic Engine -->
+    <!-- Real-time Map (if in transit) -->
     <div *ngIf="carrierLocation && ['in_transit', 'out_for_delivery', 'picked_up'].includes(selectedDelivery.status)"
-      class="bg-white rounded-[3.5rem] shadow-premium border border-slate-100 overflow-hidden group/map">
-      <div class="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
-        <div class="flex items-center gap-5">
-          <div class="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-soft">
-            <lucide-icon name="map" [size]="24"></lucide-icon>
+         class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-5 border-b border-gray-100 bg-gradient-to-l from-blue-50 to-indigo-50">
+        <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+          <i class="bi bi-geo-alt text-blue-600"></i>
+          موقع المندوب الآن (تتبع مباشر)
+        </h2>
+      </div>
+      <div class="p-5">
+        <div class="aspect-video bg-gray-100 rounded-xl mb-4 flex items-center justify-center relative overflow-hidden">
+          <iframe *ngIf="mapUrl" 
+                  [src]="mapUrl" 
+                  class="w-full h-full border-0 rounded-xl"
+                  allowfullscreen>
+          </iframe>
+          <div *ngIf="!mapUrl" class="text-center text-gray-500">
+            <i class="bi bi-map text-4xl mb-2"></i>
+            <p>جاري تحميل الخريطة...</p>
+          </div>
+        </div>
+        <p class="text-sm text-gray-600 text-center">
+          <i class="bi bi-clock ml-1"></i>
+          آخر تحديث: {{ formatDate(carrierLocation.timestamp) }}
+        </p>
+        <a [href]="mapUrl" target="_blank"
+           class="block mt-3 text-center text-primary-green font-semibold hover:underline">
+          <i class="bi bi-box-arrow-up-right ml-1"></i>
+          فتح في Google Maps
+        </a>
+      </div>
+    </div>
+
+    <!-- Delivery Overview Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-6 border-b border-gray-100 bg-gradient-to-br from-primary-green/5 to-secondary-teal/5">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-green to-secondary-teal flex items-center justify-center shadow-green">
+              <i class="bi bi-box-arrow-in-down text-white text-2xl"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-black text-primary-dark">{{ selectedDelivery.trackingNumber }}</h2>
+              <p class="text-gray-600">{{ selectedDelivery.description }}</p>
+            </div>
+          </div>
+          <span class="px-5 py-2 rounded-full text-sm font-bold self-start lg:self-center"
+                [ngClass]="getStatusClass(selectedDelivery.status)">
+            {{ getStatusText(selectedDelivery.status) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="p-6" *ngIf="!['cancelled', 'failed_delivery', 'returned'].includes(selectedDelivery.status)">
+        <div class="relative">
+          <div class="absolute top-5 left-0 right-0 h-1 bg-gray-200 rounded-full"></div>
+          <div class="absolute top-5 left-0 h-1 bg-gradient-to-l from-primary-green to-secondary-teal rounded-full transition-all duration-500"
+               [style.width]="getStatusProgress() + '%'"></div>
+          
+          <div class="relative flex justify-between">
+            <div *ngFor="let step of statusSteps" class="flex flex-col items-center" style="width: 60px;">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 z-10"
+                   [ngClass]="{
+                     'bg-gradient-to-br from-primary-green to-secondary-teal text-white shadow-green': isStepCompleted(step),
+                     'bg-white border-2 border-primary-green text-primary-green animate-pulse': isStepCurrent(step) && !isStepCompleted(step),
+                     'bg-gray-100 text-gray-400': !isStepCompleted(step) && !isStepCurrent(step)
+                   }">
+                <i *ngIf="isStepCompleted(step) && !isStepCurrent(step)" class="bi bi-check"></i>
+                <i *ngIf="!isStepCompleted(step) || isStepCurrent(step)" [ngClass]="step.icon"></i>
+              </div>
+              <span class="mt-2 text-xs font-medium text-center leading-tight"
+                    [ngClass]="isStepCompleted(step) ? 'text-primary-dark' : 'text-gray-400'">
+                {{ step.label }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Status -->
+      <div *ngIf="['cancelled', 'failed_delivery', 'returned'].includes(selectedDelivery.status)" 
+           class="p-6 bg-red-50 border-b border-red-100">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+            <i class="bi bi-exclamation-triangle text-red-600 text-xl"></i>
           </div>
           <div>
-            <h2 class="text-xl font-black text-slate-900 leading-none">رادار الموقع الحي</h2>
-            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-2">تحديث تلقائي كل 5 ثوانٍ</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-3 px-4 py-2 bg-success-50 rounded-xl border border-success-100">
-          <div class="w-2 h-2 rounded-full bg-success-500 animate-pulse"></div>
-          <span class="text-[10px] font-black text-success-700 uppercase tracking-widest">مباشر الآن</span>
-        </div>
-      </div>
-
-      <div class="p-8">
-        <div
-          class="aspect-video lg:aspect-[21/9] bg-slate-50 rounded-[2.5rem] border-4 border-slate-50 shadow-inner relative overflow-hidden group/frame">
-          <iframe *ngIf="mapUrl" [src]="mapUrl"
-            class="w-full h-full border-0 grayscale-[0.2] hover:grayscale-0 transition-all duration-700"
-            allowfullscreen>
-          </iframe>
-
-          <div *ngIf="!mapUrl" class="absolute inset-0 flex flex-col items-center justify-center gap-4">
-            <div class="w-10 h-10 border-4 border-slate-200 border-t-brand-500 rounded-full animate-spin"></div>
-            <p class="text-xs font-black text-slate-300 uppercase tracking-widest">جاري استدعاء القمر الصناعي...</p>
-          </div>
-
-          <!-- Map Overlay UI -->
-          <div class="absolute bottom-8 right-8 z-10">
-            <a [href]="mapUrl" target="_blank"
-              class="flex items-center gap-3 px-6 py-4 bg-white/90 backdrop-blur-md rounded-2xl shadow-premium border border-white/20 text-slate-900 hover:bg-white transition-all active:scale-95">
-              <lucide-icon name="external-link" [size]="18" class="text-brand-500"></lucide-icon>
-              <span class="text-[10px] font-black uppercase tracking-widest">توسيع في خريطة Google</span>
-            </a>
-          </div>
-        </div>
-
-        <div class="mt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-slate-400">
-          <div class="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest">
-            <span>خط العرض: {{ carrierLocation.lat }}</span>
-            <span class="text-slate-200">|</span>
-            <span>خط الطول: {{ carrierLocation.lng }}</span>
-          </div>
-          <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
-            <lucide-icon name="clock" [size]="14"></lucide-icon>
-            آخر رصد: {{ formatDate(carrierLocation.timestamp) }}
+            <h3 class="font-bold text-red-800">{{ getStatusText(selectedDelivery.status) }}</h3>
+            <p class="text-sm text-red-600">تواصل مع المُرسل أو الدعم للمزيد من المعلومات</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Core Shipment Identity Card -->
-    <div
-      class="bg-white rounded-[3.5rem] shadow-premium border border-slate-100 overflow-hidden transition-all duration-500">
-      <div class="p-10 lg:p-14 border-b border-slate-50 bg-slate-50/30">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-10">
-          <div class="flex items-center gap-8">
-            <div
-              class="w-24 h-24 rounded-[2rem] bg-slate-900 text-white flex items-center justify-center shadow-premium shrink-0 relative overflow-hidden group/id">
-              <div class="absolute inset-0 bg-gradient-to-br from-brand-500/20 to-transparent"></div>
-              <lucide-icon name="box" [size]="40"
-                class="relative z-10 group-hover/id:scale-110 transition-transform"></lucide-icon>
-            </div>
-            <div class="space-y-3">
-              <div class="flex items-center gap-3">
-                <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] font-mono leading-none">{{
-                  selectedDelivery.trackingNumber }}</span>
-              </div>
-              <h2 class="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-none mb-2">{{
-                selectedDelivery.description }}</h2>
-              <div class="flex items-center gap-4">
-                <span
-                  class="px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm animate-pulse"
-                  [ngClass]="getStatusClass(selectedDelivery.status)">
-                  {{ getStatusText(selectedDelivery.status) }}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-10 text-center lg:text-right">
-            <div>
-              <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">الكتلة الصافية</p>
-              <p class="text-2xl font-black text-slate-900 leading-none">{{ selectedDelivery.weight }} <span
-                  class="text-sm">كجم</span></p>
-            </div>
-            <div class="w-px h-12 bg-slate-100"></div>
-            <div>
-              <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">قيمة الطرد</p>
-              <p class="text-2xl font-black text-brand-600 leading-none">{{ selectedDelivery.deliveryFee || 0 }} <span
-                  class="text-sm">ج.م</span></p>
-            </div>
-          </div>
+    <!-- Info Cards Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Sender Info -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-4 border-b border-gray-100 bg-gray-50/50">
+          <h3 class="font-bold text-primary-dark flex items-center gap-2">
+            <i class="bi bi-person text-primary-green"></i>
+            المُرسل
+          </h3>
         </div>
-      </div>
-
-      <!-- Sophisticated Progress Timeline -->
-      <div class="p-10 lg:p-14" *ngIf="!['cancelled', 'failed_delivery', 'returned'].includes(selectedDelivery.status)">
-        <div class="relative py-12">
-          <!-- Timeline Path -->
-          <div class="absolute top-[88px] left-0 right-0 h-1 bg-slate-100 rounded-full overflow-hidden">
-            <div class="h-full bg-brand-500 shadow-glow-blue transition-all duration-1000 ease-out"
-              [style.width]="getStatusProgress() + '%'"></div>
-          </div>
-
-          <div class="relative flex justify-between gap-4">
-            <div *ngFor="let step of statusSteps; let i = index"
-              class="flex flex-col items-center group/step min-w-[80px]">
-              <div
-                class="w-16 h-16 rounded-[1.5rem] flex items-center justify-center text-sm font-bold transition-all duration-500 z-10 border-4 outline outline-4 outline-white shadow-soft"
-                [ngClass]="{
-                       'bg-slate-900 text-white border-slate-900 shadow-premium': isStepCompleted(step),
-                       'bg-white border-brand-500 text-brand-500 shadow-glow-blue animate-float': isStepCurrent(step) && !isStepCompleted(step),
-                       'bg-white border-slate-100 text-slate-200': !isStepCompleted(step) && !isStepCurrent(step)
-                     }">
-                <lucide-icon *ngIf="isStepCompleted(step) && !isStepCurrent(step)" name="check"
-                  [size]="24"></lucide-icon>
-                <lucide-icon *ngIf="!isStepCompleted(step) || isStepCurrent(step)" [name]="step.icon" [size]="24"
-                  [class.animate-pulse]="isStepCurrent(step)"></lucide-icon>
-              </div>
-
-              <div class="mt-8 text-center space-y-2">
-                <p class="text-[10px] font-black uppercase tracking-widest leading-none transition-colors"
-                  [ngClass]="isStepCompleted(step) ? 'text-slate-900' : 'text-slate-400'">
-                  {{ step.label }}
-                </p>
-                <p
-                  class="text-[8px] font-bold text-slate-300 uppercase leading-relaxed max-w-[80px] group-hover/step:text-slate-400 transition-colors">
-                  {{ step.description }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Critical Intelligence Summary -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 border-t border-slate-50">
-        <!-- Shipper -->
-        <div class="p-10 border-l border-slate-50 hover:bg-slate-50/50 transition-colors">
-          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-3">
-            <lucide-icon name="user" [size]="14"></lucide-icon> سـلطة الشـحن
-          </p>
+        <div class="p-4">
           <div class="flex items-center justify-between">
-            <div class="space-y-1">
-              <p class="text-xl font-black text-slate-900 leading-none">{{ selectedDelivery.senderName }}</p>
-              <p *ngIf="selectedDelivery.senderPhone" class="text-xs font-bold text-slate-400 tracking-tighter">{{
-                selectedDelivery.senderPhone }}</p>
+            <div>
+              <p class="font-bold text-primary-dark">{{ selectedDelivery.senderName }}</p>
+              <p *ngIf="selectedDelivery.senderPhone" class="text-sm text-gray-500">{{ selectedDelivery.senderPhone }}</p>
             </div>
-            <button *ngIf="selectedDelivery.senderPhone" (click)="callSender()"
-              class="w-12 h-12 rounded-2xl bg-white border border-slate-100 text-slate-400 hover:text-brand-500 hover:shadow-soft transition-all flex items-center justify-center shadow-sm">
-              <lucide-icon name="phone" [size]="18"></lucide-icon>
+            <button *ngIf="selectedDelivery.senderPhone" 
+                    (click)="callSender()"
+                    class="w-10 h-10 rounded-full bg-primary-green/10 text-primary-green hover:bg-primary-green hover:text-white flex items-center justify-center transition-colors">
+              <i class="bi bi-telephone"></i>
             </button>
           </div>
         </div>
+      </div>
 
-        <!-- Logistics Attributes -->
-        <div class="p-10 border-l border-slate-50 hover:bg-slate-50/50 transition-colors space-y-6">
-          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-3">
-            <lucide-icon name="info" [size]="14"></lucide-icon> خصائص التوصيل
-          </p>
-          <div class="flex flex-wrap gap-2">
-            <span *ngIf="selectedDelivery.isFragile"
-              class="px-4 py-2 bg-amber-50 text-amber-600 rounded-xl text-[9px] font-black uppercase tracking-widest border border-amber-100 flex items-center gap-2">
-              <lucide-icon name="shield-alert" [size]="12"></lucide-icon> قابل للكسر
-            </span>
-            <span *ngIf="selectedDelivery.requiresSignature"
-              class="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-[9px] font-black uppercase tracking-widest border border-blue-100 flex items-center gap-2">
-              <lucide-icon name="pen-tool" [size]="12"></lucide-icon> توقيع يدوي
-            </span>
+      <!-- Delivery Details -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-4 border-b border-gray-100 bg-gray-50/50">
+          <h3 class="font-bold text-primary-dark flex items-center gap-2">
+            <i class="bi bi-info-circle text-primary-green"></i>
+            تفاصيل الشحنة
+          </h3>
+        </div>
+        <div class="p-4 space-y-3">
+          <div class="flex justify-between">
+            <span class="text-gray-500 text-sm">الوزن</span>
+            <span class="font-medium text-primary-dark">{{ selectedDelivery.weight }} كجم</span>
           </div>
-          <div class="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-            <lucide-icon name="calendar" [size]="14"></lucide-icon>
-            تاريخ القيد: {{ formatDate(selectedDelivery.createdAt) }}
+          <div class="flex justify-between">
+            <span class="text-gray-500 text-sm">تاريخ الإنشاء</span>
+            <span class="font-medium text-primary-dark">{{ formatDate(selectedDelivery.createdAt) }}</span>
+          </div>
+          <div *ngIf="selectedDelivery.estimatedDelivery && selectedDelivery.status !== 'delivered'" class="flex justify-between">
+            <span class="text-gray-500 text-sm">التوصيل المتوقع</span>
+            <span class="font-medium text-primary-green">{{ formatDate(selectedDelivery.estimatedDelivery) }}</span>
+          </div>
+          <div class="flex items-center gap-2 pt-2">
+            <span *ngIf="selectedDelivery.isFragile" class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
+              <i class="bi bi-exclamation-diamond ml-1"></i>قابل للكسر
+            </span>
+            <span *ngIf="selectedDelivery.requiresSignature" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+              <i class="bi bi-pen ml-1"></i>يتطلب توقيعك
+            </span>
           </div>
         </div>
+      </div>
 
-        <!-- Destination Node -->
-        <div class="p-10 hover:bg-slate-50/50 transition-colors">
-          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-3">
-            <lucide-icon name="map-pin" [size]="14"></lucide-icon> عقدة التوصيل النهائية
-          </p>
-          <div class="space-y-4">
-            <p class="text-sm font-black text-slate-900 leading-relaxed">{{ selectedDelivery.deliveryAddress }}</p>
-            <a routerLink="/customer/profile"
-              class="inline-flex items-center gap-2 text-[10px] font-black text-brand-600 uppercase tracking-widest hover:underline group/edit">
-              <lucide-icon name="edit-3" [size]="12"
-                class="group-hover/edit:rotate-12 transition-transform"></lucide-icon>
-              تحديث إحداثيات العنوان
-            </a>
+      <!-- Delivery Address -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-4 border-b border-gray-100 bg-gray-50/50">
+          <h3 class="font-bold text-primary-dark flex items-center gap-2">
+            <i class="bi bi-geo-alt text-primary-green"></i>
+            عنوان التسليم
+          </h3>
+        </div>
+        <div class="p-4">
+          <p class="font-medium text-primary-dark">{{ selectedDelivery.deliveryAddress }}</p>
+          <a routerLink="/customer/profile" class="inline-flex items-center gap-1 mt-3 text-sm text-primary-green hover:underline">
+            <i class="bi bi-pencil"></i>
+            تعديل العنوان
+          </a>
+        </div>
+      </div>
+
+      <!-- Courier Info -->
+      <div *ngIf="selectedDelivery.courierName" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-4 border-b border-gray-100 bg-blue-50">
+          <h3 class="font-bold text-blue-800 flex items-center gap-2">
+            <i class="bi bi-truck text-blue-600"></i>
+            المندوب
+          </h3>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                <i class="bi bi-person text-blue-600 text-xl"></i>
+              </div>
+              <div>
+                <p class="font-bold text-primary-dark">{{ selectedDelivery.courierName }}</p>
+                <p *ngIf="selectedDelivery.courierPhone" class="text-sm text-gray-500">{{ selectedDelivery.courierPhone }}</p>
+              </div>
+            </div>
+            <button *ngIf="selectedDelivery.courierPhone" 
+                    (click)="callCourier()" 
+                    class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-medium text-sm hover:bg-blue-200 transition-colors">
+              <i class="bi bi-telephone ml-1"></i>
+              اتصال
+            </button>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Empty Exploration State -->
-  <div *ngIf="!isLoading && searchPerformed && !selectedDelivery && !error"
-    class="py-32 text-center bg-white rounded-[3.5rem] border border-dashed border-slate-200 animate-fade-in shadow-soft">
-    <div
-      class="w-32 h-32 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-10 shadow-inner relative overflow-hidden group/nores">
-      <lucide-icon name="search-x" class="text-slate-200 group-hover/nores:scale-110 transition-transform"
-        [size]="64"></lucide-icon>
-      <div class="absolute inset-0 bg-gradient-to-b from-transparent to-white/50"></div>
+  <!-- No Results -->
+  <div *ngIf="!isLoading && searchPerformed && !selectedDelivery && !error" 
+       class="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
+    <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
+      <i class="bi bi-search text-gray-400 text-4xl"></i>
     </div>
-    <h3 class="text-3xl font-black text-slate-900 mb-4 tracking-tight">لم يتم رصد بوليصة الشحن</h3>
-    <p class="text-slate-400 font-medium max-w-sm mx-auto leading-relaxed mb-10">
-      تحقق من دقة الرمز المدخل يرجى التأكد من أن الرقم يطابق المذكور في رسالة تأكيد الشحن المراسلة إليك عبر البريد أو
-      الهاتف.
-    </p>
-    <button (click)="trackingNumber=''; error=''" class="btn-primary px-10 h-16 scale-110">محاولة رصد أخرى</button>
+    <h3 class="text-xl font-bold text-gray-800 mb-2">لم يتم العثور على الشحنة</h3>
+    <p class="text-gray-500">تأكد من رقم التتبع وحاول مرة أخرى</p>
   </div>
 </div>
+

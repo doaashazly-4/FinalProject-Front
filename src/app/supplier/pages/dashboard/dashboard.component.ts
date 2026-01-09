@@ -1,61 +1,33 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { SupplierDataService, Parcel, SenderStat, SenderDashboardData, SupplierProfile } from '../../services/supplier-data.service';
-import { LucideAngularModule } from 'lucide-angular';
-import { TranslationService } from '../../../core/services/translation.service';
+import { SupplierDataService, Parcel, SenderStat, SenderDashboardData } from '../../services/supplier-data.service';
 
 import { ShipmentCardComponent } from '../../components/shipment-card/shipment-card.component';
 
 @Component({
   selector: 'app-supplier-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, ShipmentCardComponent, LucideAngularModule],
+  imports: [CommonModule, RouterModule, ShipmentCardComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
 export class SupplierDashboardComponent implements OnInit {
-  supplierProfile: SupplierProfile | null = null;
   stats: SenderStat[] = [];
   recentParcels: Parcel[] = [];
   pendingParcels: Parcel[] = [];
   dashboardData: SenderDashboardData | null = null;
   isLoading = true;
-  viewMode: 'recent' | 'all' = 'recent'; // Default to recent (last 5 days)
+  showAllParcels = false;
   today = new Date();
 
   constructor(
     private dataService: SupplierDataService,
-    private router: Router,
-    public langService: TranslationService
+    private router: Router
   ) { }
-
-  get displayedParcels(): Parcel[] {
-    if (this.viewMode === 'all') {
-      return this.pendingParcels;
-    }
-    // Filter last 5 days
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 5);
-    return this.pendingParcels.filter(p => new Date(p.createdAt) >= cutoff);
-  }
-
-  toggleViewMode(): void {
-    this.viewMode = this.viewMode === 'recent' ? 'all' : 'recent';
-  }
 
   ngOnInit(): void {
     this.loadDashboardData();
-    this.loadProfile();
-  }
-
-  loadProfile(): void {
-    this.dataService.getProfile().subscribe({
-      next: (profile) => {
-        this.supplierProfile = profile;
-      },
-      error: (err) => console.error('Error loading profile:', err)
-    });
   }
 
   loadDashboardData(): void {
@@ -183,20 +155,5 @@ export class SupplierDashboardComponent implements OnInit {
       'bg-gradient-to-br from-amber-500 to-amber-600'
     ];
     return colors[index % colors.length];
-  }
-
-  getStatLabel(label: string): string {
-    const map: { [key: string]: string } = {
-      'Total Orders': 'DASHBOARD.STATS.TOTAL_ORDERS',
-      'Delivered': 'DASHBOARD.STATS.DELIVERED',
-      'Pending': 'DASHBOARD.STATS.PENDING',
-      'Revenue': 'DASHBOARD.STATS.REVENUE',
-      'إجمالي الطلبات': 'DASHBOARD.STATS.TOTAL_ORDERS',
-      'تم التسليم': 'DASHBOARD.STATS.DELIVERED',
-      'قيد الانتظار': 'DASHBOARD.STATS.PENDING',
-      'الإيرادات': 'DASHBOARD.STATS.REVENUE'
-    };
-    // Return translation key if found, otherwise return label (and hope translate pipe handles it or it's formatted well)
-    return map[label] || label;
   }
 }

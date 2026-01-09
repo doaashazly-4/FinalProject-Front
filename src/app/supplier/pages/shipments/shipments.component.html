@@ -1,321 +1,281 @@
-<div class="space-y-10 animate-fade-in pb-20">
-
-  <!-- Content Header -->
-  <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-    <div class="space-y-3">
-      <div class="flex items-center gap-3">
-        <span
-          class="inline-flex items-center gap-2 px-3 py-1 bg-brand-500/10 text-brand-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-brand-500/20">
-          <lucide-icon name="list" [size]="12"></lucide-icon>
-          {{ 'SERVICES.BADGE' | translate }}
-        </span>
-      </div>
-      <h1 class="text-3xl lg:text-5xl font-black text-slate-900 tracking-tight leading-none">{{ 'SHIPMENTS.TITLE' |
-        translate }}</h1>
-      <p class="text-slate-500 font-medium text-lg leading-relaxed">{{ 'SHIPMENTS.SUBTITLE' | translate }}</p>
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">طلباتي</h1>
+      <p class="text-gray-600 mt-1">إدارة ومتابعة جميع طلبات الشحن</p>
     </div>
+    <a routerLink="/supplier/create-shipment"
+      class="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl shadow-green hover:shadow-green-lg transition-all">
+      <i class="bi bi-plus-lg"></i>
+      <span>طلب جديد</span>
+    </a>
+  </div>
 
-    <div class="flex items-center gap-4">
-      <a routerLink="/supplier/create-shipment" class="btn-primary px-8 h-14 shadow-glow-blue whitespace-nowrap">
-        <lucide-icon name="plus" class="w-5 h-5"></lucide-icon>
-        <span>{{ 'CREATE_SHIPMENT.TITLE' | translate }}</span>
-      </a>
+  <!-- Filters -->
+  <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+    <div class="flex flex-col lg:flex-row lg:items-center gap-4">
+      <!-- Search -->
+      <div class="flex-1">
+        <div class="relative">
+          <i class="bi bi-search absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()" class="input pr-12"
+            placeholder="بحث برقم التتبع، اسم المستلم، الهاتف...">
+        </div>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="flex flex-wrap gap-2">
+        <button *ngFor="let filter of statusFilters" (click)="onStatusChange(filter.value)"
+          class="px-4 py-2 rounded-xl text-sm font-medium transition-all" [ngClass]="selectedStatus === filter.value 
+                  ? 'bg-primary-green text-white shadow-green' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+          {{ filter.label }}
+          <span *ngIf="filter.count !== undefined" class="mr-1 opacity-70">({{ filter.count }})</span>
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Filtration Matrix -->
-  <div
-    class="p-4 bg-white rounded-[2.5rem] shadow-soft border border-slate-100 flex flex-col xl:flex-row gap-4 items-center">
-    <!-- Search Control -->
-    <div class="relative flex-1 w-full">
-      <lucide-icon name="search" class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400"
-        [size]="18"></lucide-icon>
-      <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()"
-        class="input h-14 pr-14 border-0 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-500/20"
-        [placeholder]="'SHIPMENTS.SEARCH_PLACEHOLDER' | translate">
-    </div>
-
-    <!-- Status Horizontal Scroller -->
-    <div class="flex items-center gap-2 overflow-x-auto pb-2 xl:pb-0 custom-scrollbar w-full xl:w-auto px-2">
-      <button *ngFor="let filter of statusFilters" (click)="onStatusChange(filter.value)"
-        class="px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border"
-        [ngClass]="selectedStatus === filter.value 
-                ? 'bg-slate-900 text-white border-slate-900 shadow-premium' 
-                : 'bg-white text-slate-500 border-slate-100 hover:bg-slate-50 hover:text-slate-900'">
-        {{ filter.label | translate }}
-        <span *ngIf="filter.count !== undefined" class="mr-2 opacity-50 px-2 py-0.5 bg-white/10 rounded-lg">{{
-          filter.count }}</span>
-      </button>
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4">
+      </div>
+      <p class="text-gray-500">جاري تحميل الطلبات...</p>
     </div>
   </div>
 
-  <!-- Main Viewport -->
-  <div class="relative min-h-[400px]">
-    <!-- Loading Intelligence -->
-    <div *ngIf="isLoading"
-      class="absolute inset-0 flex flex-col items-center justify-center gap-4 animate-fade-in bg-white/50 backdrop-blur-sm z-10 rounded-[3rem]">
-      <div class="w-12 h-12 border-4 border-brand-200 border-t-brand-500 rounded-full animate-spin"></div>
-      <span class="text-xs font-black text-slate-400 uppercase tracking-widest">{{ 'COMMON.LOADING' | translate
-        }}</span>
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredParcels.length === 0"
+    class="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
+    <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
+      <i class="bi bi-inbox text-gray-400 text-4xl"></i>
     </div>
+    <h3 class="text-xl font-bold text-primary-dark mb-2">لا توجد طلبات</h3>
+    <p class="text-gray-500 mb-6">
+      {{ selectedStatus === 'all' ? 'لم تقم بإنشاء أي طلبات بعد' : 'لا توجد طلبات بهذه الحالة' }}
+    </p>
+    <a routerLink="/supplier/create-shipment" class="btn-primary">
+      <i class="bi bi-plus-lg ml-2"></i>
+      إنشاء طلب جديد
+    </a>
+  </div>
 
-    <!-- Empty Discovery State -->
-    <div *ngIf="!isLoading && filteredParcels.length === 0"
-      class="py-32 text-center bg-white rounded-[3rem] border border-dashed border-slate-200 animate-fade-in">
-      <div
-        class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner relative overflow-hidden">
-        <lucide-icon name="box" class="text-slate-200" [size]="48"></lucide-icon>
-        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-white/50"></div>
-      </div>
-      <h3 class="text-2xl font-black text-slate-900 mb-2">{{ 'SHIPMENTS.NO_RESULTS' | translate }}</h3>
-      <p class="text-slate-400 font-medium max-w-sm mx-auto leading-relaxed mb-10">
-        {{ 'SHIPMENTS.NO_RESULTS_DESC' | translate }}
-      </p>
-      <a routerLink="/supplier/create-shipment" class="btn-primary px-10 h-14 scale-110">
-        {{ 'SHIPMENTS.CREATE_FIRST' | translate }}
-      </a>
-    </div>
-
-    <!-- Dynamic Grid -->
-    <div *ngIf="!isLoading && filteredParcels.length > 0"
-      class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
-      <app-shipment-card *ngFor="let parcel of filteredParcels; let i = index" [parcel]="parcel" [index]="i"
-        (onMarkReady)="markReadyForPickup($event)" (onAssign)="openAssignModal($event)"
-        (onDelete)="cancelOrder($event)">
-      </app-shipment-card>
-    </div>
+  <!-- Parcels List -->
+  <div *ngIf="!isLoading && filteredParcels.length > 0"
+    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <app-shipment-card *ngFor="let parcel of filteredParcels; let i = index" [parcel]="parcel" [index]="i"
+      (onMarkReady)="markReadyForPickup($event)" (onAssign)="openAssignModal($event)" (onDelete)="cancelOrder($event)">
+    </app-shipment-card>
   </div>
 </div>
 
-<!-- Assign Intelligence Modal -->
-<div *ngIf="showAssignModal"
-  class="fixed inset-0 z-[1000] flex items-center justify-center p-6 backdrop-blur-xl bg-slate-900/40 animate-fade-in">
-  <div
-    class="bg-white rounded-[3.5rem] max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-premium border border-slate-100 animate-slide-up">
+<!-- Assign Carrier Modal (UC-SUP-03) -->
+<div *ngIf="showAssignModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+  <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
     <!-- Modal Header -->
-    <div class="p-8 lg:p-10 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
-      <div class="flex items-center gap-5">
-        <div class="w-14 h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-lg">
-          <lucide-icon name="user-plus" [size]="28"></lucide-icon>
-        </div>
+    <div class="p-6 border-b border-gray-100 bg-gray-50">
+      <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-2xl font-black text-slate-900 leading-none">{{ 'ACTIONS.ASSIGN' | translate }}</h2>
-          <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-2">{{
-            selectedParcel?.trackingNumber }}</p>
+          <h2 class="text-xl font-black text-primary-dark">تعيين مندوب</h2>
+          <p class="text-gray-500 text-sm">اختر مندوب من القائمة لتعيينه للطلب {{ selectedParcel?.trackingNumber }}</p>
         </div>
-      </div>
-      <button (click)="closeAssignModal()"
-        class="w-12 h-12 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:shadow-soft transition-all">
-        <lucide-icon name="x" [size]="20"></lucide-icon>
-      </button>
-    </div>
-
-    <!-- Modal Intelligence Hub -->
-    <div class="p-8 lg:p-10 overflow-y-auto max-h-[60vh] custom-scrollbar">
-      <!-- Search Progress -->
-      <div *ngIf="isLoadingCarriers" class="flex flex-col items-center justify-center py-20 gap-4">
-        <div class="w-10 h-10 border-4 border-brand-200 border-t-brand-500 rounded-full animate-spin"></div>
-        <span class="text-xs font-black text-slate-400 uppercase tracking-widest">{{ 'SHIPMENTS.SEARCHING_CARRIERS' |
-          translate }}</span>
-      </div>
-
-      <!-- No Resources -->
-      <div *ngIf="!isLoadingCarriers && availableCarriers.length === 0" class="py-20 text-center">
-        <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-          <lucide-icon name="user-x" class="text-slate-300" [size]="32"></lucide-icon>
-        </div>
-        <h4 class="text-xl font-black text-slate-900 mb-2">{{ 'SHIPMENTS.NO_CARRIERS' | translate }}</h4>
-        <p class="text-slate-400 text-sm font-medium">{{ 'SHIPMENTS.ALL_BUSY' | translate }}</p>
-      </div>
-
-      <!-- Discovery List -->
-      <div *ngIf="!isLoadingCarriers && availableCarriers.length > 0" class="space-y-4">
-        <div *ngFor="let carrier of availableCarriers" (click)="carrier.isAvailable && selectCarrier(carrier)"
-          class="group p-6 rounded-3xl border-2 transition-all cursor-pointer relative overflow-hidden" [ngClass]="{
-               'border-brand-500 bg-brand-50/20': selectedCarrier?.id === carrier.id,
-               'border-slate-100 bg-white hover:border-slate-200 hover:shadow-soft': selectedCarrier?.id !== carrier.id && carrier.isAvailable,
-               'border-slate-50 bg-slate-50/50 opacity-40 cursor-not-allowed': !carrier.isAvailable
-             }">
-          <div class="flex items-center gap-6 relative z-10">
-            <!-- Profile Engine -->
-            <div
-              class="w-16 h-16 rounded-[1.5rem] bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
-              <img *ngIf="carrier.photoUrl" [src]="carrier.photoUrl" class="w-full h-full object-cover">
-              <lucide-icon *ngIf="!carrier.photoUrl" name="user" class="text-slate-300" [size]="28"></lucide-icon>
-            </div>
-
-            <!-- Strategic Data -->
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-3 mb-1.5 flex-wrap">
-                <p class="font-black text-slate-900 text-lg leading-none">{{ carrier.name }}</p>
-                <div *ngIf="carrier.isOnline" class="w-2 h-2 rounded-full bg-success-500 animate-pulse"></div>
-                <span *ngIf="!carrier.isAvailable"
-                  class="px-3 py-1 bg-slate-100 text-[9px] font-black uppercase tracking-widest text-slate-500 rounded-lg">{{
-                  'SHIPMENTS.BUSY' | translate }}</span>
-              </div>
-              <div class="flex items-center gap-6 mt-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                <span class="flex items-center gap-2"><lucide-icon [name]="getVehicleIcon(carrier.vehicleType)"
-                    [size]="14"></lucide-icon>{{ getVehicleText(carrier.vehicleType) }}</span>
-                <span class="flex items-center gap-2"><lucide-icon name="star" [size]="14"
-                    class="text-amber-500 fill-amber-500"></lucide-icon>{{ carrier.rating }}</span>
-                <span class="flex items-center gap-2"><lucide-icon name="package" [size]="14"></lucide-icon>{{
-                  carrier.totalDeliveries }}</span>
-              </div>
-            </div>
-
-            <!-- Proximity & Speed -->
-            <div class="text-left shrink-0">
-              <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{{ carrier.distanceKm }}
-                {{ 'COMMON.KM' | translate }}</p>
-              <p class="font-black text-brand-600 text-lg leading-none">{{ carrier.estimatedArrival }}</p>
-            </div>
-
-            <!-- Selection State Overlay -->
-            <div *ngIf="selectedCarrier?.id === carrier.id"
-              class="w-10 h-10 rounded-2xl bg-brand-500 text-white flex items-center justify-center shadow-glow-blue animate-fade-in shrink-0">
-              <lucide-icon name="check" [size]="20"></lucide-icon>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal Strategic Footer -->
-    <div class="p-8 lg:p-10 border-t border-slate-50 bg-slate-50/50 flex items-center justify-between">
-      <button (click)="closeAssignModal()"
-        class="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-all">{{
-        'ACTIONS.CANCEL_OP' | translate }}</button>
-      <button (click)="assignCarrier()" [disabled]="!selectedCarrier || isAssigning"
-        class="h-16 px-10 bg-brand-500 text-white font-black rounded-2xl shadow-glow-blue hover:bg-brand-600 active:scale-95 disabled:opacity-50 disabled:grayscale transition-all flex items-center justify-center gap-3">
-        <span *ngIf="!isAssigning" class="flex items-center gap-3">
-          <lucide-icon name="check-circle" [size]="20"></lucide-icon>
-          {{ 'ACTIONS.CONFIRM_ASSIGN' | translate }}
-        </span>
-        <div *ngIf="isAssigning" class="flex items-center gap-3">
-          <div class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-          <span>{{ 'SHIPMENTS.WAIT' | translate }}</span>
-        </div>
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Detailed Intel Modal -->
-<div *ngIf="showDetailsModal && detailsParcel"
-  class="fixed inset-0 z-[1000] flex items-center justify-center p-6 backdrop-blur-xl bg-slate-900/40 animate-fade-in">
-  <div
-    class="bg-white rounded-[3.5rem] max-w-xl w-full max-h-[90vh] overflow-hidden shadow-premium border border-slate-100 animate-slide-up">
-    <!-- Modal Header -->
-    <div class="p-10 bg-slate-900 text-white relative overflow-hidden">
-      <div class="absolute -top-10 -right-10 w-48 h-48 bg-brand-500/10 rounded-full blur-3xl"></div>
-      <div class="relative z-10 flex items-center justify-between">
-        <div class="space-y-2">
-          <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">{{ 'TRACK.SERVICE_TYPE' |
-            translate }}</p>
-          <h2 class="text-3xl font-black tracking-wider font-mono">{{ detailsParcel.trackingNumber }}</h2>
-        </div>
-        <button (click)="closeDetailsModal()"
-          class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all">
-          <lucide-icon name="x" [size]="20"></lucide-icon>
+        <button (click)="closeAssignModal()"
+          class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200">
+          <i class="bi bi-x-lg"></i>
         </button>
       </div>
     </div>
 
-    <!-- Modal Intel Body -->
-    <div class="p-10 space-y-8 overflow-y-auto max-h-[60vh] custom-scrollbar">
-      <!-- Status Badge Matrix -->
-      <div class="flex items-center justify-between p-6 bg-slate-50 rounded-3xl border border-slate-100">
-        <span class="text-xs font-black text-slate-400 uppercase tracking-widest">{{ 'TRACK.CURRENT_PHASE' | translate
-          }}</span>
-        <span class="px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] animate-pulse"
-          [ngClass]="getStatusClass(detailsParcel.status)">
-          {{ 'STATUS.' + (detailsParcel.status | uppercase) | translate }}
-        </span>
+    <!-- Modal Body -->
+    <div class="p-6 overflow-y-auto max-h-[60vh]">
+      <!-- Loading -->
+      <div *ngIf="isLoadingCarriers" class="text-center py-8">
+        <div
+          class="animate-spin rounded-full h-10 w-10 border-4 border-primary-green border-t-transparent mx-auto mb-4">
+        </div>
+        <p class="text-gray-500">جاري البحث عن المناديب المتاحين...</p>
       </div>
 
-      <!-- Core Logistics Data -->
-      <div class="space-y-6">
-        <div class="flex items-start gap-4 p-6 bg-white rounded-3xl border border-slate-100 shadow-soft">
-          <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center shrink-0">
-            <lucide-icon name="box" [size]="24"></lucide-icon>
-          </div>
-          <div class="min-w-0">
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">{{
-              'CREATE_SHIPMENT.DESC_LABEL' | translate }}
-            </p>
-            <h4 class="text-lg font-black text-slate-900 leading-tight">{{ detailsParcel.description }}</h4>
-          </div>
+      <!-- Empty -->
+      <div *ngIf="!isLoadingCarriers && availableCarriers.length === 0" class="text-center py-8">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+          <i class="bi bi-person-x text-gray-400 text-2xl"></i>
         </div>
-
-        <div class="flex items-start gap-4 p-6 bg-white rounded-3xl border border-slate-100 shadow-soft">
-          <div class="w-12 h-12 bg-success-50 text-success-600 rounded-2xl flex items-center justify-center shrink-0">
-            <lucide-icon name="map-pin" [size]="24"></lucide-icon>
-          </div>
-          <div class="min-w-0">
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">{{
-              'TRACK.RECIPIENT' | translate }}</p>
-            <h4 class="text-lg font-black text-slate-900 leading-tight mb-2">{{ detailsParcel.receiverName }}</h4>
-            <p class="text-xs font-bold text-slate-500 tracking-widest mb-3">{{ detailsParcel.receiverPhone }}</p>
-            <p class="text-sm font-medium text-slate-400 leading-relaxed">{{ detailsParcel.deliveryAddress }}</p>
-          </div>
-        </div>
+        <p class="text-gray-500">لا يوجد مناديب متاحين حالياً</p>
+        <p class="text-gray-400 text-sm mt-1">يرجى المحاولة لاحقاً</p>
       </div>
 
-      <!-- Financial Engine -->
-      <div class="grid grid-cols-2 gap-6">
-        <div class="p-6 bg-slate-50 rounded-3xl border border-slate-100">
-          <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 leading-none">{{
-            'CREATE_SHIPMENT.COD_LABEL' | translate }}
-          </p>
-          <div class="flex items-baseline gap-2">
-            <span class="text-2xl font-black text-slate-900">{{ detailsParcel.codAmount }}</span>
-            <span class="text-[10px] font-black text-slate-400 uppercase">EGP</span>
+      <!-- Carriers List -->
+      <div *ngIf="!isLoadingCarriers && availableCarriers.length > 0" class="space-y-3">
+        <div *ngFor="let carrier of availableCarriers" (click)="carrier.isAvailable && selectCarrier(carrier)"
+          class="p-4 rounded-xl border-2 transition-all cursor-pointer" [ngClass]="{
+               'border-primary-green bg-primary-green/5': selectedCarrier?.id === carrier.id,
+               'border-gray-200 hover:border-gray-300': selectedCarrier?.id !== carrier.id && carrier.isAvailable,
+               'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed': !carrier.isAvailable
+             }">
+          <div class="flex items-center gap-4">
+            <!-- Photo -->
+            <div class="w-14 h-14 rounded-xl bg-gray-200 flex items-center justify-center overflow-hidden">
+              <img *ngIf="carrier.photoUrl" [src]="carrier.photoUrl" alt="{{ carrier.name }}"
+                class="w-full h-full object-cover">
+              <i *ngIf="!carrier.photoUrl" class="bi bi-person text-gray-400 text-2xl"></i>
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1">
+              <div class="flex items-center gap-2">
+                <p class="font-bold text-primary-dark">{{ carrier.name }}</p>
+                <span *ngIf="carrier.isOnline" class="w-2 h-2 rounded-full bg-green-500"></span>
+                <span *ngIf="!carrier.isAvailable"
+                  class="px-2 py-0.5 bg-gray-200 text-gray-600 text-xs rounded-full">مشغول</span>
+              </div>
+              <div class="flex items-center gap-4 mt-1 text-sm text-gray-500">
+                <span>
+                  <i class="bi ml-1" [ngClass]="getVehicleIcon(carrier.vehicleType)"></i>
+                  {{ getVehicleText(carrier.vehicleType) }}
+                </span>
+                <span>
+                  <i class="bi bi-star-fill ml-1 text-amber-400"></i>
+                  {{ carrier.rating }}
+                </span>
+                <span>{{ carrier.totalDeliveries }} توصيلة</span>
+              </div>
+            </div>
+
+            <!-- Distance & ETA -->
+            <div class="text-left">
+              <p class="text-sm text-gray-500">{{ carrier.distanceKm }} كم</p>
+              <p class="font-bold text-primary-green">{{ carrier.estimatedArrival }}</p>
+            </div>
+
+            <!-- Selected Check -->
+            <div *ngIf="selectedCarrier?.id === carrier.id"
+              class="w-8 h-8 rounded-full bg-primary-green flex items-center justify-center text-white">
+              <i class="bi bi-check-lg"></i>
+            </div>
           </div>
         </div>
-        <div class="p-6 bg-slate-50 rounded-3xl border border-slate-100">
-          <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 leading-none">{{
-            'SHIPMENTS.SERVICE_FEES' | translate }}</p>
-          <div class="flex items-baseline gap-2">
-            <span class="text-2xl font-black text-brand-600">{{ detailsParcel.deliveryFee }}</span>
-            <span class="text-[10px] font-black text-slate-400 uppercase">EGP</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Capability Markers -->
-      <div class="flex flex-wrap gap-3">
-        <div *ngIf="detailsParcel.isFragile"
-          class="px-5 py-3 bg-amber-50 text-amber-600 rounded-2xl border border-amber-100 flex items-center gap-3">
-          <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
-          <span class="text-[10px] font-black uppercase tracking-widest">{{ 'COMMON.FRAGILE' | translate }}</span>
-        </div>
-        <div *ngIf="detailsParcel.requiresSignature"
-          class="px-5 py-3 bg-blue-50 text-blue-600 rounded-2xl border border-blue-100 flex items-center gap-3">
-          <lucide-icon name="pen-tool" [size]="16"></lucide-icon>
-          <span class="text-[10px] font-black uppercase tracking-widest">{{ 'COMMON.SIGNATURE' | translate }}</span>
-        </div>
-        <div *ngIf="detailsParcel.priority === 'urgent'"
-          class="px-5 py-3 bg-red-50 text-red-600 rounded-2xl border border-red-100 flex items-center gap-3">
-          <lucide-icon name="zap" [size]="16"></lucide-icon>
-          <span class="text-[10px] font-black uppercase tracking-widest">{{ 'COMMON.URGENT' | translate }}</span>
-        </div>
-      </div>
-
-      <!-- Historical Logs -->
-      <div
-        class="pt-6 border-t border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex flex-col gap-2">
-        <span>{{ 'COMMON.CREATED' | translate }}: {{ formatDate(detailsParcel.createdAt) }}</span>
-        <span *ngIf="detailsParcel.actualDelivery" class="text-success-600">{{ 'COMMON.COMPLETED' | translate }}: {{
-          formatDate(detailsParcel.actualDelivery) }}</span>
       </div>
     </div>
 
-    <!-- Modal Action Launcher -->
-    <div class="p-10 border-t border-slate-50 bg-slate-50/50">
+    <!-- Modal Footer -->
+    <div class="p-6 border-t border-gray-100 bg-gray-50">
+      <div class="flex items-center justify-end gap-3">
+        <button (click)="closeAssignModal()"
+          class="px-6 py-3 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition-colors">
+          إلغاء
+        </button>
+        <button (click)="assignCarrier()" [disabled]="!selectedCarrier || isAssigning"
+          class="px-6 py-3 bg-primary-green text-white font-bold rounded-xl shadow-green hover:shadow-green-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+          <span *ngIf="!isAssigning">
+            <i class="bi bi-check-lg ml-2"></i>
+            تعيين المندوب
+          </span>
+          <span *ngIf="isAssigning" class="flex items-center gap-2">
+            <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+            جاري التعيين...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Order Details Modal -->
+<div *ngIf="showDetailsModal && detailsParcel"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+  <div class="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl">
+    <!-- Modal Header -->
+    <div class="p-6 border-b border-gray-100 bg-gradient-to-br from-primary-dark to-primary-dark-light text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-white/70 text-sm">رقم التتبع</p>
+          <h2 class="text-xl font-black">{{ detailsParcel.trackingNumber }}</h2>
+        </div>
+        <button (click)="closeDetailsModal()"
+          class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white hover:bg-white/20">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-6 space-y-4 overflow-y-auto max-h-[60vh]">
+      <!-- Status -->
+      <div class="flex items-center justify-between">
+        <span class="text-gray-500">الحالة</span>
+        <span class="px-4 py-1.5 rounded-full text-sm font-bold border"
+          [ngClass]="getStatusClass(detailsParcel.status)">
+          {{ getStatusText(detailsParcel.status) }}
+        </span>
+      </div>
+
+      <!-- Description -->
+      <div>
+        <p class="text-gray-500 text-sm mb-1">وصف الشحنة</p>
+        <p class="font-medium text-primary-dark">{{ detailsParcel.description }}</p>
+      </div>
+
+      <!-- Receiver -->
+      <div class="p-4 bg-gray-50 rounded-xl">
+        <p class="text-gray-500 text-sm mb-2">بيانات المستلم</p>
+        <p class="font-bold text-primary-dark">{{ detailsParcel.receiverName }}</p>
+        <p class="text-gray-600">{{ detailsParcel.receiverPhone }}</p>
+        <p class="text-gray-600 mt-1">{{ detailsParcel.deliveryAddress }}</p>
+      </div>
+
+      <!-- Amounts -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="p-4 bg-green-50 rounded-xl">
+          <p class="text-gray-500 text-sm mb-1">COD</p>
+          <p class="text-xl font-black text-green-600">{{ formatCurrency(detailsParcel.codAmount) }}</p>
+        </div>
+        <div class="p-4 bg-blue-50 rounded-xl">
+          <p class="text-gray-500 text-sm mb-1">رسوم التوصيل</p>
+          <p class="text-xl font-black text-blue-600">{{ formatCurrency(detailsParcel.deliveryFee) }}</p>
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="flex flex-wrap gap-2">
+        <span *ngIf="detailsParcel.isFragile"
+          class="px-3 py-1.5 bg-amber-100 text-amber-700 text-sm font-medium rounded-lg">
+          <i class="bi bi-exclamation-triangle ml-1"></i>
+          قابل للكسر
+        </span>
+        <span *ngIf="detailsParcel.requiresSignature"
+          class="px-3 py-1.5 bg-blue-100 text-blue-700 text-sm font-medium rounded-lg">
+          <i class="bi bi-pencil-square ml-1"></i>
+          يتطلب توقيع
+        </span>
+        <span *ngIf="detailsParcel.priority === 'urgent'"
+          class="px-3 py-1.5 bg-red-100 text-red-700 text-sm font-medium rounded-lg">
+          <i class="bi bi-lightning-charge-fill ml-1"></i>
+          عاجل
+        </span>
+      </div>
+
+      <!-- Notes -->
+      <div *ngIf="detailsParcel.notes">
+        <p class="text-gray-500 text-sm mb-1">ملاحظات</p>
+        <p class="text-gray-700">{{ detailsParcel.notes }}</p>
+      </div>
+
+      <!-- Dates -->
+      <div class="text-sm text-gray-500 space-y-1">
+        <p>تاريخ الإنشاء: {{ formatDate(detailsParcel.createdAt) }}</p>
+        <p *ngIf="detailsParcel.actualDelivery">تاريخ التسليم: {{ formatDate(detailsParcel.actualDelivery) }}</p>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="p-6 border-t border-gray-100">
       <a [routerLink]="['/supplier/track']" [queryParams]="{id: detailsParcel.trackingNumber}"
-        class="h-16 w-full bg-slate-900 text-white rounded-2xl font-black flex items-center justify-center gap-3 shadow-premium hover:bg-black transition-all">
-        <lucide-icon name="navigation" [size]="20"></lucide-icon>
-        {{ 'ACTIONS.TRACK' | translate }}
+        class="block w-full py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl text-center hover:shadow-lg transition-all">
+        <i class="bi bi-geo-alt ml-2"></i>
+        تتبع الشحنة
       </a>
     </div>
   </div>

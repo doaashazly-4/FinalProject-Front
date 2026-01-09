@@ -1,151 +1,146 @@
-<nav class="fixed top-0 left-0 right-0 z-50 transition-all duration-500" [ngClass]="{
-    'py-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-premium border-b border-slate-200/50 dark:border-slate-700/50': isScrolled,
-    'py-5 bg-transparent': !isScrolled
-  }">
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300 py-4 shadow-md"
+  [ngClass]="{'py-3': isScrolled, 'bg-white/95': isScrolled, 'backdrop-blur-lg': isScrolled, 'shadow-lg': isScrolled}">
 
-  <div class="container-custom flex justify-between items-center">
+  <div class="flex justify-between items-center max-w-7xl mx-auto px-4 lg:px-8">
 
-    <!-- Logo Section -->
+    <!-- الشعار -->
     <a class="flex items-center gap-3 cursor-pointer group" (click)="goToHome()">
       <div
-        class="relative w-10 h-10 flex items-center justify-center overflow-hidden rounded-xl bg-slate-900 dark:bg-white shadow-premium transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
-        <img src="assets/Images/lynx-logo.png" alt="Lynx"
-          class="w-7 h-7 object-contain brightness-0 invert dark:brightness-100 dark:invert-0">
+        class="relative w-12 h-12 flex items-center justify-center overflow-hidden rounded-xl bg-primary-dark/5 transition-transform duration-300 group-hover:scale-110">
+        <img src="assets/Images/lynx-logo.png" alt="Lynx Logo" class="w-full h-full object-contain">
       </div>
       <div class="flex flex-col">
         <span
-          class="text-2xl font-black text-slate-900 dark:text-white tracking-tighter transition-colors group-hover:text-brand-600 dark:group-hover:text-brand-400">
+          class="text-2xl font-black bg-gradient-to-br from-primary-green to-secondary-teal bg-clip-text text-transparent">
           Lynx
+        </span>
+        <span class="text-xs text-gray-500 font-semibold tracking-wide uppercase hidden sm:block">
+          Smart Delivery
         </span>
       </div>
     </a>
 
-    <!-- Desktop Navigation Links -->
-    <div
-      class="hidden lg:flex items-center gap-1 bg-slate-100/50 dark:bg-slate-800/50 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
-      <a routerLink="/" routerLinkActive="bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-soft"
-        [routerLinkActiveOptions]="{exact: true}"
-        class="px-5 py-2 rounded-xl text-slate-600 dark:text-slate-300 font-bold transition-all duration-200 hover:text-brand-600 dark:hover:text-brand-400">
-        {{ 'NAV.HOME' | translate }}
+    <!-- زر القائمة للموبايل -->
+    <button
+      class="lg:hidden flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 text-primary-dark hover:bg-primary-green/10 hover:text-primary-green transition-all duration-300"
+      [ngClass]="{'bg-primary-green/10': isMenuOpen, 'text-primary-green': isMenuOpen}" (click)="toggleMenu()">
+      <span class="text-xl transition-transform duration-300" [ngClass]="{'rotate-90': isMenuOpen}">☰</span>
+    </button>
+
+    <!-- روابط التنقل -->
+    <div class="hidden lg:flex items-center gap-8">
+      <a routerLink="/" routerLinkActive="text-primary-green font-bold" [routerLinkActiveOptions]="{exact: true}"
+        class="relative text-gray-600 font-semibold py-2 hover:text-primary-green transition-all duration-300">
+        الرئيسية
       </a>
       <a href="#services"
-        class="px-5 py-2 rounded-xl text-slate-600 dark:text-slate-300 font-bold transition-all duration-200 hover:text-brand-600 dark:hover:text-brand-400">
-        {{ 'NAV.SERVICES' | translate }}
+        class="relative text-gray-600 font-semibold py-2 hover:text-primary-green transition-all duration-300">
+        الخدمات
       </a>
       <a href="#how-it-works"
-        class="px-5 py-2 rounded-xl text-slate-600 dark:text-slate-300 font-bold transition-all duration-200 hover:text-brand-600 dark:hover:text-brand-400">
-        {{ 'STEPS.BADGE' | translate }}
+        class="relative text-gray-600 font-semibold py-2 hover:text-primary-green transition-all duration-300">
+        كيف يعمل
       </a>
-      <a routerLink="/available-couriers"
-        routerLinkActive="bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-soft"
-        class="px-5 py-2 rounded-xl text-slate-600 dark:text-slate-300 font-bold transition-all duration-200 hover:text-brand-600 dark:hover:text-brand-400">
-        {{ 'HERO.CTA_MAP' | translate }}
+      <a routerLink="/available-couriers" routerLinkActive="text-primary-green font-bold"
+        class="relative text-gray-600 font-semibold py-2 hover:text-primary-green transition-all duration-300">
+        المندوبون
       </a>
     </div>
 
-    <!-- Action Buttons / User Menu -->
+    <!-- الأزرار -->
     <div class="flex items-center gap-3">
-
-      <!-- Theme Toggle -->
-      <button (click)="toggleTheme()"
-        class="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-        <lucide-icon [name]="themeService.theme() === 'dark' ? 'sun' : 'moon'" [size]="20"></lucide-icon>
-      </button>
-
-      <!-- Language Toggle -->
-      <button (click)="toggleLanguage()"
-        class="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors font-bold text-sm">
-        {{ translationService.lang() === 'ar' ? 'EN' : 'ع' }}
-      </button>
-
-      <div class="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block"></div>
-
       <ng-container *ngIf="!isAuthenticated; else loggedIn">
         <a routerLink="/role-selection"
-          class="hidden sm:flex btn-outline gap-2 bg-white/50 backdrop-blur-sm dark:bg-slate-800/50">
-          <lucide-icon name="log-in" class="w-4 h-4"></lucide-icon>
-          <span>{{ 'NAV.LOGIN' | translate }}</span>
+          class="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-primary-green text-primary-green font-semibold hover:bg-primary-green/10 hover:-translate-y-0.5 transition-all duration-300">
+          <span>🔑</span>
+          <span>تسجيل الدخول</span>
         </a>
-
-        <a routerLink="/role-selection" class="btn-primary gap-2">
-          <lucide-icon name="user-plus" class="w-4 h-4"></lucide-icon>
-          <span class="hidden md:inline">{{ 'NAV.REGISTER' | translate }}</span>
-          <span class="md:hidden">{{ 'NAV.REGISTER' | translate }}</span>
+        <a routerLink="/role-selection"
+          class="sm:hidden flex items-center justify-center w-11 h-11 rounded-xl border-2 border-primary-green text-primary-green hover:bg-primary-green/10 transition-all duration-300">
+          <span>🔑</span>
+        </a>
+        <a routerLink="/role-selection"
+          class="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-br from-primary-green to-secondary-teal text-white font-semibold shadow-green hover:shadow-green-lg hover:-translate-y-0.5 transition-all duration-300">
+          <span>📝</span>
+          <span>سجل الآن</span>
+        </a>
+        <a routerLink="/role-selection"
+          class="sm:hidden flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-primary-green to-secondary-teal text-white shadow-green hover:shadow-green-lg transition-all duration-300">
+          <span>📝</span>
         </a>
       </ng-container>
 
       <ng-template #loggedIn>
-        <!-- User Info Badge -->
+        <!-- معلومات المستخدم -->
         <div
-          class="hidden md:flex items-center gap-3 pl-4 pr-1 py-1 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
-          <div class="flex flex-col items-end">
-            <span class="font-bold text-sm text-slate-900 dark:text-white leading-none">{{ getShortName() }}</span>
-            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">{{
-              getRoleTitle() }}</span>
-          </div>
-          <div
-            class="w-10 h-10 rounded-xl bg-white dark:bg-slate-700 flex items-center justify-center text-brand-600 dark:text-brand-400 shadow-soft border border-slate-200 dark:border-slate-600">
-            <lucide-icon name="user" class="w-5 h-5"></lucide-icon>
+          class="hidden md:flex items-center gap-3 px-4 py-2 bg-gradient-to-br from-primary-green/10 to-secondary-teal/5 rounded-xl border border-primary-green/15">
+          <span
+            class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-green to-secondary-teal flex items-center justify-center text-white shadow-green">
+            👤
+          </span>
+          <div class="flex flex-col">
+            <span class="font-bold text-sm text-primary-dark">{{ getShortName() }}</span>
+            <span class="text-xs text-primary-green font-semibold">{{ getRoleTitle() }}</span>
           </div>
         </div>
 
-        <!-- Dashboard Link -->
+        <!-- زر لوحة التحكم -->
         <a *ngIf="dashboardLink" [routerLink]="dashboardLink"
-          class="btn bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 shadow-premium">
-          <lucide-icon name="layout-dashboard" class="w-4 h-4 ml-1"></lucide-icon>
-          <span class="hidden sm:inline">Dashboard</span>
+          class="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary-teal text-white font-semibold shadow-md hover:bg-secondary-teal-light hover:-translate-y-0.5 transition-all duration-300">
+          <span>📊</span>
+          <span>لوحة التحكم</span>
+        </a>
+        <a *ngIf="dashboardLink" [routerLink]="dashboardLink"
+          class="sm:hidden flex items-center justify-center w-11 h-11 rounded-xl bg-secondary-teal text-white shadow-md hover:bg-secondary-teal-light transition-all duration-300">
+          <span>📊</span>
         </a>
 
-        <!-- Logout -->
+        <!-- زر تسجيل الخروج -->
         <button type="button"
-          class="w-11 h-11 flex items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 border border-red-100 dark:border-red-900/50"
-          (click)="logout()" title="Logout">
-          <lucide-icon name="log-out" class="w-5 h-5"></lucide-icon>
+          class="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl bg-red-500 text-white font-semibold shadow-md hover:bg-red-600 hover:-translate-y-0.5 transition-all duration-300"
+          (click)="logout()">
+          <span>🚪</span>
+          <span>خروج</span>
+        </button>
+        <button type="button"
+          class="sm:hidden flex items-center justify-center w-11 h-11 rounded-xl bg-red-500 text-white shadow-md hover:bg-red-600 transition-all duration-300"
+          (click)="logout()">
+          <span>🚪</span>
         </button>
       </ng-template>
-
-      <!-- Toggle Menu (Mobile Only) -->
-      <button
-        class="lg:hidden w-11 h-11 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-slate-700 transition-all duration-300"
-        (click)="toggleMenu()">
-        <lucide-icon [name]="isMenuOpen ? 'x' : 'menu'" class="w-6 h-6"></lucide-icon>
-      </button>
     </div>
   </div>
 
-  <!-- Mobile Menu Drawer -->
-  <div
-    class="lg:hidden fixed inset-x-0 top-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-b border-slate-200 dark:border-slate-800 transition-all duration-500 overflow-hidden"
-    [style.max-height]="isMenuOpen ? '500px' : '0'" [style.opacity]="isMenuOpen ? '1' : '0'">
-    <div class="container-custom flex flex-col gap-2 py-6">
-      <a routerLink="/" routerLinkActive="bg-brand-50 dark:bg-slate-800 text-brand-600 dark:text-brand-400"
+  <!-- القائمة المنسدلة للموبايل -->
+  <div class="lg:hidden overflow-hidden transition-all duration-300"
+    [ngClass]="{'max-h-0 opacity-0': !isMenuOpen, 'max-h-96 opacity-100': isMenuOpen}">
+    <div class="flex flex-col gap-2 px-4 py-4 mt-4 border-t border-gray-200">
+      <a routerLink="/" routerLinkActive="bg-primary-green/10 text-primary-green"
         [routerLinkActiveOptions]="{exact: true}" (click)="closeMenu()"
-        class="flex items-center gap-3 p-4 rounded-2xl font-bold text-slate-600 dark:text-slate-300 transition-all">
-        <lucide-icon name="home" class="w-5 h-5"></lucide-icon>
-        {{ 'NAV.HOME' | translate }}
+        class="w-full text-center py-3 px-4 rounded-xl text-gray-600 font-semibold bg-gray-50 hover:bg-primary-green/10 hover:text-primary-green transition-all duration-300">
+        الرئيسية
       </a>
       <a href="#services" (click)="closeMenu()"
-        class="flex items-center gap-3 p-4 rounded-2xl font-bold text-slate-600 dark:text-slate-300 transition-all">
-        <lucide-icon name="layers" class="w-5 h-5"></lucide-icon>
-        {{ 'NAV.SERVICES' | translate }}
+        class="w-full text-center py-3 px-4 rounded-xl text-gray-600 font-semibold bg-gray-50 hover:bg-primary-green/10 hover:text-primary-green transition-all duration-300">
+        الخدمات
       </a>
       <a href="#how-it-works" (click)="closeMenu()"
-        class="flex items-center gap-3 p-4 rounded-2xl font-bold text-slate-600 dark:text-slate-300 transition-all">
-        <lucide-icon name="help-circle" class="w-5 h-5"></lucide-icon>
-        {{ 'STEPS.BADGE' | translate }}
+        class="w-full text-center py-3 px-4 rounded-xl text-gray-600 font-semibold bg-gray-50 hover:bg-primary-green/10 hover:text-primary-green transition-all duration-300">
+        كيف يعمل
       </a>
-      <a routerLink="/available-couriers"
-        routerLinkActive="bg-brand-50 dark:bg-slate-800 text-brand-600 dark:text-brand-400" (click)="closeMenu()"
-        class="flex items-center gap-3 p-4 rounded-2xl font-bold text-slate-600 dark:text-slate-300 transition-all">
-        <lucide-icon name="truck" class="w-5 h-5"></lucide-icon>
-        {{ 'HERO.CTA_MAP' | translate }}
+      <a routerLink="/available-couriers" routerLinkActive="bg-primary-green/10 text-primary-green"
+        (click)="closeMenu()"
+        class="w-full text-center py-3 px-4 rounded-xl text-gray-600 font-semibold bg-gray-50 hover:bg-primary-green/10 hover:text-primary-green transition-all duration-300">
+        المندوبون
       </a>
-
-      <div *ngIf="!isAuthenticated"
-        class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-3">
-        <a routerLink="/role-selection" (click)="closeMenu()" class="btn-outline">{{ 'NAV.LOGIN' | translate }}</a>
-        <a routerLink="/role-selection" (click)="closeMenu()" class="btn-primary">{{ 'NAV.REGISTER' | translate }}</a>
-      </div>
+      <a routerLink="/role-selection" routerLinkActive="bg-primary-green/10 text-primary-green" (click)="closeMenu()"
+        class="w-full text-center py-3 px-4 rounded-xl text-gray-600 font-semibold bg-gray-50 hover:bg-primary-green/10 hover:text-primary-green transition-all duration-300">
+        سجل كمُرسل أو مندوب
+      </a>
+      <a routerLink="/role-selection" routerLinkActive="bg-primary-green/10 text-primary-green" (click)="closeMenu()"
+        class="w-full text-center py-3 px-4 rounded-xl text-gray-600 font-semibold bg-gray-50 hover:bg-primary-green/10 hover:text-primary-green transition-all duration-300">
+        تسجيل الدخول
+      </a>
     </div>
   </div>
 </nav>

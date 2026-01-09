@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule } from 'lucide-angular';
 
 import {
   CustomerDataService,
@@ -15,8 +14,7 @@ import {
   imports: [
     CommonModule,
     RouterModule,
-    FormsModule,
-    LucideAngularModule
+    FormsModule        // ✅ required for ngModel
   ],
   templateUrl: './delivery-confirmation.component.html'
 })

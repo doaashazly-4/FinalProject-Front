@@ -2,13 +2,11 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
-import { LucideAngularModule } from 'lucide-angular';
-import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
   selector: 'app-main',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule, TranslatePipe],
+  imports: [CommonModule, RouterLink],
   templateUrl: './main.component.html',
   styleUrl: './main.component.css',
   animations: [
@@ -68,38 +66,34 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
         animate('0.5s ease-out', style({ opacity: 1, transform: 'scale(1)' }))
       ])
     ]),
+    // Removed float/pulse infinite animations to avoid invalid timing errors
   ]
 })
 export class MainComponent implements OnInit {
   isScrolled = false;
-
-  // Data moved to translations, but we keep structure here if needed for iteration
-  // or use directly in template with keys
-  // For simplicity, we'll iterate over keys in template or arrays of keys locally
-
   stats = [
-    { value: '50K+', label: 'HERO.STAT_CUSTOMERS', icon: 'smile', color: 'text-amber-500' },
-    { value: '100K+', label: 'HERO.STAT_ORDERS', icon: 'check-circle', color: 'text-green-500' },
-    { value: '24/7', label: 'HERO.STAT_SUPPORT', icon: 'headset', color: 'text-blue-500' }
+    { value: '50K+', label: 'عميل سعيد', icon: 'bi-emoji-smile' },
+    { value: '100K+', label: 'طلب منجز', icon: 'bi-check-circle' },
+    { value: '24/7', label: 'خدمة عملاء', icon: 'bi-headset' }
   ];
 
   services = [
     {
-      icon: 'zap',
-      title: 'SERVICES.SPEED_TITLE',
-      description: 'SERVICES.SPEED_DESC',
+      icon: 'bi-lightning-charge-fill',
+      title: 'توصيل سريع',
+      description: 'توصيل خلال 24 ساعة لجميع المناطق مع تتبع مباشر لطلبك',
       color: '#3B82F6'
     },
     {
-      icon: 'shield-check',
-      title: 'SERVICES.SECURE_TITLE',
-      description: 'SERVICES.SECURE_DESC',
+      icon: 'bi-shield-check-fill',
+      title: 'آمن ومضمون',
+      description: 'ضمان كامل على جميع المنتجات مع سياسة إرجاع سهلة',
       color: '#10B981'
     },
     {
-      icon: 'truck',
-      title: 'SERVICES.FREE_TITLE',
-      description: 'SERVICES.FREE_DESC',
+      icon: 'bi-truck-flatbed',
+      title: 'توصيل مجاني',
+      description: 'توصيل مجاني للطلبات التي تزيد عن 100 ريال',
       color: '#8B5CF6'
     }
   ];
@@ -107,49 +101,48 @@ export class MainComponent implements OnInit {
   steps = [
     {
       number: '1',
-      title: 'STEPS.STEP1_TITLE',
-      description: 'STEPS.STEP1_DESC',
-      icon: 'search'
+      title: 'اختر منتجاتك',
+      description: 'تصفح مجموعتنا الواسعة من المنتجات واختر ما يناسبك'
     },
     {
       number: '2',
-      title: 'STEPS.STEP2_TITLE',
-      description: 'STEPS.STEP2_DESC',
-      icon: 'shopping-cart'
+      title: 'أكمل الطلب',
+      description: 'أضف المنتجات إلى السلة وأكمل معلومات التوصيل'
     },
     {
       number: '3',
-      title: 'STEPS.STEP3_TITLE',
-      description: 'STEPS.STEP3_DESC',
-      icon: 'package-check'
+      title: 'استلم طلبك',
+      description: 'سنقوم بتوصيل طلبك بسرعة وأمان إلى باب منزلك'
     }
   ];
 
   features = [
     {
-      icon: 'clock',
-      title: 'FEATURES.F1_TITLE',
-      description: 'FEATURES.F1_DESC'
+      icon: 'bi-check-circle-fill',
+      title: 'سرعة في التوصيل',
+      description: 'نضمن وصول طلبك في الوقت المحدد مع خدمة توصيل سريعة'
     },
     {
-      icon: 'tag',
-      title: 'FEATURES.F2_TITLE',
-      description: 'FEATURES.F2_DESC'
+      icon: 'bi-check-circle-fill',
+      title: 'أسعار تنافسية',
+      description: 'أفضل الأسعار في السوق مع عروض وخصومات حصرية'
     },
     {
-      icon: 'award',
-      title: 'FEATURES.F3_TITLE',
-      description: 'FEATURES.F3_DESC'
+      icon: 'bi-check-circle-fill',
+      title: 'جودة عالية',
+      description: 'منتجات أصلية 100% مع ضمان الجودة والرضا'
     },
     {
-      icon: 'headphones',
-      title: 'FEATURES.F4_TITLE',
-      description: 'FEATURES.F4_DESC'
+      icon: 'bi-check-circle-fill',
+      title: 'دعم فني متواصل',
+      description: 'فريق دعم متاح 24/7 لمساعدتك في أي وقت'
     }
   ];
 
   ngOnInit() {
     console.log('MainComponent initialized');
+    console.log('Stats:', this.stats);
+    console.log('Services:', this.services);
   }
 
   @HostListener('window:scroll', ['$event'])

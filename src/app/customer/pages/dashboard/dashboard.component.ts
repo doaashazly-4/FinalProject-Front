@@ -2,12 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CustomerDataService, IncomingDelivery, ReceiverStat } from '../../services/customer-data.service';
-import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-customer-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
@@ -17,7 +16,7 @@ export class CustomerDashboardComponent implements OnInit {
   activeDeliveries: IncomingDelivery[] = [];
   isLoading = true;
 
-  constructor(private dataService: CustomerDataService) { }
+  constructor(private dataService: CustomerDataService) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -39,7 +38,7 @@ export class CustomerDashboardComponent implements OnInit {
     this.dataService.getDeliveries().subscribe({
       next: (deliveries) => {
         this.recentDeliveries = deliveries.slice(0, 5);
-        this.activeDeliveries = deliveries.filter(d =>
+        this.activeDeliveries = deliveries.filter(d => 
           !['delivered', 'cancelled', 'returned'].includes(d.status)
         );
         this.isLoading = false;

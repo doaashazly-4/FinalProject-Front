@@ -2,12 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CourierDataService, DeliveryJob, JobStatus } from '../../services/courier-data.service';
-import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-my-jobs',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './my-jobs.component.html',
   styleUrls: ['./my-jobs.component.css']
 })
@@ -17,7 +16,7 @@ export class MyJobsComponent implements OnInit {
   filter: 'all' | 'active' | 'completed' = 'active';
   isLoading = true;
 
-  constructor(private dataService: CourierDataService) { }
+  constructor(private dataService: CourierDataService) {}
 
   ngOnInit(): void {
     this.loadJobs();

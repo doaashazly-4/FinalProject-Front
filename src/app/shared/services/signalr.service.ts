@@ -12,45 +12,45 @@ export class SignalRService {
   public notifications$ = new BehaviorSubject<any>(null);
   public chatMessages$ = new BehaviorSubject<any>(null);
 
-  constructor(private notificationService: NotificationService) { }
+  constructor(private notificationService: NotificationService) {}
 
-  public startConnection(token: string): Promise<void> {
-    this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl('https://localhost:7180/hubs/courier-location', {
-        accessTokenFactory: () => token
-      })
-      .withAutomaticReconnect()
-      .build();
+ public startConnection(token: string): Promise<void> {
+  this.hubConnection = new signalR.HubConnectionBuilder()
+    .withUrl('https://localhost:7180/hubs/courier-location', {
+      accessTokenFactory: () => token
+    })
+    .withAutomaticReconnect()
+    .build();
 
-    // Realtime location
-    this.hubConnection.on('ReceiveLocation', (lat: number, lng: number) => {
-      this.location$.next({ lat, lng });
+  // Realtime location
+  this.hubConnection.on('ReceiveLocation', (lat: number, lng: number) => {
+    this.location$.next({ lat, lng });
+  });
+
+  // Notifications
+ this.hubConnection.on('ReceiveNotification', (notif) => {
+  console.log('🔥 Notification received:', notif);
+  this.notificationService.showNotification({
+    title: notif.title || 'إشعار جديد',
+    message: notif.message,
+    type: notif.type || 'info',
+    sound: 'assets/sounds/ringtone-you-would-be-glad-to-know.ogg'
+  });
+});
+
+
+
+  // ✅ المهم: نرجّع الـ Promise
+  return this.hubConnection
+    .start()
+    .then(() => {
+      console.log('✅ SignalR connected');
+    })
+    .catch(err => {
+      console.error('SignalR connection error:', err);
+      throw err; // مهم
     });
-
-    // Notifications
-    this.hubConnection.on('ReceiveNotification', (notif) => {
-      console.log('🔥 Notification received:', notif);
-      this.notificationService.showNotification({
-        title: notif.title || 'إشعار جديد',
-        message: notif.message,
-        type: notif.type || 'info',
-        sound: 'assets/sounds/ringtone-you-would-be-glad-to-know.ogg'
-      });
-    });
-
-
-
-    // ✅ المهم: نرجّع الـ Promise
-    return this.hubConnection
-      .start()
-      .then(() => {
-        console.log('✅ SignalR connected');
-      })
-      .catch(err => {
-        console.error('SignalR connection error:', err);
-        throw err; // مهم
-      });
-  }
+}
 
 
   // --- Courier location ---
@@ -91,11 +91,5 @@ export class SignalRService {
   public sendMessage(receiverUserId: string, message: string) {
     this.hubConnection.invoke('SendMessage', receiverUserId, message)
       .catch(err => console.error(err));
-  }
-
-  public stopConnection() {
-    if (this.hubConnection) {
-      this.hubConnection.stop().catch(err => console.error(err));
-    }
   }
 }

@@ -1,106 +1,56 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: 'class',
   content: [
     "./src/**/*.{html,ts}",
   ],
   theme: {
     extend: {
       colors: {
-        // Semantic Application Colors
-        background: 'rgb(var(--color-background) / <alpha-value>)',
-        foreground: 'rgb(var(--color-foreground) / <alpha-value>)',
-        muted: 'rgb(var(--color-muted) / <alpha-value>)',
-        'muted-foreground': 'rgb(var(--color-muted-foreground) / <alpha-value>)',
-
-        brand: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9', // Primary Blue/Sky
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
-          950: '#082f49',
-        },
-        success: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e', // Success Green
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
-          950: '#052e16',
-        },
+        // Primary Colors - Dark Blue
         'primary-dark': {
-          DEFAULT: '#0f172a',
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
-          950: '#020617',
+          DEFAULT: '#192A45',
+          light: '#243656',
+          lighter: '#2d4268',
         },
+        
+        // Green Palette
         'primary-green': {
-          DEFAULT: '#10b981',
-          light: '#34d399',
-          dark: '#059669',
+          DEFAULT: '#4CAF50',
+          dark: '#3d8b40',
+          light: '#66bb6a',
         },
+        
+        // Teal Palette
         'secondary-teal': {
-          DEFAULT: '#0d9488',
-          light: '#14b8a6',
-          dark: '#0f766e',
+          DEFAULT: '#1E5A5C',
+          light: '#2a7577',
         },
+        
+        // Gold Palette
         'accent-gold': {
-          DEFAULT: '#f59e0b',
-          light: '#fbbf24',
-          dark: '#d97706',
+          DEFAULT: '#FFD700',
+          light: '#ffeb3b',
+          dark: '#ffc107',
         },
       },
       fontFamily: {
-        'sans': ['Inter', 'Roboto', 'system-ui', 'sans-serif'],
-        'arabic': ['Cairo', 'Tajawal', 'Segoe UI', 'sans-serif'],
-      },
-      borderRadius: {
-        'xl': '0.75rem',
-        '2xl': '1rem',
-        '3xl': '1.5rem',
+        'arabic': ['Cairo', 'Segoe UI', 'Tahoma', 'sans-serif'],
       },
       boxShadow: {
-        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        'premium': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-        'glow-green': '0 0 15px rgba(16, 185, 129, 0.3)',
-        'glow-blue': '0 0 15px rgba(14, 165, 233, 0.3)',
+        'green': '0 10px 30px rgba(76, 175, 80, 0.25)',
+        'green-lg': '0 14px 40px rgba(76, 175, 80, 0.35)',
+        'gold': '0 8px 24px rgba(255, 215, 0, 0.3)',
+        'dark': '0 10px 30px rgba(25, 42, 69, 0.15)',
+        'dark-lg': '0 20px 50px rgba(25, 42, 69, 0.2)',
       },
       animation: {
-        'fade-in': 'fadeIn 0.5s ease-out',
-        'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
         'float': 'float 3s ease-in-out infinite',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        slideUp: {
-          '0%': { transform: 'translateY(10px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
-        },
         float: {
           '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-8px)' },
+          '50%': { transform: 'translateY(-12px)' },
         }
       },
     },
