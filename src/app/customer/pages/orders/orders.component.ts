@@ -1,20 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CustomerDataService, CustomerOrder } from '../../services/customer-data.service';
+import { CustomerDataService, IncomingDelivery } from '../../services/customer-data.service';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-customer-orders',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LucideAngularModule],
   templateUrl: './orders.component.html',
   styleUrl: './orders.component.css'
 })
 export class CustomerOrdersComponent implements OnInit {
-  orders: CustomerOrder[] = [];
+  orders: IncomingDelivery[] = [];
   filter = 'الكل';
   isLoading = true;
 
-  constructor(private data: CustomerDataService) {}
+  constructor(private data: CustomerDataService) { }
 
   ngOnInit(): void {
     this.loadOrders();
@@ -22,7 +23,7 @@ export class CustomerOrdersComponent implements OnInit {
 
   loadOrders(): void {
     this.isLoading = true;
-    this.data.getOrders().subscribe({
+    this.data.getDeliveries().subscribe({
       next: (orders) => {
         this.orders = orders;
         this.isLoading = false;
@@ -35,8 +36,25 @@ export class CustomerOrdersComponent implements OnInit {
     });
   }
 
-  filteredOrders(): CustomerOrder[] {
+  filteredOrders(): IncomingDelivery[] {
     if (this.filter === 'الكل') return this.orders;
-    return this.orders.filter(o => o.status === this.filter);
+    // Map Arabic filters to internal status if needed, 
+    // but for now let's just use the status text if it matches
+    return this.orders.filter(o => this.getStatusText(o.status) === this.filter);
+  }
+
+  getStatusText(status: string): string {
+    const statusMap: { [key: string]: string } = {
+      'pending': 'في الانتظار',
+      'assigned': 'تم التعيين',
+      'picked_up': 'تم الاستلام',
+      'in_transit': 'في الطريق',
+      'out_for_delivery': 'قريبة',
+      'delivered': 'مكتمل',
+      'failed_delivery': 'فاشل',
+      'returned': 'مرتجع',
+      'cancelled': 'ملغي'
+    };
+    return statusMap[status] || status;
   }
 }

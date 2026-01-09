@@ -1,426 +1,359 @@
-<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 lg:p-6">
-  <!-- Header -->
-  <div class="flex justify-between items-center p-4 bg-white rounded-xl shadow-sm mb-6">
-    <button
-      class="flex items-center gap-2 px-4 py-2 rounded-lg text-bright-green font-semibold hover:bg-bright-green/10 transition-all duration-300"
-      (click)="goBack()">
-      <span class="text-xl">←</span>
-      <span>رجوع</span>
-    </button>
-    <div class="flex items-center gap-3 cursor-pointer" (click)="goBack()">
-      <div
-        class="w-10 h-10 rounded-lg overflow-hidden border border-gray-100 flex items-center justify-center p-1 bg-white">
-        <img src="assets/Images/lynx-logo.png" alt="Lynx" class="w-full h-full object-contain">
-      </div>
-      <span
-        class="text-2xl font-black bg-gradient-to-br from-bright-green to-dark-teal bg-clip-text text-transparent">Lynx</span>
-    </div>
-  </div>
-
-  <div class="flex flex-col lg:flex-row gap-6 min-h-[calc(100vh-140px)]">
-    <!-- Right Section - Role Selection -->
-    <div
-      class="lg:order-1 order-2 flex-1 p-6 lg:p-10 rounded-2xl flex flex-col justify-center items-center bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
-      <div class="w-full max-w-2xl">
-        <h2 class="text-3xl lg:text-4xl font-black text-gray-800 text-center mb-3">اختر دورك</h2>
-        <p class="text-gray-600 text-center mb-10">سجل كمُرسل أو مندوب توصيل</p>
-
-        <div class="grid sm:grid-cols-2 gap-6 max-w-lg mx-auto">
-          <!-- Supplier Card (Sender) -->
-          <div class="group cursor-pointer bg-white p-6 rounded-2xl border-2 transition-all duration-300 text-center"
-            [ngClass]="{'border-emerald-500 shadow-xl scale-105': selectedRole === 'Supplier', 'border-gray-200 hover:border-emerald-300 hover:shadow-lg': selectedRole !== 'Supplier'}"
-            (click)="selectRole('supplier')">
-            <div
-              class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform duration-300">
-              📦
-            </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-1">مُرسل</h3>
-            <p class="text-emerald-600 font-semibold text-sm mb-2">إرسال الطلبات</p>
-            <p class="text-gray-600 text-sm">أرسل طلباتك وتتبع شحناتك</p>
-          </div>
-
-          <!-- Courier Card -->
-          <div class="group cursor-pointer bg-white p-6 rounded-2xl border-2 transition-all duration-300 text-center"
-            [ngClass]="{'border-emerald-500 shadow-xl scale-105': selectedRole === 'Courier', 'border-gray-200 hover:border-emerald-300 hover:shadow-lg': selectedRole !== 'Courier'}"
-            (click)="selectRole('courier')">
-            <div
-              class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-white border border-gray-100 flex items-center justify-center p-2 group-hover:scale-110 transition-transform duration-300 overflow-hidden">
-              <img src="assets/Images/lynx-logo.png" alt="Lynx" class="w-full h-full object-contain">
-            </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-1">مندوب توصيل</h3>
-            <p class="text-emerald-600 font-semibold text-sm mb-2">توصيل الطلبات</p>
-            <p class="text-gray-600 text-sm">قم بتوصيل الطلبات واكسب المال</p>
-          </div>
+<div class="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-5xl mx-auto">
+    <!-- Top Header -->
+    <div class="flex items-center justify-between mb-12">
+      <div class="flex items-center gap-4 cursor-pointer group" (click)="goBack()">
+        <div
+          class="w-12 h-12 rounded-2xl bg-white shadow-premium flex items-center justify-center text-slate-900 group-hover:bg-slate-900 group-hover:text-white transition-all">
+          <lucide-icon name="arrow-right" class="w-6 h-6"></lucide-icon>
         </div>
+        <span class="text-sm font-black text-slate-900 uppercase tracking-widest leading-none">العودة للرئيسية</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-2xl font-black text-slate-900 tracking-tight">Lynx</span>
+        <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center p-2 shadow-soft">
+          <img src="assets/Images/lynx-logo.png" alt="Lynx" class="w-full h-full object-contain brightness-0 invert">
+        </div>
+      </div>
+    </div>
 
-        <div class="mt-8 text-center">
-          <p class="text-gray-600">
-            لديك حساب بالفعل؟
-            <button class="text-emerald-600 font-bold hover:underline" (click)="goToLogin()">
-              تسجيل الدخول
+    <!-- Main Grid -->
+    <div class="grid lg:grid-cols-12 gap-10 items-start">
+
+      <!-- Right Pane: Role Selection & Info -->
+      <div class="lg:col-span-4 space-y-8 animate-fade-in">
+        <div class="p-10 bg-slate-900 rounded-[2.5rem] text-white shadow-premium relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-32 h-32 bg-brand-500/10 rounded-full blur-3xl"></div>
+
+          <h2 class="text-3xl font-black mb-6 relative z-10">اختر دورك</h2>
+
+          <div class="space-y-4 relative z-10">
+            <!-- Role Cards -->
+            <button (click)="selectRole('supplier')"
+              class="w-full p-6 text-right rounded-2xl border-2 transition-all duration-300 flex items-center justify-between group"
+              [ngClass]="{'bg-white/10 border-white/20': selectedRole === 'Supplier', 'bg-transparent border-white/5 hover:border-white/10': selectedRole !== 'Supplier'}">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center transition-all"
+                  [ngClass]="{'bg-brand-500 text-white': selectedRole === 'Supplier', 'bg-white/5 text-slate-400': selectedRole !== 'Supplier'}">
+                  <lucide-icon name="package" class="w-6 h-6"></lucide-icon>
+                </div>
+                <div>
+                  <div class="font-bold text-lg">مُرسل</div>
+                  <div class="text-xs text-slate-400 font-medium">إرسال الطلبات والمخزون</div>
+                </div>
+              </div>
+              <lucide-icon *ngIf="selectedRole === 'Supplier'" name="check-circle"
+                class="w-5 h-5 text-brand-500"></lucide-icon>
             </button>
-          </p>
+
+            <button (click)="selectRole('courier')"
+              class="w-full p-6 text-right rounded-2xl border-2 transition-all duration-300 flex items-center justify-between group"
+              [ngClass]="{'bg-white/10 border-white/20': selectedRole === 'Courier', 'bg-transparent border-white/5 hover:border-white/10': selectedRole !== 'Courier'}">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center transition-all"
+                  [ngClass]="{'bg-success-500 text-white': selectedRole === 'Courier', 'bg-white/5 text-slate-400': selectedRole !== 'Courier'}">
+                  <lucide-icon name="truck" class="w-6 h-6"></lucide-icon>
+                </div>
+                <div>
+                  <div class="font-bold text-lg leading-tight">مندوب</div>
+                  <div class="text-xs text-slate-400 font-medium mt-1">توصيل الطلبات وتحقيق الأرباح</div>
+                </div>
+              </div>
+              <lucide-icon *ngIf="selectedRole === 'Courier'" name="check-circle"
+                class="w-5 h-5 text-success-500"></lucide-icon>
+            </button>
+          </div>
         </div>
 
-        <!-- Client Info Box -->
-        <div class="mt-6 p-4 bg-green-50 border border-green-200 rounded-xl">
-          <div class="flex items-start gap-3">
-            <span class="text-2xl">💡</span>
-            <div>
-              <h4 class="font-bold text-green-800 mb-1">هل أنت عميل؟</h4>
-              <p class="text-green-700 text-sm">
-                العملاء لا يحتاجون للتسجيل. يمكنك <button class="text-emerald-600 font-bold hover:underline"
-                  (click)="goToLogin()">تسجيل الدخول مباشرة</button> برقم الجوال فقط.
-              </p>
-            </div>
+        <!-- Info Card -->
+        <div class="p-10 bg-brand-50 rounded-[2.5rem] border border-brand-100/50">
+          <div class="w-12 h-12 rounded-xl bg-white shadow-soft flex items-center justify-center text-brand-600 mb-6">
+            <lucide-icon name="help-circle" class="w-6 h-6"></lucide-icon>
           </div>
+          <h4 class="text-xl font-black text-slate-900 mb-2">هل أنت عميل مستلم؟</h4>
+          <p class="text-slate-600 text-sm leading-relaxed mb-6">
+            العملاء لا يحتاجون لإنشاء حساب مسبق. يمكنك الدخول مباشرة باستخدام رقم جوالك.
+          </p>
+          <button (click)="goToLogin()"
+            class="btn bg-white/50 text-brand-600 font-black px-6 py-2.5 rounded-xl border border-brand-200 hover:bg-brand-500 hover:text-white transition-all">دخول
+            العملاء</button>
         </div>
       </div>
-    </div>
 
-    <!-- Left Section - Form -->
-    <div class="lg:order-2 order-1 flex-1 flex justify-center items-start p-4">
-      <div class="w-full max-w-lg bg-white rounded-2xl p-8 shadow-lg">
-        <h1 class="text-2xl lg:text-3xl font-bold text-dark-blue text-center mb-3">إنشاء حساب {{getRoleTitleArabic()}}
-        </h1>
-        <p class="text-gray-600 text-center mb-8">املأ بياناتك للبدء</p>
+      <!-- Left Pane: Form Container -->
+      <div
+        class="lg:col-span-8 bg-white p-8 lg:p-14 rounded-[2.5rem] shadow-premium border border-slate-100 animate-slide-up">
 
-        <!-- Success/Error Messages -->
+        <div class="mb-12 border-b border-slate-50 pb-8 text-center lg:text-right">
+          <h1 class="text-3xl font-black text-slate-900 mb-2">إنشاء حساب جديد</h1>
+          <p class="text-slate-500">سجل كـ <span class="text-slate-900 font-bold">{{getRoleTitleArabic()}}</span> في
+            منظومة Lynx</p>
+        </div>
+
+        <!-- Alerts -->
         <div *ngIf="successMessage"
-          class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl flex items-center gap-3">
-          <i class="bi bi-check-circle-fill text-2xl"></i>
-          <span class="font-medium">{{ successMessage }}</span>
+          class="mb-8 p-5 bg-success-50 border border-success-100 text-success-700 rounded-2xl flex items-center gap-4 animate-scale-in">
+          <lucide-icon name="check-circle" class="w-6 h-6 shrink-0"></lucide-icon>
+          <span class="font-bold">{{ successMessage }}</span>
         </div>
-
         <div *ngIf="errorMessage"
-          class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl flex items-center gap-3">
-          <i class="bi bi-exclamation-circle-fill text-2xl"></i>
-          <span class="font-medium">{{ errorMessage }}</span>
+          class="mb-8 p-5 bg-red-50 border border-red-100 text-red-700 rounded-2xl flex items-center gap-4 animate-scale-in">
+          <lucide-icon name="alert-circle" class="w-6 h-6 shrink-0"></lucide-icon>
+          <span class="font-bold">{{ errorMessage }}</span>
         </div>
 
-        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-5">
-          <!-- Username -->
-          <div>
-            <label class="block text-dark-blue font-semibold mb-2">اسم المستخدم *</label>
-            <div class="relative">
-              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">👤</span>
-              <input type="text" formControlName="userName" placeholder="أدخل اسم المستخدم"
-                class="w-full pr-12 pl-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bright-green focus:border-transparent transition-all duration-200"
-                [class.border-red-500]="registerForm.get('userName')?.invalid && registerForm.get('userName')?.touched">
-            </div>
-            <p class="text-red-500 text-sm mt-1"
-              *ngIf="registerForm.get('userName')?.hasError('required') && registerForm.get('userName')?.touched">اسم
-              المستخدم مطلوب</p>
-          </div>
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-10">
 
-          <!-- Email -->
-          <div>
-            <label class="block text-dark-blue font-semibold mb-2">البريد الإلكتروني *</label>
-            <div class="relative">
-              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">✉️</span>
-              <input type="email" formControlName="email" placeholder="أدخل البريد الإلكتروني"
-                class="w-full pr-12 pl-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bright-green focus:border-transparent transition-all duration-200"
-                [class.border-red-500]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+          <!-- Section: Basic Info -->
+          <div class="space-y-6">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-2 h-6 bg-slate-900 rounded-full"></div>
+              <h3 class="text-lg font-black text-slate-900 tracking-tight">المعلومات الأساسية</h3>
             </div>
-            <p class="text-red-500 text-sm mt-1"
-              *ngIf="registerForm.get('email')?.hasError('required') && registerForm.get('email')?.touched">البريد
-              الإلكتروني مطلوب</p>
-            <p class="text-red-500 text-sm mt-1"
-              *ngIf="registerForm.get('email')?.hasError('email') && registerForm.get('email')?.touched">الرجاء إدخال
-              بريد إلكتروني صحيح</p>
-          </div>
 
-          <!-- Supplier Fields (Sender) -->
-          <div *ngIf="selectedRole === 'Supplier'" class="space-y-5">
-            <div>
-              <label class="block text-dark-blue font-semibold mb-2">اسم الشركة / الجهة *</label>
-              <div class="relative">
-                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">🏢</span>
-                <input type="text" formControlName="shopName" placeholder="أدخل اسم الشركة أو الجهة"
-                  class="w-full pr-12 pl-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bright-green focus:border-transparent transition-all duration-200"
-                  [class.border-red-500]="registerForm.get('shopName')?.invalid && registerForm.get('shopName')?.touched">
-              </div>
-              <p class="text-red-500 text-sm mt-1"
-                *ngIf="registerForm.get('shopName')?.hasError('required') && registerForm.get('shopName')?.touched">اسم
-                الشركة / الجهة مطلوب</p>
-            </div>
-            <div>
-              <label class="block text-dark-blue font-semibold mb-2">عنوان الإرسال *</label>
-              <textarea formControlName="address" placeholder="أدخل عنوان الإرسال" rows="2"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bright-green focus:border-transparent transition-all duration-200 resize-y min-h-[80px]"
-                [class.border-red-500]="registerForm.get('address')?.invalid && registerForm.get('address')?.touched"></textarea>
-              <p class="text-red-500 text-sm mt-1"
-                *ngIf="registerForm.get('address')?.hasError('required') && registerForm.get('address')?.touched">
-                العنوان مطلوب</p>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-dark-blue font-semibold mb-2">النوع *</label>
-                <select formControlName="gender"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bright-green focus:border-transparent transition-all duration-200"
-                  [class.border-red-500]="registerForm.get('gender')?.invalid && registerForm.get('gender')?.touched">
-                  <option value="">اختر النوع</option>
-                  <option *ngFor="let gender of genders" [value]="gender">{{gender === 'Male' ? 'ذكر' : gender ===
-                    'Female' ? 'أنثى' : 'أخرى'}}</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-dark-blue font-semibold mb-2">تاريخ الميلاد *</label>
-                <input type="date" formControlName="birthDate"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bright-green focus:border-transparent transition-all duration-200"
-                  [class.border-red-500]="registerForm.get('birthDate')?.invalid && registerForm.get('birthDate')?.touched">
-              </div>
-            </div>
-          </div>
-
-          <!-- Courier Fields -->
-          <div *ngIf="selectedRole === 'Courier'" class="space-y-5">
-            <div>
-              <label class="block text-dark-blue font-semibold mb-2">نوع المركبة *</label>
-              <select formControlName="vehicleType"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bright-green focus:border-transparent transition-all duration-200"
-                [class.border-red-500]="registerForm.get('vehicleType')?.invalid && registerForm.get('vehicleType')?.touched">
-                <option value="">اختر نوع المركبة</option>
-                <option *ngFor="let type of vehicleTypes" [value]="type.value">
-                  {{ type.name === 'Car' ? 'سيارة' : type.name === 'Bike' ? 'دراجة نارية' : 'مشياً' }}
-                </option>
-
-              </select>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-dark-blue font-semibold mb-2">رقم الرخصة *</label>
+            <div class="grid md:grid-cols-2 gap-6">
+              <div class="space-y-2">
+                <label class="label-custom mr-1">اسم المستخدم</label>
                 <div class="relative">
-                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">📄</span>
-                  <input type="text" formControlName="licenseNumber" placeholder="رقم الرخصة"
-                    class="w-full pr-12 pl-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bright-green focus:border-transparent transition-all duration-200"
-                    [class.border-red-500]="registerForm.get('licenseNumber')?.invalid && registerForm.get('licenseNumber')?.touched">
-                </div>
-              </div>
-              <div>
-                <label class="block text-dark-blue font-semibold mb-2">الوزن الأقصى (كجم) *</label>
-                <div class="relative">
-                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">⚖️</span>
-                  <input type="number" formControlName="maxWeight" placeholder="الوزن الأقصى"
-                    class="w-full pr-12 pl-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bright-green focus:border-transparent transition-all duration-200"
-                    [class.border-red-500]="registerForm.get('maxWeight')?.invalid && registerForm.get('maxWeight')?.touched">
-                </div>
-              </div>
-            </div>
-            <div>
-              <label class="block text-dark-blue font-semibold mb-2">العنوان *</label>
-              <textarea formControlName="address" placeholder="أدخل عنوانك" rows="2"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bright-green focus:border-transparent transition-all duration-200 resize-y min-h-[80px]"
-                [class.border-red-500]="registerForm.get('address')?.invalid && registerForm.get('address')?.touched"></textarea>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-dark-blue font-semibold mb-2">النوع *</label>
-                <select formControlName="gender"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bright-green focus:border-transparent transition-all duration-200">
-                  <option value="">اختر النوع</option>
-                  <option *ngFor="let gender of genders" [value]="gender">{{gender === 'Male' ? 'ذكر' : gender ===
-                    'Female' ? 'أنثى' : 'أخرى'}}</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-dark-blue font-semibold mb-2">تاريخ الميلاد *</label>
-                <input type="date" formControlName="birthDate"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bright-green focus:border-transparent transition-all duration-200">
-              </div>
-            </div>
-
-            <!-- Photo Uploads for Courier -->
-            <div class="border-t border-gray-200 pt-5 mt-5">
-              <h3 class="text-lg font-bold text-dark-blue mb-4 flex items-center gap-2">
-                <i class="bi bi-camera text-bright-green"></i>
-                المستندات والصور
-              </h3>
-
-              <!-- Profile Photo -->
-              <div class="mb-5">
-                <label class="block text-dark-blue font-semibold mb-2">الصورة الشخصية</label>
-                <div class="flex items-center gap-4">
-                  <div
-                    class="w-20 h-20 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50">
-                    <img *ngIf="photoPreview" [src]="photoPreview" alt="صورة شخصية" class="w-full h-full object-cover">
-                    <span *ngIf="!photoPreview" class="text-3xl text-gray-400">📷</span>
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">
+                    <lucide-icon name="user" class="w-5 h-5"></lucide-icon>
                   </div>
-                  <div class="flex-1">
+                  <input type="text" formControlName="userName" placeholder="user_lynx" class="input pr-12">
+                </div>
+              </div>
+              <div class="space-y-2">
+                <label class="label-custom mr-1">البريد الإلكتروني</label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">
+                    <lucide-icon name="mail" class="w-5 h-5"></lucide-icon>
+                  </div>
+                  <input type="email" formControlName="email" placeholder="mail@example.com" class="input pr-12">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Role Specific Info -->
+          <div class="space-y-6">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-2 h-6 bg-slate-400 rounded-full"></div>
+              <h3 class="text-lg font-black text-slate-900 tracking-tight">تفاصيل الحساب</h3>
+            </div>
+
+            <!-- Supplier Specific -->
+            <div *ngIf="selectedRole === 'Supplier'" class="space-y-6 animate-fade-in">
+              <div class="space-y-2">
+                <label class="label-custom mr-1">اسم الشركة / الجهة</label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">
+                    <lucide-icon name="briefcase" class="w-5 h-5"></lucide-icon>
+                  </div>
+                  <input type="text" formControlName="shopName" placeholder="شركة التوصيل مثال" class="input pr-12">
+                </div>
+              </div>
+
+              <div class="grid md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="label-custom mr-1">الجنس</label>
+                  <select formControlName="gender" class="input">
+                    <option value="">حدد الجنس</option>
+                    <option value="Male">ذكر</option>
+                    <option value="Female">أنثى</option>
+                  </select>
+                </div>
+                <div class="space-y-2">
+                  <label class="label-custom mr-1">تاريخ الميلاد</label>
+                  <input type="date" formControlName="birthDate" class="input">
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <label class="label-custom mr-1">عنوان المقر الإداري</label>
+                <textarea formControlName="address" rows="3" placeholder="المدينة، الحي، اسم الشارع..."
+                  class="input py-4"></textarea>
+              </div>
+            </div>
+
+            <!-- Courier Specific -->
+            <div *ngIf="selectedRole === 'Courier'" class="space-y-8 animate-fade-in">
+              <div class="grid md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="label-custom mr-1">نوع المركبة</label>
+                  <select formControlName="vehicleType" class="input">
+                    <option value="">حدد المركبة</option>
+                    <option *ngFor="let type of vehicleTypes" [value]="type.value">
+                      {{ type.name === 'Car' ? 'سيارة' : type.name === 'Bike' ? 'دراجة نارية' : 'مشياً' }}
+                    </option>
+                  </select>
+                </div>
+                <div class="space-y-2">
+                  <label class="label-custom mr-1">رقم رخصة القيادة</label>
+                  <input type="text" formControlName="licenseNumber" placeholder="10XXXXXX" class="input">
+                </div>
+              </div>
+
+              <div class="grid md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="label-custom mr-1">الوزن الأقصى للحمولة (KG)</label>
+                  <input type="number" formControlName="maxWeight" placeholder="50" class="input">
+                </div>
+                <div class="space-y-2">
+                  <label class="label-custom mr-1">تاريخ الميلاد</label>
+                  <input type="date" formControlName="birthDate" class="input">
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <label class="label-custom mr-1">العنوان السكني</label>
+                <input type="text" formControlName="address" placeholder="المدينة، الحي..." class="input">
+              </div>
+
+              <div class="space-y-2">
+                <label class="label-custom mr-1">الجنس</label>
+                <div class="flex gap-4">
+                  <button type="button" (click)="registerForm.get('gender')?.setValue('Male')"
+                    class="flex-1 h-12 rounded-xl border-2 transition-all flex items-center justify-center gap-2 font-bold"
+                    [ngClass]="registerForm.get('gender')?.value === 'Male' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-100 bg-slate-50 text-slate-400'">
+                    <lucide-icon name="user" class="w-4 h-4"></lucide-icon> ذكر
+                  </button>
+                  <button type="button" (click)="registerForm.get('gender')?.setValue('Female')"
+                    class="flex-1 h-12 rounded-xl border-2 transition-all flex items-center justify-center gap-2 font-bold"
+                    [ngClass]="registerForm.get('gender')?.value === 'Female' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-100 bg-slate-50 text-slate-400'">
+                    <lucide-icon name="user" class="w-4 h-4"></lucide-icon> أنثى
+                  </button>
+                </div>
+              </div>
+
+              <!-- File Uploads (Courier) -->
+              <div class="space-y-6 pt-6 border-t border-slate-50">
+                <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest mb-6 leading-none">المستندات
+                  والصور</h3>
+
+                <!-- Avatar -->
+                <div class="flex items-center gap-6">
+                  <div
+                    class="w-24 h-24 rounded-[2rem] bg-slate-100 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden transition-all group hover:border-brand-500">
+                    <img *ngIf="photoPreview" [src]="photoPreview" class="w-full h-full object-cover">
+                    <lucide-icon *ngIf="!photoPreview" name="camera" class="w-8 h-8 text-slate-300"></lucide-icon>
+                  </div>
+                  <div>
                     <input type="file" accept="image/*" (change)="onPhotoSelected($event)" class="hidden" #photoInput>
                     <button type="button" (click)="photoInput.click()"
-                      class="px-4 py-2 bg-gray-100 text-dark-blue rounded-lg font-medium hover:bg-gray-200 transition-colors duration-200">
-                      اختر صورة
-                    </button>
-                    <button type="button" *ngIf="photoPreview" (click)="removePhoto('photo')"
-                      class="mr-2 px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors duration-200">
-                      <i class="bi bi-trash"></i>
-                    </button>
+                      class="btn bg-slate-100 text-slate-900 px-6 py-2.5 rounded-xl font-bold hover:bg-slate-900 hover:text-white transition-all">رفع
+                      صورة شخصية</button>
+                    <p class="text-[10px] text-slate-400 mt-2 font-medium">JPG, PNG عالي الجودة</p>
                   </div>
                 </div>
-              </div>
 
-              <!-- License Photos -->
-              <div class="mb-5">
-                <label class="block text-dark-blue font-semibold mb-3">صور رخصة القيادة</label>
-                <div class="grid grid-cols-2 gap-4">
-                  <!-- Front -->
+                <!-- Document Grid -->
+                <div class="grid md:grid-cols-2 gap-6">
+                  <!-- License Front -->
                   <div
-                    class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-bright-green transition-colors duration-200">
-                    <input type="file" accept="image/*" (change)="onLicensePhotoFrontSelected($event)" class="hidden"
-                      #licenseFrontInput>
-                    <div
-                      class="w-full h-24 flex items-center justify-center overflow-hidden rounded-lg bg-gray-50 mb-2">
-                      <img *ngIf="licensePhotoFrontPreview" [src]="licensePhotoFrontPreview" alt="وجه الرخصة"
-                        class="max-w-full max-h-full object-contain">
-                      <span *ngIf="!licensePhotoFrontPreview" class="text-4xl text-gray-400">📄</span>
+                    class="p-4 border-2 border-dashed border-slate-100 rounded-2xl hover:border-brand-500 transition-all text-center group cursor-pointer"
+                    (click)="licFront.click()">
+                    <input type="file" #licFront (change)="onLicensePhotoFrontSelected($event)" class="hidden">
+                    <div class="h-24 bg-slate-50 rounded-xl mb-3 flex items-center justify-center overflow-hidden">
+                      <img *ngIf="licensePhotoFrontPreview" [src]="licensePhotoFrontPreview"
+                        class="max-h-full object-contain">
+                      <lucide-icon *ngIf="!licensePhotoFrontPreview" name="file-text"
+                        class="w-8 h-8 text-slate-200 group-hover:scale-110 transition-transform"></lucide-icon>
                     </div>
-                    <p class="text-sm text-gray-600 mb-2">وجه الرخصة</p>
-                    <button type="button" (click)="licenseFrontInput.click()"
-                      class="px-3 py-1 text-sm bg-bright-green text-white rounded-lg hover:bg-dark-teal transition-colors duration-200">
-                      {{ licensePhotoFrontPreview ? 'تغيير' : 'رفع' }}
-                    </button>
+                    <span class="text-xs font-bold text-slate-500">وجه رخصة القيادة</span>
                   </div>
-                  <!-- Back -->
+                  <!-- Vehicle License Front -->
                   <div
-                    class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-bright-green transition-colors duration-200">
-                    <input type="file" accept="image/*" (change)="onLicensePhotoBackSelected($event)" class="hidden"
-                      #licenseBackInput>
-                    <div
-                      class="w-full h-24 flex items-center justify-center overflow-hidden rounded-lg bg-gray-50 mb-2">
-                      <img *ngIf="licensePhotoBackPreview" [src]="licensePhotoBackPreview" alt="ظهر الرخصة"
-                        class="max-w-full max-h-full object-contain">
-                      <span *ngIf="!licensePhotoBackPreview" class="text-4xl text-gray-400">📄</span>
-                    </div>
-                    <p class="text-sm text-gray-600 mb-2">ظهر الرخصة</p>
-                    <button type="button" (click)="licenseBackInput.click()"
-                      class="px-3 py-1 text-sm bg-bright-green text-white rounded-lg hover:bg-dark-teal transition-colors duration-200">
-                      {{ licensePhotoBackPreview ? 'تغيير' : 'رفع' }}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Vehicle License Photos -->
-              <div>
-                <label class="block text-dark-blue font-semibold mb-3">صور رخصة المركبة</label>
-                <div class="grid grid-cols-2 gap-4">
-                  <!-- Front -->
-                  <div
-                    class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-gold transition-colors duration-200">
-                    <input type="file" accept="image/*" (change)="onVehicleLicensePhotoFrontSelected($event)"
-                      class="hidden" #vehicleFrontInput>
-                    <div
-                      class="w-full h-24 flex items-center justify-center overflow-hidden rounded-lg bg-gray-50 mb-2">
+                    class="p-4 border-2 border-dashed border-slate-100 rounded-2xl hover:border-success-500 transition-all text-center group cursor-pointer"
+                    (click)="vehFront.click()">
+                    <input type="file" #vehFront (change)="onVehicleLicensePhotoFrontSelected($event)" class="hidden">
+                    <div class="h-24 bg-slate-50 rounded-xl mb-3 flex items-center justify-center overflow-hidden">
                       <img *ngIf="vehicleLicensePhotoFrontPreview" [src]="vehicleLicensePhotoFrontPreview"
-                        alt="وجه رخصة المركبة" class="max-w-full max-h-full object-contain">
-                      <span *ngIf="!vehicleLicensePhotoFrontPreview" class="text-4xl text-gray-400">🚗</span>
+                        class="max-h-full object-contain">
+                      <lucide-icon *ngIf="!vehicleLicensePhotoFrontPreview" name="car"
+                        class="w-8 h-8 text-slate-200 group-hover:scale-110 transition-transform"></lucide-icon>
                     </div>
-                    <p class="text-sm text-gray-600 mb-2">وجه رخصة المركبة</p>
-                    <button type="button" (click)="vehicleFrontInput.click()"
-                      class="px-3 py-1 text-sm bg-gold text-dark-blue rounded-lg hover:bg-yellow-500 transition-colors duration-200">
-                      {{ vehicleLicensePhotoFrontPreview ? 'تغيير' : 'رفع' }}
-                    </button>
-                  </div>
-                  <!-- Back -->
-                  <div
-                    class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-gold transition-colors duration-200">
-                    <input type="file" accept="image/*" (change)="onVehicleLicensePhotoBackSelected($event)"
-                      class="hidden" #vehicleBackInput>
-                    <div
-                      class="w-full h-24 flex items-center justify-center overflow-hidden rounded-lg bg-gray-50 mb-2">
-                      <img *ngIf="vehicleLicensePhotoBackPreview" [src]="vehicleLicensePhotoBackPreview"
-                        alt="ظهر رخصة المركبة" class="max-w-full max-h-full object-contain">
-                      <span *ngIf="!vehicleLicensePhotoBackPreview" class="text-4xl text-gray-400">🚗</span>
-                    </div>
-                    <p class="text-sm text-gray-600 mb-2">ظهر رخصة المركبة</p>
-                    <button type="button" (click)="vehicleBackInput.click()"
-                      class="px-3 py-1 text-sm bg-gold text-dark-blue rounded-lg hover:bg-yellow-500 transition-colors duration-200">
-                      {{ vehicleLicensePhotoBackPreview ? 'تغيير' : 'رفع' }}
-                    </button>
+                    <span class="text-xs font-bold text-slate-500">وجه رخصة المركبة</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Password Fields -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-dark-blue font-semibold mb-2">كلمة المرور *</label>
-              <div class="relative">
-                <input [type]="hidePassword ? 'password' : 'text'" formControlName="password" placeholder="كلمة المرور"
-                  class="w-full pr-4 pl-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bright-green focus:border-transparent transition-all duration-200"
-                  [class.border-red-500]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
-                <button type="button" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  (click)="togglePasswordVisibility()">
-                  {{hidePassword ? '👁️' : '🙈'}}
-                </button>
-              </div>
-              <p class="text-red-500 text-sm mt-1"
-                *ngIf="registerForm.get('password')?.hasError('required') && registerForm.get('password')?.touched">كلمة
-                المرور مطلوبة</p>
-              <p class="text-red-500 text-sm mt-1"
-                *ngIf="registerForm.get('password')?.hasError('minlength') && registerForm.get('password')?.touched">يجب
-                أن تكون 6 أحرف على الأقل</p>
+          <!-- Section: Authentication -->
+          <div class="space-y-6">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-2 h-6 bg-slate-900 rounded-full"></div>
+              <h3 class="text-lg font-black text-slate-900 tracking-tight">كلمة المرور</h3>
             </div>
-            <div>
-              <label class="block text-dark-blue font-semibold mb-2">تأكيد كلمة المرور *</label>
-              <div class="relative">
-                <input [type]="hideConfirmPassword ? 'password' : 'text'" formControlName="confirmPassword"
-                  placeholder="تأكيد كلمة المرور"
-                  class="w-full pr-4 pl-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bright-green focus:border-transparent transition-all duration-200"
-                  [class.border-red-500]="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched">
-                <button type="button" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  (click)="toggleConfirmPasswordVisibility()">
-                  {{hideConfirmPassword ? '👁️' : '🙈'}}
-                </button>
+
+            <div class="grid md:grid-cols-2 gap-6">
+              <div class="space-y-2">
+                <label class="label-custom mr-1">كلمة المرور</label>
+                <div class="relative">
+                  <input [type]="hidePassword ? 'password' : 'text'" formControlName="password" placeholder="••••••••"
+                    class="input pl-12">
+                  <button type="button" (click)="togglePasswordVisibility()"
+                    class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400 hover:text-slate-900 group">
+                    <lucide-icon [name]="hidePassword ? 'eye' : 'eye-off'"
+                      class="w-5 h-5 group-hover:scale-110"></lucide-icon>
+                  </button>
+                </div>
               </div>
-              <p class="text-red-500 text-sm mt-1"
-                *ngIf="registerForm.get('confirmPassword')?.hasError('required') && registerForm.get('confirmPassword')?.touched">
-                الرجاء تأكيد كلمة المرور</p>
+              <div class="space-y-2">
+                <label class="label-custom mr-1">تأكيد كلمة المرور</label>
+                <div class="relative">
+                  <input [type]="hideConfirmPassword ? 'password' : 'text'" formControlName="confirmPassword"
+                    placeholder="••••••••" class="input pl-12">
+                  <button type="button" (click)="toggleConfirmPasswordVisibility()"
+                    class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400 hover:text-slate-900 group">
+                    <lucide-icon [name]="hideConfirmPassword ? 'eye' : 'eye-off'"
+                      class="w-5 h-5 group-hover:scale-110"></lucide-icon>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-          <p class="text-red-500 text-sm"
-            *ngIf="registerForm.hasError('mismatch') && registerForm.get('confirmPassword')?.touched">كلمات المرور غير
-            متطابقة</p>
 
           <!-- Terms -->
-          <div class="pt-2">
-            <label class="flex items-start gap-3 cursor-pointer text-gray-600">
-              <input type="checkbox" formControlName="agreeTerms"
-                class="w-5 h-5 mt-0.5 rounded border-gray-300 text-bright-green focus:ring-bright-green">
-              <span class="leading-relaxed">أوافق على <a
-                  class="text-bright-green font-semibold hover:underline cursor-pointer">شروط الخدمة</a> و<a
-                  class="text-bright-green font-semibold hover:underline cursor-pointer">سياسة الخصوصية</a> *</span>
+          <div class="pt-6 border-t border-slate-50">
+            <label class="flex items-center gap-4 cursor-pointer group">
+              <div class="relative shrink-0">
+                <input type="checkbox" formControlName="agreeTerms" class="peer sr-only">
+                <div
+                  class="w-6 h-6 border-2 border-slate-200 rounded-lg peer-checked:bg-slate-900 peer-checked:border-slate-900 transition-all duration-300 flex items-center justify-center shadow-soft">
+                  <lucide-icon name="check"
+                    class="w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity"></lucide-icon>
+                </div>
+              </div>
+              <span
+                class="text-sm font-bold text-slate-500 transition-colors group-hover:text-slate-900 leading-relaxed">
+                أوافق على <a class="text-slate-900 underline hover:text-brand-600">شروط الخدمة</a> و <a
+                  class="text-slate-900 underline hover:text-brand-600">سياسة الخصوصية</a> الخاصة بمنصة Lynx
+              </span>
             </label>
-            <p class="text-red-500 text-sm mt-1"
-              *ngIf="registerForm.get('agreeTerms')?.hasError('required') && registerForm.get('agreeTerms')?.touched">
-              يجب الموافقة على الشروط</p>
           </div>
 
-          <!-- Submit Button -->
+          <!-- Submit -->
           <button type="submit" [disabled]="registerForm.invalid || isLoading"
-            class="w-full py-4 rounded-xl bg-gradient-to-br from-bright-green to-dark-teal text-white font-bold text-lg shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all duration-300">
-            <span *ngIf="!isLoading">إنشاء الحساب</span>
-            <span *ngIf="isLoading" class="flex items-center justify-center gap-2">
-              <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-              </svg>
-              جاري إنشاء الحساب...
+            class="btn-primary w-full h-16 text-xl shadow-glow-blue disabled:opacity-50 disabled:translate-y-0">
+            <span *ngIf="isLoading"
+              class="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+            <span class="flex items-center gap-2">
+              {{ isLoading ? 'جاري المعالجة...' : 'إنشاء الحساب الآن' }}
+              <lucide-icon *ngIf="!isLoading" name="arrow-left" class="w-6 h-6"></lucide-icon>
             </span>
           </button>
         </form>
 
-        <!-- Login Link -->
-        <div class="mt-6 pt-6 border-t border-gray-200 text-center">
-          <p class="text-gray-600">
+        <div class="mt-12 text-center pt-8">
+          <p class="text-sm text-slate-500 font-medium">
             لديك حساب بالفعل؟
-            <a class="text-bright-green font-bold cursor-pointer hover:underline" (click)="goToLogin()">تسجيل الدخول</a>
+            <button (click)="goToLogin()"
+              class="text-slate-900 font-black hover:text-brand-600 ml-1 transition-colors px-4 py-2 bg-slate-50 rounded-xl">تسجيل
+              الدخول</button>
           </p>
         </div>
       </div>
+
     </div>
   </div>
 </div>

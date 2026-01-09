@@ -7,13 +7,14 @@ import { interval, Subscription, timer } from 'rxjs';
 import * as L from 'leaflet';
 import { AuthService } from '../../../shared/services/auth.service';
 import { SignalRService } from '../../../shared/services/signalr.service';
-import { LanguageService } from '../../../shared/services/language.service';
-import { ThemeService } from '../../../shared/services/theme.service';
+import { TranslationService } from '../../../core/services/translation.service';
+import { ThemeService } from '../../../core/services/theme.service';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
   selector: 'app-track',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, TranslatePipe],
   templateUrl: './track.component.html',
   styleUrl: './track.component.css'
 })
@@ -38,7 +39,7 @@ export class TrackComponent implements OnInit, AfterViewInit, OnDestroy {
     private route: ActivatedRoute,
     private signalR: SignalRService,
     private auth: AuthService,
-    public langService: LanguageService,
+    public langService: TranslationService,
     public themeService: ThemeService
   ) { }
 
@@ -104,7 +105,7 @@ export class TrackComponent implements OnInit, AfterViewInit, OnDestroy {
         }, 100);
       },
       error: () => {
-        this.errorMessage = this.langService.currentLang() === 'ar' ? 'لم يتم العثور على شحنة' : 'Shipment not found';
+        this.errorMessage = this.langService.translate('SHIPMENTS.NO_RESULTS');
         this.isSearching = false;
       }
     });
@@ -136,14 +137,14 @@ export class TrackComponent implements OnInit, AfterViewInit, OnDestroy {
         className: 'custom-div-icon',
         html: `<div class="w-4 h-4 rounded-full bg-primary-green border-2 border-white shadow-md"></div>`
       })
-    }).addTo(this.map).bindPopup(this.langService.currentLang() === 'ar' ? 'الاستلام' : 'Pickup');
+    }).addTo(this.map).bindPopup(this.langService.translate('COMMON.PICKUP'));
 
     L.marker([dLat, dLng], {
       icon: L.divIcon({
         className: 'custom-div-icon',
         html: `<div class="w-4 h-4 rounded-full bg-red-500 border-2 border-white shadow-md"></div>`
       })
-    }).addTo(this.map).bindPopup(this.langService.currentLang() === 'ar' ? 'التسليم' : 'Delivery');
+    }).addTo(this.map).bindPopup(this.langService.translate('COMMON.DELIVERY'));
 
     this.routePolyline = L.polyline([[pLat, pLng], [dLat, dLng]], {
       color: '#192A45',
@@ -177,12 +178,18 @@ export class TrackComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getStatusText(status: string): string {
-    const ar: any = { 'pending': 'معلق', 'picked_up': 'تم الاستلام', 'delivered': 'تم التسليم' };
-    const en: any = { 'pending': 'Pending', 'picked_up': 'Picked Up', 'delivered': 'Delivered' };
-    return this.langService.currentLang() === 'ar' ? ar[status] || status : en[status] || status;
+    const key = `STATUS.${status.toUpperCase()}`;
+    // We can return the key and let the pipe translate it, OR translate it here.
+    // If we return the key, we must use the pipe in HTML.
+    // The previous implementation returned the translated string.
+    // Let's rely on the pipe in HTML for consistency, BUT `getStatusText` is called in HTML {{ getStatusText(parcel.status) }}.
+    // So if I return a key here, I must verify HTML uses | translate.
+    // Looking at track.component.html: <p class="text-lg font-black text-primary-green">{{ getStatusText(parcel.status) }}</p>
+    // It does NOT use | translate. So I should translate it here.
+    return this.langService.translate(key);
   }
 
   formatCurrency(value: number): string {
-    return this.langService.currentLang() === 'ar' ? `${value} ج.م` : `${value} EGP`;
+    return this.langService.lang() === 'ar' ? `${value} ج.م` : `${value} EGP`;
   }
 }

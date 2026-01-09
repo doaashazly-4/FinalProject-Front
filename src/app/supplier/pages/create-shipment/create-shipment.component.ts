@@ -7,11 +7,12 @@ import { SupplierDataService, CreateParcelDTO, DeliveryFeeResponse, SupplierProf
 import * as L from 'leaflet';
 import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
 import { Subscription, of, Subject } from 'rxjs';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-create-shipment',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, HttpClientModule, LucideAngularModule],
   templateUrl: './create-shipment.component.html',
   styleUrl: './create-shipment.component.css'
 })
@@ -410,6 +411,25 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
           customer.phoneNumber.includes(filterValue)
         );
         this.showDropdown = this.filteredCustomers.length > 0;
+      });
+
+    // Auto-map adjustment for addresses
+    this.shipmentForm.get('pickupAddress')?.valueChanges
+      .pipe(debounceTime(1000), distinctUntilChanged())
+      .subscribe(val => {
+        if (val && val.length > 5) {
+          this.activeField = 'pickup';
+          this.geocodeAddress(val, 'pickup');
+        }
+      });
+
+    this.shipmentForm.get('deliveryAddress')?.valueChanges
+      .pipe(debounceTime(1000), distinctUntilChanged())
+      .subscribe(val => {
+        if (val && val.length > 5) {
+          this.activeField = 'delivery';
+          this.geocodeAddress(val, 'delivery');
+        }
       });
   }
 

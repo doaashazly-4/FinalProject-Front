@@ -19,9 +19,27 @@
         {{ langService.currentLang() === 'ar' ? 'لوحة تحكم كبار المُرسلين' : 'Elite Supplier Hub' }}
       </h1>
       <p class="text-slate-500 dark:text-slate-400 font-medium text-lg max-w-2xl leading-relaxed">
+        <span *ngIf="supplierProfile" class="block mb-2 text-primary-green font-bold">
+          {{ supplierProfile.businessName || supplierProfile.name }}
+        </span>
         {{ langService.currentLang() === 'ar' ? 'مرحباً بعودتك! شاشتك الموحدة لمتابعة كل الشحنات والعمليات الميدانية
         بكفاءة عالية واحترافية.' : 'Welcome back! Your unified command center for monitoring all shipments and field
         operations with high efficiency and professionalism.' }}
+
+        <span *ngIf="supplierProfile" class="flex flex-wrap items-center gap-3 mt-4 text-sm font-bold text-slate-400">
+          <span class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+            <lucide-icon name="user" [size]="14"></lucide-icon>
+            {{ supplierProfile.name }}
+          </span>
+          <span class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+            <lucide-icon name="mail" [size]="14"></lucide-icon>
+            {{ supplierProfile.email }}
+          </span>
+          <span class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+            <lucide-icon name="phone" [size]="14"></lucide-icon>
+            {{ supplierProfile.phone }}
+          </span>
+        </span>
       </p>
     </div>
 
@@ -109,15 +127,14 @@
                 <lucide-icon name="layout-dashboard" [size]="28"></lucide-icon>
               </div>
               <div>
-                <h2 class="text-2xl font-black text-slate-900 dark:text-white">{{ langService.currentLang() === 'ar' ?
-                  'مراقبة العمليات الجارية' : 'Operational Workspace' }}</h2>
-                <p class="text-sm text-slate-400 font-medium mt-1">{{ langService.currentLang() === 'ar' ? 'بث مباشر
-                  لأحدث الشحنات وحالة تنفيذهل' : 'Real-time orchestration of active field logistics' }}</p>
+                <h2 class="text-2xl font-black text-slate-900 dark:text-white">{{ 'DASHBOARD.RECENT_ACTIVITY' |
+                  translate }}</h2>
+                <p class="text-sm text-slate-400 font-medium mt-1">{{ 'DASHBOARD.PENDING_TASKS' | translate }}</p>
               </div>
             </div>
             <a routerLink="/supplier/shipments"
               class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
-              <span>{{ langService.currentLang() === 'ar' ? 'الأرشيف الكامل' : 'Full Registry' }}</span>
+              <span>{{ 'DASHBOARD.VIEW_ALL' | translate }}</span>
               <lucide-icon [name]="langService.isRtl() ? 'arrow-left' : 'arrow-right'" [size]="16"></lucide-icon>
             </a>
           </div>
@@ -130,18 +147,16 @@
               <table class="w-full text-left" [dir]="langService.isRtl() ? 'rtl' : 'ltr'">
                 <thead class="bg-slate-50/50 dark:bg-slate-800/30">
                   <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    <th class="px-8 py-5">{{ langService.currentLang() === 'ar' ? 'تعريف الشحنة' : 'Logistics ID' }}
+                    <th class="px-8 py-5">{{ 'SHIPMENTS.SEARCH_PLACEHOLDER' | translate }}
                     </th>
-                    <th class="px-6 py-5">{{ langService.currentLang() === 'ar' ? 'المستلم والوجهة' : 'Receiver & Hub'
-                      }}</th>
-                    <th class="px-6 py-5">{{ langService.currentLang() === 'ar' ? 'الحالة الحالية' : 'Execution Status'
-                      }}</th>
+                    <th class="px-6 py-5">{{ 'CREATE_SHIPMENT.SECTION_RECEIVER' | translate }}</th>
+                    <th class="px-6 py-5">{{ 'TRACK.CURRENT_PHASE' | translate }}</th>
                     <th class="px-8 py-5 text-right" [class.text-left]="langService.isRtl()">{{
-                      langService.currentLang() === 'ar' ? 'تحكم' : 'Control' }}</th>
+                      'ACTIONS.CONTROL' | translate }}</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                  <tr *ngFor="let parcel of (showAllParcels ? pendingParcels : pendingParcels.slice(0, 8))"
+                  <tr *ngFor="let parcel of displayedParcels"
                     class="group hover:bg-slate-50/80 dark:hover:bg-slate-800/20 transition-all duration-300">
 
                     <!-- ID & Details -->
@@ -178,7 +193,7 @@
                       <div [ngClass]="getStatusClass(parcel.status)"
                         class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border transition-all duration-500 whitespace-nowrap">
                         <div class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></div>
-                        {{ getStatusText(parcel.status) }}
+                        {{ 'STATUS.' + (parcel.status | uppercase) | translate }}
                       </div>
                     </td>
 
@@ -187,16 +202,19 @@
                       <div class="flex items-center justify-end gap-2.5">
                         <button *ngIf="parcel.status === 'pending'" (click)="markReadyForPickup(parcel)"
                           class="px-4 py-2 bg-primary-green text-white text-[10px] font-black rounded-lg shadow-green-soft hover:shadow-green-lg transition-all hover:-translate-y-0.5">
-                          {{ langService.currentLang() === 'ar' ? 'تعميد للاستلام' : 'Authorize Pickup' }}
+                          {{ 'ACTIONS.MARK_READY' | translate }}
                         </button>
+
                         <a [routerLink]="['/supplier/track']" [queryParams]="{ id: parcel.id }"
-                          class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all"
-                          [title]="langService.currentLang() === 'ar' ? 'تتبع' : 'Track'">
-                          <lucide-icon name="navigation" [size]="18"></lucide-icon>
+                          class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-black rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center gap-2">
+                          <lucide-icon name="navigation" [size]="14"></lucide-icon>
+                          {{ 'ACTIONS.TRACK' | translate }}
                         </a>
+
                         <a [routerLink]="['/supplier/shipment-details', parcel.id]"
-                          class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
-                          <lucide-icon name="eye" [size]="18"></lucide-icon>
+                          class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-black rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center gap-2">
+                          <lucide-icon name="eye" [size]="14"></lucide-icon>
+                          {{ 'ACTIONS.DETAILS' | translate }}
                         </a>
                       </div>
                     </td>
@@ -205,13 +223,12 @@
               </table>
 
               <!-- Load More with Modern Visuals -->
-              <div *ngIf="pendingParcels.length > 8"
+              <div
                 class="p-8 border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/20 text-center">
-                <button (click)="showAllParcels = !showAllParcels"
+                <button (click)="toggleViewMode()"
                   class="inline-flex items-center gap-3 px-6 py-2 rounded-full text-xs font-black text-slate-400 hover:text-primary-green hover:bg-white dark:hover:bg-slate-900 shadow-sm transition-all border border-transparent hover:border-primary-green/20 uppercase tracking-[0.2em]">
-                  <span>{{ showAllParcels ? (langService.currentLang() === 'ar' ? 'ضغط البيانات' : 'Compress View') :
-                    (langService.currentLang() === 'ar' ? 'توسيع القائمة' : 'Expand Live Operations') }}</span>
-                  <lucide-icon [name]="showAllParcels ? 'chevron-up' : 'chevron-down'" [size]="16"
+                  <span>{{ (viewMode === 'all' ? 'DASHBOARD.VIEW_RECENT' : 'DASHBOARD.VIEW_ALL') | translate }}</span>
+                  <lucide-icon [name]="viewMode === 'all' ? 'chevron-up' : 'chevron-down'" [size]="16"
                     class="animate-bounce"></lucide-icon>
                 </button>
               </div>

@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { CustomerDataService, IncomingDelivery, DeliveryStatus } from '../../services/customer-data.service';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-deliveries',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, LucideAngularModule],
   templateUrl: './deliveries.component.html',
   styleUrls: ['./deliveries.component.css']
 })

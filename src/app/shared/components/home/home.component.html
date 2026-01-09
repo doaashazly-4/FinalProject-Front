@@ -1,273 +1,221 @@
 <!-- Hero Section -->
-<section class="relative min-h-screen flex items-center overflow-hidden">
-  <!-- Background Image with Overlay -->
-  <div class="absolute inset-0">
-    <img src="/assets/Images/pexels-norma-mortenson-4393668.jpg" alt="خلفية" class="w-full h-full object-cover">
-    <div class="absolute inset-0 bg-gradient-to-br from-dark-blue/95 via-dark-teal/90 to-dark-blue/95"></div>
-  </div>
-
-  <!-- Animated Shapes -->
-  <div class="absolute inset-0 overflow-hidden pointer-events-none">
-    <div class="absolute top-20 right-10 w-72 h-72 bg-bright-green/20 rounded-full blur-3xl animate-pulse"></div>
-    <div class="absolute bottom-20 left-10 w-96 h-96 bg-gold/10 rounded-full blur-3xl animate-pulse"
-      style="animation-delay: 1s"></div>
-    <div
-      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-dark-teal/20 rounded-full blur-3xl">
+<section class="relative min-h-screen flex items-center overflow-hidden bg-slate-50">
+  <!-- Dynamic Background -->
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-500/5 rounded-full blur-[120px] animate-float">
     </div>
+    <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-success-500/5 rounded-full blur-[120px]"
+      style="animation-delay: 2s"></div>
   </div>
 
-  <div class="container mx-auto px-4 lg:px-8 relative z-10 py-20">
-    <div class="grid lg:grid-cols-2 gap-12 items-center">
-      <!-- Content -->
-      <div class="text-center lg:text-right" [@fadeInLeft]>
-        <!-- Badge -->
+  <div class="container-custom relative z-10 py-20">
+    <div class="grid lg:grid-cols-12 gap-16 items-center">
+      <!-- Content Column -->
+      <div class="lg:col-span-7 text-center lg:text-right" [@fadeInLeft]>
+        <!-- Premium Badge -->
         <div
-          class="inline-flex items-center gap-3 px-6 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-full mb-8">
-          <i class="bi bi-lightning-charge-fill text-gold text-xl"></i>
-          <span class="text-white font-bold">لينكس - خدمة توصيل فائقة الذكاء</span>
+          class="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-slate-200 shadow-soft mb-8 stagger-item">
+          <span class="flex h-2 w-2 rounded-full bg-brand-500 animate-pulse"></span>
+          <span class="text-xs font-bold text-slate-600 uppercase tracking-widest leading-none">لينكس • الجيل الجديد من
+            اللوجستيات</span>
         </div>
 
-        <!-- Title -->
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white leading-tight mb-6">
-          توصيل سريع
-          <span class="block mt-2 bg-gradient-to-r from-gold via-bright-green to-gold bg-clip-text text-transparent">
-            ومضمون
-          </span>
-          <span class="block text-3xl sm:text-4xl lg:text-5xl mt-4 text-white/90">لجميع احتياجاتك</span>
+        <!-- Main Heading -->
+        <h1 class="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1.1] mb-8 stagger-item">
+          التوصيل الذكي <br>
+          <span class="text-gradient">أصبح واقعاً</span>
         </h1>
 
-        <!-- Description -->
-        <p class="text-lg sm:text-xl text-white/80 leading-relaxed mb-10 max-w-xl mx-auto lg:mx-0 lg:mr-0">
-          نحن نقدم خدمة توصيل سريعة وموثوقة لجميع منتجاتك.
-          اطلب الآن واحصل على توصيل مجاني للطلبات التي تزيد عن 100 ريال
+        <!-- Subheading -->
+        <p class="text-lg md:text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto lg:mr-0 mb-10 stagger-item">
+          اختبر سرعة التوصيل الفائقة مع نظام Lynx المتطور. نربطك بأفضل المندوبين لضمان وصول شحنتك بأمان واحترافية تامة.
         </p>
 
-        <!-- Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12" [@fadeInUp]>
-          <a routerLink="/role-selection"
-            class="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-bright-green text-white rounded-2xl font-bold text-lg shadow-lg hover:bg-dark-teal hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-            <i class="bi bi-box-arrow-in-left text-xl group-hover:scale-110 transition-transform"></i>
-            <span>تسجيل الدخول</span>
+        <!-- CTA Groups -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-16 stagger-item">
+          <a routerLink="/role-selection" class="btn-primary py-4 px-10 text-lg shadow-glow-blue">
+            <lucide-icon name="user-plus" class="w-5 h-5 ml-2"></lucide-icon>
+            ابدأ رحلتك الآن
           </a>
-          <a routerLink="/available-couriers"
-            class="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-white/10 backdrop-blur-md border-2 border-white/30 text-white rounded-2xl font-bold text-lg hover:bg-white/20 hover:-translate-y-1 transition-all duration-300">
-            <i class="bi bi-truck text-xl group-hover:scale-110 transition-transform"></i>
-            <span>المندوبون المتاحون</span>
+          <a routerLink="/available-couriers" class="btn-outline py-4 px-10 text-lg">
+            <lucide-icon name="search" class="w-5 h-5 ml-2"></lucide-icon>
+            تصفح المندوبين
           </a>
         </div>
 
-        <!-- Stats -->
-        <div class="grid grid-cols-3 gap-4 max-w-lg mx-auto lg:mx-0" [@slideInUp]>
+        <!-- Featured Stats Grid -->
+        <div class="grid grid-cols-3 gap-6 max-w-xl mx-auto lg:mr-0" [@staggerDown]>
           <div *ngFor="let stat of stats"
-            class="text-center p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 hover:bg-white/15 hover:-translate-y-1 transition-all duration-300">
-            <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-white/20 flex items-center justify-center">
-              <i [class]="'bi ' + stat.icon + ' text-bright-green text-xl'"></i>
+            class="stagger-item group p-4 bg-white rounded-2xl border border-slate-100 shadow-soft hover:shadow-premium hover:-translate-y-1 transition-all duration-500">
+            <div
+              class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-brand-600 mb-3 group-hover:bg-brand-500 group-hover:text-white transition-colors">
+              <lucide-icon [name]="stat.icon" class="w-5 h-5"></lucide-icon>
             </div>
-            <h3 class="text-2xl sm:text-3xl font-black text-white mb-1">{{ stat.value }}</h3>
-            <p class="text-white/70 text-sm font-medium">{{ stat.label }}</p>
+            <div class="text-2xl font-black text-slate-900 tracking-tight">{{ stat.value }}</div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{{ stat.label }}</div>
           </div>
         </div>
       </div>
 
-      <!-- Hero Image -->
-      <div class="relative hidden lg:block" [@fadeInRight]>
-        <div class="relative">
-          <img src="/assets/Images/pexels-rdne-7362949.jpg" alt="توصيل سريع"
-            class="w-full rounded-3xl shadow-2xl border-4 border-white/20">
-
-          <!-- Floating Cards -->
-          <div
-            class="absolute -top-6 -right-6 flex items-center gap-3 px-5 py-3 bg-white rounded-2xl shadow-xl animate-bounce"
-            style="animation-duration: 3s">
-            <div
-              class="w-12 h-12 rounded-xl bg-white border border-gray-100 flex items-center justify-center overflow-hidden">
-              <img src="assets/Images/lynx-logo.png" alt="Lynx" class="w-full h-full object-contain">
-            </div>
-            <div class="text-right">
-              <p class="font-bold text-dark-blue">لينكس Lynx</p>
-              <p class="text-sm text-gray-500">توصيل ذكي فائق السرعة</p>
-            </div>
-          </div>
-
-          <div
-            class="absolute -bottom-6 -left-6 flex items-center gap-3 px-5 py-3 bg-white rounded-2xl shadow-xl animate-bounce"
-            style="animation-duration: 3s; animation-delay: 1.5s">
-            <div class="w-10 h-10 rounded-full bg-gold flex items-center justify-center">
-              <i class="bi bi-shield-check text-dark-blue"></i>
-            </div>
-            <div class="text-right">
-              <p class="font-bold text-dark-blue">آمن 100%</p>
-              <p class="text-sm text-gray-500">ضمان التسليم</p>
+      <!-- Hero Visual Column -->
+      <div class="lg:col-span-5 relative hidden lg:block" [@fadeInRight]>
+        <div class="relative z-10 rounded-[2.5rem] overflow-hidden shadow-premium border-8 border-white">
+          <img src="/assets/Images/pexels-rdne-7362949.jpg" alt="Lynx Logistics" class="w-full object-cover">
+          <!-- Glass Overlay Decor -->
+          <div class="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-slate-900/80 to-transparent flex items-end">
+            <div class="w-full p-6 glass rounded-2xl flex items-center gap-4">
+              <div
+                class="w-12 h-12 rounded-xl bg-brand-500 flex items-center justify-center text-white shadow-glow-blue">
+                <lucide-icon name="shield" class="w-6 h-6"></lucide-icon>
+              </div>
+              <div>
+                <div class="font-bold text-slate-900">تغطية شاملة</div>
+                <div class="text-xs text-slate-500">شحنتك مؤمنة بالكامل مع Lynx</div>
+              </div>
             </div>
           </div>
         </div>
+        <!-- Decorative blobs -->
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-success-500/20 rounded-full blur-2xl animate-pulse"></div>
+        <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-brand-500/20 rounded-full blur-2xl animate-pulse"
+          style="animation-delay: 1.5s"></div>
       </div>
     </div>
-  </div>
-
-  <!-- Scroll Indicator -->
-  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/50 animate-bounce">
-    <i class="bi bi-chevron-double-down text-3xl"></i>
   </div>
 </section>
 
-<!-- Services Section -->
-<section id="services" class="py-20 lg:py-28 bg-white">
-  <div class="container mx-auto px-4 lg:px-8">
-    <!-- Header -->
-    <div class="text-center mb-16" [@fadeInUp]>
-      <span
-        class="inline-block px-6 py-2 bg-bright-green/10 text-bright-green rounded-full font-bold text-sm uppercase tracking-wider mb-4">خدماتنا</span>
-      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-dark-blue mb-4">خدماتنا المميزة</h2>
-      <p class="text-lg text-gray-600 max-w-2xl mx-auto">نقدم لك أفضل خدمات التوصيل بأعلى معايير الجودة والسرعة</p>
+<!-- Services / Features Section -->
+<section id="services" class="py-24 lg:py-32 bg-white relative">
+  <div class="container-custom">
+    <!-- Section Header -->
+    <div class="max-w-3xl mx-auto text-center mb-20" [@fadeInUp]>
+      <div
+        class="inline-block px-4 py-1.5 bg-brand-50 text-brand-600 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
+        ماذا نقدم</div>
+      <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-6">خدمات لوجستية متكاملة</h2>
+      <p class="text-slate-500 text-lg">نحن لا نقوم فقط بتوصيل الطرود، بل نبني جسوراً من الثقة بين المتاجر والعملاء
+        باستخدام أرقى التقنيات.</p>
     </div>
 
-    <!-- Services Grid -->
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8" [@slideInCards]>
+    <!-- Features Grid -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
       <div *ngFor="let service of services"
-        class="group bg-white p-8 rounded-3xl border-2 border-gray-100 shadow-md hover:shadow-2xl hover:border-bright-green hover:-translate-y-4 transition-all duration-300 text-center relative overflow-hidden">
-        <!-- Hover Gradient -->
+        class="group p-10 rounded-3xl bg-slate-50 border border-slate-100 transition-all duration-500 hover:bg-white hover:shadow-premium hover:-translate-y-2">
         <div
-          class="absolute inset-0 bg-gradient-to-br from-bright-green/5 to-dark-teal/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          class="w-16 h-16 rounded-2xl bg-white shadow-soft flex items-center justify-center text-brand-600 mb-8 group-hover:bg-brand-500 group-hover:text-white transition-all duration-500">
+          <lucide-icon [name]="service.icon" class="w-8 h-8"></lucide-icon>
         </div>
-
-        <!-- Icon -->
-        <div class="relative mb-8">
-          <div
-            class="w-24 h-24 mx-auto rounded-2xl bg-gradient-to-br from-bright-green to-dark-teal flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-            <i [class]="'bi ' + service.icon + ' text-white text-4xl'"></i>
-          </div>
-        </div>
-
-        <h4 class="relative text-xl font-bold text-dark-blue mb-4">{{ service.title }}</h4>
-        <p class="relative text-gray-600 leading-relaxed">{{ service.description }}</p>
-
-        <!-- Bottom Accent -->
-        <div
-          class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-bright-green to-dark-teal scale-x-0 group-hover:scale-x-100 transition-transform duration-300">
-        </div>
+        <h3 class="text-2xl font-bold text-slate-900 mb-4">{{ service.title }}</h3>
+        <p class="text-slate-500 leading-relaxed">{{ service.description }}</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- How It Works Section -->
-<section id="how-it-works" class="py-20 lg:py-28 bg-gray-50">
-  <div class="container mx-auto px-4 lg:px-8">
-    <!-- Header -->
-    <div class="text-center mb-16" [@fadeInUp]>
-      <span
-        class="inline-block px-6 py-2 bg-gold/10 text-gold rounded-full font-bold text-sm uppercase tracking-wider mb-4">كيف
-        يعمل</span>
-      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-dark-blue mb-4">كيف يعمل نظامنا</h2>
-      <p class="text-lg text-gray-600 max-w-2xl mx-auto">عملية بسيطة وسريعة في 3 خطوات فقط</p>
-    </div>
-
-    <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-      <!-- Image -->
+<!-- How It Works - Process Section -->
+<section id="how-it-works" class="py-24 lg:py-32 bg-slate-50 relative overflow-hidden">
+  <div class="container-custom relative z-10">
+    <div class="grid lg:grid-cols-2 gap-20 items-center">
+      <!-- Image Side -->
       <div [@fadeInLeft]>
-        <img src="/assets/Images/Dropshipping model-bro.png" alt="كيف يعمل" class="w-full max-w-lg mx-auto rounded-3xl">
-      </div>
-
-      <!-- Steps -->
-      <div class="space-y-6" [@fadeInRight]>
-        <div *ngFor="let step of steps"
-          class="group flex items-start gap-6 p-6 bg-white rounded-2xl border-2 border-gray-100 shadow-md hover:shadow-xl hover:border-bright-green transition-all duration-300"
-          [@scaleIn]>
-          <!-- Number -->
-          <div class="flex-shrink-0">
-            <div
-              class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-bright-green to-dark-teal flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-              <span class="text-2xl sm:text-3xl font-black text-white">{{ step.number }}</span>
-            </div>
+        <div class="relative p-10">
+          <!-- Main Illustration Decor -->
+          <div class="absolute inset-0 bg-brand-500/5 rounded-[4rem] rotate-3 scale-95 border border-brand-500/10">
           </div>
-
-          <div class="flex-1">
-            <h4 class="text-xl font-bold text-dark-blue mb-2">{{ step.title }}</h4>
-            <p class="text-gray-600 leading-relaxed">{{ step.description }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Features Section -->
-<section class="py-20 lg:py-28 bg-white">
-  <div class="container mx-auto px-4 lg:px-8">
-    <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-      <!-- Content -->
-      <div class="order-2 lg:order-1">
-        <div class="mb-10 text-center lg:text-right" [@fadeInLeft]>
-          <span
-            class="inline-block px-6 py-2 bg-dark-teal/10 text-dark-teal rounded-full font-bold text-sm uppercase tracking-wider mb-4">لماذا
-            نحن</span>
-          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-dark-blue">لماذا تختارنا؟</h2>
-        </div>
-
-        <div class="space-y-5">
-          <div *ngFor="let feature of features"
-            class="group flex items-start gap-5 p-5 bg-gray-50 rounded-2xl border-2 border-gray-100 hover:border-bright-green hover:shadow-lg transition-all duration-300"
-            [@fadeInUp]>
-            <!-- Icon -->
-            <div
-              class="w-14 h-14 flex-shrink-0 rounded-xl bg-gradient-to-br from-dark-teal to-dark-blue flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
-              <i [class]="'bi ' + feature.icon + ' text-white text-xl'"></i>
-            </div>
-
-            <div class="flex-1">
-              <h5 class="text-lg font-bold text-dark-blue mb-1">{{ feature.title }}</h5>
-              <p class="text-gray-600 leading-relaxed text-sm sm:text-base">{{ feature.description }}</p>
-            </div>
-          </div>
+          <img src="/assets/Images/Dropshipping model-bro.png" alt="Process Illustration"
+            class="relative z-10 w-full max-w-lg mx-auto transform -rotate-2 hover:rotate-0 transition-transform duration-700">
         </div>
       </div>
 
-      <!-- Image -->
-      <div class="order-1 lg:order-2" [@fadeInRight]>
-        <img src="/assets/Images/Successful purchase-cuate.png" alt="شراء ناجح"
-          class="w-full max-w-lg mx-auto rounded-3xl">
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Testimonials Section -->
-<section class="py-20 lg:py-28 bg-gray-50">
-  <div class="container mx-auto px-4 lg:px-8">
-    <!-- Header -->
-    <div class="text-center mb-16" [@fadeInUp]>
-      <span
-        class="inline-block px-6 py-2 bg-bright-green/10 text-bright-green rounded-full font-bold text-sm uppercase tracking-wider mb-4">آراء
-        العملاء</span>
-      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-dark-blue mb-4">ماذا يقول عملاؤنا</h2>
-      <p class="text-lg text-gray-600 max-w-2xl mx-auto">نفخر بثقة عملائنا ورضاهم عن خدماتنا</p>
-    </div>
-
-    <!-- Testimonials Grid -->
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      <div *ngFor="let testimonial of testimonials"
-        class="bg-white p-8 rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 relative">
-        <!-- Quote Icon -->
-        <div class="absolute top-6 left-6 text-bright-green/20 text-6xl">
-          <i class="bi bi-quote"></i>
-        </div>
-
-        <!-- Stars -->
-        <div class="flex gap-1 mb-4">
-          <i class="bi bi-star-fill text-gold" *ngFor="let star of [1,2,3,4,5]"></i>
-        </div>
-
-        <p class="text-gray-600 leading-relaxed mb-6 relative z-10">"{{ testimonial.comment }}"</p>
-
-        <div class="flex items-center gap-4">
+      <!-- Steps Side -->
+      <div class="flex flex-col gap-10">
+        <div class="mb-4" [@fadeInRight]>
           <div
-            class="w-12 h-12 rounded-full bg-gradient-to-br from-bright-green to-dark-teal flex items-center justify-center text-white font-bold text-lg">
+            class="inline-block px-4 py-1.5 bg-success-50 text-success-600 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+            بساطة الاستخدام</div>
+          <h2 class="text-4xl font-black text-slate-900 mb-4">ثلاث خطوات بسيطة</h2>
+        </div>
+
+        <div class="space-y-6">
+          <div *ngFor="let step of steps"
+            class="group flex items-start gap-6 p-6 bg-white rounded-3xl border border-slate-100 shadow-soft transition-all hover:bg-slate-900 hover:text-white duration-500">
+            <div
+              class="flex-shrink-0 w-16 h-16 rounded-2xl bg-slate-50 group-hover:bg-white/10 flex items-center justify-center text-2xl font-black text-brand-600 transition-colors">
+              {{ step.number }}
+            </div>
+            <div>
+              <h4 class="text-xl font-bold mb-2 group-hover:text-white">{{ step.title }}</h4>
+              <p class="text-slate-500 group-hover:text-slate-400 text-sm leading-relaxed">{{ step.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Why Us Section -->
+<section class="py-24 lg:py-32 bg-white">
+  <div class="container-custom">
+    <div class="grid lg:grid-cols-12 gap-16 items-center">
+      <div class="lg:col-span-7 space-y-12">
+        <div [@fadeInLeft]>
+          <div
+            class="inline-block px-4 py-1.5 bg-brand-50 text-brand-600 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
+            لماذا Lynx؟</div>
+          <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-8 leading-tight">صمم ليكون أسرع، <br> ليكون أذكى.
+          </h2>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-8">
+          <div *ngFor="let feature of features" class="flex flex-col gap-4">
+            <div class="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-soft">
+              <lucide-icon [name]="feature.icon" class="w-6 h-6"></lucide-icon>
+            </div>
+            <h5 class="text-xl font-bold text-slate-900">{{ feature.title }}</h5>
+            <p class="text-slate-500 text-sm leading-relaxed">{{ feature.description }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-5" [@fadeInRight]>
+        <div class="relative rounded-[3rem] overflow-hidden p-8 bg-slate-50 border border-slate-100">
+          <img src="/assets/Images/Successful purchase-cuate.png" alt="Success Illustration" class="w-full">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials - Social Proof -->
+<section class="py-24 lg:py-32 bg-slate-900 relative overflow-hidden">
+  <div class="absolute inset-0 opacity-10">
+    <div
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle,rgba(14,165,233,0.3)_0%,transparent_70%)]">
+    </div>
+  </div>
+
+  <div class="container-custom relative z-10">
+    <div class="text-center mb-20" [@fadeInUp]>
+      <h2 class="text-4xl font-black text-white mb-6">ماذا يقول عملاؤنا</h2>
+      <p class="text-slate-400">ثقة عملائنا هي الوقود الذي يحركنا نحو القمة.</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8">
+      <div *ngFor="let testimonial of testimonials"
+        class="p-8 rounded-3xl bg-white/5 backdrop-blur-sm border border-white/10 flex flex-col justify-between">
+        <div>
+          <lucide-icon name="message-square" class="w-8 h-8 text-brand-500 mb-6 opacity-20"></lucide-icon>
+          <p class="text-slate-300 italic mb-8 leading-relaxed">"{{ testimonial.comment }}"</p>
+        </div>
+        <div class="flex items-center gap-4 border-t border-white/5 pt-6">
+          <div
+            class="w-12 h-12 rounded-full border-2 border-brand-500/30 flex items-center justify-center bg-slate-800 text-white font-black">
             {{ testimonial.name.charAt(0) }}
           </div>
           <div>
-            <h5 class="font-bold text-dark-blue">{{ testimonial.name }}</h5>
-            <p class="text-sm text-gray-500">{{ testimonial.role }}</p>
+            <div class="font-bold text-white">{{ testimonial.name }}</div>
+            <div class="text-[10px] text-brand-500 font-bold uppercase">{{ testimonial.role }}</div>
           </div>
         </div>
       </div>
@@ -275,64 +223,27 @@
   </div>
 </section>
 
-<!-- CTA Section -->
-<section class="relative py-20 lg:py-28 overflow-hidden">
-  <!-- Background -->
-  <div class="absolute inset-0 bg-gradient-to-br from-dark-blue via-dark-teal to-dark-blue"></div>
-  <div class="absolute inset-0">
-    <img src="/assets/Images/pexels-artempodrez-5025669.jpg" alt="خلفية" class="w-full h-full object-cover opacity-10">
-  </div>
+<!-- Final CTA -->
+<section class="py-20 lg:py-32 bg-white relative overflow-hidden">
+  <div class="container-custom">
+    <div class="relative z-10 bg-slate-900 rounded-[3rem] p-12 lg:p-20 text-center text-white overflow-hidden">
+      <!-- Decor -->
+      <div class="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 rounded-full blur-[80px]"></div>
+      <div class="absolute bottom-0 left-0 w-64 h-64 bg-success-500/10 rounded-full blur-[80px]"></div>
 
-  <!-- Animated Shapes -->
-  <div class="absolute inset-0 overflow-hidden pointer-events-none">
-    <div class="absolute top-10 right-10 w-64 h-64 bg-bright-green/20 rounded-full blur-3xl"></div>
-    <div class="absolute bottom-10 left-10 w-64 h-64 bg-gold/20 rounded-full blur-3xl"></div>
-  </div>
+      <div class="max-w-3xl mx-auto relative z-10">
+        <h2 class="text-4xl md:text-6xl font-black mb-8">جاهز للتحليق <br> مع Lynx؟</h2>
+        <p class="text-slate-400 text-lg mb-12">انضم الآن إلى منظومة التوصيل الأكثر ذكاءً في المنطقة.</p>
 
-  <div class="container mx-auto px-4 lg:px-8 relative z-10">
-    <div class="flex flex-col lg:flex-row items-center justify-between gap-10 text-center lg:text-right" [@fadeInUp]>
-      <div class="text-white">
-        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black mb-4">جاهز للبدء؟</h2>
-        <p class="text-xl sm:text-2xl text-white/80">
-          انضم إلى آلاف العملاء الراضين واحصل على أفضل تجربة توصيل
-        </p>
-      </div>
-
-      <div class="flex flex-col sm:flex-row gap-4">
-        <a routerLink="/role-selection"
-          class="group inline-flex items-center justify-center gap-3 px-10 py-5 bg-gold text-dark-blue font-bold text-lg rounded-2xl shadow-xl hover:bg-yellow-400 hover:-translate-y-1 transition-all duration-300">
-          <span>انضم كمُرسل أو مندوب</span>
-          <i class="bi bi-arrow-left group-hover:-translate-x-1 transition-transform"></i>
-        </a>
-        <a routerLink="/role-selection"
-          class="group inline-flex items-center justify-center gap-3 px-10 py-5 bg-white/10 backdrop-blur-md border-2 border-white/30 text-white font-bold text-lg rounded-2xl hover:bg-white/20 hover:-translate-y-1 transition-all duration-300">
-          <span>تسجيل الدخول</span>
-          <i class="bi bi-box-arrow-in-left"></i>
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Partners Section -->
-<section class="py-16 bg-white border-t border-gray-100">
-  <div class="container mx-auto px-4 lg:px-8">
-    <p class="text-center text-gray-500 font-medium mb-8">شركاؤنا في النجاح</p>
-    <div class="flex flex-wrap justify-center items-center gap-8 lg:gap-16 opacity-60">
-      <div class="w-24 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-        <span class="font-bold text-gray-400">Partner 1</span>
-      </div>
-      <div class="w-24 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-        <span class="font-bold text-gray-400">Partner 2</span>
-      </div>
-      <div class="w-24 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-        <span class="font-bold text-gray-400">Partner 3</span>
-      </div>
-      <div class="w-24 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-        <span class="font-bold text-gray-400">Partner 4</span>
-      </div>
-      <div class="w-24 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-        <span class="font-bold text-gray-400">Partner 5</span>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a routerLink="/role-selection" class="btn-primary py-5 px-12 text-xl shadow-premium">
+            انضم الآن مجاناً
+          </a>
+          <a routerLink="/role-selection"
+            class="btn bg-white/10 hover:bg-white/20 text-white py-5 px-12 text-xl backdrop-blur-md transition-all">
+            تسجيل الدخول
+          </a>
+        </div>
       </div>
     </div>
   </div>

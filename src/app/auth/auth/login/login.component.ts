@@ -7,11 +7,12 @@ import { AuthService, ClientLoginDTO } from '../../../shared/services/auth.servi
 import { UserLoginDTO } from '../../../models/user.models';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, ParticleBackgroundComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ParticleBackgroundComponent, LucideAngularModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })

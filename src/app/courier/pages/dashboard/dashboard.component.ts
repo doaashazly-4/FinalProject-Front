@@ -6,11 +6,12 @@ import { PushNotificationService } from '../../../shared/services/push-notificat
 import { Observable } from 'rxjs';
 import { DeliveryProofComponent } from '../delivery/components/delivery-proof.component';
 import { FailedDeliveryProofComponent } from '../delivery/components/failed-delivery-proof.component';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-courier-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, DeliveryProofComponent, FailedDeliveryProofComponent],
+  imports: [CommonModule, RouterModule, DeliveryProofComponent, FailedDeliveryProofComponent, LucideAngularModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })

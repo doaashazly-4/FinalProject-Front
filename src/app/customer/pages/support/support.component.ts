@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomerDataService, SupportTicket } from '../../services/customer-data.service';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-customer-support',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './support.component.html',
   styleUrl: './support.component.css'
 })
@@ -15,7 +16,7 @@ export class CustomerSupportComponent implements OnInit {
   newTicket = { subject: '', message: '' };
   isLoading = true;
 
-  constructor(private data: CustomerDataService) {}
+  constructor(private data: CustomerDataService) { }
 
   ngOnInit(): void {
     this.loadTickets();
@@ -42,7 +43,7 @@ export class CustomerSupportComponent implements OnInit {
       alert('يرجى إدخال العنوان والرسالة');
       return;
     }
-    
+
     this.data.createTicket({ subject: this.newTicket.subject, message: this.newTicket.message }).subscribe({
       next: () => {
         alert('تم إرسال التذكرة، سنتواصل معك قريباً');

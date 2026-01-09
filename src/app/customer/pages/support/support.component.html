@@ -1,120 +1,180 @@
-<div class="space-y-6">
-  <!-- Header -->
-  <div>
-    <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">الدعم والمساعدة</h1>
-    <p class="text-gray-600 mt-1">تواصل معنا لأي استفسارات أو مشاكل</p>
-  </div>
+<div class="max-w-7xl mx-auto space-y-12 animate-fade-in pb-20 px-4">
 
-  <!-- Contact Options -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div
-      class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-lg hover:border-primary-green/30 transition-all duration-300">
-      <div class="w-12 h-12 rounded-xl bg-primary-green/10 flex items-center justify-center mb-4">
-        <i class="bi bi-telephone text-primary-green text-xl"></i>
+  <!-- Strategic Header -->
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+    <div class="space-y-4">
+      <div class="flex items-center gap-3">
+        <span
+          class="inline-flex items-center gap-2 px-3 py-1 bg-brand-500/10 text-brand-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-brand-500/20">
+          <lucide-icon name="life-buoy" [size]="12"></lucide-icon>
+          مركز المساعدة والدعم
+        </span>
       </div>
-      <h3 class="font-bold text-primary-dark mb-2">اتصل بنا</h3>
-      <p class="text-gray-500 text-sm mb-3">متاحون من 9 صباحاً حتى 9 مساءً</p>
-      <a href="tel:+201234567890" class="text-primary-green font-semibold hover:underline">01234567890</a>
-    </div>
-
-    <div
-      class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-lg hover:border-primary-green/30 transition-all duration-300">
-      <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center mb-4">
-        <i class="bi bi-whatsapp text-green-600 text-xl"></i>
-      </div>
-      <h3 class="font-bold text-primary-dark mb-2">واتساب</h3>
-      <p class="text-gray-500 text-sm mb-3">تواصل معنا عبر واتساب</p>
-      <a href="https://wa.me/201234567890" target="_blank" class="text-green-600 font-semibold hover:underline">ابدأ
-        محادثة</a>
-    </div>
-
-    <div
-      class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-lg hover:border-primary-green/30 transition-all duration-300">
-      <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-4">
-        <i class="bi bi-envelope text-blue-600 text-xl"></i>
-      </div>
-      <h3 class="font-bold text-primary-dark mb-2">البريد الإلكتروني</h3>
-      <p class="text-gray-500 text-sm mb-3">نرد خلال 24 ساعة</p>
-      <a href="mailto:support&#64;lynx.com" class="text-blue-600 font-semibold hover:underline">support&#64;lynx.com</a>
+      <h1 class="text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-none">فريق الدعم المباشر</h1>
+      <p class="text-slate-500 font-medium text-lg leading-relaxed">نحن هنا لمساعدتك على مدار الساعة. اختر وسيلة التواصل
+        الأنسب لك.</p>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <!-- Contact Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div
+      class="bg-white rounded-[2.5rem] p-8 shadow-soft border border-slate-100 hover:shadow-premium hover:-translate-y-1 transition-all group cursor-pointer">
+      <div
+        class="w-16 h-16 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
+        <lucide-icon name="phone-call" [size]="32"></lucide-icon>
+      </div>
+      <h3 class="text-xl font-black text-slate-900 mb-2">اتصال هاتفي</h3>
+      <p class="text-slate-400 font-medium text-sm mb-6 leading-relaxed">تحدث مباشرة مع أحد موظفي خدمة العملاء لحل
+        مشكلتك فوراً.</p>
+      <a href="tel:+201234567890"
+        class="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-brand-600 group-hover:gap-4 transition-all">
+        اتصل الآن <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
+      </a>
+    </div>
+
+    <div
+      class="bg-white rounded-[2.5rem] p-8 shadow-soft border border-slate-100 hover:shadow-premium hover:-translate-y-1 transition-all group cursor-pointer">
+      <div
+        class="w-16 h-16 rounded-2xl bg-success-50 text-success-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
+        <lucide-icon name="message-circle" [size]="32"></lucide-icon>
+      </div>
+      <h3 class="text-xl font-black text-slate-900 mb-2">محادثة واتساب</h3>
+      <p class="text-slate-400 font-medium text-sm mb-6 leading-relaxed">تواصل معنا عبر واتساب لسهولة إرسال الصور
+        والمواقع.</p>
+      <a href="https://wa.me/201234567890" target="_blank"
+        class="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-success-600 group-hover:gap-4 transition-all">
+        ابدأ المحادثة <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
+      </a>
+    </div>
+
+    <div
+      class="bg-white rounded-[2.5rem] p-8 shadow-soft border border-slate-100 hover:shadow-premium hover:-translate-y-1 transition-all group cursor-pointer">
+      <div
+        class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
+        <lucide-icon name="mail" [size]="32"></lucide-icon>
+      </div>
+      <h3 class="text-xl font-black text-slate-900 mb-2">البريد الإلكتروني</h3>
+      <p class="text-slate-400 font-medium text-sm mb-6 leading-relaxed">للاستفسارات الرسمية والشكاوي التي تتطلب تفاصيل
+        دقيقة.</p>
+      <a href="mailto:support@lynx.com"
+        class="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-blue-600 group-hover:gap-4 transition-all">
+        إرسال بريد <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
+      </a>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+
     <!-- New Ticket Form -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="p-5 border-b border-gray-100 bg-gray-50/50">
-        <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
-          <i class="bi bi-plus-circle text-primary-green"></i>
-          فتح تذكرة جديدة
-        </h2>
+    <div
+      class="bg-white rounded-[3rem] p-8 lg:p-12 border border-slate-100 shadow-soft h-full flex flex-col relative overflow-hidden group/form">
+      <div
+        class="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 group-hover/form:bg-brand-50 transition-colors duration-1000">
       </div>
-      <div class="p-5">
-        <form (ngSubmit)="submitTicket()" class="space-y-4">
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">عنوان التذكرة *</label>
-            <input type="text" [(ngModel)]="newTicket.subject" name="subject"
-              class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary-green focus:ring-2 focus:ring-primary-green/20 outline-none transition-all"
-              placeholder="وصف مختصر للمشكلة" required>
+
+      <div class="relative z-10">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-lg">
+            <lucide-icon name="plus" [size]="24"></lucide-icon>
           </div>
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">تفاصيل المشكلة *</label>
-            <textarea [(ngModel)]="newTicket.message" name="message" rows="4"
-              class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary-green focus:ring-2 focus:ring-primary-green/20 outline-none transition-all resize-none"
-              placeholder="اشرح المشكلة بالتفصيل..." required></textarea>
+            <h2 class="text-2xl font-black text-slate-900 leading-none">فتح تذكرة جديدة</h2>
+            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-2">سجل مشكلتك وسيتم الرد خلال
+              24 ساعة</p>
           </div>
+        </div>
+
+        <form (ngSubmit)="submitTicket()" class="space-y-6">
+          <div class="space-y-3 group/input">
+            <label
+              class="text-[10px] font-black text-slate-400 uppercase tracking-widest group-focus-within/input:text-brand-600 transition-colors">عنوان
+              الموضوع</label>
+            <input type="text" [(ngModel)]="newTicket.subject" name="subject" required
+              placeholder="مثال: تأخر في استلام الشحنة"
+              class="w-full h-14 px-6 bg-slate-50 border-0 rounded-2xl focus:ring-2 focus:ring-brand-500/20 font-bold text-slate-900 transition-all placeholder:text-slate-300">
+          </div>
+
+          <div class="space-y-3 group/input">
+            <label
+              class="text-[10px] font-black text-slate-400 uppercase tracking-widest group-focus-within/input:text-brand-600 transition-colors">تفاصيل
+              المشكلة</label>
+            <textarea [(ngModel)]="newTicket.message" name="message" rows="5" required
+              placeholder="يرجى وصف المشكلة بدقة..."
+              class="w-full p-6 bg-slate-50 border-0 rounded-2xl focus:ring-2 focus:ring-brand-500/20 font-medium text-slate-900 transition-all placeholder:text-slate-300 resize-none"></textarea>
+          </div>
+
           <button type="submit"
-            class="w-full py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl shadow-green hover:shadow-green-lg transition-all duration-300">
-            <i class="bi bi-send ml-2"></i>
-            إرسال التذكرة
+            class="w-full h-14 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all flex items-center justify-center gap-3 shadow-premium hover:-translate-y-1 mt-4">
+            <lucide-icon name="send" [size]="16"></lucide-icon> إرسال التذكرة للدعم الفني
           </button>
         </form>
       </div>
     </div>
 
-    <!-- Tickets List -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="p-5 border-b border-gray-100 bg-gray-50/50">
-        <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
-          <i class="bi bi-ticket-perforated text-primary-green"></i>
-          تذاكري
-        </h2>
-      </div>
-      <div class="p-4">
-        <!-- Loading State -->
-        <div *ngIf="isLoading" class="flex justify-center py-8">
-          <div class="animate-spin rounded-full h-10 w-10 border-4 border-primary-green border-t-transparent"></div>
-        </div>
-
-        <!-- Empty State -->
-        <div *ngIf="!isLoading && tickets.length === 0" class="text-center py-8">
-          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-            <i class="bi bi-inbox text-gray-400 text-2xl"></i>
+    <!-- Tickets History -->
+    <div class="bg-white rounded-[3rem] border border-slate-100 shadow-soft overflow-hidden flex flex-col h-full">
+      <div class="p-8 lg:p-10 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div
+            class="w-12 h-12 rounded-2xl bg-white text-slate-900 flex items-center justify-center shadow-sm border border-slate-100">
+            <lucide-icon name="history" [size]="24"></lucide-icon>
           </div>
-          <p class="text-gray-500">لا توجد تذاكر سابقة</p>
+          <div>
+            <h2 class="text-xl font-black text-slate-900 leading-none">سجل التذاكر</h2>
+            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-2">متابعة حالة الطلبات السابقة
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-8 flex-1 overflow-y-auto custom-scrollbar max-h-[500px]">
+        <!-- Loading -->
+        <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-12 gap-4">
+          <div class="w-10 h-10 border-4 border-slate-100 border-t-brand-500 rounded-full animate-spin"></div>
         </div>
 
-        <!-- Tickets -->
-        <div *ngIf="!isLoading && tickets.length > 0" class="space-y-3">
+        <!-- Empty -->
+        <div *ngIf="!isLoading && tickets.length === 0" class="text-center py-12">
+          <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
+            <lucide-icon name="inbox" [size]="40"></lucide-icon>
+          </div>
+          <p class="text-slate-400 font-bold text-sm">لا توجد تذاكر مسجلة حالياً</p>
+        </div>
+
+        <!-- List -->
+        <div *ngIf="!isLoading && tickets.length > 0" class="space-y-4">
           <div *ngFor="let ticket of tickets"
-            class="p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-primary-green/30 transition-all">
-            <div class="flex items-start justify-between gap-4">
-              <div class="flex-1">
-                <p class="text-xs text-gray-500 mb-1">#{{ ticket.id }}</p>
-                <h4 class="font-bold text-primary-dark">{{ ticket.subject }}</h4>
-                <p class="text-sm text-gray-500 mt-1">{{ ticket.message }}</p>
+            class="group bg-slate-50 rounded-[2rem] p-6 border border-slate-100 hover:bg-white hover:shadow-lg hover:border-brand-100 transition-all duration-300 cursor-default">
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block">TICKET-{{
+                  ticket.id.slice(0, 8) }}...</span>
+                <h4 class="font-black text-slate-900 text-lg group-hover:text-brand-600 transition-colors">{{
+                  ticket.subject }}</h4>
               </div>
-              <span class="px-3 py-1 rounded-full text-xs font-bold" [ngClass]="{
-                      'bg-yellow-100 text-yellow-700': ticket.status === 'open',
-                      'bg-blue-100 text-blue-700': ticket.status === 'in_progress',
-                      'bg-green-100 text-green-700': ticket.status === 'resolved',
-                      'bg-gray-100 text-gray-700': ticket.status === 'closed'
-                    }">
+              <span class="px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border" [ngClass]="{
+                        'bg-amber-50 text-amber-600 border-amber-100': ticket.status === 'open',
+                        'bg-blue-50 text-blue-600 border-blue-100': ticket.status === 'in_progress',
+                        'bg-emerald-50 text-emerald-600 border-emerald-100': ticket.status === 'resolved',
+                        'bg-slate-100 text-slate-500 border-slate-200': ticket.status === 'closed'
+                     }">
                 {{ getStatusText(ticket.status) }}
               </span>
             </div>
-            <div class="mt-3 pt-3 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
-              <span>تاريخ الإنشاء: {{ formatDate(ticket.createdAt) }}</span>
-              <span *ngIf="ticket.updatedAt">آخر تحديث: {{ formatDate(ticket.updatedAt) }}</span>
+
+            <p class="text-sm font-medium text-slate-500 leading-relaxed mb-4 line-clamp-2">{{ ticket.message }}</p>
+
+            <div class="flex items-center gap-4 pt-4 border-t border-slate-200/50">
+              <div class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <lucide-icon name="calendar" [size]="12"></lucide-icon>
+                {{ formatDate(ticket.createdAt) }}
+              </div>
+              <div *ngIf="ticket.updatedAt"
+                class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <lucide-icon name="refresh-cw" [size]="12"></lucide-icon>
+                محدث: {{ formatDate(ticket.updatedAt) }}
+              </div>
             </div>
           </div>
         </div>
@@ -122,27 +182,25 @@
     </div>
   </div>
 
-  <!-- FAQ Section -->
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-    <div class="p-5 border-b border-gray-100 bg-gray-50/50">
-      <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
-        <i class="bi bi-question-circle text-primary-green"></i>
-        الأسئلة الشائعة
-      </h2>
+  <!-- FAQ Quick Access -->
+  <div class="bg-slate-900 rounded-[3rem] p-10 lg:p-16 text-center relative overflow-hidden group shadow-glow-blue">
+    <div class="absolute inset-0 bg-gradient-to-br from-brand-900/50 to-transparent"></div>
+    <div
+      class="absolute -left-32 -bottom-32 w-80 h-80 bg-brand-500/20 rounded-full blur-[100px] group-hover:bg-brand-500/30 transition-all duration-1000">
     </div>
-    <div class="p-5 space-y-4">
-      <div class="p-4 bg-gray-50 rounded-xl">
-        <h4 class="font-bold text-primary-dark mb-2">كيف أتتبع شحنتي؟</h4>
-        <p class="text-gray-600 text-sm">يمكنك تتبع شحنتك من خلال صفحة "تتبع شحنة" باستخدام رقم التتبع المرسل إليك.</p>
+
+    <div class="relative z-10 max-w-2xl mx-auto space-y-6">
+      <div
+        class="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center mx-auto text-brand-400">
+        <lucide-icon name="help-circle" [size]="32"></lucide-icon>
       </div>
-      <div class="p-4 bg-gray-50 rounded-xl">
-        <h4 class="font-bold text-primary-dark mb-2">ماذا أفعل إذا لم يصل المندوب؟</h4>
-        <p class="text-gray-600 text-sm">تواصل مع المندوب مباشرة من خلال رقم الهاتف المعروض، أو افتح تذكرة دعم.</p>
-      </div>
-      <div class="p-4 bg-gray-50 rounded-xl">
-        <h4 class="font-bold text-primary-dark mb-2">كيف أعدل عنواني؟</h4>
-        <p class="text-gray-600 text-sm">يمكنك تعديل عنوانك من صفحة "الملف الشخصي" في أي وقت.</p>
-      </div>
+      <h2 class="text-3xl font-black text-white">الأسئلة الشائعة</h2>
+      <p class="text-slate-400 font-medium text-lg leading-relaxed">تصفح الأسئلة الشائعة للعثور على إجابات سريعة
+        لاستفساراتك دون الحاجة لانتظار الرد، نوفر لك قاعدة معرفية متكاملة.</p>
+      <button
+        class="px-8 py-4 bg-white text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-brand-50 transition-all hover:-translate-y-1 shadow-lg">
+        تصفح قاعدة المعرفة
+      </button>
     </div>
   </div>
 </div>

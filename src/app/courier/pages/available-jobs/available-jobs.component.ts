@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CourierDataService, DeliveryJob } from '../../services/courier-data.service';
 import { RejectReasonModalComponent } from '../../../shared/components/reject-reason-modal/reject-reason-modal.component';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-available-jobs',
   standalone: true,
-  imports: [CommonModule, RouterModule, RejectReasonModalComponent],
+  imports: [CommonModule, RouterModule, RejectReasonModalComponent, LucideAngularModule],
   templateUrl: './available-jobs.component.html',
   styleUrls: ['./available-jobs.component.css']
 })
@@ -27,12 +28,12 @@ export class AvailableJobsComponent implements OnInit {
   loadJobs(): void {
     this.isLoading = true;
     this.dataService.getAvailableJobs().subscribe({
-     next: (jobs) => {
-      console.log('API jobs:', jobs);
-  this.jobs = jobs ?? []; // ✅ حماية إضافية
-  this.isLoading = false;
-  this.isRefreshing = false;
-},
+      next: (jobs) => {
+        console.log('API jobs:', jobs);
+        this.jobs = jobs ?? []; // ✅ حماية إضافية
+        this.isLoading = false;
+        this.isRefreshing = false;
+      },
 
       error: (err) => {
         console.error('Error loading jobs:', err);

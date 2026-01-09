@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CustomerDataService, CustomerProfile } from '../../services/customer-data.service';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-customer-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
@@ -28,7 +29,7 @@ export class CustomerProfileComponent implements OnInit {
   constructor(
     private data: CustomerDataService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadProfile();

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../shared/services/auth.service';
 import { SupplierDataService } from './services/supplier-data.service';
+import { LucideAngularModule } from 'lucide-angular';
 
 interface NavItem {
   path: string;
@@ -14,20 +15,20 @@ interface NavItem {
 @Component({
   selector: 'app-supplier',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, LucideAngularModule],
   templateUrl: './supplier.component.html',
   styleUrl: './supplier.component.css'
 })
 export class SupplierComponent implements OnInit {
   // Navigation items for Sender (delivery-focused)
   navItems: NavItem[] = [
-    { path: '/supplier/dashboard', label: 'لوحة التحكم', icon: 'bi-grid-1x2-fill' },
-    { path: '/supplier/create-shipment', label: 'طلب جديد', icon: 'bi-plus-circle-fill' },
-    { path: '/supplier/shipments', label: 'طلباتي', icon: 'bi-box-seam' },
-    { path: '/supplier/track', label: 'تتبع الشحنات', icon: 'bi-geo-alt-fill' },
-    { path: '/supplier/reports', label: 'التقارير', icon: 'bi-bar-chart-line-fill' },
-    { path: '/supplier/chat', label: 'المحادثات', icon: 'bi-whatsapp' },
-    { path: '/supplier/settings', label: 'الإعدادات', icon: 'bi-gear-fill' }
+    { path: '/supplier/dashboard', label: 'لوحة التحكم', icon: 'layout-dashboard' },
+    { path: '/supplier/create-shipment', label: 'طلب جديد', icon: 'plus-circle' },
+    { path: '/supplier/shipments', label: 'طلباتي', icon: 'package' },
+    { path: '/supplier/track', label: 'تتبع الشحنات', icon: 'map-pin' },
+    { path: '/supplier/reports', label: 'التقارير', icon: 'bar-chart-2' },
+    { path: '/supplier/chat', label: 'المحادثات', icon: 'message-square' },
+    { path: '/supplier/settings', label: 'الإعدادات', icon: 'settings' }
   ];
 
   userName: string = '';

@@ -1,78 +1,184 @@
-<div class="profile-page">
-  <header class="profile-head">
-    <div>
-      <p class="overline">بيانات العميل</p>
-      <h2>إدارة الملف الشخصي</h2>
-      <p class="muted">حدّث بياناتك وحافظ على معلومات التوصيل محدثة</p>
-    </div>
-  </header>
+<div class="max-w-7xl mx-auto space-y-12 animate-fade-in pb-20 px-4">
 
-  <form class="profile-form" (ngSubmit)="save()">
-    <div class="form-grid">
-      <div class="form-group">
-        <label>الاسم</label>
-        <input [(ngModel)]="profile.name" name="name" required>
+  <!-- Strategic Header -->
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+    <div class="space-y-4">
+      <div class="flex items-center gap-3">
+        <span
+          class="inline-flex items-center gap-2 px-3 py-1 bg-brand-500/10 text-brand-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-brand-500/20">
+          <lucide-icon name="user-cog" [size]="12"></lucide-icon>
+          إدارة الحساب الشخصي
+        </span>
       </div>
-      <div class="form-group">
-        <label>البريد الإلكتروني</label>
-        <input [(ngModel)]="profile.email" name="email" type="email" required>
-      </div>
-      <div class="form-group">
-        <label>رقم الهاتف</label>
-        <input [(ngModel)]="profile.phone" name="phone" required>
-      </div>
-      <div class="form-group">
-        <label>المدينة</label>
-        <input [(ngModel)]="profile.city" name="city">
-      </div>
-      <div class="form-group full">
-        <label>العنوان</label>
-        <input [(ngModel)]="profile.address" name="address">
-      </div>
+      <h1 class="text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-none">الإعدادات الشخصية</h1>
+      <p class="text-slate-500 font-medium text-lg leading-relaxed">تحكم في بياناتك الشخصية وتفضيلات الاتصال الخاصة بك.
+      </p>
     </div>
+  </div>
 
-    <div class="plan-box">
-      <div>
-        <p class="overline">الباقة</p>
-        <h4>{{ profile.plan || 'عادي' }}</h4>
-        <p class="muted">استفد من خصومات الشحن والدعم المميز</p>
-      </div>
-      <button type="button" class="secondary">تحديث الباقة</button>
-    </div>
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
 
-    <!-- Become Supplier Section -->
-    <div class="bg-gradient-to-br from-primary-green/10 to-secondary-teal/10 rounded-2xl p-6 border-2 border-primary-green/20 mb-6">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h3 class="text-xl font-black text-primary-dark mb-2 flex items-center gap-2">
-            <i class="bi bi-shop text-primary-green"></i>
-            ابدأ بإرسال الطرود
-          </h3>
-          <p class="text-gray-600">هل تريد أن تصبح مُرسل؟ ابدأ في إرسال الطرود وكسب المال!</p>
+    <!-- Left Column: Identity Card -->
+    <div class="space-y-8">
+      <!-- Profile Identity -->
+      <div class="bg-white rounded-[3rem] p-8 border border-slate-100 shadow-premium relative overflow-hidden group">
+        <div class="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-slate-50 to-transparent"></div>
+        <div class="relative z-10 flex flex-col items-center text-center">
+          <div
+            class="w-24 h-24 rounded-[2rem] bg-slate-900 text-white flex items-center justify-center shadow-glow-blue mb-6 group-hover:scale-110 transition-transform duration-500">
+            <lucide-icon name="user" [size]="40"></lucide-icon>
+          </div>
+          <h2 class="text-2xl font-black text-slate-900 leading-none mb-2">{{ profile.name || 'مستخدم جديد' }}</h2>
+          <p class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-6">{{ profile.email ||
+            'email@example.com' }}</p>
+
+          <div class="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">نوع الحساب</span>
+            <span
+              class="px-3 py-1 bg-white rounded-lg shadow-sm text-[10px] font-black text-brand-600 uppercase tracking-widest border border-slate-100">
+              {{ profile.plan || 'أساسي' }}
+            </span>
+          </div>
         </div>
-        <button type="button"
-                (click)="requestSupplierUpgrade()"
-                [disabled]="isRequestingUpgrade"
-                class="px-6 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl shadow-green hover:shadow-green-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all whitespace-nowrap">
-          <span *ngIf="!isRequestingUpgrade" class="flex items-center gap-2">
-            <i class="bi bi-arrow-left"></i>
-            <span>أصبح مُرسل</span>
-          </span>
-          <span *ngIf="isRequestingUpgrade" class="flex items-center gap-2">
-            <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-            <span>جاري المعالجة...</span>
-          </span>
-        </button>
+      </div>
+
+      <!-- Upgrade Promotion -->
+      <div
+        class="bg-gradient-to-br from-brand-900 to-slate-900 rounded-[3rem] p-8 text-white relative overflow-hidden shadow-glow-blue group/promo">
+        <div
+          class="absolute -right-20 -top-20 w-64 h-64 bg-brand-500/20 rounded-full blur-[80px] group-hover/promo:bg-brand-500/30 transition-all duration-1000">
+        </div>
+
+        <div class="relative z-10 space-y-6">
+          <div
+            class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/10">
+            <lucide-icon name="briefcase" [size]="24" class="text-brand-400"></lucide-icon>
+          </div>
+          <div>
+            <h3 class="text-xl font-black leading-tight mb-2">ابدأ رحلتك كشريك أعمال</h3>
+            <p class="text-slate-400 text-sm font-medium leading-relaxed">هل ترغب في إرسال شحنات تجارية؟ قم بترقية حسابك
+              لتصبح مُرسل معتمد واستفد من حلول لوجستية متكاملة.</p>
+          </div>
+          <button (click)="requestSupplierUpgrade()" [disabled]="isRequestingUpgrade"
+            class="w-full h-14 bg-white text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-brand-50 transition-all flex items-center justify-center gap-2 group/btn">
+            <span *ngIf="!isRequestingUpgrade" class="flex items-center gap-2">
+              ترقية الحساب الآن <lucide-icon name="arrow-left" [size]="16"
+                class="group-hover/btn:-translate-x-1 transition-transform"></lucide-icon>
+            </span>
+            <span *ngIf="isRequestingUpgrade" class="flex items-center gap-2">
+              <div class="w-4 h-4 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin"></div>
+              جاري الترقية...
+            </span>
+          </button>
+        </div>
       </div>
     </div>
 
-    <div class="actions">
-      <button type="submit" class="primary" [disabled]="isSaving">
-        <span *ngIf="!isSaving">حفظ التعديلات</span>
-        <span *ngIf="isSaving">جاري الحفظ...</span>
-      </button>
-      <button type="button" class="ghost">إلغاء</button>
-    </div>
-  </form>
-</div>
+    <!-- Right Column: Settings Form -->
+    <div class="xl:col-span-2">
+      <form (ngSubmit)="save()"
+        class="bg-white rounded-[3rem] p-8 lg:p-12 border border-slate-100 shadow-soft h-full flex flex-col">
 
+        <div class="flex items-center gap-4 mb-10 pb-6 border-b border-slate-50">
+          <div class="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center">
+            <lucide-icon name="settings-2" [size]="24"></lucide-icon>
+          </div>
+          <div>
+            <h3 class="text-lg font-black text-slate-900 leading-none">تحديث البيانات</h3>
+            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">المعلومات الأساسية ونقاط
+              الاتصال</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+          <!-- Name -->
+          <div class="space-y-3 group/input">
+            <label
+              class="text-[10px] font-black text-slate-400 uppercase tracking-widest group-focus-within/input:text-brand-600 transition-colors">الاسم
+              الكامل</label>
+            <div class="relative">
+              <lucide-icon name="user"
+                class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within/input:text-brand-500 transition-colors"
+                [size]="20"></lucide-icon>
+              <input type="text" [(ngModel)]="profile.name" name="name" required
+                class="w-full h-14 pr-12 pl-4 bg-slate-50 border-0 rounded-2xl focus:ring-2 focus:ring-brand-500/20 font-bold text-slate-900 transition-all placeholder:text-slate-300">
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="space-y-3 group/input">
+            <label
+              class="text-[10px] font-black text-slate-400 uppercase tracking-widest group-focus-within/input:text-brand-600 transition-colors">رقم
+              الهاتف</label>
+            <div class="relative">
+              <lucide-icon name="phone"
+                class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within/input:text-brand-500 transition-colors"
+                [size]="20"></lucide-icon>
+              <input type="tel" [(ngModel)]="profile.phone" name="phone" required
+                class="w-full h-14 pr-12 pl-4 bg-slate-50 border-0 rounded-2xl focus:ring-2 focus:ring-brand-500/20 font-bold text-slate-900 transition-all placeholder:text-slate-300">
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="space-y-3 group/input md:col-span-2">
+            <label
+              class="text-[10px] font-black text-slate-400 uppercase tracking-widest group-focus-within/input:text-brand-600 transition-colors">البريد
+              الإلكتروني</label>
+            <div class="relative">
+              <lucide-icon name="mail"
+                class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within/input:text-brand-500 transition-colors"
+                [size]="20"></lucide-icon>
+              <input type="email" [(ngModel)]="profile.email" name="email" required
+                class="w-full h-14 pr-12 pl-4 bg-slate-50 border-0 rounded-2xl focus:ring-2 focus:ring-brand-500/20 font-bold text-slate-900 transition-all placeholder:text-slate-300">
+            </div>
+          </div>
+
+          <!-- City -->
+          <div class="space-y-3 group/input">
+            <label
+              class="text-[10px] font-black text-slate-400 uppercase tracking-widest group-focus-within/input:text-brand-600 transition-colors">المدينة</label>
+            <div class="relative">
+              <lucide-icon name="building-2"
+                class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within/input:text-brand-500 transition-colors"
+                [size]="20"></lucide-icon>
+              <input type="text" [(ngModel)]="profile.city" name="city"
+                class="w-full h-14 pr-12 pl-4 bg-slate-50 border-0 rounded-2xl focus:ring-2 focus:ring-brand-500/20 font-bold text-slate-900 transition-all placeholder:text-slate-300">
+            </div>
+          </div>
+
+          <!-- Address -->
+          <div class="space-y-3 group/input">
+            <label
+              class="text-[10px] font-black text-slate-400 uppercase tracking-widest group-focus-within/input:text-brand-600 transition-colors">العنوان
+              التفصيلي</label>
+            <div class="relative">
+              <lucide-icon name="map-pin"
+                class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within/input:text-brand-500 transition-colors"
+                [size]="20"></lucide-icon>
+              <input type="text" [(ngModel)]="profile.address" name="address"
+                class="w-full h-14 pr-12 pl-4 bg-slate-50 border-0 rounded-2xl focus:ring-2 focus:ring-brand-500/20 font-bold text-slate-900 transition-all placeholder:text-slate-300">
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-auto border-t border-slate-50 pt-8 flex gap-4">
+          <button type="submit" [disabled]="isSaving"
+            class="flex-1 h-14 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-black transition-all flex items-center justify-center gap-3 shadow-premium hover:-translate-y-1">
+            <span *ngIf="!isSaving" class="flex items-center gap-2">
+              <lucide-icon name="save" [size]="18"></lucide-icon> حفظ التغييرات
+            </span>
+            <span *ngIf="isSaving" class="flex items-center gap-2">
+              <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              جاري الحفظ...
+            </span>
+          </button>
+
+          <button type="button"
+            class="w-14 h-14 bg-white text-slate-400 border border-slate-200 rounded-2xl flex items-center justify-center hover:bg-slate-50 hover:text-slate-900 transition-all">
+            <lucide-icon name="rotate-ccw" [size]="20"></lucide-icon>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

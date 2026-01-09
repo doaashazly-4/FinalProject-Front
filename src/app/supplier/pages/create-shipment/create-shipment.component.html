@@ -1,397 +1,440 @@
-<div class="max-w-4xl mx-auto">
-  <!-- Header -->
-  <div class="mb-8">
-    <div class="flex items-center gap-3 mb-2">
-      <a routerLink="/supplier/dashboard"
-        class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
-        <i class="bi bi-arrow-right"></i>
-      </a>
-      <div>
-        <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">طلب شحن جديد</h1>
-        <p class="text-gray-600">أدخل تفاصيل الشحنة لإنشاء طلب توصيل</p>
+<div class="max-w-5xl mx-auto pb-20 animate-fade-in px-4">
+
+  <!-- Content Header -->
+  <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div class="space-y-4">
+      <div class="flex items-center gap-3">
+        <a routerLink="/supplier/dashboard"
+          class="w-12 h-12 rounded-2xl bg-white shadow-soft flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all border border-slate-100">
+          <lucide-icon name="arrow-right" class="w-6 h-6"></lucide-icon>
+        </a>
+        <span class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">{{ 'CREATE_SHIPMENT.TITLE' |
+          translate }}</span>
       </div>
+      <h1 class="text-3xl lg:text-5xl font-black text-slate-900 tracking-tight leading-none">{{ 'CREATE_SHIPMENT.TITLE'
+        | translate }}</h1>
+      <p class="text-slate-500 font-medium text-lg">{{ 'CREATE_SHIPMENT.SUBTITLE' | translate }}</p>
+    </div>
+
+    <!-- Live Status Pill -->
+    <div *ngIf="statusMessage"
+      class="px-5 py-3 bg-brand-50 border border-brand-100 rounded-2xl flex items-center gap-3 shadow-sm animate-slide-up">
+      <div class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></div>
+      <span class="text-xs font-black text-brand-700 uppercase tracking-widest">{{ statusMessage }}</span>
     </div>
   </div>
 
-  <!-- Form Container -->
-  <form [formGroup]="shipmentForm" (ngSubmit)="onSubmit()" class="space-y-6">
+  <form [formGroup]="shipmentForm" (ngSubmit)="onSubmit()" class="grid grid-cols-1 lg:grid-cols-12 gap-10">
 
-    <!-- Addresses Section -->
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-12 h-12 rounded-xl bg-primary-green/10 flex items-center justify-center">
-          <i class="bi bi-geo-alt-fill text-primary-green text-xl"></i>
-        </div>
-        <div>
-          <h2 class="text-xl font-bold text-primary-dark">عناوين الشحن</h2>
-          <p class="text-gray-500 text-sm">حدد عنوان الاستلام والتسليم على الخريطة</p>
-        </div>
-      </div>
+    <!-- Left Column: Form Sections (8 cols) -->
+    <div class="lg:col-span-8 space-y-10">
 
-      <div class="space-y-6">
-        <!-- Pickup Address Input -->
-        <div class="relative group" [ngClass]="{'ring-2 ring-green-500/20 rounded-xl': activeField === 'pickup'}">
-          <label class="block text-sm font-bold text-primary-dark mb-2">
-            <i class="bi bi-geo-alt-fill ml-2 text-green-600"></i>
-            عنوان الاستلام (من أين؟)
-          </label>
-          <div class="relative">
-            <input #pickupInput type="text" formControlName="pickupAddress" 
-                   (focus)="setActiveField('pickup')"
-                   (blur)="geocodeAddress(pickupInput.value, 'pickup')"
-                   (keyup.enter)="geocodeAddress(pickupInput.value, 'pickup')"
-                   class="input pr-10"
-                   [ngClass]="{'input-error': hasError('pickupAddress')}"
-                   placeholder="أبحث عن عنوان الاستلام أو اختر من الخريطة...">
-            <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            <button *ngIf="profile?.address" type="button"
-              (click)="shipmentForm.patchValue({pickupAddress: profile?.address || ''}); geocodeAddress(profile?.address || '', 'pickup')"
-              class="absolute top-2 left-10 px-3 py-1 bg-green-50 text-green-600 text-xs font-bold rounded-lg hover:bg-green-100 transition-colors">
-              عنواني
-            </button>
+      <!-- Section 1: Logistics Path -->
+      <div class="card-premium p-8 lg:p-10 bg-white border border-slate-100">
+        <div class="flex items-center gap-5 mb-10">
+          <div class="w-14 h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-lg">
+            <lucide-icon name="milestone" [size]="28"></lucide-icon>
           </div>
-          <p *ngIf="hasError('pickupAddress')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('pickupAddress') }}</p>
-        </div>
-
-        <!-- Delivery Address Input -->
-        <div class="relative group" [ngClass]="{'ring-2 ring-red-500/20 rounded-xl': activeField === 'delivery'}">
-          <label class="block text-sm font-bold text-primary-dark mb-2">
-            <i class="bi bi-geo-alt-fill ml-2 text-red-500"></i>
-            عنوان التسليم (إلى أين؟)
-          </label>
-          <div class="relative">
-            <input #deliveryInput type="text" formControlName="deliveryAddress" 
-                   (focus)="setActiveField('delivery')"
-                   (blur)="geocodeAddress(deliveryInput.value, 'delivery')"
-                   (keyup.enter)="geocodeAddress(deliveryInput.value, 'delivery')"
-                   class="input pr-10"
-                   [ngClass]="{'input-error': hasError('deliveryAddress')}"
-                   placeholder="أبحث عن عنوان التسليم أو اختر من الخريطة...">
-            <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <div>
+            <h2 class="text-2xl font-black text-slate-900 leading-none">{{ 'CREATE_SHIPMENT.SECTION_LOCATIONS' |
+              translate }}</h2>
+            <p class="text-sm text-slate-400 font-medium mt-1.5 uppercase tracking-widest">{{
+              'CREATE_SHIPMENT.ROUTE_ANALYSIS' | translate }}</p>
           </div>
-          <p *ngIf="hasError('deliveryAddress')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('deliveryAddress') }}</p>
         </div>
 
-        <!-- Shared Interactive Map -->
-        <div class="relative w-full h-[500px] rounded-xl overflow-hidden border-2 border-gray-200 shadow-inner">
-            <!-- Map Container -->
-            <div #mapContainer class="w-full h-full z-0"></div>
+        <div class="space-y-8">
+          <!-- Pickup -->
+          <div class="relative group">
+            <label
+              class="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest mr-1 mb-3">
+              <lucide-icon name="map-pin" [size]="12" class="text-success-500"></lucide-icon>
+              {{ 'CREATE_SHIPMENT.include_pickup' | translate }}
+            </label>
+            <div class="relative">
+              <input #pickupInput type="text" formControlName="pickupAddress" (focus)="setActiveField('pickup')"
+                (blur)="geocodeAddress(pickupInput.value, 'pickup')"
+                class="input pl-24 h-16 border-2 focus:border-success-500/50"
+                [class.border-red-500]="hasError('pickupAddress')"
+                [placeholder]="'CREATE_SHIPMENT.include_pickup' | translate">
+              <div class="absolute inset-y-0 left-0 flex items-center px-4">
+                <button *ngIf="profile?.address" type="button"
+                  (click)="shipmentForm.patchValue({pickupAddress: profile?.address || ''}); geocodeAddress(profile?.address || '', 'pickup')"
+                  class="px-3 py-1.5 bg-success-50 text-success-600 text-[10px] font-black rounded-lg hover:bg-success-500 hover:text-white transition-all uppercase tracking-widest border border-success-100">
+                  {{ 'CREATE_SHIPMENT.MY_ADDRESS' | translate }}
+                </button>
+              </div>
+            </div>
+          </div>
 
-            <!-- Instructions Overlay -->
-            <div class="absolute top-4 right-4 z-[400] flex flex-col gap-2 pointer-events-none">
-                <div class="bg-white/90 backdrop-blur shadow-md px-4 py-2 rounded-lg text-sm font-bold text-gray-700 flex items-center gap-2 border-r-4"
-                     [ngClass]="activeField === 'pickup' ? 'border-green-500' : 'border-transparent'">
-                    <i class="bi bi-geo-alt-fill text-green-600"></i>
-                    نقطة الاستلام
-                </div>
-                <div class="bg-white/90 backdrop-blur shadow-md px-4 py-2 rounded-lg text-sm font-bold text-gray-700 flex items-center gap-2 border-r-4"
-                     [ngClass]="activeField === 'delivery' ? 'border-red-500' : 'border-transparent'">
-                    <i class="bi bi-geo-alt-fill text-red-500"></i>
-                    نقطة التسليم
-                </div>
+          <!-- Map Container Panel -->
+          <div
+            class="relative w-full h-[450px] rounded-[2.5rem] overflow-hidden border-4 border-slate-50 shadow-inner group">
+            <div #mapContainer
+              class="w-full h-full z-0 grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"></div>
+
+            <!-- Floating Map UI -->
+            <div class="absolute top-6 right-6 z-[400] flex flex-col gap-3">
+              <button type="button" (click)="setActiveField('pickup')"
+                class="flex items-center gap-3 px-5 py-3 rounded-2xl shadow-premium backdrop-blur-md transition-all border"
+                [ngClass]="activeField === 'pickup' ? 'bg-success-500 text-white border-success-600' : 'bg-white/90 text-slate-500 border-slate-100'">
+                <lucide-icon name="map-pin" [size]="16"></lucide-icon>
+                <span class="text-[10px] font-black uppercase tracking-widest">{{ 'CREATE_SHIPMENT.SET_PICKUP' |
+                  translate }}</span>
+              </button>
+              <button type="button" (click)="setActiveField('delivery')"
+                class="flex items-center gap-3 px-5 py-3 rounded-2xl shadow-premium backdrop-blur-md transition-all border"
+                [ngClass]="activeField === 'delivery' ? 'bg-brand-500 text-white border-brand-600' : 'bg-white/90 text-slate-500 border-slate-100'">
+                <lucide-icon name="navigation" [size]="16"></lucide-icon>
+                <span class="text-[10px] font-black uppercase tracking-widest">{{ 'CREATE_SHIPMENT.SET_DELIVERY' |
+                  translate }}</span>
+              </button>
             </div>
 
-             <!-- Status/Hint Overlay -->
+            <!-- Animated Instruction -->
             <div
-              class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[400] pointer-events-none bg-black/70 backdrop-blur-md px-6 py-3 rounded-full text-white text-sm font-bold shadow-lg transition-all duration-300 transform"
-              [class.translate-y-20]="!activeField">
-              <i class="bi bi-hand-index-thumb mr-2"></i>
-              {{ statusMessage || 'اضغط على الخريطة لتحديد الموقع' }}
+              class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[400] flex items-center gap-4 px-8 py-4 bg-slate-900/90 backdrop-blur-md rounded-3xl shadow-glow-blue border border-white/10 text-white animate-fade-in">
+              <lucide-icon name="mouse-pointer-2" class="w-4 h-4 animate-bounce"></lucide-icon>
+              <span class="text-xs font-black uppercase tracking-[0.2em]">{{ activeField === 'pickup' ?
+                ('CREATE_SHIPMENT.TAP_TO_SET_PICKUP' | translate) : ('CREATE_SHIPMENT.TAP_TO_SET_DELIVERY' | translate)
+                }}</span>
             </div>
-            
-            <!-- Coordinates Debug (Optional) -->
-             <div class="absolute bottom-1 left-1 z-[500] text-[10px] bg-white/50 px-2 rounded text-gray-600 font-mono" *ngIf="pickupLat || deliveryLat">
-               P: {{pickupLat?.toFixed(4)}},{{pickupLng?.toFixed(4)}} | D: {{deliveryLat?.toFixed(4)}},{{deliveryLng?.toFixed(4)}}
-             </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Receiver Info Section -->
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-          <i class="bi bi-person-fill text-blue-600 text-xl"></i>
-        </div>
-        <div>
-          <h2 class="text-xl font-bold text-primary-dark">بيانات المستلم</h2>
-          <p class="text-gray-500 text-sm">أدخل بيانات الشخص الذي سيستلم الشحنة</p>
-        </div>
-      </div>
-
-      <div class="space-y-6">
-        <!-- Receiver Name -->
-        <div>
-          <label class="block text-sm font-bold text-primary-dark mb-2">
-            اسم المستلم *
-          </label>
-          <input type="text" formControlName="receiverName" class="input"
-            [ngClass]="{'input-error': hasError('receiverName')}" placeholder="الاسم الكامل للمستلم">
-          <p *ngIf="hasError('receiverName')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('receiverName') }}
-          </p>
-        </div>
-
-        <!-- Receiver Phone -->
-        <div class="relative">
-          <label class="block text-sm font-bold text-primary-dark mb-2">
-            رقم الهاتف *
-          </label>
-
-          <input type="tel" formControlName="receiverPhone" class="input"
-            [ngClass]="{'input-error': hasError('receiverPhone')}" placeholder="01xxxxxxxxx / 05xxxxxxxx" dir="ltr"
-            autocomplete="off">
-
-          <p *ngIf="hasError('receiverPhone')" class="text-red-500 text-sm mt-1">
-            {{ getErrorMessage('receiverPhone') }}
-          </p>
-          
-          <!-- Dropdown -->
-          <ul *ngIf="showDropdown"
-            class="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto z-50">
-            <li *ngFor="let customer of filteredCustomers" class="px-4 py-2 cursor-pointer hover:bg-blue-50 text-sm"
-              (click)="selectCustomer(customer)">
-              {{ customer.phoneNumber }} - {{ customer.name }}
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- Package Details Section -->
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
-          <i class="bi bi-box-seam-fill text-purple-600 text-xl"></i>
-        </div>
-        <div>
-          <h2 class="text-xl font-bold text-primary-dark">تفاصيل الطرد</h2>
-          <p class="text-gray-500 text-sm">صف محتويات الشحنة وحدد الخيارات</p>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Description -->
-        <div class="md:col-span-2">
-          <label class="block text-sm font-bold text-primary-dark mb-2">
-            وصف الشحنة *
-          </label>
-          <input type="text" formControlName="description" class="input"
-            [ngClass]="{'input-error': hasError('description')}" placeholder="مثال: ملابس، إلكترونيات، مستندات...">
-          <p *ngIf="hasError('description')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('description') }}</p>
-        </div>
-
-        <!-- Weight -->
-        <div>
-          <label class="block text-sm font-bold text-primary-dark mb-2">
-            الوزن (كجم) *
-          </label>
-          <input type="number" formControlName="weight" class="input" [ngClass]="{'input-error': hasError('weight')}"
-            min="0.1" step="0.1">
-          <p *ngIf="hasError('weight')" class="text-red-500 text-sm mt-1">{{ getErrorMessage('weight') }}</p>
-        </div>
-
-        <!-- Dimensions -->
-        <div>
-          <label class="block text-sm font-bold text-primary-dark mb-2">
-            الأبعاد (اختياري)
-          </label>
-          <input type="text" formControlName="dimensions" class="input" placeholder="الطول × العرض × الارتفاع">
-        </div>
-
-        <!-- COD Amount -->
-        <div>
-          <label class="block text-sm font-bold text-primary-dark mb-2">
-            <i class="bi bi-cash ml-2 text-green-500"></i>
-            مبلغ الدفع عند الاستلام (COD)
-          </label>
-          <div class="relative">
-            <input type="number" formControlName="codAmount" class="input pl-16"
-              [ngClass]="{'input-error': hasError('codAmount')}" min="0" placeholder="0">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">ج.م</span>
           </div>
-          <p class="text-gray-400 text-xs mt-1">اتركه 0 إذا كان الطلب مدفوع مسبقاً</p>
+
+          <!-- Destination -->
+          <div class="relative group">
+            <label
+              class="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest mr-1 mb-3">
+              <lucide-icon name="navigation" [size]="12" class="text-brand-500"></lucide-icon>
+              {{ 'CREATE_SHIPMENT.include_delivery' | translate }}
+            </label>
+            <input #deliveryInput type="text" formControlName="deliveryAddress" (focus)="setActiveField('delivery')"
+              (blur)="geocodeAddress(deliveryInput.value, 'delivery')"
+              class="input h-16 border-2 focus:border-brand-500/50" [class.border-red-500]="hasError('deliveryAddress')"
+              [placeholder]="'CREATE_SHIPMENT.include_delivery' | translate">
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Entities & Security -->
+      <div class="grid md:grid-cols-2 gap-10">
+        <!-- Receiver Card -->
+        <div class="card-premium p-8 bg-white border border-slate-100">
+          <h3 class="text-lg font-black text-slate-900 mb-8 flex items-center gap-3">
+            <lucide-icon name="user" class="text-brand-500"></lucide-icon>
+            {{ 'CREATE_SHIPMENT.SECTION_RECEIVER' | translate }}
+          </h3>
+
+          <div class="space-y-6">
+            <div class="relative">
+              <label
+                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mr-1 mb-2 leading-none">{{
+                'CREATE_SHIPMENT.SMART_PHONE' | translate }}</label>
+              <div class="relative">
+                <input type="tel" formControlName="receiverPhone" class="input h-14 pr-12 text-left tracking-wider"
+                  dir="ltr" [class.border-red-500]="hasError('receiverPhone')" placeholder="01xxxxxxxxx">
+                <lucide-icon name="smartphone" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300"
+                  [size]="18"></lucide-icon>
+              </div>
+
+              <!-- Dropdown Autocomplete -->
+              <div *ngIf="showDropdown"
+                class="absolute top-[calc(100%+8px)] inset-x-0 z-[500] bg-white rounded-2xl shadow-premium border border-slate-100 overflow-hidden animate-slide-up">
+                <div *ngFor="let customer of filteredCustomers" (click)="selectCustomer(customer)"
+                  class="p-4 hover:bg-brand-50 cursor-pointer flex items-center justify-between transition-all border-b border-slate-50 last:border-0">
+                  <div class="flex flex-col">
+                    <span class="font-black text-slate-900">{{ customer.name }}</span>
+                    <span class="text-[10px] text-slate-400 tracking-widest">{{ customer.phoneNumber }}</span>
+                  </div>
+                  <lucide-icon name="arrow-left" [size]="14" class="text-slate-300"></lucide-icon>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label
+                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mr-1 mb-2 leading-none">{{
+                'CREATE_SHIPMENT.FULL_NAME' | translate }}</label>
+              <input type="text" formControlName="receiverName" class="input h-14"
+                [class.border-red-500]="hasError('receiverName')"
+                [placeholder]="'CREATE_SHIPMENT.RECIPIENT_NAME_PLACEHOLDER' | translate">
+            </div>
+          </div>
         </div>
 
-        <!-- Priority -->
-        <div>
-          <label class="block text-sm font-bold text-primary-dark mb-2">
-            أولوية التوصيل *
-          </label>
-          <div class="grid grid-cols-2 gap-3">
-            <label class="relative cursor-pointer">
+        <!-- Package DNA Card -->
+        <div class="card-premium p-8 bg-white border border-slate-100">
+          <h3 class="text-lg font-black text-slate-900 mb-8 flex items-center gap-3">
+            <lucide-icon name="box" class="text-amber-500"></lucide-icon>
+            {{ 'CREATE_SHIPMENT.PACKAGE_SPECS' | translate }}
+          </h3>
+
+          <div class="space-y-6">
+            <div>
+              <label
+                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mr-1 mb-2 leading-none">{{
+                'CREATE_SHIPMENT.CONTENTS_DESC' | translate }}</label>
+              <input type="text" formControlName="description" class="input h-14"
+                [class.border-red-500]="hasError('description')"
+                [placeholder]="'CREATE_SHIPMENT.EXAMPLE_INPUT' | translate">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mr-1 mb-2 leading-none">{{
+                  'CREATE_SHIPMENT.WEIGHT_LABEL' | translate }} (kg)</label>
+                <input type="number" formControlName="weight" class="input h-14"
+                  [class.border-red-500]="hasError('weight')">
+              </div>
+              <div>
+                <label
+                  class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mr-1 mb-2 leading-none">{{
+                  'CREATE_SHIPMENT.COD_LABEL' | translate }}</label>
+                <div class="relative">
+                  <input type="number" formControlName="codAmount" class="input h-14 pl-12"
+                    [class.border-red-500]="hasError('codAmount')">
+                  <span
+                    class="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400">EGP</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Priority & Special Conditions -->
+      <div class="card-premium p-8 lg:p-10 bg-white border border-slate-100">
+        <h3 class="text-lg font-black text-slate-900 mb-8 flex items-center gap-3">
+          <lucide-icon name="zap" class="text-brand-500"></lucide-icon>
+          {{ 'CREATE_SHIPMENT.PRIORITY_LABEL' | translate }}
+        </h3>
+
+        <div class="grid md:grid-cols-2 gap-10">
+          <div class="grid grid-cols-1 gap-4">
+            <label class="relative cursor-pointer group">
               <input type="radio" formControlName="priority" value="normal" class="peer sr-only">
               <div
-                class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-primary-green peer-checked:bg-primary-green/5 transition-all">
-                <div class="flex items-center gap-2">
-                  <i class="bi bi-clock text-gray-500 peer-checked:text-primary-green"></i>
-                  <span class="font-bold text-primary-dark">عادي</span>
+                class="p-6 rounded-3xl border-2 border-slate-100 bg-slate-50/50 group-hover:border-slate-200 peer-checked:border-brand-500 peer-checked:bg-white transition-all duration-300">
+                <div class="flex items-center gap-4">
+                  <div
+                    class="w-12 h-12 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 peer-checked:text-brand-500 shadow-soft">
+                    <lucide-icon name="clock" [size]="20"></lucide-icon>
+                  </div>
+                  <div>
+                    <p class="font-black text-slate-900 leading-none mb-1">{{ 'CREATE_SHIPMENT.PRIORITY_NORMAL' |
+                      translate }}</p>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{{
+                      'CREATE_SHIPMENT.PRIORITY_NORMAL_DESC' | translate }}</p>
+                  </div>
                 </div>
-                <p class="text-xs text-gray-500 mt-1">توصيل خلال 24 ساعة</p>
               </div>
             </label>
-            <label class="relative cursor-pointer">
+            <label class="relative cursor-pointer group">
               <input type="radio" formControlName="priority" value="urgent" class="peer sr-only">
               <div
-                class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-red-500 peer-checked:bg-red-50 transition-all">
-                <div class="flex items-center gap-2">
-                  <i class="bi bi-lightning-charge-fill text-red-500"></i>
-                  <span class="font-bold text-primary-dark">عاجل</span>
+                class="p-6 rounded-3xl border-2 border-slate-100 bg-slate-50/50 group-hover:border-slate-200 peer-checked:border-red-500 peer-checked:bg-white transition-all duration-300">
+                <div class="flex items-center gap-4">
+                  <div
+                    class="w-12 h-12 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 peer-checked:text-red-500 shadow-soft">
+                    <lucide-icon name="zap" [size]="20"></lucide-icon>
+                  </div>
+                  <div>
+                    <p class="font-black text-slate-900 leading-none mb-1">{{ 'CREATE_SHIPMENT.PRIORITY_URGENT' |
+                      translate }}</p>
+                    <p class="text-[10px] text-red-500 font-black uppercase tracking-widest">{{
+                      'CREATE_SHIPMENT.PRIORITY_URGENT_DESC' | translate }}</p>
+                  </div>
                 </div>
-                <p class="text-xs text-gray-500 mt-1">توصيل سريع (+20 ج.م)</p>
               </div>
+            </label>
+          </div>
+
+          <div class="space-y-4">
+            <label
+              class="flex items-center justify-between p-6 bg-slate-50 rounded-3xl cursor-pointer hover:bg-slate-100 transition-all border border-transparent hover:border-slate-200 group">
+              <div class="flex items-center gap-4">
+                <lucide-icon name="shield-alert"
+                  class="text-amber-500 group-hover:scale-110 transition-transform"></lucide-icon>
+                <span class="text-sm font-black text-slate-700">{{ 'CREATE_SHIPMENT.FRAGILE_LABEL' | translate }}</span>
+              </div>
+              <input type="checkbox" formControlName="isFragile"
+                class="w-6 h-6 rounded-lg text-brand-500 border-slate-300 focus:ring-brand-500">
+            </label>
+            <label
+              class="flex items-center justify-between p-6 bg-slate-50 rounded-3xl cursor-pointer hover:bg-slate-100 transition-all border border-transparent hover:border-slate-200 group">
+              <div class="flex items-center gap-4">
+                <lucide-icon name="pen-tool"
+                  class="text-blue-500 group-hover:scale-110 transition-transform"></lucide-icon>
+                <span class="text-sm font-black text-slate-700">{{ 'CREATE_SHIPMENT.SIGNATURE_LABEL' | translate
+                  }}</span>
+              </div>
+              <input type="checkbox" formControlName="requiresSignature"
+                class="w-6 h-6 rounded-lg text-brand-500 border-slate-300 focus:ring-brand-500">
             </label>
           </div>
         </div>
 
-        <!-- Notes -->
-        <div class="md:col-span-2">
-          <label class="block text-sm font-bold text-primary-dark mb-2">
-            ملاحظات إضافية (اختياري)
-          </label>
-          <textarea formControlName="notes" rows="2" class="input resize-none"
-            placeholder="أي تعليمات خاصة للمندوب..."></textarea>
-        </div>
-
-        <!-- Options -->
-        <div class="md:col-span-2 flex flex-wrap gap-4">
-          <label
-            class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-gray-200 hover:border-primary-green/30 transition-colors">
-            <input type="checkbox" formControlName="isFragile"
-              class="w-5 h-5 rounded border-gray-300 text-primary-green focus:ring-primary-green">
-            <div class="flex items-center gap-2">
-              <i class="bi bi-exclamation-triangle text-amber-500"></i>
-              <span class="font-medium text-primary-dark">قابل للكسر</span>
-            </div>
-          </label>
-          <label
-            class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-gray-200 hover:border-primary-green/30 transition-colors">
-            <input type="checkbox" formControlName="requiresSignature"
-              class="w-5 h-5 rounded border-gray-300 text-primary-green focus:ring-primary-green">
-            <div class="flex items-center gap-2">
-              <i class="bi bi-pencil-square text-blue-500"></i>
-              <span class="font-medium text-primary-dark">يتطلب توقيع</span>
-            </div>
-          </label>
+        <div class="mt-8">
+          <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mr-1 mb-2 leading-none">{{
+            'CREATE_SHIPMENT.NOTES_LABEL' | translate }}</label>
+          <textarea formControlName="notes" rows="3" class="input resize-none py-4"
+            [placeholder]="'CREATE_SHIPMENT.NOTES_PLACEHOLDER' | translate"></textarea>
         </div>
       </div>
     </div>
 
-    <!-- Fee Summary Section -->
-    <div class="bg-gradient-to-br from-primary-dark to-primary-dark-light rounded-2xl p-6 text-white">
-      <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
-        <i class="bi bi-calculator"></i>
-        ملخص التكلفة
-      </h3>
+    <!-- Right Column: Cost Summary & Actions (4 cols) -->
+    <div class="lg:col-span-4 space-y-8 sticky top-32 self-start">
 
-      <div *ngIf="isCalculatingFee" class="text-center py-4">
-        <div class="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent mx-auto mb-2"></div>
-        <p class="text-white/70">جاري حساب التكلفة...</p>
+      <!-- Logistics Intelligence Card -->
+      <div class="p-8 bg-slate-900 text-white rounded-[2.5rem] shadow-premium overflow-hidden group">
+        <div
+          class="absolute -top-12 -left-12 w-48 h-48 bg-brand-500/10 rounded-full blur-[60px] group-hover:scale-110 transition-transform duration-1000">
+        </div>
+
+        <div class="relative z-10 flex flex-col h-full">
+          <h3 class="text-lg font-black tracking-tight leading-none uppercase mb-10 flex items-center justify-between">
+            {{ 'CREATE_SHIPMENT.COST_RADAR' | translate }}
+            <lucide-icon name="calculator" class="text-brand-400" [size]="20"></lucide-icon>
+          </h3>
+
+          <!-- Calculation Progress -->
+          <div *ngIf="isCalculatingFee" class="flex flex-col items-center justify-center py-10 gap-4">
+            <div class="w-10 h-10 border-2 border-white/20 border-t-brand-400 rounded-full animate-spin"></div>
+            <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">{{
+              'CREATE_SHIPMENT.CALCULATING' | translate }}</span>
+          </div>
+
+          <!-- Result -->
+          <div *ngIf="!isCalculatingFee && deliveryFee" class="space-y-8 animate-fade-in">
+            <div class="space-y-4">
+              <div
+                class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <span>{{ 'CREATE_SHIPMENT.EST_DISTANCE' | translate }}</span>
+                <span class="text-white">{{ deliveryFee.estimatedDistance }} km</span>
+              </div>
+              <div
+                class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <span>{{ 'CREATE_SHIPMENT.EST_DURATION' | translate }}</span>
+                <span class="text-white">{{ deliveryFee.estimatedDuration }}</span>
+              </div>
+            </div>
+
+            <div class="py-10 border-y border-white/5 space-y-6">
+              <div class="flex justify-between items-center text-sm font-bold">
+                <span class="text-slate-500">{{ 'CREATE_SHIPMENT.BASE_FEE' | translate }}</span>
+                <span>{{ deliveryFee.baseFee + deliveryFee.distanceFee }} EGP</span>
+              </div>
+              <div *ngIf="deliveryFee.priorityFee > 0" class="flex justify-between items-center text-sm font-bold">
+                <span class="text-red-400">{{ 'CREATE_SHIPMENT.PRIORITY_FEE' | translate }}</span>
+                <span class="text-red-400">+{{ deliveryFee.priorityFee }} EGP</span>
+              </div>
+            </div>
+
+            <div class="flex flex-col items-center gap-2">
+              <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">{{
+                'CREATE_SHIPMENT.TOTAL_COST' | translate }}</p>
+              <div class="flex items-baseline gap-2">
+                <span class="text-6xl font-black tracking-tighter text-brand-400">{{ deliveryFee.totalFee }}</span>
+                <span class="text-xl font-black">EGP</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty Step -->
+          <div *ngIf="!isCalculatingFee && !deliveryFee"
+            class="py-12 text-center text-slate-500 space-y-4 border border-dashed border-white/10 rounded-3xl">
+            <lucide-icon name="map" class="mx-auto opacity-20" [size]="32"></lucide-icon>
+            <p class="text-xs font-bold leading-relaxed px-6">{{ 'CREATE_SHIPMENT.SELECT_POINTS_MSG' | translate }}</p>
+          </div>
+        </div>
       </div>
 
-      <div *ngIf="!isCalculatingFee && deliveryFee" class="space-y-3">
-        <div class="flex justify-between items-center py-2 border-b border-white/10">
-          <span class="text-white/70">رسوم التوصيل ({{ deliveryFee.estimatedDistance }} كم)</span>
-          <span>{{ deliveryFee.baseFee + deliveryFee.distanceFee }} ج.م</span>
+      <!-- Submit Launcher -->
+      <button type="submit" [disabled]="isSubmitting || shipmentForm.invalid"
+        class="w-full flex-col p-8 bg-brand-500 text-white rounded-[2.5rem] shadow-glow-blue hover:bg-brand-600 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale disabled:scale-100 flex items-center justify-center gap-2 group overflow-hidden relative">
+        <div
+          class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000">
         </div>
-        <div *ngIf="deliveryFee.priorityFee > 0"
-          class="flex justify-between items-center py-2 border-b border-white/10">
-          <span class="text-white/70">رسوم الأولوية (عاجل)</span>
-          <span class="text-red-400">{{ deliveryFee.priorityFee }} ج.م</span>
+        <div *ngIf="!isSubmitting" class="flex flex-col items-center gap-3">
+          <lucide-icon name="check-circle-2" [size]="32"
+            class="group-hover:scale-110 transition-transform"></lucide-icon>
+          <span class="text-2xl font-black tracking-tight leading-none">{{ 'CREATE_SHIPMENT.BTN_SUBMIT' | translate
+            }}</span>
         </div>
-         <div *ngIf="deliveryFee.weightFee > 0" class="flex justify-between items-center py-2 border-b border-white/10">
-          <span class="text-white/70">رسوم الوزن</span>
-          <span>{{ deliveryFee.weightFee }} ج.م</span>
+        <div *ngIf="isSubmitting" class="flex flex-col items-center gap-4">
+          <div class="w-10 h-10 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
+          <span class="text-sm font-black uppercase tracking-widest">{{ 'CREATE_SHIPMENT.SUBMITTING' | translate
+            }}</span>
         </div>
-        <div class="flex justify-between items-center py-3 text-lg font-bold">
-          <span>إجمالي رسوم التوصيل</span>
-          <span class="text-primary-green">{{ deliveryFee.totalFee }} ج.م</span>
+      </button>
+
+      <!-- Advanced Debug Console (Hidden but accessible) -->
+      <div class="p-6 bg-slate-50 rounded-3xl border border-slate-100 opacity-50 hover:opacity-100 transition-opacity">
+        <div class="flex items-center gap-3 mb-4">
+          <lucide-icon name="bug" class="text-slate-400" [size]="16"></lucide-icon>
+          <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ 'CREATE_SHIPMENT.DEV_TOOLS' |
+            translate }}</span>
         </div>
-        <div class="flex justify-between items-center py-2 text-sm text-white/60">
-          <span>الوقت المتوقع للتوصيل</span>
-          <span>{{ deliveryFee.estimatedDuration }}</span>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" (click)="debugTools.validateData()"
+            class="p-3 bg-white rounded-xl text-[10px] font-black text-slate-600 border border-slate-200 hover:bg-slate-900 hover:text-white transition-all">{{
+            'CREATE_SHIPMENT.VALIDATE' | translate }}</button>
+          <button type="button" (click)="debugTools.showLogs()"
+            class="p-3 bg-white rounded-xl text-[10px] font-black text-slate-600 border border-slate-200 hover:bg-slate-900 hover:text-white transition-all">{{
+            'TRACK.CONSOLE' | translate }}</button>
         </div>
       </div>
 
-      <div *ngIf="!isCalculatingFee && !deliveryFee"
-        class="text-center py-4 text-white/50 border border-dashed border-white/20 rounded-xl">
-        حدد موقعي الاستلام والتسليم لحساب التكلفة
-      </div>
     </div>
-
-    <!-- Submit Button -->
-    <button type="submit" [disabled]="isSubmitting || shipmentForm.invalid"
-      class="w-full flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold text-lg rounded-xl shadow-green hover:shadow-green-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-      <span *ngIf="!isSubmitting">
-        <i class="bi bi-check-lg ml-2"></i>
-        إنشاء الطلب
-      </span>
-      <span *ngIf="isSubmitting" class="flex items-center gap-2">
-        <div class="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
-        جاري الإنشاء...
-      </span>
-    </button>
   </form>
-
-  <!-- Debug Tools (Preserved) -->
-  <div class="mt-8 mb-12 p-6 bg-gray-50 rounded-2xl border border-gray-200 border-dashed">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="font-bold text-gray-600 flex items-center gap-2">
-        <i class="bi bi-bug-fill"></i> أدوات التصحيح
-      </h3>
-    </div>
-    <div class="flex flex-wrap gap-3">
-      <button type="button" (click)="debugTools.validateData()" class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg font-bold text-sm hover:bg-purple-200">
-        <i class="bi bi-check-circle mr-2"></i> التحقق من البيانات
-      </button>
-       <button type="button" (click)="debugTools.showLogs()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-bold text-sm hover:bg-gray-300">
-        <i class="bi bi-terminal mr-2"></i> Console
-      </button>
-    </div>
-    <div *ngIf="statusMessage" class="mt-4 p-4 bg-white border-l-4 border-blue-500 rounded-r-lg shadow-sm text-sm font-medium text-gray-700 flex items-center gap-3">
-      <i class="bi bi-info-circle-fill text-blue-500 text-lg"></i>
-      {{ statusMessage }}
-    </div>
-  </div>
 </div>
 
-<!-- Success Modal -->
-<div *ngIf="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-  <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl">
-    <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
-      <i class="bi bi-check-lg text-green-500 text-4xl"></i>
-    </div>
-    <h2 class="text-2xl font-black text-primary-dark mb-2">تم إنشاء الطلب بنجاح!</h2>
-    <p class="text-gray-600 mb-4">رقم التتبع الخاص بك:</p>
-    <div class="bg-gray-100 rounded-xl p-4 mb-6">
-      <p class="text-2xl font-black text-primary-green tracking-wider">{{ createdTrackingNumber }}</p>
-    </div>
+<!-- Success Command Center Modal -->
+<div *ngIf="showSuccessModal"
+  class="fixed inset-0 z-[1000] flex items-center justify-center p-6 backdrop-blur-xl bg-slate-900/40 animate-fade-in">
+  <div
+    class="bg-white rounded-[3.5rem] p-10 lg:p-14 max-w-2xl w-full shadow-premium border border-slate-100 relative overflow-hidden text-center animate-slide-up">
+    <!-- Abstract success graphics -->
+    <div class="absolute -top-20 -right-20 w-80 h-80 bg-success-500/5 rounded-full blur-3xl"></div>
 
-    <p class="text-sm text-gray-500 mb-6">
-      يمكنك الآن تأكيد جاهزية الطرد للاستلام من صفحة الطلبات
-    </p>
-
-    <div class="flex flex-col gap-3">
-      <div class="flex flex-col sm:flex-row gap-3">
-        <button (click)="viewDetails()"
-          class="flex-1 px-4 py-3 bg-primary-dark text-white font-bold rounded-xl hover:shadow-lg transition-all">
-          <i class="bi bi-info-circle ml-2"></i>
-          عرض التفاصيل الكاملة
-        </button>
+    <div class="relative z-10">
+      <div
+        class="w-24 h-24 mx-auto mb-10 rounded-3xl bg-success-500 text-white flex items-center justify-center shadow-glow-green animate-float">
+        <lucide-icon name="check-circle" [size]="48"></lucide-icon>
       </div>
 
-      <div class="flex flex-col sm:flex-row gap-3">
+      <h2 class="text-3xl lg:text-4xl font-black text-slate-900 mb-4 tracking-tight">{{ 'CREATE_SHIPMENT.SUCCESS_TITLE'
+        | translate }}</h2>
+      <p class="text-slate-500 font-medium text-lg mb-10">{{ 'CREATE_SHIPMENT.SUCCESS_DESC' | translate }}</p>
+
+      <div class="bg-slate-50 rounded-[2.5rem] p-10 mb-10 border border-slate-100 text-center relative group">
+        <p class="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4">{{
+          'CREATE_SHIPMENT.TRACKING_ID' | translate }}</p>
+        <div class="flex items-center justify-center gap-4">
+          <span class="text-4xl font-black text-slate-900 tracking-wider font-mono">{{ createdTrackingNumber }}</span>
+          <button class="text-slate-300 hover:text-brand-500 transition-colors"><lucide-icon name="copy"
+              [size]="20"></lucide-icon></button>
+        </div>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4">
         <button (click)="trackShipment()"
-          class="flex-1 px-4 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl hover:shadow-lg transition-all">
-          <i class="bi bi-geo-alt ml-2"></i>
-          تتبع الشحنة
+          class="h-16 bg-slate-900 text-white rounded-2xl font-black shadow-premium hover:bg-black transition-all flex items-center justify-center gap-3">
+          <lucide-icon name="navigation" [size]="20"></lucide-icon>
+          {{ 'CREATE_SHIPMENT.BTN_TRACK' | translate }}
         </button>
         <button (click)="createAnother()"
-          class="flex-1 px-4 py-3 border-2 border-gray-200 text-primary-dark font-bold rounded-xl hover:bg-gray-50 transition-all">
-          <i class="bi bi-plus-lg ml-2"></i>
-          طلب جديد
+          class="h-16 bg-slate-50 text-slate-900 rounded-2xl font-black border border-slate-100 hover:bg-slate-100 transition-all flex items-center justify-center gap-3">
+          <lucide-icon name="plus" [size]="20"></lucide-icon>
+          {{ 'CREATE_SHIPMENT.BTN_ANOTHER' | translate }}
         </button>
       </div>
+
+      <button (click)="viewDetails()"
+        class="mt-8 text-xs font-black text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-colors">{{
+        'CREATE_SHIPMENT.VIEW_DETAILS' | translate }}</button>
     </div>
   </div>
 </div>

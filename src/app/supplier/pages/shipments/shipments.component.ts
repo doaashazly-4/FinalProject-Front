@@ -3,13 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { SupplierDataService, Parcel, ParcelStatus, AvailableCarrier } from '../../services/supplier-data.service';
-
+import { LucideAngularModule } from 'lucide-angular';
 import { ShipmentCardComponent } from '../../components/shipment-card/shipment-card.component';
 
 @Component({
   selector: 'app-shipments',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ShipmentCardComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ShipmentCardComponent, LucideAngularModule],
   templateUrl: './shipments.component.html',
   styleUrl: './shipments.component.css'
 })
@@ -40,14 +40,14 @@ export class ShipmentsComponent implements OnInit {
   pendingAssignId: string | null = null;
 
   statusFilters: { value: ParcelStatus | 'all'; label: string; count?: number }[] = [
-    { value: 'all', label: 'الكل' },
-    { value: 'pending', label: 'في الانتظار' },
-    { value: 'ready_for_pickup', label: 'جاهز للاستلام' },
-    { value: 'assigned', label: 'تم التعيين' },
-    { value: 'picked_up', label: 'تم الاستلام' },
-    { value: 'in_transit', label: 'قيد التوصيل' },
-    { value: 'delivered', label: 'تم التسليم' },
-    { value: 'failed_delivery', label: 'فشل التسليم' }
+    { value: 'all', label: 'SHIPMENTS.FILTERS.ALL' },
+    { value: 'pending', label: 'SHIPMENTS.FILTERS.PENDING' },
+    { value: 'ready_for_pickup', label: 'SHIPMENTS.FILTERS.READY' },
+    { value: 'assigned', label: 'SHIPMENTS.FILTERS.ASSIGNED' },
+    { value: 'picked_up', label: 'SHIPMENTS.FILTERS.PICKED_UP' },
+    { value: 'in_transit', label: 'SHIPMENTS.FILTERS.IN_TRANSIT' },
+    { value: 'delivered', label: 'SHIPMENTS.FILTERS.DELIVERED' },
+    { value: 'failed_delivery', label: 'SHIPMENTS.FILTERS.FAILED' }
   ];
 
   constructor(

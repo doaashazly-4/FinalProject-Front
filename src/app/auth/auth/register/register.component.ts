@@ -5,12 +5,13 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../shared/services/auth.service';
 import { SupplierRegisterDTO, CourierRegisterDTO } from '../../../models/user.models';
 import { RegisterService } from './register.service';
+import { LucideAngularModule } from 'lucide-angular';
 
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, LucideAngularModule],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
 })

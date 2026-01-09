@@ -9,11 +9,12 @@ import {
   DeliveryStatus
 } from '../../services/customer-data.service';
 import { Subscription, interval } from 'rxjs';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-order-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, LucideAngularModule],
   templateUrl: './order-detail.component.html',
   styleUrls: ['./order-detail.component.css']
 })

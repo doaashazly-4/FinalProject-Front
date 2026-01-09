@@ -4,15 +4,13 @@
   <div class="glass p-8 rounded-[2rem] border-subtle shadow-premium">
     <div class="max-w-3xl mx-auto space-y-6">
       <div class="text-center">
-        <h1 class="text-3xl font-black mb-2">{{ langService.currentLang() === 'ar' ? 'تتبع شحنتك لحظة بلحظة' :
-          'Real-time Operations Monitoring' }}</h1>
-        <p class="text-secondary font-bold">{{ langService.currentLang() === 'ar' ? 'أدخل رقم التتبع لمشاهدة التفاصيل
-          وموقع المندوبباشرة' : 'Enter a tracking ID to visualize live movement and logistics status' }}</p>
+        <h1 class="text-3xl font-black mb-2">{{ 'TRACK.TITLE' | translate }}</h1>
+        <p class="text-secondary font-bold">{{ 'TRACK.SUBTITLE' | translate }}</p>
       </div>
 
       <div class="relative group">
         <input [(ngModel)]="trackingNumber" (keyup.enter)="searchParcel()" type="text"
-          [placeholder]="langService.currentLang() === 'ar' ? 'أدخل رقم التتبع (مثال: #1234)' : 'Search by ID (e.g. #1234)...'"
+          [placeholder]="'TRACK.SEARCH_PLACEHOLDER' | translate"
           class="input !pl-16 !pr-32 !py-5 !text-lg !rounded-2xl shadow-sm focus:shadow-green-lg">
 
         <i
@@ -20,7 +18,7 @@
 
         <button (click)="searchParcel()"
           class="absolute right-3 top-1/2 -translate-y-1/2 btn-primary !py-3 !px-8 !rounded-xl">
-          <span *ngIf="!isSearching">{{ langService.currentLang() === 'ar' ? 'تتبع الآن' : 'Locate' }}</span>
+          <span *ngIf="!isSearching">{{ 'TRACK.BTN_SEARCH' | translate }}</span>
           <span *ngIf="isSearching" class="flex items-center gap-2">
             <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
           </span>
@@ -48,8 +46,8 @@
         <div class="absolute top-6 left-6 z-20 space-y-2 pointer-events-none">
           <div class="glass px-4 py-2 rounded-xl border-subtle flex items-center gap-3 backdrop-blur-xl">
             <div class="w-2 h-2 rounded-full bg-primary-green animate-ping"></div>
-            <span class="text-[10px] font-black text-text-primary uppercase tracking-widest ltr:tracking-[0.2em]">Live
-              Signal Acquired</span>
+            <span class="text-[10px] font-black text-text-primary uppercase tracking-widest ltr:tracking-[0.2em]">{{
+              'TRACK.LIVE_SIGNAL' | translate }}</span>
           </div>
         </div>
 
@@ -60,10 +58,10 @@
               <i class="bi bi-clock-history"></i>
             </div>
             <div>
-              <p class="text-[9px] font-black text-secondary tracking-widest uppercase mb-1">{{
-                langService.currentLang() === 'ar' ? 'الوقت المتبقي' : 'ETA' }}</p>
+              <p class="text-[9px] font-black text-secondary tracking-widest uppercase mb-1">{{ 'TRACK.ETA' | translate
+                }}</p>
               <p class="text-sm font-black text-text-primary">~ 25 {{ langService.currentLang() === 'ar' ? 'دقيقة' :
-                'mins' }}</p>
+              <p class="text-sm font-black text-text-primary">~ 25 {{ 'COMMON.MINS' | translate }}</p>
             </div>
           </div>
 
@@ -72,9 +70,9 @@
               <i class="bi bi-speedometer2"></i>
             </div>
             <div>
-              <p class="text-[9px] font-black text-secondary tracking-widest uppercase mb-1">{{
-                langService.currentLang() === 'ar' ? 'المسافة' : 'Distance' }}</p>
-              <p class="text-sm font-black text-text-primary">3.2 {{ langService.currentLang() === 'ar' ? 'كم' : 'km' }}
+              <p class="text-[9px] font-black text-secondary tracking-widest uppercase mb-1">{{ 'TRACK.DISTANCE' |
+                translate }}</p>
+              <p class="text-sm font-black text-text-primary">3.2 {{ 'COMMON.KM' | translate }}
               </p>
             </div>
           </div>
@@ -87,23 +85,23 @@
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
           <div class="space-y-1">
-            <p class="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">{{ langService.currentLang() ===
-              'ar' ? 'الحالة الحالية' : 'Current Phase' }}</p>
+            <p class="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">{{ 'TRACK.CURRENT_PHASE' |
+              translate }}</p>
             <p class="text-lg font-black text-primary-green">{{ getStatusText(parcel.status) }}</p>
           </div>
           <div class="space-y-1">
-            <p class="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">{{ langService.currentLang() ===
-              'ar' ? 'الخدمة' : 'Service Type' }}</p>
-            <p class="text-lg font-black text-text-primary">Express Next-Day</p>
+            <p class="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">{{ 'TRACK.SERVICE_TYPE' |
+              translate }}</p>
+            <p class="text-lg font-black text-text-primary">{{ 'TRACK.SERVICE_EXPRESS' | translate }}</p>
           </div>
           <div class="space-y-1">
-            <p class="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">{{ langService.currentLang() ===
-              'ar' ? 'المستلم' : 'Recipient' }}</p>
+            <p class="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">{{ 'TRACK.RECIPIENT' | translate
+              }}</p>
             <p class="text-lg font-black text-text-primary">{{ parcel.receiverName }}</p>
           </div>
           <div class="space-y-1">
-            <p class="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">{{ langService.currentLang() ===
-              'ar' ? 'قيمة التحصيل' : 'COD Amount' }}</p>
+            <p class="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">{{ 'TRACK.COD' | translate }}
+            </p>
             <p class="text-lg font-black text-accent-gold">{{ formatCurrency(parcel.codAmount) }}</p>
           </div>
         </div>
@@ -119,8 +117,8 @@
           class="absolute -bottom-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl group-hover:bg-primary-green/10 transition-all duration-700">
         </div>
 
-        <h3 class="text-xs font-black text-white/40 uppercase tracking-[0.3em] mb-8">{{ langService.currentLang() ===
-          'ar' ? 'معلومات المندوب' : 'Operational Courier' }}</h3>
+        <h3 class="text-xs font-black text-white/40 uppercase tracking-[0.3em] mb-8">{{ 'TRACK.COURIER_INFO' | translate
+          }}</h3>
 
         <div class="flex items-center gap-6">
           <div class="relative">
@@ -134,12 +132,13 @@
           </div>
           <div>
             <p class="text-xl font-black">{{ parcel.courierName }}</p>
-            <p class="text-xs text-white/50 font-bold mb-3">Carrier ID: #{{ parcel.courierId }}</p>
+            <p class="text-xs text-white/50 font-bold mb-3">{{ 'TRACK.CARRIER_ID' | translate }}: #{{ parcel.courierId
+              }}</p>
             <div class="flex gap-2">
               <a [href]="'tel:' + parcel.courierPhone"
                 class="btn-primary !px-4 !py-2 !text-[10px] !rounded-lg border-0">
                 <i class="bi bi-telephone-fill"></i>
-                <span>{{ langService.currentLang() === 'ar' ? 'اتصال' : 'Call' }}</span>
+                <span>{{ 'ACTIONS.CALL' | translate }}</span>
               </a>
               <button class="btn border border-white/20 hover:bg-white/10 !px-4 !py-2 !text-[10px] !rounded-lg">
                 <i class="bi bi-chat-dots-fill"></i>
@@ -152,8 +151,7 @@
       <!-- Live Timeline -->
       <div class="surface p-8 pb-4">
         <div class="flex items-center justify-between mb-8">
-          <h3 class="text-lg font-black">{{ langService.currentLang() === 'ar' ? 'سجل تتبع الشحنة' : 'Execution
-            Timeline' }}</h3>
+          <h3 class="text-lg font-black">{{ 'TRACK.TIMELINE' | translate }}</h3>
           <i class="bi bi-list-stars text-2xl text-secondary"></i>
         </div>
 
