@@ -51,10 +51,10 @@ export class NavbarComponent implements OnInit {
     if (!this.currentUserRole) return '';
 
     const roleTitles: { [key: string]: string } = {
-      'customer': 'مُستلم',    // Receiver
-      'supplier': 'مُرسل',     // Sender
-      'courier': 'مندوب',      // Carrier
-      'admin': 'مدير'          // Admin
+      'customer': 'Receiver',
+      'supplier': 'Sender',
+      'courier': 'Courier',
+      'admin': 'Admin'
     };
 
     return roleTitles[this.currentUserRole] || this.currentUserRole;

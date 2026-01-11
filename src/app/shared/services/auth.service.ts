@@ -47,7 +47,7 @@ export class AuthService {
       localStorage.setItem(this.TOKEN_KEY, 'dev-test-token');
       localStorage.setItem(this.STORAGE_KEY, role);
       localStorage.setItem('user_id', 'dev-user-id');
-      localStorage.setItem('user_name', role === 'admin' ? 'مدير النظام' : 'مستخدم تجريبي');
+      localStorage.setItem('user_name', role === 'admin' ? 'System Admin' : 'Demo User');
       localStorage.setItem('user_email', `${role}@test.com`);
       localStorage.setItem('token_expiration', new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString());
       this.roleSignal.set(role);
@@ -206,7 +206,7 @@ export class AuthService {
 
   private handleRegistrationError(error: any, role: string): Observable<never> {
     console.error(`${role} registration error:`, error);
-    let errorMessage = `فشل في تسجيل ${role}`;
+    let errorMessage = `Failed to register ${role}`;
 
     if (error.error?.message) {
       errorMessage = error.error.message;
@@ -214,9 +214,9 @@ export class AuthService {
       const errors = Object.values(error.error.errors).flat();
       errorMessage = errors.join(', ');
     } else if (error.status === 400) {
-      errorMessage = 'بيانات غير صالحة. يرجى التحقق من جميع الحقول.';
+      errorMessage = 'Invalid data. Please check all fields.';
     } else if (error.status === 409) {
-      errorMessage = 'البريد الإلكتروني أو اسم المستخدم مسجل مسبقاً';
+      errorMessage = 'Email or username already registered';
     }
 
     return throwError(() => errorMessage);
@@ -379,17 +379,17 @@ export class AuthService {
 
   private parseError(error: any): string {
     if (error.status === 401) {
-      return error.error?.message || 'بيانات الدخول غير صحيحة';
+      return error.error?.message || 'Invalid login credentials';
     }
     if (error.status === 400) {
-      return error.error?.message || 'طلب غير صالح';
+      return error.error?.message || 'Invalid request';
     }
     if (error.status === 404) {
-      return 'الخدمة غير موجودة';
+      return 'Service not found';
     }
     if (error.status === 500) {
-      return 'خطأ في الخادم. يرجى المحاولة لاحقاً.';
+      return 'Server error. Please try again later.';
     }
-    return 'حدث خطأ غير متوقع';
+    return 'An unexpected error occurred';
   }
 }

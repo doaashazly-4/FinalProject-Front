@@ -40,14 +40,14 @@ export class ShipmentsComponent implements OnInit {
   pendingAssignId: string | null = null;
 
   statusFilters: { value: ParcelStatus | 'all'; label: string; count?: number }[] = [
-    { value: 'all', label: 'الكل' },
-    { value: 'pending', label: 'في الانتظار' },
-    { value: 'ready_for_pickup', label: 'جاهز للاستلام' },
-    { value: 'assigned', label: 'تم التعيين' },
-    { value: 'picked_up', label: 'تم الاستلام' },
-    { value: 'in_transit', label: 'قيد التوصيل' },
-    { value: 'delivered', label: 'تم التسليم' },
-    { value: 'failed_delivery', label: 'فشل التسليم' }
+    { value: 'all', label: 'All' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'ready_for_pickup', label: 'Ready for Pickup' },
+    { value: 'assigned', label: 'Assigned' },
+    { value: 'picked_up', label: 'Picked Up' },
+    { value: 'in_transit', label: 'In Transit' },
+    { value: 'delivered', label: 'Delivered' },
+    { value: 'failed_delivery', label: 'Failed' }
   ];
 
   constructor(
@@ -236,7 +236,7 @@ export class ShipmentsComponent implements OnInit {
 
   // Cancel Order
   cancelOrder(parcel: Parcel): void {
-    if (!confirm('هل أنت متأكد من إلغاء هذا الطلب؟')) return;
+    if (!confirm('Are you sure you want to cancel this order?')) return;
 
     this.dataService.cancelParcel(parcel.id).subscribe({
       next: () => {
@@ -253,34 +253,22 @@ export class ShipmentsComponent implements OnInit {
   // Helpers
   getStatusText(status: string): string {
     const statusMap: { [key: string]: string } = {
-      'pending': 'في الانتظار',
-      'ready_for_pickup': 'جاهز للاستلام',
-      'assigned': 'تم التعيين',
-      'picked_up': 'تم الاستلام',
-      'in_transit': 'قيد التوصيل',
-      'out_for_delivery': 'في الطريق',
-      'delivered': 'تم التسليم',
-      'failed_delivery': 'فشل التسليم',
-      'returned': 'مُرتجع',
-      'cancelled': 'ملغي'
+      'pending': 'Pending',
+      'ready_for_pickup': 'Ready for Pickup',
+      'assigned': 'Assigned',
+      'picked_up': 'Picked Up',
+      'in_transit': 'In Transit',
+      'out_for_delivery': 'Out for Delivery',
+      'delivered': 'Delivered',
+      'failed_delivery': 'Failed',
+      'returned': 'Returned',
+      'cancelled': 'Cancelled'
     };
     return statusMap[status] || status;
   }
 
   getStatusClass(status: string): string {
-    const classMap: { [key: string]: string } = {
-      'pending': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      'ready_for_pickup': 'bg-blue-100 text-blue-800 border-blue-200',
-      'assigned': 'bg-indigo-100 text-indigo-800 border-indigo-200',
-      'picked_up': 'bg-purple-100 text-purple-800 border-purple-200',
-      'in_transit': 'bg-cyan-100 text-cyan-800 border-cyan-200',
-      'out_for_delivery': 'bg-teal-100 text-teal-800 border-teal-200',
-      'delivered': 'bg-green-100 text-green-800 border-green-200',
-      'failed_delivery': 'bg-red-100 text-red-800 border-red-200',
-      'returned': 'bg-orange-100 text-orange-800 border-orange-200',
-      'cancelled': 'bg-gray-100 text-gray-800 border-gray-200'
-    };
-    return classMap[status] || 'bg-gray-100 text-gray-800 border-gray-200';
+    return 'bg-slate-100 text-slate-800 border-slate-200';
   }
 
   getVehicleIcon(type: string): string {
@@ -295,17 +283,17 @@ export class ShipmentsComponent implements OnInit {
 
   getVehicleText(type: string): string {
     const texts: { [key: string]: string } = {
-      'Motorcycle': 'موتوسيكل',
-      'Car': 'سيارة',
-      'Van': 'فان',
-      'Truck': 'شاحنة'
+      'Motorcycle': 'Motorcycle',
+      'Car': 'Car',
+      'Van': 'Van',
+      'Truck': 'Truck'
     };
     return texts[type] || type;
   }
 
   formatDate(date: string | undefined): string {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString('ar-EG', {
+    return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -315,7 +303,7 @@ export class ShipmentsComponent implements OnInit {
   }
 
   formatCurrency(amount: number): string {
-    return amount.toLocaleString('ar-EG') + ' ج.م';
+    return amount.toLocaleString('en-US', { style: 'currency', currency: 'EGP' });
   }
 
   canAssignCarrier(parcel: Parcel): boolean {

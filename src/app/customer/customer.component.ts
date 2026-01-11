@@ -13,12 +13,12 @@ import { AuthService } from '../shared/services/auth.service';
 export class CustomerComponent {
   // Navigation items for Receiver (delivery-focused)
   navItems = [
-    { label: 'لوحة التحكم', path: 'dashboard', icon: 'bi-speedometer2' },
-    { label: 'شحناتي الواردة', path: 'deliveries', icon: 'bi-box-arrow-in-down' },
-    { label: 'تتبع شحنة', path: 'track', icon: 'bi-geo-alt' },
-    { label: 'المحادثات', path: 'chat', icon: 'bi-whatsapp' },
-    { label: 'الملف الشخصي', path: 'profile', icon: 'bi-person-circle' },
-    { label: 'الدعم', path: 'support', icon: 'bi-headset' }
+    { label: 'Dashboard', path: 'dashboard', icon: 'bi-speedometer2' },
+    { label: 'My Deliveries', path: 'deliveries', icon: 'bi-box-arrow-in-down' },
+    { label: 'Tracking', path: 'track', icon: 'bi-geo-alt' },
+    { label: 'Chats', path: 'chat', icon: 'bi-whatsapp' },
+    { label: 'Profile', path: 'profile', icon: 'bi-person-circle' },
+    { label: 'Support', path: 'support', icon: 'bi-headset' }
   ];
 
   userName: string = '';
@@ -26,7 +26,7 @@ export class CustomerComponent {
 
   constructor(private auth: AuthService, private router: Router) {
     const user = this.auth.getCurrentUser();
-    this.userName = user.userName || user.email?.split('@')[0] || 'المُستلم';
+    this.userName = user.userName || user.email?.split('@')[0] || 'Receiver';
   }
 
   toggleMobileMenu(): void {

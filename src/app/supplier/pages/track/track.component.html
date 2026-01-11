@@ -1,26 +1,24 @@
-<div class="space-y-8 animate-fade-in-up">
+<div class="space-y-8 animate-fade-in-up" dir="ltr">
 
   <!-- Tracking Header (Search Bar) -->
   <div class="glass p-8 rounded-[2rem] border-subtle shadow-premium">
     <div class="max-w-3xl mx-auto space-y-6">
       <div class="text-center">
-        <h1 class="text-3xl font-black mb-2">{{ langService.currentLang() === 'ar' ? 'تتبع شحنتك لحظة بلحظة' :
-          'Real-time Operations Monitoring' }}</h1>
-        <p class="text-secondary font-bold">{{ langService.currentLang() === 'ar' ? 'أدخل رقم التتبع لمشاهدة التفاصيل
-          وموقع المندوبباشرة' : 'Enter a tracking ID to visualize live movement and logistics status' }}</p>
+        <h1 class="text-3xl font-black mb-2">Real-time Operations Monitoring</h1>
+        <p class="text-secondary font-bold">Enter a tracking ID to visualize live movement and logistics status</p>
       </div>
 
       <div class="relative group">
         <input [(ngModel)]="trackingNumber" (keyup.enter)="searchParcel()" type="text"
-          [placeholder]="langService.currentLang() === 'ar' ? 'أدخل رقم التتبع (مثال: #1234)' : 'Search by ID (e.g. #1234)...'"
+          placeholder="Search by ID (e.g. #1234)..."
           class="input !pl-16 !pr-32 !py-5 !text-lg !rounded-2xl shadow-sm focus:shadow-green-lg">
 
         <i
-          class="bi bi-search absolute left-6 top-1/2 -translate-y-1/2 text-2xl text-secondary group-focus-within:text-primary-green transition-colors"></i>
+          class="bi bi-search absolute left-6 top-1/2 -translate-y-1/2 text-2xl text-secondary group-focus-within:text-slate-900 transition-colors"></i>
 
         <button (click)="searchParcel()"
-          class="absolute right-3 top-1/2 -translate-y-1/2 btn-primary !py-3 !px-8 !rounded-xl">
-          <span *ngIf="!isSearching">{{ langService.currentLang() === 'ar' ? 'تتبع الآن' : 'Locate' }}</span>
+          class="absolute right-3 top-1/2 -translate-y-1/2 btn-primary !py-3 !px-8 !rounded-xl text-white">
+          <span *ngIf="!isSearching">Locate</span>
           <span *ngIf="isSearching" class="flex items-center gap-2">
             <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
           </span>
@@ -41,70 +39,59 @@
     <div class="xl:col-span-8 space-y-6">
 
       <!-- Live Map Card -->
-      <div class="surface h-[500px] relative overflow-hidden group">
+      <div class="surface h-[500px] relative overflow-hidden group border border-slate-200 rounded-[2rem] bg-white">
         <div #mapContainer class="w-full h-full z-10"></div>
 
         <!-- Map HUD (Overlays) -->
         <div class="absolute top-6 left-6 z-20 space-y-2 pointer-events-none">
-          <div class="glass px-4 py-2 rounded-xl border-subtle flex items-center gap-3 backdrop-blur-xl">
-            <div class="w-2 h-2 rounded-full bg-primary-green animate-ping"></div>
-            <span class="text-[10px] font-black text-text-primary uppercase tracking-widest ltr:tracking-[0.2em]">Live
+          <div class="glass px-4 py-2 rounded-xl border-subtle flex items-center gap-3 backdrop-blur-xl bg-white/70">
+            <div class="w-2 h-2 rounded-full bg-slate-900 animate-ping"></div>
+            <span class="text-[10px] font-black text-slate-900 uppercase tracking-widest ltr:tracking-[0.2em]">Live
               Signal Acquired</span>
           </div>
         </div>
 
         <div class="absolute bottom-6 left-6 right-6 z-20 flex gap-4 overflow-x-auto pb-2 pointer-events-auto">
-          <div class="glass p-4 rounded-2xl border-subtle flex items-center gap-4 min-w-[200px]">
-            <div
-              class="w-10 h-10 rounded-xl bg-primary-green/20 text-primary-green flex items-center justify-center text-xl">
+          <div class="glass p-4 rounded-2xl border-subtle flex items-center gap-4 min-w-[200px] bg-white/70">
+            <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center text-xl">
               <i class="bi bi-clock-history"></i>
             </div>
             <div>
-              <p class="text-[9px] font-black text-secondary tracking-widest uppercase mb-1">{{
-                langService.currentLang() === 'ar' ? 'الوقت المتبقي' : 'ETA' }}</p>
-              <p class="text-sm font-black text-text-primary">~ 25 {{ langService.currentLang() === 'ar' ? 'دقيقة' :
-                'mins' }}</p>
+              <p class="text-[9px] font-black text-slate-500 tracking-widest uppercase mb-1">ETA</p>
+              <p class="text-sm font-black text-slate-900">~ 25 mins</p>
             </div>
           </div>
 
-          <div class="glass p-4 rounded-2xl border-subtle flex items-center gap-4 min-w-[200px]">
-            <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-500 flex items-center justify-center text-xl">
+          <div class="glass p-4 rounded-2xl border-subtle flex items-center gap-4 min-w-[200px] bg-white/70">
+            <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center text-xl">
               <i class="bi bi-speedometer2"></i>
             </div>
             <div>
-              <p class="text-[9px] font-black text-secondary tracking-widest uppercase mb-1">{{
-                langService.currentLang() === 'ar' ? 'المسافة' : 'Distance' }}</p>
-              <p class="text-sm font-black text-text-primary">3.2 {{ langService.currentLang() === 'ar' ? 'كم' : 'km' }}
-              </p>
+              <p class="text-[9px] font-black text-slate-500 tracking-widest uppercase mb-1">Distance</p>
+              <p class="text-sm font-black text-slate-900">3.2 km</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Quick Details Horizontal Strip -->
-      <div class="surface p-8 overflow-hidden relative">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-primary-green/5 rounded-full -mr-16 -mt-16"></div>
-
+      <!-- Quick Details -->
+      <div class="surface p-8 overflow-hidden relative border border-slate-200 rounded-[2rem] bg-white">
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
           <div class="space-y-1">
-            <p class="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">{{ langService.currentLang() ===
-              'ar' ? 'الحالة الحالية' : 'Current Phase' }}</p>
-            <p class="text-lg font-black text-primary-green">{{ getStatusText(parcel.status) }}</p>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Current Phase</p>
+            <p class="text-lg font-black text-slate-900">{{ getStatusText(parcel.status) }}</p>
           </div>
           <div class="space-y-1">
-            <p class="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">{{ langService.currentLang() ===
-              'ar' ? 'الخدمة' : 'Service Type' }}</p>
-            <p class="text-lg font-black text-text-primary">Express Next-Day</p>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Service Type</p>
+            <p class="text-lg font-black text-slate-900">Express Next-Day</p>
           </div>
           <div class="space-y-1">
-            <p class="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">{{ langService.currentLang() ===
-              'ar' ? 'المستلم' : 'Recipient' }}</p>
-            <p class="text-lg font-black text-text-primary">{{ parcel.receiverName }}</p>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Recipient</p>
+            <p class="text-lg font-black text-slate-900">{{ parcel.receiverName }}</p>
           </div>
           <div class="space-y-1">
-            <p class="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">{{ langService.currentLang() ===
-              'ar' ? 'قيمة التحصيل' : 'COD Amount' }}</p>
-            <p class="text-lg font-black text-accent-gold">{{ formatCurrency(parcel.codAmount) }}</p>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">COD Amount</p>
+            <p class="text-lg font-black text-slate-900">{{ formatCurrency(parcel.codAmount) }}</p>
           </div>
         </div>
       </div>
@@ -114,13 +101,9 @@
     <div class="xl:col-span-4 space-y-6">
 
       <!-- Courier Profile (If assigned) -->
-      <div *ngIf="parcel.courierName" class="surface p-8 bg-primary-dark text-white relative overflow-hidden group">
-        <div
-          class="absolute -bottom-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl group-hover:bg-primary-green/10 transition-all duration-700">
-        </div>
-
-        <h3 class="text-xs font-black text-white/40 uppercase tracking-[0.3em] mb-8">{{ langService.currentLang() ===
-          'ar' ? 'معلومات المندوب' : 'Operational Courier' }}</h3>
+      <div *ngIf="parcel.courierName"
+        class="surface p-8 bg-slate-900 text-white rounded-[2rem] relative overflow-hidden group">
+        <h3 class="text-xs font-black text-white/40 uppercase tracking-[0.3em] mb-8">Operational Courier</h3>
 
         <div class="flex items-center gap-6">
           <div class="relative">
@@ -128,7 +111,7 @@
               {{ parcel.courierName.charAt(0) }}
             </div>
             <div
-              class="absolute -bottom-1 -right-1 w-5 h-5 bg-primary-green rounded-full border-2 border-primary-dark flex items-center justify-center text-[10px]">
+              class="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-full border-2 border-slate-900 flex items-center justify-center text-[10px]">
               <i class="bi bi-patch-check-fill"></i>
             </div>
           </div>
@@ -137,11 +120,12 @@
             <p class="text-xs text-white/50 font-bold mb-3">Carrier ID: #{{ parcel.courierId }}</p>
             <div class="flex gap-2">
               <a [href]="'tel:' + parcel.courierPhone"
-                class="btn-primary !px-4 !py-2 !text-[10px] !rounded-lg border-0">
+                class="btn-primary !px-4 !py-2 !text-[10px] !rounded-lg border-0 text-white">
                 <i class="bi bi-telephone-fill"></i>
-                <span>{{ langService.currentLang() === 'ar' ? 'اتصال' : 'Call' }}</span>
+                <span>Call</span>
               </a>
-              <button class="btn border border-white/20 hover:bg-white/10 !px-4 !py-2 !text-[10px] !rounded-lg">
+              <button
+                class="btn border border-white/20 hover:bg-white/10 !px-4 !py-2 !text-[10px] !rounded-lg text-white">
                 <i class="bi bi-chat-dots-fill"></i>
               </button>
             </div>
@@ -150,36 +134,35 @@
       </div>
 
       <!-- Live Timeline -->
-      <div class="surface p-8 pb-4">
+      <div class="surface p-8 pb-4 border border-slate-200 rounded-[2rem] bg-white">
         <div class="flex items-center justify-between mb-8">
-          <h3 class="text-lg font-black">{{ langService.currentLang() === 'ar' ? 'سجل تتبع الشحنة' : 'Execution
-            Timeline' }}</h3>
-          <i class="bi bi-list-stars text-2xl text-secondary"></i>
+          <h3 class="text-lg font-black">Execution Timeline</h3>
+          <i class="bi bi-list-stars text-2xl text-slate-400"></i>
         </div>
 
         <div class="relative space-y-8">
           <!-- Central Line -->
-          <div class="absolute left-4 top-2 bottom-6 w-0.5 bg-border-subtle rtl:left-auto rtl:right-4"></div>
+          <div class="absolute left-4 top-2 bottom-6 w-0.5 bg-slate-100"></div>
 
-          <div *ngFor="let event of timeline; let last = last" class="relative pl-10 rtl:pl-0 rtl:pr-10">
+          <div *ngFor="let event of timeline; let last = last" class="relative pl-10">
             <!-- Event Dot -->
             <div
-              class="absolute left-2.5 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-surface transition-all duration-500 z-10 rtl:left-auto rtl:right-2.5"
-              [ngClass]="event.status === parcel.status ? 'bg-primary-green ring-4 ring-primary-green/20' : 'bg-gray-300 dark:bg-gray-700'">
+              class="absolute left-2.5 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white transition-all duration-500 z-10"
+              [ngClass]="event.status === parcel.status ? 'bg-slate-900 ring-4 ring-slate-100' : 'bg-slate-300'">
             </div>
 
             <div class="space-y-1">
               <div class="flex items-center justify-between">
-                <p class="text-sm font-black" [class.text-primary-green]="event.status === parcel.status">
+                <p class="text-sm font-black" [class.text-slate-900]="event.status === parcel.status">
                   {{ event.title }}
                 </p>
-                <p class="text-[9px] font-black text-secondary tracking-widest uppercase">
+                <p class="text-[9px] font-black text-slate-400 tracking-widest uppercase">
                   {{ event.timestamp | date:'shortTime' }}
                 </p>
               </div>
-              <p class="text-xs text-secondary font-bold leading-relaxed">{{ event.description }}</p>
-              <p class="text-[10px] text-secondary/40 font-bold uppercase pt-1">{{ event.timestamp | date:'MMM dd, yyyy'
-                }}</p>
+              <p class="text-xs text-slate-500 font-bold leading-relaxed">{{ event.description }}</p>
+              <p class="text-[10px] text-slate-400 font-bold uppercase pt-1">{{ event.timestamp | date:'MMM dd, yyyy' }}
+              </p>
             </div>
           </div>
         </div>

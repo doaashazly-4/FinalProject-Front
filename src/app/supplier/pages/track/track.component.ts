@@ -7,8 +7,6 @@ import { interval, Subscription, timer } from 'rxjs';
 import * as L from 'leaflet';
 import { AuthService } from '../../../shared/services/auth.service';
 import { SignalRService } from '../../../shared/services/signalr.service';
-import { LanguageService } from '../../../shared/services/language.service';
-import { ThemeService } from '../../../shared/services/theme.service';
 
 @Component({
   selector: 'app-track',
@@ -37,9 +35,7 @@ export class TrackComponent implements OnInit, AfterViewInit, OnDestroy {
     private dataService: SupplierDataService,
     private route: ActivatedRoute,
     private signalR: SignalRService,
-    private auth: AuthService,
-    public langService: LanguageService,
-    public themeService: ThemeService
+    private auth: AuthService
   ) { }
 
   ngOnInit(): void {
@@ -104,7 +100,7 @@ export class TrackComponent implements OnInit, AfterViewInit, OnDestroy {
         }, 100);
       },
       error: () => {
-        this.errorMessage = this.langService.currentLang() === 'ar' ? 'لم يتم العثور على شحنة' : 'Shipment not found';
+        this.errorMessage = 'Shipment not found';
         this.isSearching = false;
       }
     });
@@ -136,14 +132,14 @@ export class TrackComponent implements OnInit, AfterViewInit, OnDestroy {
         className: 'custom-div-icon',
         html: `<div class="w-4 h-4 rounded-full bg-primary-green border-2 border-white shadow-md"></div>`
       })
-    }).addTo(this.map).bindPopup(this.langService.currentLang() === 'ar' ? 'الاستلام' : 'Pickup');
+    }).addTo(this.map).bindPopup('Pickup');
 
     L.marker([dLat, dLng], {
       icon: L.divIcon({
         className: 'custom-div-icon',
         html: `<div class="w-4 h-4 rounded-full bg-red-500 border-2 border-white shadow-md"></div>`
       })
-    }).addTo(this.map).bindPopup(this.langService.currentLang() === 'ar' ? 'التسليم' : 'Delivery');
+    }).addTo(this.map).bindPopup('Delivery');
 
     this.routePolyline = L.polyline([[pLat, pLng], [dLat, dLng]], {
       color: '#192A45',
@@ -177,12 +173,11 @@ export class TrackComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getStatusText(status: string): string {
-    const ar: any = { 'pending': 'معلق', 'picked_up': 'تم الاستلام', 'delivered': 'تم التسليم' };
     const en: any = { 'pending': 'Pending', 'picked_up': 'Picked Up', 'delivered': 'Delivered' };
-    return this.langService.currentLang() === 'ar' ? ar[status] || status : en[status] || status;
+    return en[status] || status;
   }
 
   formatCurrency(value: number): string {
-    return this.langService.currentLang() === 'ar' ? `${value} ج.م` : `${value} EGP`;
+    return `${value} EGP`;
   }
 }
