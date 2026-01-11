@@ -1,14 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { SupplierDataService, Parcel, SenderStat, SenderDashboardData } from '../../services/supplier-data.service';
+import { LanguageService } from '../../../shared/services/language.service';
+import { LucideAngularModule, CheckCircle2 } from 'lucide-angular';
 
 import { ShipmentCardComponent } from '../../components/shipment-card/shipment-card.component';
+
+@NgModule({
+  imports: [LucideAngularModule.pick({ CheckCircle2 })],
+  exports: [LucideAngularModule]
+})
+export class DashboardIconsModule { }
 
 @Component({
   selector: 'app-supplier-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, ShipmentCardComponent],
+  imports: [CommonModule, RouterModule, ShipmentCardComponent, DashboardIconsModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
@@ -23,7 +31,8 @@ export class SupplierDashboardComponent implements OnInit {
 
   constructor(
     private dataService: SupplierDataService,
-    private router: Router
+    private router: Router,
+    public langService: LanguageService
   ) { }
 
   ngOnInit(): void {
@@ -155,5 +164,9 @@ export class SupplierDashboardComponent implements OnInit {
       'bg-gradient-to-br from-amber-500 to-amber-600'
     ];
     return colors[index % colors.length];
+  }
+
+  getStatLabel(label: string): string {
+    return label;
   }
 }
