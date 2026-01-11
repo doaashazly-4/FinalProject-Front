@@ -264,7 +264,7 @@ export class CourierDataService {
     return this.http.get<{ packages: DeliveryJob[] }>(`${this.apiUrl}/AvailableJobs`)
       .pipe(map(res => {
         console.log("available jobs response", res);
-        return res.packages;
+        return res.packages || [];
       }));
   }
 

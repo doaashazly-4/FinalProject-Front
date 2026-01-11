@@ -93,10 +93,9 @@ export class SignalRService {
       .catch(err => console.error(err));
   }
 
-  public stopConnection(): Promise<void> {
+  public stopConnection() {
     if (this.hubConnection) {
-      return this.hubConnection.stop();
+      this.hubConnection.stop().then(() => console.log('🛑 SignalR Connection stopped'));
     }
-    return Promise.resolve();
   }
 }
