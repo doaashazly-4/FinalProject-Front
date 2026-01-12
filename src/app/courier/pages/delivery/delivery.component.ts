@@ -17,6 +17,7 @@ interface DeliveryUIJob {
   id: number;
   status: DeliveryUIStatus;
   awaitingOTP: boolean;
+  otp?: string; // Exposed from backend
 
   pickupAddress?: string;
   pickupLat?: number;
@@ -57,6 +58,7 @@ export class DeliveryComponent implements OnInit, OnDestroy {
   showProofModal = false;
   showFailedModal = false;
   otpVerified = false;
+  isVerifying = false;
 
   /* ================= INIT ================= */
 
@@ -105,7 +107,7 @@ export class DeliveryComponent implements OnInit, OnDestroy {
     this.isLoading = true;
 
     this.courierService.checkOTPStatus(this.packageId).subscribe({
-      next: (otpRes: { otpVerified: boolean; status: number | string }) => {
+      next: (otpRes: { otpVerified: boolean; status: number | string; otp?: string }) => {
 
         const normalizedStatus = this.normalizeStatus(otpRes.status);
 
@@ -113,13 +115,15 @@ export class DeliveryComponent implements OnInit, OnDestroy {
           this.job.status = normalizedStatus;
           this.job.awaitingOTP =
             !otpRes.otpVerified && normalizedStatus === 'out_for_delivery';
+          if (otpRes.otp) this.job.otp = otpRes.otp;
         } else {
           // Direct reload case
           this.job = {
             id: this.packageId,
             status: normalizedStatus,
             awaitingOTP:
-              !otpRes.otpVerified && normalizedStatus === 'out_for_delivery'
+              !otpRes.otpVerified && normalizedStatus === 'out_for_delivery',
+            otp: otpRes.otp
           };
         }
 
@@ -195,20 +199,24 @@ export class DeliveryComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.isVerifying = true;
     this.courierService.verifyDeliveryOTP(this.packageId, payload.otp).subscribe({
       next: () => {
         this.courierService.deliverPackage(this.packageId, payload.notes ?? '')
           .subscribe({
             next: () => {
+              this.isVerifying = false;
               this.showProofModal = false;
               this.router.navigate(['/courier/dashboard']);
             },
             error: () => {
+              this.isVerifying = false;
               this.error = 'فشل إنهاء التوصيل';
             }
           });
       },
       error: () => {
+        this.isVerifying = false;
         this.error = 'رمز OTP غير صحيح';
       }
     });
@@ -295,16 +303,28 @@ export class DeliveryComponent implements OnInit, OnDestroy {
     dropLat?: number,
     dropLng?: number
   ) {
-    if (!pickupLat || !pickupLng || !dropLat || !dropLng) {
-      return null;
+    // 1. Full Route
+    if (pickupLat && pickupLng && dropLat && dropLng) {
+      const url =
+        `https://www.google.com/maps?saddr=${pickupLat},${pickupLng}` +
+        `&daddr=${dropLat},${dropLng}` +
+        `&hl=ar&z=14&output=embed`;
+      return this.sanitizer.bypassSecurityTrustResourceUrl(url);
     }
 
-    const url =
-      `https://www.google.com/maps?saddr=${pickupLat},${pickupLng}` +
-      `&daddr=${dropLat},${dropLng}` +
-      `&hl=ar&z=14&output=embed`;
+    // 2. Only Pickup (Fallback)
+    if (pickupLat && pickupLng) {
+      const url = `https://www.google.com/maps?q=${pickupLat},${pickupLng}&hl=ar&z=15&output=embed`;
+      return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    }
 
-    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    // 3. Only Dropoff (Fallback)
+    if (dropLat && dropLng) {
+      const url = `https://www.google.com/maps?q=${dropLat},${dropLng}&hl=ar&z=15&output=embed`;
+      return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    }
+
+    return null;
   }
 
   ngOnDestroy(): void {

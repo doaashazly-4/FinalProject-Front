@@ -54,18 +54,8 @@ export class SupplierDashboardComponent implements OnInit {
       }
     });
 
-    this.dataService.getParcels({ status: ['pending', 'ready_for_pickup'] }).subscribe({
-      next: (parcels) => {
-        console.log('Pending Parcels:', parcels);
-        this.pendingParcels = parcels;
-        // In case dashboard summary is slow/fails, ensure we stop loading
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Error loading pending parcels:', err);
-        this.pendingParcels = [];
-      }
-    });
+    // We rely on getDashboardData() for the summary and recent parcels.
+    // Fetching all pending parcels here is unnecessary and causes performance issues if data is large.
   }
 
   markReadyForPickup(parcel: Parcel): void {

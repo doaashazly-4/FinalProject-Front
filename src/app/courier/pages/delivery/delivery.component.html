@@ -66,8 +66,12 @@
         )" class="w-full h-full" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
       </iframe>
 
-      <div *ngIf="!job.pickupLat || !job.destinationLat" class="flex items-center justify-center h-full text-gray-500">
-        لا توجد إحداثيات متاحة للمسار
+      <div *ngIf="!job.pickupLat && !job.destinationLat"
+        class="flex items-center justify-center h-full text-gray-500 bg-gray-100">
+        <div class="text-center">
+          <i class="bi bi-map-fill text-4xl mb-2 text-gray-400"></i>
+          <p>الخريطة غير متاحة لهذا المسار</p>
+        </div>
       </div>
     </div>
 
@@ -99,7 +103,9 @@
 </div>
 
 <!-- Delivery Proof Modal -->
-<app-delivery-proof *ngIf="showProofModal" (onComplete)="onProofComplete($event)" (onCancel)="onProofCancel()">
+<app-delivery-proof *ngIf="showProofModal" [isVisible]="showProofModal" [isSubmitting]="isVerifying"
+  [expectedOtp]="job?.otp" (onComplete)="onProofComplete($event)" (onCancel)="onProofCancel()"
+  (onRefresh)="loadOTPStatusOnly()">
 </app-delivery-proof>
 
 <!-- Loader -->

@@ -8,6 +8,7 @@ import {
   CarrierLocation,
   DeliveryStatus
 } from '../../services/customer-data.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 import { Subscription, interval } from 'rxjs';
 import { LynxTalismanComponent } from '../../../shared/components/lynx-talisman/lynx-talisman.component'; // AI Dispatcher UI
 
@@ -48,7 +49,8 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
-    private dataService: CustomerDataService
+    private dataService: CustomerDataService,
+    private notificationService: NotificationService // Injected
   ) { }
 
   // ================= LIFECYCLE =================
@@ -75,6 +77,12 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
       next: (pkg: any) => {
         this.delivery = this.mapBackendPackage(pkg);
         this.deliveryNote = this.delivery.notes ?? '';
+
+        // Extract OTP if present from backend
+        if (this.delivery.deliveryOTP) {
+          this.otp = this.delivery.deliveryOTP;
+        }
+
         this.isLoading = false;
 
         if (
@@ -111,7 +119,8 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
       weight: pkg.weight ?? 0,
       courierName: pkg.courier ? `Courier #${pkg.courier.id}` : undefined,
       courierPhone: undefined,
-      notes: pkg.shipmentNotes ?? ''
+      notes: pkg.shipmentNotes ?? '',
+      deliveryOTP: pkg.courier?.deliveryOTP
     };
   }
 
@@ -249,6 +258,11 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
   otp: string | null = null;
 
   loadOTP() {
+    // If mocking, return a fake OTP
+    if (this.delivery?.status === 'out_for_delivery' && !this.otp) {
+      this.otp = '8921'; // Mock OTP
+    }
+
     if (!this.delivery || this.delivery.status !== 'out_for_delivery') return;
 
     this.dataService.getPackageOTP(Number(this.delivery.id)).subscribe({
@@ -257,6 +271,48 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
           this.otp = res.otp;
         }
       }
+    });
+  }
+
+  // ================= DEMO / SIMULATION =================
+
+  simulateCourierArrival(): void {
+    if (!this.delivery) return;
+
+    this.isLoading = true;
+    setTimeout(() => {
+      this.delivery!.status = 'out_for_delivery';
+      this.isLoading = false;
+      this.otp = '4492'; // Demo OTP
+
+      // Trigger Notification
+      this.notificationService.showNotification({
+        title: 'المندوب وصل! 🚴',
+        message: 'المندوب بالخارج الآن. يرجى إعطاءه رمز التسليم: ' + this.otp,
+        type: 'success',
+        sound: 'assets/sounds/notification.mp3'
+      });
+
+      // Mock Location near user
+      // Mock Location near user
+      this.carrierLocation = {
+        courierId: '99',
+        lat: 30.0444, // Cairo example
+        lng: 31.2357,
+        timestamp: new Date()
+      };
+      this.mapUrl = `https://www.google.com/maps?q=${this.carrierLocation.lat},${this.carrierLocation.lng}&z=15`;
+    }, 1500);
+  }
+
+  simulateDeliveryComplete(): void {
+    if (!this.delivery) return;
+    this.delivery.status = 'delivered';
+    this.showRatingModal = true;
+    this.notificationService.showNotification({
+      title: 'تم التسليم ✅',
+      message: 'شكراً لاستخدامك Lynx. نتمنى لك يوماً سعيداً!',
+      type: 'success'
     });
   }
 

@@ -305,9 +305,32 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
       });
   }
 
+  suggestedCourier: any = null;
+
   setupFeeCalculationTriggers(): void {
     this.shipmentForm.get('weight')?.valueChanges.subscribe(() => this.localCalculateFee());
-    this.shipmentForm.get('priority')?.valueChanges.subscribe(() => this.localCalculateFee());
+    this.shipmentForm.get('priority')?.valueChanges.subscribe(val => {
+      this.localCalculateFee();
+      this.triggerLynxTalisman(val);
+    });
+  }
+
+  triggerLynxTalisman(priority: string): void {
+    if (priority === 'urgent') {
+      // Simulate Lynx AI finding the best match
+      setTimeout(() => {
+        this.suggestedCourier = {
+          id: 2,
+          name: 'Courier #2',
+          score: '98%',
+          features: ['الأسرع', 'الأقرب', 'تقييم عالي']
+        };
+        // Auto-assign logic (mock)
+        this.shipmentForm.patchValue({ notes: (this.shipmentForm.get('notes')?.value || '') + ' [Lynx Auto-Assign: Courier #2]' });
+      }, 500);
+    } else {
+      this.suggestedCourier = null;
+    }
   }
 
   localCalculateFee(): void {

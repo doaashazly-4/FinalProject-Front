@@ -1,16 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
+import { Router, RouterOutlet, NavigationEnd, NavigationStart, NavigationCancel, NavigationError } from '@angular/router';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
 import { filter } from 'rxjs/operators';
 import { OfflineService } from './courier/services/offline.service';
 import { NotificationsComponent } from './shared/notifications/notifications.component';
+import { LoaderComponent } from './shared/components/loader/loader.component';
+import { LoaderService } from './shared/services/loader.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, NavbarComponent, FooterComponent, NotificationsComponent],
+  imports: [CommonModule, RouterOutlet, NavbarComponent, FooterComponent, NotificationsComponent, LoaderComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -29,11 +31,29 @@ export class AppComponent implements OnInit {
     '/admin'
   ];
 
-  constructor(private router: Router, private offlineService: OfflineService) {
+  constructor(
+    private router: Router,
+    private offlineService: OfflineService,
+    private loaderService: LoaderService
+  ) {
     console.log('🔧 Testing OfflineService:', {
       serviceExists: !!offlineService,
       isOnlineProperty: offlineService?.isCurrentlyOnline,
       hasOnlineStatus$: !!offlineService?.onlineStatus$
+    });
+
+    // Global Loader Logic
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationStart) {
+        this.loaderService.show();
+      } else if (
+        event instanceof NavigationEnd ||
+        event instanceof NavigationCancel ||
+        event instanceof NavigationError
+      ) {
+        // Add a small delay for better UX
+        setTimeout(() => this.loaderService.hide(), 800);
+      }
     });
   }
 

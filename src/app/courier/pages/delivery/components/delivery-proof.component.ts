@@ -12,14 +12,17 @@ import { DeliveryJob } from '../../../services/courier-data.service';
 export class DeliveryProofComponent {
   @Input() isVisible = false;
   @Input() job: DeliveryJob | null = null;
+  @Input() isSubmitting = false; // Controlled by parent
+  @Input() expectedOtp?: string; // For Demo purposes
 
   otp = '';
   notes = '';
   error: string | null = null;
-  isSubmitting = false;
+  // State controlled by parent via isSubmitting
 
   @Output() onComplete = new EventEmitter<{ otp: string; notes?: string }>();
   @Output() onCancel = new EventEmitter<void>();
+  @Output() onRefresh = new EventEmitter<void>();
 
   submit() {
     if (!this.otp || this.otp.length < 4) {
@@ -27,7 +30,7 @@ export class DeliveryProofComponent {
       return;
     }
 
-    this.isSubmitting = true;
+    // this.isSubmitting = true; // Let parent control this
     this.error = null;
 
     this.onComplete.emit({
@@ -38,5 +41,9 @@ export class DeliveryProofComponent {
 
   cancel() {
     this.onCancel.emit();
+  }
+
+  refresh() {
+    this.onRefresh.emit();
   }
 }

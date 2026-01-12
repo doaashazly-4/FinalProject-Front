@@ -189,7 +189,7 @@ export class CustomerDataService {
       `${this.apiUrl}/MyOrders`,
       { params: { phoneNumber: phone } }
     );
-  } 
+  }
 
 
 
@@ -244,6 +244,7 @@ export class CustomerDataService {
   }
 
   trackPackage(packageId: number) {
+    // If backend returns deliveryOTP directly or inside courier object, we want to expose it generally
     return this.http.get<any>(
       `${this.apiUrl}/TrackPackage/${packageId}`
     );

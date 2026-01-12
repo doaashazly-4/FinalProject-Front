@@ -150,7 +150,8 @@ export class CourierDataService {
       customerName: job.customerName ?? job.customer?.user?.userName ?? 'عميل',
       receiverPhone: job.receiverPhone ?? job.customer?.user?.phoneNumber ?? '',
       status: statusMap[job.status] ?? 'available',
-      awaitingOTP: false
+      awaitingOTP: false,
+      otp: job.courier?.deliveryOTP // Map OTP from courier object
     };
   }
 
@@ -217,7 +218,8 @@ export class CourierDataService {
   }
 
   verifyDeliveryOTP(jobId: number, otp: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/VerifyOTP/${jobId}`, otp);
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post(`${this.apiUrl}/VerifyOTP/${jobId}`, JSON.stringify(otp), { headers });
   }
 
   // ✅ Restore updateJobStatus as a facade for various endpoints
@@ -280,10 +282,10 @@ export class CourierDataService {
   /* ===================== OTHER / LEGACY / SUPPORT ===================== */
 
   checkOTPStatus(packageId: number) {
-  return this.http.get<{ otpVerified: boolean; status: string }>(
-    `${this.apiUrl}/otp-status/${packageId}`
-  );
-}
+    return this.http.get<{ otpVerified: boolean; status: string }>(
+      `${this.apiUrl}/otp-status/${packageId}`
+    );
+  }
 
 
 
