@@ -693,6 +693,16 @@ export class SupplierDataService {
     };
   }
 
+  matchCouriers(pickupLat: number, pickupLng: number) {
+    return this.http.post<any[]>(
+      `${environment.apiUrl}/Supplier/MatchCourier`,
+      {
+        pickupLat,
+        pickupLng
+      }
+    );
+  }
+
   updateOrderStatus(orderId: string, newStatus: string): Observable<SupplierOrderRow> {
     let action$: Observable<any>;
 
@@ -717,6 +727,8 @@ export class SupplierDataService {
   }
 
 }
+
+
 
 export interface SupplierOrderRow {
   id: string;
