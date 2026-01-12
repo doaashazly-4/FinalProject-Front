@@ -1,177 +1,126 @@
-<div *ngIf="!isLoading && job">
-  <div class="space-y-6" *ngIf="job && !isLoading">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div>
-        <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">طلب #{{ job.id }}</h1>
-        <p class="text-gray-600 mt-1">{{ job.description }}</p>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="px-3 py-1 rounded-full text-sm font-bold" [ngClass]="getStatusClass(job.status)">
-          {{ getStatusText(job.status) }}
-        </span>
-        <div class="text-left">
-          <p class="font-bold text-primary-green">{{ job.shipmentCost }} ج.م</p>
-        </div>
-      </div>
+<div *ngIf="!isLoading && job" class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">
+        طلب #{{ job.id }}
+      </h1>
     </div>
 
-    <!-- Route Map -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="p-5 border-b border-gray-100 bg-gradient-to-l from-blue-50 to-indigo-50">
-        <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
-          <i class="bi bi-geo-alt text-blue-600"></i>
-          مسار التوصيل
-        </h2>
-      </div>
-      <div class="p-5">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Pickup Location -->
-          <div class="p-4 bg-gray-50 rounded-xl space-y-3">
-            <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                <i class="bi bi-arrow-up-circle text-blue-600"></i>
-              </div>
-              <div class="flex-1">
-                <p class="text-xs text-gray-500">الاستلام من</p>
-                <p class="text-sm text-gray-600">{{ job.pickupAddress }}</p>
-              </div>
-            </div>
-            <button (click)="navigateToPickup()"
-              class="w-full py-3 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl font-bold hover:shadow-lg transition-all">
-              <i class="bi bi-geo-alt ml-2"></i>
-              تنقل للاستلام
-            </button>
-          </div>
+    <span class="px-3 py-1 rounded-full text-sm font-bold bg-indigo-100 text-indigo-700">
+      {{
+      job.status === 'assigned'
+      ? 'جاهز للبدء'
+      : job.status === 'out_for_delivery'
+      ? 'قيد التوصيل'
+      : 'تم التسليم'
+      }}
+    </span>
+  </div>
 
-          <!-- Delivery Location -->
-          <div class="p-4 bg-gray-50 rounded-xl space-y-3">
-            <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                <i class="bi bi-arrow-down-circle text-green-600"></i>
-              </div>
-              <div class="flex-1">
-                <p class="text-xs text-gray-500">التسليم إلى</p>
-                <p class="font-medium text-primary-dark">{{ job.customerName }}</p>
-                <p class="text-sm text-gray-600">{{ job.dropoffAddress }}</p>
-              </div>
-            </div>
-            <button (click)="navigateToDropoff()"
-              class="w-full py-3 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl font-bold hover:shadow-lg transition-all">
-              <i class="bi bi-geo-alt ml-2"></i>
-              تنقل للتسليم
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+  <!-- Route Info -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
 
-    <!-- Order Details -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="p-5 border-b border-gray-100 bg-gray-50/50">
-        <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
-          <i class="bi bi-box-seam text-primary-green"></i>
-          تفاصيل الطلب
-        </h2>
-      </div>
-      <div class="p-5">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="space-y-3">
-            <div class="flex justify-between">
-              <span class="text-gray-600">الوزن:</span>
-              <span class="font-medium">{{ job.weight }} كجم</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <h2 class="text-lg font-bold">مسار التوصيل</h2>
 
-    <!-- Action Buttons -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="p-5 space-y-4">
-        <!-- Call Customer Button -->
-        <button (click)="callCustomer()"
-          class="w-full py-4 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold text-lg hover:shadow-green-lg transition-all flex items-center justify-center gap-3">
-          <i class="bi bi-telephone-fill text-2xl"></i>
-          <span>اتصال بالعميل</span>
+    <!-- Pickup & Dropoff Addresses -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+
+      <!-- Pickup -->
+      <div class="p-4 bg-gray-50 rounded-xl space-y-2">
+        <p class="text-xs text-gray-500">الاستلام من</p>
+        <p class="font-medium text-gray-800">
+          {{ job.pickupAddress || 'غير متوفر' }}
+        </p>
+        <button (click)="navigateToPickup()" class="w-full py-2 bg-blue-500 text-white rounded-lg font-bold">
+          تنقل إلى الاستلام
         </button>
+      </div>
 
-        <!-- Status Update Buttons -->
-        <div class="flex gap-3 flex-wrap">
-          <button *ngIf="job.status === 'accepted'" (click)="markPickedUp()"
-            class="flex-1 py-3 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl font-bold hover:shadow-lg transition-all">
-            <i class="bi bi-box-arrow-up ml-2"></i>
-            تم الاستلام (Picked Up)
-          </button>
-          <button *ngIf="job.status === 'picked_up'" (click)="markOutForDelivery()"
-            class="flex-1 py-3 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl font-bold hover:shadow-lg transition-all">
-            <i class="bi bi-truck ml-2"></i>
-            في الطريق (Out For Delivery)
-          </button>
-          <button *ngIf="job.status === 'out_for_delivery' || job.status === 'in_transit'" (click)="completeDelivery()"
-            class="flex-1 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold hover:shadow-lg transition-all">
-            <i class="bi bi-check-circle ml-2"></i>
-            تأكيد التسليم (Deliver)
-          </button>
+      <!-- Dropoff -->
+      <div class="p-4 bg-gray-50 rounded-xl space-y-2">
+        <p class="text-xs text-gray-500">التسليم إلى</p>
+        <p class="font-medium text-gray-800">
+          {{ job.dropoffAddress || 'غير متوفر' }}
+        </p>
+        <button (click)="navigateToDropoff()" class="w-full py-2 bg-green-500 text-white rounded-lg font-bold">
+          تنقل إلى التسليم
+        </button>
+      </div>
 
-          <!-- Report Issue -->
-          <button routerLink="/courier/support"
-            class="px-6 py-3 bg-orange-100 text-orange-700 rounded-xl font-bold hover:bg-orange-200 transition-colors">
-            <i class="bi bi-exclamation-triangle ml-2"></i>
-            الإبلاغ عن مشكلة
-          </button>
-        </div>
+    </div>
 
-        <!-- Unable to Deliver Options -->
-        <div *ngIf="['accepted', 'picked_up', 'out_for_delivery', 'in_transit'].includes(job.status)"
-          class="pt-4 border-t border-gray-100">
-          <h3 class="font-bold text-gray-800 mb-3">في حالة عدم القدرة على التسليم:</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <button (click)="unableToDeliver('no_answer')"
-              class="p-3 bg-red-50 text-red-700 rounded-xl font-medium hover:bg-red-100 transition-colors text-sm">
-              <i class="bi bi-x-circle ml-2"></i>
-              لا يوجد رد
-            </button>
-            <button (click)="unableToDeliver('refused')"
-              class="p-3 bg-red-50 text-red-700 rounded-xl font-medium hover:bg-red-100 transition-colors text-sm">
-              <i class="bi bi-hand-thumbs-down ml-2"></i>
-              رفض الاستلام
-            </button>
-            <button (click)="unableToDeliver('wrong_address')"
-              class="p-3 bg-red-50 text-red-700 rounded-xl font-medium hover:bg-red-100 transition-colors text-sm">
-              <i class="bi bi-geo-alt ml-2"></i>
-              عنوان خاطئ
-            </button>
-            <button (click)="unableToDeliver('damaged')"
-              class="p-3 bg-red-50 text-red-700 rounded-xl font-medium hover:bg-red-100 transition-colors text-sm">
-              <i class="bi bi-exclamation-triangle ml-2"></i>
-              تالف
-            </button>
-          </div>
-        </div>
+    <!-- Combined Route Map -->
+    <div class="w-full h-[350px] rounded-xl overflow-hidden border">
+      <iframe *ngIf="getRouteMapUrl(
+          job.pickupLat,
+          job.pickupLng,
+          job.destinationLat,
+          job.destinationLng
+        )" [src]="getRouteMapUrl(
+          job.pickupLat,
+          job.pickupLng,
+          job.destinationLat,
+          job.destinationLng
+        )" class="w-full h-full" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+
+      <div *ngIf="!job.pickupLat || !job.destinationLat" class="flex items-center justify-center h-full text-gray-500">
+        لا توجد إحداثيات متاحة للمسار
       </div>
     </div>
+
   </div>
 
-  <!-- Delivery Proof Modal -->
-  <app-delivery-proof *ngIf="showProofModal" [isVisible]="showProofModal" [job]="job"
-    (onComplete)="onProofComplete($event)" (onCancel)="onProofCancel()">
-  </app-delivery-proof>
+  <!-- Actions -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
 
-  <!-- Failed Delivery Modal -->
-  <app-failed-delivery-proof *ngIf="showFailedModal" [isVisible]="showFailedModal" [job]="job"
-    (onSubmit)="onFailedSubmit($event)" (onCancel)="onFailedCancel()">
-  </app-failed-delivery-proof>
+    <!-- Start Delivery -->
+    <button *ngIf="job.status === 'assigned'" (click)="startDelivery()"
+      class="w-full py-4 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold">
+      <i class="bi bi-truck ml-2"></i>
+      بدء التوصيل
+    </button>
 
-  <!-- Loader -->
-  <div *ngIf="isLoading" class="flex justify-center items-center py-20">
-    <div class="text-center">
-      <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4">
-      </div>
-      <p class="text-gray-500">جاري تحميل تفاصيل المهمة...</p>
+    <!-- Request OTP -->
+    <button *ngIf="job.status === 'out_for_delivery' && job.awaitingOTP" (click)="openConfirmDelivery()"
+      class="w-full py-3 bg-orange-500 text-white rounded-xl font-bold">
+      طلب رمز OTP
+    </button>
+
+    <!-- Delivered -->
+    <div *ngIf="job.status === 'delivered'" class="p-4 bg-green-100 text-green-700 rounded-xl text-center font-bold">
+      🎉 تم تسليم الطلب بنجاح
     </div>
+
+  </div>
+
+</div>
+
+<!-- Delivery Proof Modal -->
+<app-delivery-proof *ngIf="showProofModal" (onComplete)="onProofComplete($event)" (onCancel)="onProofCancel()">
+</app-delivery-proof>
+
+<!-- Loader -->
+<div *ngIf="isLoading" class="flex justify-center items-center py-20">
+  <div class="text-center">
+    <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4">
+    </div>
+    <p class="text-gray-500">جاري تحميل تفاصيل المهمة...</p>
   </div>
 </div>
-<div *ngIf="isLoading" class="text-center p-6">
-  جاري تحميل بيانات الشحنة...
+
+<!-- Error -->
+<div *ngIf="error" class="p-4 bg-red-100 text-red-700 rounded-xl mt-4">
+  {{ error }}
 </div>
+
+<app-delivery-proof [isVisible]="showProofModal" (onComplete)="onProofComplete($event)" (onCancel)="onProofCancel()">
+</app-delivery-proof>
+
+
+<!-- Failed Delivery Modal -->
+<app-failed-delivery-proof *ngIf="showFailedModal" [isVisible]="showFailedModal" [job]="job"
+  (onSubmit)="onFailedSubmit($event)" (onCancel)="onFailedCancel()">
+</app-failed-delivery-proof>

@@ -4,14 +4,12 @@ import { RouterModule, Router } from '@angular/router';
 import { CourierDataService, DeliveryJob, CourierStat, CourierEarnings, JobStatus } from '../../services/courier-data.service';
 import { PushNotificationService } from '../../../shared/services/push-notification.service';
 import { Observable } from 'rxjs';
-import { DeliveryProofComponent } from '../delivery/components/delivery-proof.component';
-import { FailedDeliveryProofComponent } from '../delivery/components/failed-delivery-proof.component';
 
 
 @Component({
   selector: 'app-courier-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, DeliveryProofComponent, FailedDeliveryProofComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })

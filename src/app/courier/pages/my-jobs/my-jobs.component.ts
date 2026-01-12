@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CourierDataService, DeliveryJob, JobStatus } from '../../services/courier-data.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-my-jobs',
@@ -17,7 +18,7 @@ export class MyJobsComponent implements OnInit {
   filter: 'all' | 'active' | 'completed' = 'active';
   isLoading = true;
 
-  constructor(private dataService: CourierDataService) { }
+  constructor(private dataService: CourierDataService, private router: Router) { }
 
   ngOnInit(): void {
     this.loadJobs();
@@ -127,6 +128,14 @@ export class MyJobsComponent implements OnInit {
     };
     return classMap[status] || 'bg-gray-100 text-gray-800 border-gray-200';
   }
+
+  openDelivery(job: DeliveryJob) {
+    this.router.navigate(
+      ['/courier/delivery', job.id],
+      { state: { job } }
+    );
+  }
+
 
   getNextAction(status: string): { label: string; action: JobStatus; class: string } | null {
     const actions: { [key: string]: { label: string; action: JobStatus; class: string } } = {

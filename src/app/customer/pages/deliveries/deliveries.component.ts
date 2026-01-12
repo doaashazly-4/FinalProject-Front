@@ -38,7 +38,7 @@ export class DeliveriesComponent implements OnInit {
   loadDeliveries(): void {
     this.isLoading = true;
 
-    this.dataService.getMyOrders(this.phoneNumber).subscribe({
+    this.dataService.getDeliveries().subscribe({
       next: (packages) => {
         this.deliveries = packages.map(pkg => this.mapBackendPackage(pkg));
         this.updateFilterCounts();

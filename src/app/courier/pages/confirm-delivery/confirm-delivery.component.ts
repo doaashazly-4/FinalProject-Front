@@ -11,16 +11,12 @@ import { Subscription, interval } from 'rxjs';
   imports: [CommonModule, FormsModule],
   templateUrl: './confirm-delivery.component.html'
 })
-export class ConfirmDeliveryComponent implements OnInit, OnDestroy {
-
+export class ConfirmDeliveryComponent implements OnInit {
   packageId!: number;
   otp = '';
+  otpVerified = false;
   isLoading = false;
   error = '';
-
-  status: 'waiting' | 'confirmed' = 'waiting';
-
-  private pollingSub?: Subscription;
 
   constructor(
     private route: ActivatedRoute,
@@ -29,74 +25,52 @@ export class ConfirmDeliveryComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('packageId');
-
-    if (!id) {
-      this.error = 'رقم الشحنة غير صالح';
-      return;
-    }
-
-    this.packageId = Number(id);
-
-    if (isNaN(this.packageId)) {
-      this.error = 'رقم الشحنة غير صالح';
-      return;
-    }
-
-    this.startPolling();
+    this.packageId = Number(this.route.snapshot.paramMap.get('id'));
+    this.loadOtpStatus();
   }
 
-  ngOnDestroy(): void {
-    this.pollingSub?.unsubscribe();
-  }
-
-  // ==============================
-  // OTP STATUS POLLING
-  // ==============================
-
-  startPolling(): void {
-    this.pollingSub = interval(5000).subscribe(() => {
-      this.checkOTPStatus();
-    });
-  }
-
-  checkOTPStatus(): void {
+  loadOtpStatus() {
     this.courierService.checkOTPStatus(this.packageId).subscribe({
-      next: (res: { otpVerified: boolean }) => {
-        if (res.otpVerified) {
-          this.status = 'confirmed';
-          this.pollingSub?.unsubscribe(); // stop polling once confirmed
-        }
+      next: res => {
+        this.otpVerified = res.otpVerified;
       },
       error: () => {
-        // silent fail — polling should not break UX
+        this.error = 'تعذر تحميل حالة الشحنة';
       }
     });
   }
 
-  // ==============================
-  // CONFIRM DELIVERY
-  // ==============================
-
-  confirmDelivery() {
-    if (this.otp.length !== 6) {
-      this.error = 'OTP غير صحيح';
-      return;
-    }
+  verifyOtp() {
+    if (!this.otp) return;
 
     this.isLoading = true;
     this.error = '';
 
-    this.courierService.verifyDeliveryOTP(this.packageId, this.otp).subscribe({
-      next: () => {
-        this.status = 'confirmed'; // 🔓 UNLOCK PROOF UI
-        this.isLoading = false;
-      },
-      error: () => {
-        this.isLoading = false;
-        this.error = 'OTP غير صحيح أو منتهي';
-      }
-    });
+    this.courierService.verifyDeliveryOTP(this.packageId, this.otp)
+      .subscribe({
+        next: () => {
+          this.otpVerified = true;
+          this.isLoading = false;
+        },
+        error: err => {
+          this.error = err.error ?? 'رمز OTP غير صحيح';
+          this.isLoading = false;
+        }
+      });
   }
 
+  completeDelivery() {
+    this.isLoading = true;
+
+    this.courierService.deliverPackage(this.packageId, '')
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/courier/dashboard']);
+        },
+        error: err => {
+          this.error = err.error ?? 'فشل تأكيد التسليم';
+          this.isLoading = false;
+        }
+      });
+  }
 }

@@ -4,10 +4,12 @@ import { CourierDataService, DeliveryJob, JobStatus } from '../../../../services
 import { OfflineService } from '../../../../services/offline.service'; // ✅ جديد
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DeliveryProofComponent } from '../delivery-proof.component';
+import { FailedDeliveryProofComponent } from '../failed-delivery-proof.component';
 
 @Component({
   selector: 'app-workflow',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DeliveryProofComponent, FailedDeliveryProofComponent],
   templateUrl: './workflow.component.html',
   styleUrls: ['./workflow.component.css']
 })
@@ -32,7 +34,7 @@ export class WorkflowComponent implements OnInit {
     private router: Router,
     private courierService: CourierDataService,
     private offlineService: OfflineService // ✅ جديد
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.jobId = this.route.snapshot.paramMap.get('id') || '';
@@ -42,7 +44,7 @@ export class WorkflowComponent implements OnInit {
       return;
     }
     this.loadJobData();
-    
+
     // ✅ مراقبة حالة الإنترنت (اختياري)
     this.monitorNetworkStatus();
   }
@@ -62,14 +64,17 @@ export class WorkflowComponent implements OnInit {
   loadJobData(): void {
     this.isLoading = true;
 
-    this.courierService.getMyAssignedPackages()?.subscribe({
+    this.courierService.getMyJobs()?.subscribe({
       next: (jobs: DeliveryJob[]) => this.findJobInList(jobs),
       error: () => this.tryAlternativeLoad()
     });
   }
 
+  dropDelivery(job: any): void {
+    job.awaitingOTP = true;
+  }
   findJobInList(jobs: DeliveryJob[]): void {
-    const foundJob = jobs.find(j => j.id === this.jobId || j.trackingNumber === this.jobId);
+    const foundJob = jobs.find(j => j.id === Number(this.jobId) || j.trackingNumber === this.jobId);
     if (foundJob) {
       this.job = foundJob;
       this.updateStepsBasedOnStatus();
@@ -108,6 +113,16 @@ export class WorkflowComponent implements OnInit {
       else if (step.id === this.currentStep) step.status = 'current';
       else step.status = 'pending';
     });
+  }
+
+  getStepDescription(action: string): string {
+    const descriptions: { [key: string]: string } = {
+      'pickup': 'تذكر التحقق من سلامة الطرد',
+      'startDelivery': 'ابدأ التحرك نحو العميل',
+      'arrived': 'تأكد من الوصول للعنوان الصحيح',
+      'complete': 'اجمع التوقيع أو رمز التسليم'
+    };
+    return descriptions[action] || '';
   }
 
   executeStep(step: { id: number; action: string; status: string }): void {
@@ -163,7 +178,7 @@ export class WorkflowComponent implements OnInit {
     try {
       if (this.offlineService.isCurrentlyOnline) {
         // إرسال مباشر للـ API
-        this.courierService.updateJobStatus(this.jobId, status).subscribe({
+        this.courierService.updateJobStatus(Number(this.jobId), status).subscribe({
           next: () => {
             alert(`✅ ${successMessage}`);
             if (this.job) {
@@ -190,8 +205,8 @@ export class WorkflowComponent implements OnInit {
    * 🔥 حفظ تحديث الحالة للعمل بدون إنترنت
    */
   private async saveStatusUpdateOffline(
-    status: JobStatus, 
-    statusData: any, 
+    status: JobStatus,
+    statusData: any,
     originalError?: any
   ): Promise<void> {
     try {
@@ -200,18 +215,18 @@ export class WorkflowComponent implements OnInit {
         status,
         statusData
       );
-      
+
       if (this.job) {
         this.job.status = status;
         this.updateStepsBasedOnStatus();
       }
-      
+
       if (originalError) {
         alert(`💾 تم حفظ التحديث محلياً بعد فشل الإرسال\nسيتم إرساله تلقائياً عند عودة الإنترنت`);
       } else {
         alert(`💾 تم حفظ التحديث\nسيتم إرساله تلقائياً عند عودة الإنترنت`);
       }
-      
+
     } catch (saveError) {
       console.error('Failed to save status update offline:', saveError);
       alert('فشل حفظ التحديث، حاول مرة أخرى');
@@ -221,13 +236,13 @@ export class WorkflowComponent implements OnInit {
   /**
    * 🔥 الحصول على الموقع الحالي
    */
-  private async getCurrentLocation(): Promise<{lat: number, lng: number} | null> {
+  private async getCurrentLocation(): Promise<{ lat: number, lng: number } | null> {
     return new Promise((resolve) => {
       if (!navigator.geolocation) {
         resolve(null);
         return;
       }
-      
+
       navigator.geolocation.getCurrentPosition(
         (position) => {
           resolve({
@@ -253,16 +268,16 @@ export class WorkflowComponent implements OnInit {
 
   async handleDeliveryComplete(proofData: any): Promise<void> {
     this.showProofModal = false;
-    
+
     try {
       await this.updateJobStatus('delivered', 'تم إكمال التسليم');
-      
+
       proofData.jobId = this.jobId;
       proofData.status = 'delivered';
       proofData.timestamp = new Date().toISOString();
-      
+
       alert('✅ تم إرسال إثبات التسليم بنجاح');
-      
+
     } catch (error) {
       console.error('Error handling delivery complete:', error);
     }
@@ -270,16 +285,16 @@ export class WorkflowComponent implements OnInit {
 
   async handleDeliveryFailure(failureData: any): Promise<void> {
     this.showFailedProofModal = false;
-    
+
     try {
       await this.updateJobStatus('failed', 'تم إبلاغ فشل التسليم');
-      
+
       failureData.jobId = this.jobId;
       failureData.status = 'failed';
       failureData.failedAt = new Date().toISOString();
-      
+
       alert('⚠️ تم إرسال إبلاغ الفشل');
-      
+
     } catch (error) {
       console.error('Error handling delivery failure:', error);
     }

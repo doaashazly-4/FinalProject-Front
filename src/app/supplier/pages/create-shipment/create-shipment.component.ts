@@ -5,8 +5,8 @@ import { Router, RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { SupplierDataService, CreateParcelDTO, DeliveryFeeResponse, SupplierProfile, CreateRequestDTO, Customer } from '../../services/supplier-data.service';
 import * as L from 'leaflet';
-import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
-import { Subscription, of, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-create-shipment',
@@ -66,7 +66,6 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
   showDropdown = false;
 
   private subscriptions: Subscription = new Subscription();
-  // private addressSearchSubject = new Subject<{ query: string, type: 'pickup' | 'delivery' }>(); // Unused?
 
   constructor(
     private fb: FormBuilder,
@@ -462,7 +461,9 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
           lng: this.deliveryLng || 0,
           expireDate: formValue.expireDate,
           notes: formValue.notes,
-          customerID: formValue.customerID ? Number(formValue.customerID) : 0
+          customerID: 0,
+          receiverName: formValue.receiverName,
+          receiverPhone: formValue.receiverPhone
         }
       ]
     };
@@ -470,12 +471,30 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
     console.log('Sending DTO:', dto);
 
     this.dataService.createParcelSafe(dto).subscribe({
-      next: (parcel) => {
+      next: (response: any) => {
         this.isSubmitting = false;
-        this.createdTrackingNumber = parcel.trackingNumber;
-        this.createdId = parcel.id || parcel.trackingNumber; // Fallback if ID not returned
+
+        const requestId = response?.id;
+        const firstPackageId = response?.packages?.[0]?.id;
+
+        if (!requestId) {
+          console.error('Request ID missing', response);
+          return;
+        }
+
+        // Prefer package ID if exists, fallback to request ID
+        this.createdId = firstPackageId ?? requestId;
+        this.createdTrackingNumber = String(this.createdId);
+
+        this.showSuccessModal = true;
+
+        // OPTION A: Package ID is the tracking reference
+        this.createdTrackingNumber = String(firstPackageId);
+        this.createdId = firstPackageId;
+
         this.showSuccessModal = true;
       },
+
       error: (err) => {
         this.isSubmitting = false;
         console.error('Error creating shipment:', err);
@@ -526,28 +545,24 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
       }).addTo(this.map);
-      // Re-add tiles
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(this.map);
     }
   }
 
   trackShipment(): void {
-    this.router.navigate(['/supplier/shipments', this.createdId]);
+    if (!this.createdId) {
+      console.error('Cannot navigate: createdId is missing');
+      return;
+    }
+
     this.router.navigate(['/supplier/shipments', this.createdId]);
   }
+
 
   hasError(controlName: string): boolean {
     const control = this.shipmentForm.get(controlName);
     return !!(control && control.invalid && (control.dirty || control.touched));
-  hasError(controlName: string): boolean {
-    const control = this.shipmentForm.get(controlName);
-    return !!(control && control.invalid && (control.dirty || control.touched));
   }
 
-  getErrorMessage(controlName: string): string {
-    const control = this.shipmentForm.get(controlName);
   getErrorMessage(controlName: string): string {
     const control = this.shipmentForm.get(controlName);
     if (!control || !control.errors) return '';

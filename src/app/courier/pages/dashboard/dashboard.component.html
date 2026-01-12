@@ -392,11 +392,3 @@
 </div>
 
 
-<!-- Proof Modals -->
-<app-delivery-proof [isVisible]="showProofModal" [job]="selectedJobForProof"
-  (onComplete)="handleDeliveryComplete($event)" (onCancel)="cancelModal()">
-</app-delivery-proof>
-
-<app-failed-delivery-proof [isVisible]="showFailedModal" [job]="selectedJobForProof"
-  (onComplete)="handleDeliveryFailure($event)" (onCancel)="cancelModal()">
-</app-failed-delivery-proof>

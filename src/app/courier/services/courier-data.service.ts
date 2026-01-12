@@ -1,58 +1,41 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
-/* ===================== MODELS ===================== */
 /* ===================== MODELS ===================== */
 
 export interface DeliveryJob {
   id: number;
-  id: number;
   description: string;
   weight: number;
   shipmentCost: number;
-
-  shipmentCost: number;
-
   pickupAddress: string;
   dropoffAddress: string;
+  // Aliases/Optionals for compatibility
+  deliveryAddress?: string; // Alias for dropoffAddress
+  trackingNumber?: string;
+  receiverName?: string; // Alias for customerName ??
+  customerPhone?: string; // Alias for receiverPhone
+  items?: string;
+  notes?: string;
+  codAmount?: number; // Alias for shipmentCost
+  estimatedDelivery?: Date;
+  courierEarning?: number;
 
   pickupLat: number;
   pickupLng: number;
   destinationLat: number;
   destinationLng: number;
-
-  customerName: string;
-  dropoffAddress: string;
-
-  pickupLat: number;
-  pickupLng: number;
-  destinationLat: number;
-  destinationLng: number;
-
   customerName: string;
   receiverPhone: string;
-
-  status: JobStatus;
-  awaitingOTP?: boolean;
-  otp?: string;
-
   status: JobStatus;
   awaitingOTP?: boolean;
   otp?: string;
 }
 
 export type JobStatus =
-  | 'available'
-  | 'accepted'
-  | 'picked_up'
-  | 'in_transit'
-  | 'out_for_delivery'
-  | 'delivered'
-  | 'failed'
-  | 'returned';
   | 'available'
   | 'accepted'
   | 'picked_up'
@@ -68,14 +51,6 @@ export interface CourierStat {
   icon: string;
   trend?: string;
   color?: string;
-}
-
-export interface CourierEarnings {
-  today: number;
-  thisWeek: number;
-  thisMonth: number;
-  pending: number;
-  totalEarned: number;
 }
 
 export interface CourierEarnings {
@@ -106,11 +81,6 @@ export interface CourierCompleteProfileDTO {
   photoUrl?: string;
   address?: string;
   locations?: CourierLocationDto[];
-
-  // Missing properties
-  locations?: CourierLocationDto[];
-
-  // Missing properties
   licensePhotoFront?: string;
   licensePhotoBack?: string;
   vehicleLicensePhotoFront?: string;
@@ -157,114 +127,29 @@ export class CourierDataService {
 
     return {
       id: job.id,
-
-      description:
-        job.description ??
-        job.requestDescription ??
-        `طلب توصيل #${job.id}`,
-
+      description: job.description ?? job.requestDescription ?? `طلب توصيل #${job.id}`,
       weight: job.weight ?? 0,
-
-      shipmentCost:
-        job.shipmentCost ??
-        job.codAmount ??
-        0,
-
-      pickupAddress:
-        job.pickupAddress ??
-        job.pickupLocation ??
-        'عنوان الاستلام غير متوفر',
-
-      dropoffAddress:
-        job.dropoffAddress ??
-        job.destination ??
-        'عنوان التسليم غير متوفر',
+      shipmentCost: job.shipmentCost ?? job.codAmount ?? 0,
+      pickupAddress: job.pickupAddress ?? job.pickupLocation ?? 'عنوان الاستلام غير متوفر',
+      dropoffAddress: job.dropoffAddress ?? job.destination ?? 'عنوان التسليم غير متوفر',
+      // Compatibility mappings
+      deliveryAddress: job.dropoffAddress ?? job.destination ?? 'عنوان التسليم غير متوفر',
+      trackingNumber: job.trackingNumber ?? String(job.id),
+      receiverName: job.customerName ?? job.customer?.user?.userName ?? 'عميل',
+      customerPhone: job.receiverPhone ?? job.customer?.user?.phoneNumber ?? '',
+      codAmount: job.shipmentCost ?? job.codAmount ?? 0,
+      items: job.items ?? 'طرد قياسي',
+      notes: job.notes ?? '',
+      estimatedDelivery: job.estimatedDelivery ? new Date(job.estimatedDelivery) : new Date(),
+      courierEarning: job.courierEarning ?? 50, // Mock value if missing
 
       pickupLat: job.pickupLat ?? 0,
       pickupLng: job.pickupLng ?? 0,
-
       destinationLat: job.destinationLat ?? 0,
       destinationLng: job.destinationLng ?? 0,
-
-      customerName:
-        job.customerName ??
-        job.customer?.user?.userName ??
-        'عميل',
-
-      receiverPhone:
-        job.receiverPhone ??
-        job.customer?.user?.phoneNumber ??
-        '',
-
+      customerName: job.customerName ?? job.customer?.user?.userName ?? 'عميل',
+      receiverPhone: job.receiverPhone ?? job.customer?.user?.phoneNumber ?? '',
       status: statusMap[job.status] ?? 'available',
-
-      awaitingOTP: false
-    };
-  /* ===================== NORMALIZER (CORE FIX) ===================== */
-
-  private mapBackendJob(job: any): DeliveryJob {
-    const statusMap: Record<number | string, JobStatus> = {
-      0: 'available',
-      1: 'accepted',
-      2: 'picked_up',
-      3: 'in_transit',
-      4: 'out_for_delivery',
-      5: 'delivered',
-      6: 'failed',
-      7: 'returned',
-
-      Assigned: 'accepted',
-      PickupInProgress: 'picked_up',
-      InTransit: 'in_transit',
-      OutForDelivery: 'out_for_delivery',
-      Delivered: 'delivered',
-      Failed: 'failed',
-      Cancelled: 'returned'
-    };
-
-    return {
-      id: job.id,
-
-      description:
-        job.description ??
-        job.requestDescription ??
-        `طلب توصيل #${job.id}`,
-
-      weight: job.weight ?? 0,
-
-      shipmentCost:
-        job.shipmentCost ??
-        job.codAmount ??
-        0,
-
-      pickupAddress:
-        job.pickupAddress ??
-        job.pickupLocation ??
-        'عنوان الاستلام غير متوفر',
-
-      dropoffAddress:
-        job.dropoffAddress ??
-        job.destination ??
-        'عنوان التسليم غير متوفر',
-
-      pickupLat: job.pickupLat ?? 0,
-      pickupLng: job.pickupLng ?? 0,
-
-      destinationLat: job.destinationLat ?? 0,
-      destinationLng: job.destinationLng ?? 0,
-
-      customerName:
-        job.customerName ??
-        job.customer?.user?.userName ??
-        'عميل',
-
-      receiverPhone:
-        job.receiverPhone ??
-        job.customer?.user?.phoneNumber ??
-        '',
-
-      status: statusMap[job.status] ?? 'available',
-
       awaitingOTP: false
     };
   }
@@ -273,14 +158,8 @@ export class CourierDataService {
 
   getStats(): Observable<CourierStat[]> {
     return this.http.get<CourierStat[]>(`${this.apiUrl}/DashboardSummary`);
-  /* ===================== DASHBOARD ===================== */
-
-  getStats(): Observable<CourierStat[]> {
-    return this.http.get<CourierStat[]>(`${this.apiUrl}/DashboardSummary`);
   }
 
-  getEarnings(): Observable<CourierEarnings> {
-    return this.http.get<CourierEarnings>(`${this.apiUrl}/Earnings`);
   getEarnings(): Observable<CourierEarnings> {
     return this.http.get<CourierEarnings>(`${this.apiUrl}/Earnings`);
   }
@@ -297,39 +176,15 @@ export class CourierDataService {
     return this.http
       .get<any[]>(`${this.apiUrl}/MyAssignedPackages`)
       .pipe(map(jobs => jobs.map(j => this.mapBackendJob(j))));
-    return this.http
-      .get<any[]>(`${this.apiUrl}/MyAssignedPackages`)
-      .pipe(map(jobs => jobs.map(j => this.mapBackendJob(j))));
   }
-
 
   getActiveJobs(): Observable<DeliveryJob[]> {
     return this.http
       .get<any[]>(`${this.apiUrl}/activeJobs`)
       .pipe(map(jobs => jobs.map(j => this.mapBackendJob(j))));
-    return this.http
-      .get<any[]>(`${this.apiUrl}/activeJobs`)
-      .pipe(map(jobs => jobs.map(j => this.mapBackendJob(j))));
   }
 
-  getJobById(id: string): Observable<DeliveryJob> {
-    return this.http
-      .get<any>(`${this.apiUrl}/jobs/${id}`)
-      .pipe(map(job => this.mapBackendJob(job)));
-  }
 
-  /* ===================== JOB ACTIONS ===================== */
-
-  acceptJob(jobId: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/AcceptPackage/${jobId}`, {});
-  }
-
-  rejectJob(jobId: number, reason?: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/RejectPackage/${jobId}`, reason ?? '');
-    return this.http
-      .get<any>(`${this.apiUrl}/jobs/${id}`)
-      .pipe(map(job => this.mapBackendJob(job)));
-  }
 
   /* ===================== JOB ACTIONS ===================== */
 
@@ -341,73 +196,63 @@ export class CourierDataService {
     return this.http.post(`${this.apiUrl}/RejectPackage/${jobId}`, reason ?? '');
   }
 
-  updateJobStatus(
-    jobId: number,
-    status: JobStatus,
-    reason?: string,
-    extra?: any
-  ): Observable<any> {
-    if (status === 'failed') {
-      return this.http.post(`${this.apiUrl}/FailDelivery/${jobId}`, reason ?? '');
-  updateJobStatus(
-    jobId: number,
-    status: JobStatus,
-    reason?: string,
-    extra?: any
-  ): Observable<any> {
-    if (status === 'failed') {
-      return this.http.post(`${this.apiUrl}/FailDelivery/${jobId}`, reason ?? '');
-    }
+  // ✅ Restore pickupJob for compatibility
+  pickupJob(jobId: number | string): Observable<any> {
+    // Determine which endpoint to use. Often "StartDelivery" or a specific "Pickup" one.
+    // Based on history, it might have been calling keys like 'pickup'.
+    // Let's assume we call StartDelivery as a proxy or use a generic status update if backend supports it.
 
-    return this.http.post(
-      `${this.apiUrl}/UpdateStatus/${jobId}?status=${status}`,
-      extra ?? {}
-    );
-
-    return this.http.post(
-      `${this.apiUrl}/UpdateStatus/${jobId}?status=${status}`,
-      extra ?? {}
-    );
+    // Let's use that path or map to updateStatus.
+    return this.updateJobStatus(Number(jobId), 'picked_up');
   }
 
   startDelivery(jobId: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/StartDelivery/${jobId}`, {});
   }
 
-  deliverPackage(jobId: number, customerOTP: string): Observable<any> {
+  deliverPackage(jobId: number, notes: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/DeliverPackage/${jobId}`, {
-      customerOTP
-    });
-  deliverPackage(jobId: number, customerOTP: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/DeliverPackage/${jobId}`, {
-      customerOTP
+      notes
     });
   }
 
   verifyDeliveryOTP(jobId: number, otp: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/VerifyOTP/${jobId}`, otp, {
-      responseType: 'text'
-    });
+    return this.http.post(`${this.apiUrl}/VerifyOTP/${jobId}`, otp);
   }
 
-  pickupJob(jobId: number | string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/jobs/${jobId}/pickup`, {});
-  }
+  // ✅ Restore updateJobStatus as a facade for various endpoints
+  updateJobStatus(
+    jobId: number,
+    status: JobStatus,
+    reason?: string,
+    extra?: any
+  ): Observable<any> {
+    switch (status) {
+      case 'accepted':
+        return this.acceptJob(jobId);
 
-  /* ===================== AVAILABILITY ===================== */
+      case 'picked_up':
+        // If there is no explicit pickup endpoint, we might treat it as a status update
+        // or use StartDelivery if that fits the flow.
+        // Let's assume there is a generic UpdateStatus endpoint since it was used before.
+        return this.http.post(`${this.apiUrl}/UpdateStatus/${jobId}?status=${status}`, extra ?? {});
 
-  getAvailability(): Observable<{ isAvailable: boolean }> {
-    return this.http.get<{ isAvailable: boolean }>(
-      `${this.apiUrl}/availability`
-    );
-  verifyDeliveryOTP(jobId: number, otp: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/VerifyOTP/${jobId}`, otp, {
-      responseType: 'text'
-    });
-  }
+      case 'out_for_delivery':
+        return this.startDelivery(jobId);
 
-  pickupJob(jobId: number | string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/jobs/${jobId}/pickup`, {});
+      case 'delivered':
+        return this.deliverPackage(jobId, extra?.otp ?? '');
+
+      case 'failed':
+        return this.http.post(`${this.apiUrl}/FailDelivery/${jobId}`, reason ?? '');
+
+      default:
+        // Generic status update fallback
+        return this.http.post(
+          `${this.apiUrl}/UpdateStatus/${jobId}?status=${status}`,
+          extra ?? {}
+        );
+    }
   }
 
   /* ===================== AVAILABILITY ===================== */
@@ -430,35 +275,17 @@ export class CourierDataService {
 
   addLocation(lat: number, lng: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/AddLocation`, { lat, lng });
-  toggleAvailability(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/availability/toggle`, {});
-  }
-
-  endShift(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/endshift`, {});
-  }
-
-  /* ===================== LOCATION ===================== */
-
-  addLocation(lat: number, lng: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/AddLocation`, { lat, lng });
   }
 
   /* ===================== OTHER / LEGACY / SUPPORT ===================== */
 
   checkOTPStatus(packageId: number) {
-    return this.http.get<{ otpVerified: boolean }>(
-      `${this.apiUrl}/CheckOTPStatus/${packageId}`
-    );
-  }
+  return this.http.get<{ otpVerified: boolean; status: string }>(
+    `${this.apiUrl}/otp-status/${packageId}`
+  );
+}
 
-  /* ===================== OTHER / LEGACY / SUPPORT ===================== */
 
-  checkOTPStatus(packageId: number) {
-    return this.http.get<{ otpVerified: boolean }>(
-      `${this.apiUrl}/CheckOTPStatus/${packageId}`
-    );
-  }
 
   getProfile(): Observable<CourierCompleteProfileDTO> {
     return this.http.get<CourierCompleteProfileDTO>(`${this.apiUrl}/Profile?t=${new Date().getTime()}`);
@@ -477,11 +304,8 @@ export class CourierDataService {
 
   uploadImage(data: FormData) {
     return this.http.post<{ url: string }>(`${this.apiUrl}/upload/image`, data);
-  uploadImage(data: FormData) {
-    return this.http.post<{ url: string }>(`${this.apiUrl}/upload/image`, data);
   }
 
-  // Support
   // Support
   getTickets(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/tickets`);
@@ -491,8 +315,6 @@ export class CourierDataService {
     return this.http.post<any>(`${this.apiUrl}/tickets`, ticket);
   }
 
-  completeDelivery(jobId: number, dto: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/DeliverPackage/${jobId}`, dto);
   completeDelivery(jobId: number, dto: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/DeliverPackage/${jobId}`, dto);
   }

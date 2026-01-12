@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ParticleBackgroundComponent } from '../../../shared/components/particle-background/particle-background.component';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-role-selection',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ParticleBackgroundComponent],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './role-selection.component.html',
   styleUrls: ['./role-selection.component.css']
 })

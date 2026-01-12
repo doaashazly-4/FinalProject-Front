@@ -57,6 +57,8 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.loadDelivery(Number(id));
+      this.loadOTP();
+
     }
   }
 
@@ -243,4 +245,19 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
   setRating(value: number): void {
     this.rating = value;
   }
+
+  otp: string | null = null;
+
+  loadOTP() {
+    if (!this.delivery || this.delivery.status !== 'out_for_delivery') return;
+
+    this.dataService.getPackageOTP(Number(this.delivery.id)).subscribe({
+      next: res => {
+        if (!res.verified) {
+          this.otp = res.otp;
+        }
+      }
+    });
+  }
+
 }

@@ -63,15 +63,6 @@ export interface Parcel {
   pickupLng?: number;
   destinationLat?: number;
   destinationLng?: number;
-  customerID?: string | number;
-
-  // Backend Raw Fields (for compatibility)
-  source?: string;
-  requestId?: string;
-  pickupLat?: number;
-  pickupLng?: number;
-  destinationLat?: number;
-  destinationLng?: number;
 }
 
 export interface FailedAttempt {
@@ -98,7 +89,9 @@ export interface CreateRequestDTO {
       lng: number,
       expireDate: string,
       notes: string,
-      customerID: number
+      customerID?: number,
+      receiverName: string,
+      receiverPhone: string
     }
   ]
 }
@@ -401,7 +394,6 @@ export class SupplierDataService {
     }
 
     return this.http.get<any[]>(
-    return this.http.get<any[]>(
       `${environment.apiUrl}/Request`,
       { params }
     ).pipe(
@@ -466,7 +458,6 @@ export class SupplierDataService {
 
   getParcelById(id: string): Observable<Parcel> {
     return this.http.get<any>(
-    return this.http.get<any>(
       `${environment.apiUrl}/Request/${id}`
     ).pipe(
       map(res => this.mapToParcel(res))
@@ -524,11 +515,11 @@ export class SupplierDataService {
   // ================= TRACKING METHODS =================
 
   getParcelTimeline(parcelId: string): Observable<ParcelTimelineEvent[]> {
-  return this.http.get<{ timeline: ParcelTimelineEvent[] }>(`${this.apiUrl}/TrackOrder/${parcelId}`)
-    .pipe(
-      map(res => res.timeline ?? []) // لو السيرفر بيرجع timeline جوه object
-    );
-}
+    return this.http.get<{ timeline: ParcelTimelineEvent[] }>(`${this.apiUrl}/TrackOrder/${parcelId}`)
+      .pipe(
+        map(res => res.timeline ?? []) // لو السيرفر بيرجع timeline جوه object
+      );
+  }
 
 
   getCarrierLiveLocation(parcelId: string): Observable<CarrierLiveLocation> {

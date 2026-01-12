@@ -28,8 +28,6 @@ export interface IncomingDelivery {
   notes?: string;
   deliveryOTP?: string;
   otpVerified?: boolean;
-  deliveryOTP?: string;
-  otpVerified?: boolean;
 }
 
 
@@ -129,56 +127,6 @@ export interface CarrierLocation {
   courierId: string;
 }
 
-// ================= MOCK DATA (TEMPORARY) =================
-
-const MOCK_DELIVERIES: IncomingDelivery[] = [
-  {
-    id: '101',
-    trackingNumber: 'PKG-101',
-    description: 'شحنة إلكترونيات',
-    senderName: 'متجر الإلكترونيات',
-    pickupAddress: 'القاهرة - مدينة نصر',
-    deliveryAddress: 'الجيزة - الدقي',
-    status: 'out_for_delivery',
-    estimatedDelivery: new Date(),
-    createdAt: new Date(),
-    weight: 2.5,
-    courierName: 'أحمد',
-    courierPhone: '01012345678',
-    isFragile: true,
-    requiresSignature: true
-  },
-  {
-    id: '102',
-    trackingNumber: 'PKG-102',
-    description: 'أدوية',
-    senderName: 'صيدلية الشفاء',
-    pickupAddress: 'القاهرة - المعادي',
-    deliveryAddress: 'الجيزة - المهندسين',
-    status: 'in_transit',
-    estimatedDelivery: new Date(),
-    createdAt: new Date(),
-    weight: 1,
-    courierName: 'محمد',
-    courierPhone: '01198765432'
-  },
-  {
-    id: '103',
-    trackingNumber: 'PKG-103',
-    description: 'ملابس',
-    senderName: 'متجر الملابس',
-    pickupAddress: 'الإسكندرية',
-    deliveryAddress: 'القاهرة',
-    status: 'delivered',
-    estimatedDelivery: new Date(),
-    actualDelivery: new Date(),
-    createdAt: new Date(),
-    weight: 3,
-    courierName: 'يوسف',
-    courierPhone: '01234567890'
-  }
-];
-
 @Injectable({ providedIn: 'root' })
 export class CustomerDataService {
   private apiUrl = `${environment.apiUrl}/Customer`;
@@ -230,18 +178,18 @@ export class CustomerDataService {
     );
   }
 
-
-
-
   //========== Deliveries ==========
-  // getDeliveries() {
-  //   const customerId = this.getCustomerId();
-  //   return this.http.get<IncomingDelivery[]>(
-  //     `${environment.apiUrl}/Customer/${customerId}/packages`
-  //   );
-  // }
+  getDeliveries(): Observable<IncomingDelivery[]> {
+    const phone = localStorage.getItem('customer_mobile');
+    if (!phone) {
+      throw new Error('Customer phone not found');
+    }
 
-
+    return this.http.get<IncomingDelivery[]>(
+      `${this.apiUrl}/MyOrders`,
+      { params: { phoneNumber: phone } }
+    );
+  } 
 
 
 
@@ -277,7 +225,6 @@ export class CustomerDataService {
 
   getDeliveriesByPhoneNumber(phoneNumber: string) {
     return this.http.get<IncomingDelivery[]>(
-      `${environment.apiUrl}/Customer/packages/${phoneNumber}`
       `${environment.apiUrl}/Customer/packages/${phoneNumber}`
     );
   }
@@ -325,6 +272,12 @@ export class CustomerDataService {
     );
   }
 
+  getPackageOTP(packageId: number) {
+    return this.http.get<{
+      otp: string;
+      verified: boolean;
+    }>(`${this.apiUrl}/Customer/packages/${packageId}/otp`);
+  }
 
   // ========== Profile ==========
   getProfile(): Observable<CustomerProfile> {
@@ -380,9 +333,4 @@ export class CustomerDataService {
   requestSupplierUpgrade(): Observable<{ success: boolean; message: string }> {
     return this.http.post<{ success: boolean; message: string }>(`${this.apiUrl}/upgrade-to-supplier`, {});
   }
-
-
-
 }
-
-

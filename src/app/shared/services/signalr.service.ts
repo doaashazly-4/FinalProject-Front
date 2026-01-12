@@ -16,7 +16,7 @@ export class SignalRService {
 
  public startConnection(token: string): Promise<void> {
   this.hubConnection = new signalR.HubConnectionBuilder()
-    .withUrl('https://localhost:7180/hubs/courier-location', {
+    .withUrl('http://localhost:5166/hubs/courier-location', {
       accessTokenFactory: () => token
     })
     .withAutomaticReconnect()
@@ -72,7 +72,7 @@ export class SignalRService {
   // --- Chat ---
   public connectChatHub(token: string) {
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl('https://localhost:7180/chatHub', {
+      .withUrl('http://localhost:5166/chatHub', {
         accessTokenFactory: () => token
       })
       .withAutomaticReconnect()

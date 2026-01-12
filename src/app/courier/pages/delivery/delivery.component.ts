@@ -1,177 +1,316 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { CourierDataService, DeliveryJob, JobStatus } from '../../services/courier-data.service';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { CourierDataService } from '../../services/courier-data.service';
 import { DeliveryProofComponent } from './components/delivery-proof.component';
 import { FailedDeliveryProofComponent } from './components/failed-delivery-proof.component';
+
+
+
+/* ================= UI TYPES (FIX-1) ================= */
+
+type DeliveryUIStatus = 'assigned' | 'out_for_delivery' | 'delivered';
+
+interface DeliveryUIJob {
+  id: number;
+  status: DeliveryUIStatus;
+  awaitingOTP: boolean;
+
+  pickupAddress?: string;
+  pickupLat?: number;
+  pickupLng?: number;
+
+  dropoffAddress?: string;
+  destinationLat?: number;
+  destinationLng?: number;
+
+  customerName?: string;
+  customerPhone?: string;
+}
+/* ================= COMPONENT ================= */
 
 @Component({
   selector: 'app-delivery',
   standalone: true,
-  imports: [CommonModule, DeliveryProofComponent, FailedDeliveryProofComponent],
-  templateUrl: './delivery.component.html',
-  styleUrls: ['./delivery.component.css']
-})
-export class DeliveryComponent implements OnInit {
-  job: DeliveryJob | null = null;
-  isLoading = true;
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    DeliveryProofComponent,
+    FailedDeliveryProofComponent
 
-  // ===== Modals =====
+  ],
+  templateUrl: './delivery.component.html'
+})
+export class DeliveryComponent implements OnInit, OnDestroy {
+
+  /* ================= STATE ================= */
+
+  packageId!: number;
+  job: DeliveryUIJob | null = null;
+
+  isLoading = true;
+  error: string | null = null;
+
   showProofModal = false;
-  showFailedModal = false;       // استخدمها بدل showFailedProofModal
-  newProofData: any = null;      // لتخزين بيانات Proof قبل الإرسال
+  showFailedModal = false;
+  otpVerified = false;
+
+  /* ================= INIT ================= */
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private dataService: CourierDataService
+    private courierService: CourierDataService,
+    private sanitizer: DomSanitizer
   ) { }
 
   ngOnInit(): void {
-    const jobId = Number(this.route.snapshot.paramMap.get('id'));
-    this.loadJobFromAssignedPackages(jobId);
+    this.packageId = Number(this.route.snapshot.paramMap.get('id'));
+
+    const navState = history.state?.job;
+
+    if (navState) {
+      // Job came from My Jobs
+      this.job = {
+        id: navState.id,
+        status: this.normalizeStatus(navState.status),
+        awaitingOTP: false,
+
+        pickupAddress: navState.pickupAddress,
+        pickupLat: navState.pickupLat,
+        pickupLng: navState.pickupLng,
+
+        dropoffAddress: navState.dropoffAddress,
+        destinationLat: navState.destinationLat,
+        destinationLng: navState.destinationLng,
+
+        customerName: navState.customerName,
+        customerPhone: navState.receiverPhone
+      };
+
+      this.loadOTPStatusOnly();
+    } else {
+      // Fallback (direct reload)
+      this.loadOTPStatusOnly();
+    }
   }
 
-  loadJobFromAssignedPackages(jobId: number): void {
-    this.dataService.getMyJobs().subscribe({
-      next: (jobs: DeliveryJob[]) => {
-        const foundJob = jobs.find((j: DeliveryJob) => j.id === jobId);
 
-        if (!foundJob) {
-          alert('لا يمكن العثور على هذه الشحنة');
-          this.isLoading = false;
-          return;
+  /* ================= CORE LOGIC ================= */
+
+  loadOTPStatusOnly(): void {
+    this.isLoading = true;
+
+    this.courierService.checkOTPStatus(this.packageId).subscribe({
+      next: (otpRes: { otpVerified: boolean; status: number | string }) => {
+
+        const normalizedStatus = this.normalizeStatus(otpRes.status);
+
+        if (this.job) {
+          this.job.status = normalizedStatus;
+          this.job.awaitingOTP =
+            !otpRes.otpVerified && normalizedStatus === 'out_for_delivery';
+        } else {
+          // Direct reload case
+          this.job = {
+            id: this.packageId,
+            status: normalizedStatus,
+            awaitingOTP:
+              !otpRes.otpVerified && normalizedStatus === 'out_for_delivery'
+          };
         }
 
-        this.job = foundJob;
         this.isLoading = false;
       },
-      error: (err: any) => {
-        console.error('Error loading assigned packages', err);
-        alert('حدث خطأ أثناء تحميل بيانات الشحنة');
+      error: () => {
+        this.error = 'تعذر تحميل حالة التوصيل';
         this.isLoading = false;
       }
     });
   }
 
-  // ===== Load Job =====
-  loadJob(id: number): void {
-    this.isLoading = true;
-    this.dataService.getJobById(id.toString()).subscribe({
-      next: (job: DeliveryJob) => { this.job = job; this.isLoading = false; },
-      error: (err: any) => { console.error('Error loading job:', err); this.isLoading = false; }
+
+  /* ================= STATUS NORMALIZER ================= */
+
+  private normalizeStatus(
+    status: number | string
+  ): DeliveryUIStatus {
+
+    if (typeof status === 'number') {
+      switch (status) {
+        case 1:
+          return 'assigned';
+        case 3:
+          return 'out_for_delivery';
+        case 4:
+          return 'delivered';
+        default:
+          throw new Error(`Unsupported numeric status: ${status}`);
+      }
+    }
+
+    switch (status) {
+      case 'Assigned':
+      case 'assigned':
+        return 'assigned';
+
+      case 'OutForDelivery':
+      case 'out_for_delivery':
+        return 'out_for_delivery';
+
+      case 'Delivered':
+      case 'delivered':
+        return 'delivered';
+
+      default:
+        throw new Error(`Unsupported string status: ${status}`);
+    }
+  }
+
+  /* ================= ACTIONS ================= */
+
+  startDelivery(): void {
+    if (!this.job || this.job.status !== 'assigned') return;
+
+    this.courierService.startDelivery(this.packageId).subscribe({
+      next: () => {
+        this.job!.status = 'out_for_delivery';
+      },
+      error: () => {
+        this.error = 'فشل بدء التوصيل';
+      }
     });
   }
 
-  // ===== Navigation =====
-  navigateToPickup(): void {
-    if (!this.job) return;
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${this.job.pickupLat},${this.job.pickupLng}`;
-    window.open(url, '_blank');
+  openConfirmDelivery(): void {
+    this.showProofModal = true;
   }
 
-  navigateToDropoff(): void {
-    if (!this.job) return;
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${this.job.destinationLat},${this.job.destinationLng}`;
-    window.open(url, '_blank');
-  }
+  onProofComplete(payload: { otp: string; notes?: string }): void {
+    if (!payload?.otp) {
+      this.error = 'رمز OTP مطلوب';
+      return;
+    }
 
-  // ===== Status Updates =====
-  markPickedUp(): void {
-    if (!this.job) return;
-
-    const updateStatus = () => {
-      this.dataService.updateJobStatus(Number(this.job!.id), 'picked_up' as JobStatus).subscribe({
-        next: () => this.job!.status = 'picked_up' as JobStatus,
-        error: (err) => console.error('Error updating status:', err)
-      });
-    };
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const pickupData = { lat: pos.coords.latitude, lng: pos.coords.longitude, timestamp: new Date() };
-          this.dataService.updateJobStatus(Number(this.job!.id), 'picked_up' as JobStatus, undefined, pickupData).subscribe({
-            next: () => this.job!.status = 'picked_up' as JobStatus,
-            error: (err) => console.error('Error updating status with location:', err)
+    this.courierService.verifyDeliveryOTP(this.packageId, payload.otp).subscribe({
+      next: () => {
+        this.courierService.deliverPackage(this.packageId, payload.notes ?? '')
+          .subscribe({
+            next: () => {
+              this.showProofModal = false;
+              this.router.navigate(['/courier/dashboard']);
+            },
+            error: () => {
+              this.error = 'فشل إنهاء التوصيل';
+            }
           });
-        },
-        () => updateStatus()
-      );
-    } else updateStatus();
-  }
-
-  markOutForDelivery(): void {
-    if (!this.job) return;
-    this.dataService.updateJobStatus(Number(this.job.id), 'out_for_delivery').subscribe({
-      next: () => this.job!.status = 'out_for_delivery',
-      error: (err) => console.error('Error updating status:', err)
+      },
+      error: () => {
+        this.error = 'رمز OTP غير صحيح';
+      }
     });
   }
 
-  completeDelivery(): void { this.showProofModal = true; }
-  unableToDeliver(reason: string): void {
+  onProofCancel(): void {
+    this.showProofModal = false;
+  }
+
+  unableToDeliver(): void {
     this.showFailedModal = true;
   }
 
-  // ===== Call =====
-  callCustomer(): void { if (this.job) window.open(`tel:${this.job.receiverPhone}`, '_self'); }
-
-  // ===== Helpers =====
-  getStatusText(status: JobStatus): string {
-    const statusMap: { [key in JobStatus]: string } = {
-      available: 'متاح',
-      accepted: 'تم القبول',
-      picked_up: 'تم الاستلام',
-      in_transit: 'قيد التوصيل',
-      out_for_delivery: 'وصلت للمنطقة',
-      delivered: 'تم التسليم',
-      failed: 'فشل',
-      returned: 'مُرتجع'
-    };
-    return statusMap[status] || status;
+  onFailedSubmit(event: { reason: string; notes?: string }): void {
+    this.courierService
+      .updateJobStatus(this.packageId, 'failed', event.reason, { notes: event.notes })
+      .subscribe({
+        next: () => {
+          this.showFailedModal = false;
+          this.router.navigate(['/courier/dashboard']);
+        },
+        error: () => {
+          this.error = 'فشل تحديث الحالة';
+        }
+      });
   }
 
-  getStatusClass(status: JobStatus): string {
-    const classMap: { [key in JobStatus]: string } = {
-      available: 'bg-yellow-100 text-yellow-800',
-      accepted: 'bg-blue-100 text-blue-800',
-      picked_up: 'bg-indigo-100 text-indigo-800',
-      in_transit: 'bg-purple-100 text-purple-800',
-      out_for_delivery: 'bg-cyan-100 text-cyan-800',
-      delivered: 'bg-green-100 text-green-800',
-      failed: 'bg-red-100 text-red-800',
-      returned: 'bg-orange-100 text-orange-800'
-    };
-    return classMap[status] || 'bg-gray-100 text-gray-800';
-  }
-
-  // ===== Proof Modals =====
-  handleDeliveryComplete(event: any): void {
-    if (!this.job) return;
-    this.dataService.completeDelivery(Number(this.job.id), event).subscribe({
-      next: () => {
-        this.job!.status = 'delivered';
-        alert('تم التسليم بنجاح');
-      },
-      error: (err) => { console.error('Error completing delivery:', err); }
-    });
-  }
-
-  handleDeliveryFailure(event: any): void {
-    if (!this.job) return;
+  onFailedCancel(): void {
     this.showFailedModal = false;
-    this.dataService.updateJobStatus(Number(this.job.id), 'failed' as JobStatus, event.reason, event).subscribe({
-      next: () => { this.job!.status = 'failed' as JobStatus; this.router.navigate(['/courier/my-jobs']); },
-      error: (err) => { console.error('Error updating failure:', err); alert('حدث خطأ أثناء تحديث حالة المهمة'); }
-    });
   }
 
-  cancelModal(): void { this.showProofModal = false; this.showFailedModal = false; }
+  /* ================= TEMPLATE HELPERS ================= */
 
-  onProofComplete(event: any): void { this.handleDeliveryComplete(event); }
-  onProofCancel(): void { this.cancelModal(); }
+  getStatusClass(status: DeliveryUIStatus): string {
+    switch (status) {
+      case 'assigned':
+        return 'bg-blue-100 text-blue-700';
+      case 'out_for_delivery':
+        return 'bg-orange-100 text-orange-700';
+      case 'delivered':
+        return 'bg-green-100 text-green-700';
+      default:
+        return 'bg-gray-100 text-gray-600';
+    }
+  }
 
-  onFailedSubmit(event: any): void { this.handleDeliveryFailure(event); }
-  onFailedCancel(): void { this.cancelModal(); }
-};
+  getStatusText(status: DeliveryUIStatus): string {
+    const map: Record<DeliveryUIStatus, string> = {
+      assigned: 'تم التعيين',
+      out_for_delivery: 'جاري التوصيل',
+      delivered: 'تم التسليم'
+    };
+    return map[status];
+  }
+
+  navigateToPickup() {
+    if (!this.job?.pickupLat || !this.job?.pickupLng) return;
+
+    window.open(
+      `https://www.google.com/maps/search/?api=1&query=${this.job.pickupLat},${this.job.pickupLng}`,
+      '_blank'
+    );
+  }
+
+  navigateToDropoff() {
+    if (!this.job?.destinationLat || !this.job?.destinationLng) return;
+
+    window.open(
+      `https://www.google.com/maps/search/?api=1&query=${this.job.destinationLat},${this.job.destinationLng}`,
+      '_blank'
+    );
+  }
+
+  getMapEmbedUrl(lat?: number, lng?: number): SafeResourceUrl | null {
+    if (!lat || !lng) return null;
+
+    const url = `https://www.google.com/maps?q=${lat},${lng}&hl=ar&z=16&output=embed`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  getRouteMapUrl(
+    pickupLat?: number,
+    pickupLng?: number,
+    dropLat?: number,
+    dropLng?: number
+  ) {
+    if (!pickupLat || !pickupLng || !dropLat || !dropLng) {
+      return null;
+    }
+
+    const url =
+      `https://www.google.com/maps?saddr=${pickupLat},${pickupLng}` +
+      `&daddr=${dropLat},${dropLng}` +
+      `&hl=ar&z=14&output=embed`;
+
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  ngOnDestroy(): void {
+    this.showProofModal = false;
+    this.showFailedModal = false;
+  }
+
+
+}
