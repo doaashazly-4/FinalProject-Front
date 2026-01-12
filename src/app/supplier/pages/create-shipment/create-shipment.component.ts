@@ -317,21 +317,39 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
 
   triggerLynxTalisman(priority: string): void {
     if (priority === 'urgent') {
+      // Show loading state briefly
+      this.statusMessage = '🔍 Lynx Talisman يبحث عن أفضل مندوب...';
+
       // Simulate Lynx AI finding the best match
       setTimeout(() => {
         this.suggestedCourier = {
           id: 2,
-          name: 'Courier #2',
+          name: 'أحمد محمد',
           score: '98%',
-          features: ['الأسرع', 'الأقرب', 'تقييم عالي']
+          rating: 4.9,
+          completedDeliveries: 847,
+          avgDeliveryTime: '25 دقيقة',
+          vehicleType: 'دراجة نارية',
+          distanceAway: '2.3 كم',
+          features: ['⚡ الأسرع في المنطقة', '📍 الأقرب لموقعك', '⭐ تقييم 4.9/5', '🎯 نسبة نجاح 99%']
         };
-        // Auto-assign logic (mock)
-        this.shipmentForm.patchValue({ notes: (this.shipmentForm.get('notes')?.value || '') + ' [Lynx Auto-Assign: Courier #2]' });
-      }, 500);
+
+        this.statusMessage = '✅ تم اختيار أفضل مندوب تلقائياً';
+
+        // Auto-assign note
+        const currentNotes = this.shipmentForm.get('notes')?.value || '';
+        if (!currentNotes.includes('Lynx')) {
+          this.shipmentForm.patchValue({
+            notes: currentNotes + (currentNotes ? '\n' : '') + '🎯 [Lynx Auto-Assign: أحمد محمد - Courier #2]'
+          });
+        }
+      }, 800);
     } else {
       this.suggestedCourier = null;
+      this.statusMessage = '';
     }
   }
+
 
   localCalculateFee(): void {
     if (!this.pickupLat || !this.pickupLng || !this.deliveryLat || !this.deliveryLng) {

@@ -8,11 +8,13 @@ import { OfflineService } from './courier/services/offline.service';
 import { NotificationsComponent } from './shared/notifications/notifications.component';
 import { LoaderComponent } from './shared/components/loader/loader.component';
 import { LoaderService } from './shared/services/loader.service';
+import { ToastNotificationsComponent } from './shared/components/toast-notifications/toast-notifications.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, NavbarComponent, FooterComponent, NotificationsComponent, LoaderComponent],
+  imports: [CommonModule, RouterOutlet, NavbarComponent, FooterComponent, NotificationsComponent, LoaderComponent, ToastNotificationsComponent],
+
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })

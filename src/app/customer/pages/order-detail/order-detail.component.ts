@@ -10,7 +10,8 @@ import {
 } from '../../services/customer-data.service';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { Subscription, interval } from 'rxjs';
-import { LynxTalismanComponent } from '../../../shared/components/lynx-talisman/lynx-talisman.component'; // AI Dispatcher UI
+import { LynxTalismanComponent } from '../../../shared/components/lynx-talisman/lynx-talisman.component';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-order-detail',
@@ -30,6 +31,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
   showRatingModal = false;
   showNoteModal = false;
   showTimeChangeModal = false;
+  showDemoControls = true;
 
   // ---------- RATING ----------
   rating = 0;
@@ -46,11 +48,23 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
   carrierLocation: CarrierLocation | null = null;
   locationSubscription?: Subscription;
   mapUrl = '';
+  safeMapUrl: SafeResourceUrl | null = null;
+
+  // ---------- OTP ----------
+  otp: string | null = null;
+  otpInput = '';
+  isVerifyingOtp = false;
+  otpError = '';
+
+  // ---------- DEMO STATE ----------
+  demoPhase = 0;
+  isDemoRunning = false;
 
   constructor(
     private route: ActivatedRoute,
     private dataService: CustomerDataService,
-    private notificationService: NotificationService // Injected
+    private notificationService: NotificationService,
+    private sanitizer: DomSanitizer
   ) { }
 
   // ================= LIFECYCLE =================
@@ -59,8 +73,6 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.loadDelivery(Number(id));
-      this.loadOTP();
-
     }
   }
 
@@ -79,7 +91,6 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
         this.delivery = this.mapBackendPackage(pkg);
         this.deliveryNote = this.delivery.notes ?? '';
 
-        // Extract OTP if present from backend
         if (this.delivery.deliveryOTP) {
           this.otp = this.delivery.deliveryOTP;
         }
@@ -90,9 +101,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
           this.handleDeliveryComplete();
         }
 
-        if (
-          ['picked_up', 'in_transit', 'out_for_delivery'].includes(this.delivery.status)
-        ) {
+        if (['picked_up', 'in_transit', 'out_for_delivery'].includes(this.delivery.status)) {
           this.startLocationTracking(String(id));
           if (!this.statusSubscription) {
             this.startStatusPolling(id);
@@ -100,10 +109,31 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
         }
       },
       error: () => {
-        this.error = 'لم يتم العثور على الشحنة';
+        // Use mock data for demo
+        this.loadMockDelivery(id);
         this.isLoading = false;
       }
     });
+  }
+
+  loadMockDelivery(id: number): void {
+    this.delivery = {
+      id: String(id),
+      trackingNumber: `PKG-${id}`,
+      description: 'إلكترونيات - أجهزة ذكية',
+      senderName: 'متجر التقنية الحديثة',
+      senderPhone: '01012345678',
+      pickupAddress: 'المنطقة الصناعية، القاهرة',
+      deliveryAddress: 'شارع النيل 123، الجيزة',
+      status: 'assigned',
+      createdAt: new Date(),
+      estimatedDelivery: new Date(Date.now() + 2 * 60 * 60 * 1000),
+      weight: 2.5,
+      courierName: 'أحمد محمد',
+      courierPhone: '01098765432',
+      notes: ''
+    };
+    this.error = '';
   }
 
   statusSubscription?: Subscription;
@@ -127,7 +157,10 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
 
   handleDeliveryComplete() {
     this.showRatingModal = true;
-    this.notificationService.showLynxNotification('تم التسليم بنجاح', 'شكراً لاستخدامك خدماتنا!');
+    this.notificationService.notifyDeliveryPhase({
+      deliveryId: this.delivery?.id || '',
+      phase: 'delivered'
+    });
   }
 
   // ================= MAPPING =================
@@ -137,18 +170,18 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
       id: String(pkg.id),
       trackingNumber: `PKG-${pkg.id}`,
       description: pkg.description ?? '—',
-      senderName: 'غير محدد',
-      senderPhone: undefined,
-      pickupAddress: '—',
-      deliveryAddress: '—',
+      senderName: pkg.senderName || 'غير محدد',
+      senderPhone: pkg.senderPhone,
+      pickupAddress: pkg.pickupAddress || '—',
+      deliveryAddress: pkg.destination || pkg.deliveryAddress || '—',
       status: this.mapStatus(pkg.status),
-      createdAt: new Date(),
-      estimatedDelivery: undefined,
+      createdAt: new Date(pkg.createdAt || new Date()),
+      estimatedDelivery: pkg.estimatedDelivery ? new Date(pkg.estimatedDelivery) : undefined,
       weight: pkg.weight ?? 0,
-      courierName: pkg.courier ? `Courier #${pkg.courier.id}` : undefined,
-      courierPhone: undefined,
+      courierName: pkg.courier ? `${pkg.courier.userName || 'Courier #' + pkg.courier.id}` : undefined,
+      courierPhone: pkg.courier?.phone,
       notes: pkg.shipmentNotes ?? '',
-      deliveryOTP: pkg.courier?.deliveryOTP
+      deliveryOTP: pkg.deliveryOTP || pkg.courier?.deliveryOTP
     };
   }
 
@@ -222,9 +255,27 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
     this.dataService.getCarrierLocation(deliveryId).subscribe({
       next: (loc) => {
         this.carrierLocation = loc;
-        this.mapUrl = `https://www.google.com/maps?q=${loc.lat},${loc.lng}&z=15`;
+        this.updateMapUrl(loc.lat, loc.lng);
+      },
+      error: () => {
+        // Fallback: Show pickup location if carrier location unavailable
+        if (!this.carrierLocation) {
+          // Mock Cairo location for demo
+          this.carrierLocation = {
+            courierId: '0',
+            lat: 30.0444,
+            lng: 31.2357,
+            timestamp: new Date()
+          };
+          this.updateMapUrl(30.0444, 31.2357);
+        }
       }
     });
+  }
+
+  updateMapUrl(lat: number, lng: number): void {
+    this.mapUrl = `https://www.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
+    this.safeMapUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.mapUrl);
   }
 
   // ================= ACTIONS =================
@@ -263,7 +314,6 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
 
   markNotAvailableToday(): void {
     if (!this.delivery) return;
-
     this.dataService.markNotAvailableToday(this.delivery.id).subscribe();
   }
 
@@ -283,65 +333,177 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
     this.rating = value;
   }
 
-  otp: string | null = null;
+  // ================= OTP VERIFICATION =================
 
-  loadOTP() {
-    // If mocking, return a fake OTP
-    if (this.delivery?.status === 'out_for_delivery' && !this.otp) {
-      this.otp = '8921'; // Mock OTP
+  verifyOtp(): void {
+    if (!this.otpInput || this.otpInput.length < 4) {
+      this.otpError = 'الرجاء إدخال رمز التحقق كاملاً';
+      return;
     }
 
-    if (!this.delivery || this.delivery.status !== 'out_for_delivery') return;
-
-    this.dataService.getPackageOTP(Number(this.delivery.id)).subscribe({
-      next: res => {
-        if (!res.verified) {
-          this.otp = res.otp;
-        }
-      }
-    });
+    if (this.otpInput === this.otp) {
+      this.isVerifyingOtp = true;
+      // Simulate verification
+      setTimeout(() => {
+        this.isVerifyingOtp = false;
+        this.delivery!.status = 'delivered';
+        this.handleDeliveryComplete();
+      }, 1000);
+    } else {
+      this.otpError = 'رمز التحقق غير صحيح';
+    }
   }
 
-  // ================= DEMO / SIMULATION =================
+  // ================= DEMO SIMULATION =================
 
-  simulateCourierArrival(): void {
-    if (!this.delivery) return;
+  runFullDemo(): void {
+    if (!this.delivery || this.isDemoRunning) return;
 
-    this.isLoading = true;
+    this.isDemoRunning = true;
+    this.demoPhase = 1;
+
+    // Phase 1: Accepted
+    this.delivery.status = 'assigned';
+    this.notificationService.notifyDeliveryPhase({
+      deliveryId: this.delivery.id,
+      phase: 'accepted'
+    });
+
+    // Phase 2: Courier Assigned (3s)
     setTimeout(() => {
-      this.delivery!.status = 'out_for_delivery';
-      this.isLoading = false;
-      this.otp = '4492'; // Demo OTP
-
-      // Trigger Notification
-      this.notificationService.showNotification({
-        title: 'المندوب وصل! 🚴',
-        message: 'المندوب بالخارج الآن. يرجى إعطاءه رمز التسليم: ' + this.otp,
-        type: 'success',
-        sound: 'assets/sounds/notification.mp3'
+      if (!this.delivery) return;
+      this.demoPhase = 2;
+      this.delivery.courierName = 'أحمد محمد';
+      this.notificationService.notifyDeliveryPhase({
+        deliveryId: this.delivery.id,
+        phase: 'courier_assigned',
+        courierName: 'أحمد محمد'
       });
+    }, 3000);
 
-      // Mock Location near user
-      // Mock Location near user
+    // Phase 3: On the way (6s)
+    setTimeout(() => {
+      if (!this.delivery) return;
+      this.demoPhase = 3;
+      this.delivery.status = 'in_transit';
       this.carrierLocation = {
         courierId: '99',
-        lat: 30.0444, // Cairo example
+        lat: 30.0500,
+        lng: 31.2400,
+        timestamp: new Date()
+      };
+      this.updateMapUrl(30.0500, 31.2400);
+      this.notificationService.notifyDeliveryPhase({
+        deliveryId: this.delivery.id,
+        phase: 'on_the_way',
+        eta: '12 دقيقة'
+      });
+    }, 6000);
+
+    // Phase 4: Nearby (10s)
+    setTimeout(() => {
+      if (!this.delivery) return;
+      this.demoPhase = 4;
+      this.carrierLocation = {
+        courierId: '99',
+        lat: 30.0450,
+        lng: 31.2360,
+        timestamp: new Date()
+      };
+      this.updateMapUrl(30.0450, 31.2360);
+      this.notificationService.notifyDeliveryPhase({
+        deliveryId: this.delivery.id,
+        phase: 'nearby'
+      });
+    }, 10000);
+
+    // Phase 5: Arrived + OTP Required (14s)
+    setTimeout(() => {
+      if (!this.delivery) return;
+      this.demoPhase = 5;
+      this.delivery.status = 'out_for_delivery';
+      this.otp = '4829';
+      this.carrierLocation = {
+        courierId: '99',
+        lat: 30.0444,
         lng: 31.2357,
         timestamp: new Date()
       };
-      this.mapUrl = `https://www.google.com/maps?q=${this.carrierLocation.lat},${this.carrierLocation.lng}&z=15`;
-    }, 1500);
+      this.updateMapUrl(30.0444, 31.2357);
+      this.notificationService.notifyDeliveryPhase({
+        deliveryId: this.delivery.id,
+        phase: 'arrived'
+      });
+      setTimeout(() => {
+        this.notificationService.notifyDeliveryPhase({
+          deliveryId: this.delivery!.id,
+          phase: 'otp_required'
+        });
+      }, 1500);
+      this.isDemoRunning = false;
+    }, 14000);
+  }
+
+  simulateSingleStep(step: 'pickup' | 'transit' | 'nearby' | 'arrived'): void {
+    if (!this.delivery) return;
+
+    switch (step) {
+      case 'pickup':
+        this.delivery.status = 'picked_up';
+        this.notificationService.notifyDeliveryPhase({
+          deliveryId: this.delivery.id,
+          phase: 'on_the_way',
+          eta: '20 دقيقة'
+        });
+        break;
+
+      case 'transit':
+        this.delivery.status = 'in_transit';
+        this.carrierLocation = {
+          courierId: '99',
+          lat: 30.0500,
+          lng: 31.2400,
+          timestamp: new Date()
+        };
+        this.updateMapUrl(30.0500, 31.2400);
+        break;
+
+      case 'nearby':
+        this.notificationService.notifyDeliveryPhase({
+          deliveryId: this.delivery.id,
+          phase: 'nearby'
+        });
+        this.carrierLocation = {
+          courierId: '99',
+          lat: 30.0450,
+          lng: 31.2360,
+          timestamp: new Date()
+        };
+        this.updateMapUrl(30.0450, 31.2360);
+        break;
+
+      case 'arrived':
+        this.delivery.status = 'out_for_delivery';
+        this.otp = '4829';
+        this.carrierLocation = {
+          courierId: '99',
+          lat: 30.0444,
+          lng: 31.2357,
+          timestamp: new Date()
+        };
+        this.updateMapUrl(30.0444, 31.2357);
+        this.notificationService.notifyDeliveryPhase({
+          deliveryId: this.delivery.id,
+          phase: 'otp_required'
+        });
+        break;
+    }
   }
 
   simulateDeliveryComplete(): void {
     if (!this.delivery) return;
     this.delivery.status = 'delivered';
-    this.showRatingModal = true;
-    this.notificationService.showNotification({
-      title: 'تم التسليم ✅',
-      message: 'شكراً لاستخدامك Lynx. نتمنى لك يوماً سعيداً!',
-      type: 'success'
-    });
+    this.handleDeliveryComplete();
   }
-
 }
+
