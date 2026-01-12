@@ -6,6 +6,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { CourierDataService } from '../../services/courier-data.service';
 import { DeliveryProofComponent } from './components/delivery-proof.component';
 import { FailedDeliveryProofComponent } from './components/failed-delivery-proof.component';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 
 
@@ -66,6 +67,7 @@ export class DeliveryComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private courierService: CourierDataService,
+    private notificationService: NotificationService,
     private sanitizer: DomSanitizer
   ) { }
 
@@ -202,11 +204,15 @@ export class DeliveryComponent implements OnInit, OnDestroy {
     this.isVerifying = true;
     this.courierService.verifyDeliveryOTP(this.packageId, payload.otp).subscribe({
       next: () => {
+        // Prepare delivery notification
+        this.notificationService.showLynxNotification('تم التحقق', 'كود OTP صحيح!');
+
         this.courierService.deliverPackage(this.packageId, payload.notes ?? '')
           .subscribe({
             next: () => {
               this.isVerifying = false;
               this.showProofModal = false;
+              this.notificationService.showLynxNotification('نجاح التسليم', 'تم تسجيل الشحنة كمسلمة شكرأ لجهودك');
               this.router.navigate(['/courier/dashboard']);
             },
             error: () => {
@@ -218,6 +224,7 @@ export class DeliveryComponent implements OnInit, OnDestroy {
       error: () => {
         this.isVerifying = false;
         this.error = 'رمز OTP غير صحيح';
+        this.notificationService.showNotification({ title: 'خطأ', message: 'رمز OTP غير صحيح', type: 'error' });
       }
     });
   }

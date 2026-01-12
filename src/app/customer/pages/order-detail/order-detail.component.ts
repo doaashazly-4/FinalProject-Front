@@ -66,6 +66,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.locationSubscription?.unsubscribe();
+    this.statusSubscription?.unsubscribe();
   }
 
   // ================= DATA =================
@@ -85,14 +86,17 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
 
         this.isLoading = false;
 
+        if (this.delivery.status === 'delivered' || (this.delivery.status === 'out_for_delivery' && this.delivery.otpVerified)) {
+          this.handleDeliveryComplete();
+        }
+
         if (
           ['picked_up', 'in_transit', 'out_for_delivery'].includes(this.delivery.status)
         ) {
           this.startLocationTracking(String(id));
-        }
-
-        if (this.delivery.status === 'delivered') {
-          this.showRatingModal = true;
+          if (!this.statusSubscription) {
+            this.startStatusPolling(id);
+          }
         }
       },
       error: () => {
@@ -100,6 +104,30 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       }
     });
+  }
+
+  statusSubscription?: Subscription;
+
+  startStatusPolling(id: number) {
+    this.statusSubscription = interval(5000).subscribe(() => {
+      this.dataService.trackPackage(id).subscribe((pkg: any) => {
+        const newStatus = this.mapStatus(pkg.status);
+        const otpVerified = pkg.courier?.otpVerified;
+
+        if (newStatus === 'delivered' || (newStatus === 'out_for_delivery' && otpVerified)) {
+          if (this.delivery?.status !== 'delivered') {
+            this.handleDeliveryComplete();
+            this.delivery!.status = 'delivered';
+            this.statusSubscription?.unsubscribe();
+          }
+        }
+      });
+    });
+  }
+
+  handleDeliveryComplete() {
+    this.showRatingModal = true;
+    this.notificationService.showLynxNotification('تم التسليم بنجاح', 'شكراً لاستخدامك خدماتنا!');
   }
 
   // ================= MAPPING =================

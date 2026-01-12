@@ -229,3 +229,18 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: 'Tajawal', Roboto, "Helvetica Neue", sans-serif; }
+
+/* Lynx Notification */
+.lynx-notification {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-right: 4px solid #005f73;
+    box-shadow: 0 10px 30px -5px rgba(0, 95, 115, 0.2);
+}
+.lynx-notification .title {
+    color: #005f73;
+    font-weight: 900;
+}
+.lynx-notification .icon {
+    background: #005f73;
+    color: white;
+}

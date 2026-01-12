@@ -358,7 +358,12 @@ export class SupplierDataService {
   // ================= DASHBOARD =================
 
   getDashboardData(): Observable<SenderDashboardData> {
-    return this.http.get<SenderDashboardData>(`${this.apiUrl}/Dashboard`);
+    return this.http.get<any>(`${this.apiUrl}/Dashboard`).pipe(
+      map(data => ({
+        ...data,
+        recentParcels: (data.recentParcels || []).map((p: any) => this.mapToParcel(p))
+      }))
+    );
   }
 
   getStats(): Observable<SenderStat[]> {
@@ -405,8 +410,23 @@ export class SupplierDataService {
     // Helper to map numeric status to string
     const mapStatus = (s: any): string => {
       if (typeof s === 'number') {
-        const statuses = ['pending', 'ready_for_pickup', 'assigned', 'picked_up', 'in_transit', 'delivered', 'cancelled', 'returned'];
-        return statuses[s] || 'pending';
+        // Backend RequestStatus: 0:Pending, 1:Assigned, 2:Accepted, 3:PickupInProgress, 4:Delivered, 5:Cancelled
+        // Backend PackageStatus: 0:Pending, 1:Assigned, 2:PickupInProgress, 3:OutForDelivery, 4:Delivered, 5:Cancelled, 6:Failed
+
+        // We need a unified mapping. Since we use string statuses in FE:
+        // 'pending', 'ready_for_pickup', 'assigned', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'failed_delivery', 'returned', 'cancelled'
+
+        // Mapping based on observation of backend Enums:
+        switch (s) {
+          case 0: return 'pending';
+          case 1: return 'assigned'; // or ready_for_pickup? Backend Assigned usually means courier assigned.
+          case 2: return 'assigned'; // Accepted
+          case 3: return 'picked_up'; // PickupInProgress roughly maps to picked up or in_transit
+          case 4: return 'delivered';
+          case 5: return 'cancelled';
+          case 6: return 'failed_delivery';
+          default: return 'pending';
+        }
       }
       return (s || 'pending').toString().toLowerCase();
     };

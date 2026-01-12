@@ -18,7 +18,7 @@ export class SupplierDashboardComponent implements OnInit {
   pendingParcels: Parcel[] = [];
 
   get displayParcels(): Parcel[] {
-    return this.recentParcels;
+    return this.recentParcels || [];
   }
   dashboardData: SenderDashboardData | null = null;
   isLoading = true;

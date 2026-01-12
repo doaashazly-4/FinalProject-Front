@@ -15,7 +15,16 @@ export class NotificationService {
   private notificationsSubject = new BehaviorSubject<AppNotification | null>(null);
   public notifications$ = this.notificationsSubject.asObservable();
 
-  constructor() {}
+  constructor() { }
+
+  showLynxNotification(title: string, message: string) {
+    this.showNotification({
+      title: '✨ Lynx Talisman',
+      message: `${title}: ${message}`,
+      type: 'success', // We can use custom styles or just leverage 'success' with the prefix
+      sound: 'assets/sounds/notification.mp3'
+    });
+  }
 
   showNotification(notification: AppNotification) {
     // Trigger the notification

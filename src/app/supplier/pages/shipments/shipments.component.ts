@@ -327,6 +327,6 @@ export class ShipmentsComponent implements OnInit {
   }
 
   canCancel(parcel: Parcel): boolean {
-    return ['pending', 'ready_for_pickup'].includes(parcel.status);
+    return ['pending', 'ready_for_pickup', 'assigned'].includes(parcel.status);
   }
 }

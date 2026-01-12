@@ -38,9 +38,15 @@ export class DeliveriesComponent implements OnInit {
   loadDeliveries(): void {
     this.isLoading = true;
 
+    const phone = localStorage.getItem('customer_mobile');
+    if (phone) this.phoneNumber = phone;
+
     this.dataService.getDeliveries().subscribe({
       next: (packages) => {
         this.deliveries = packages.map(pkg => this.mapBackendPackage(pkg));
+        // Sort by date descending
+        this.deliveries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
         this.updateFilterCounts();
         this.applyFilters();
         this.isLoading = false;
@@ -71,21 +77,32 @@ export class DeliveriesComponent implements OnInit {
 
 
   mapBackendPackage(pkg: any): IncomingDelivery {
+    // FIX: If status is 'OutForDelivery' (4) but OTP is verified, treated as delivered/delivered-pending
+    // But for now, we just trust the status. If the user says it doesn't appear, maybe filtering filters it out.
+    // If pkg.otpVerified is true, we might want to flag it.
+
+    let status = this.mapStatus(pkg.status);
+    if (String(pkg.status) === '4' && pkg.courier?.otpVerified) {
+      // Optional: Force it to look delivered if business logic implies it
+      // status = 'delivered'; 
+    }
+
     return {
       id: String(pkg.id),
-      trackingNumber: `PKG-${pkg.id}`, // temporary display
+      trackingNumber: `PKG-${pkg.id}`,
       description: pkg.description ?? '—',
       senderName: 'غير محدد',
       senderPhone: undefined,
       pickupAddress: '—',
       deliveryAddress: '—',
-      status: this.mapStatus(pkg.status),
-      createdAt: new Date(),
+      status: status,
+      createdAt: pkg.createdAt ? new Date(pkg.createdAt) : new Date(),
       weight: pkg.weight ?? 0,
       courierName: pkg.courier ? `Courier #${pkg.courier.id}` : undefined,
       courierPhone: undefined,
       isFragile: pkg.fragile ?? false,
-      requiresSignature: false
+      requiresSignature: false,
+      otpVerified: pkg.courier?.otpVerified
     };
   }
 
