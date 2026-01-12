@@ -577,7 +577,7 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
       return;
     }
 
-    this.router.navigate(['/supplier/shipments', this.createdId]);
+    this.router.navigate(['/supplier/shipments']);
   }
 
 
