@@ -1,6 +1,8 @@
 <app-lynx-talisman></app-lynx-talisman>
+
 <div class="min-h-screen bg-[#f8fafc] pb-12">
-  <!-- Top Navigation / Breadcrumb -->
+
+  <!-- Top Navigation -->
   <div
     class="flex items-center justify-between p-6 lg:px-12 bg-white/50 backdrop-blur-md sticky top-0 z-30 border-b border-gray-100">
     <div class="flex items-center gap-4">
@@ -13,735 +15,156 @@
         <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">Shipment Management</p>
       </div>
     </div>
-    <div class="flex items-center gap-3">
-      <button
-        class="px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-black text-gray-700 hover:bg-gray-50 transition-all flex items-center gap-2">
-        <i class="bi bi-printer"></i>
-        <span>طباعة بوليصة الشحن</span>
-      </button>
-    </div>
   </div>
 
+  <!-- Loader -->
   <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-32">
     <div class="w-16 h-16 border-4 border-primary-green border-t-transparent rounded-full animate-spin"></div>
     <p class="mt-6 text-gray-500 font-bold">جاري جلب تفاصيل الشحنة...</p>
   </div>
 
-  <div *ngIf="!isLoading && shipment"
-    class="max-w-7xl mx-auto px-6 lg:px-12 mt-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+  <!-- Content -->
+  <div *ngIf="!isLoading && shipment" class="max-w-7xl mx-auto px-6 lg:px-12 mt-8 space-y-8">
 
-    <!-- 3D Card Header -->
-    <div class="relative group">
-      <div
-        class="absolute inset-0 bg-primary-green/20 rounded-[2.5rem] blur-2xl group-hover:bg-primary-green/30 transition-all duration-700 -z-10 translate-y-4">
-      </div>
+    <!-- Header Card -->
+    <div class="bg-primary-dark rounded-[2.5rem] p-8 text-white">
+      <div class="flex flex-col lg:flex-row justify-between gap-8">
 
-      <div class="bg-primary-dark rounded-[2.5rem] p-8 lg:p-12 text-white relative overflow-hidden">
-        <div
-          class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-white/5 to-transparent pointer-events-none">
+        <div>
+          <h2 class="text-4xl font-black mb-2">#{{ shipment.id }}</h2>
+          <span class="px-5 py-1.5 rounded-full text-sm font-black bg-white/10">
+            {{ getStatusText(shipment.packages[0].status || 'pending') }}
+          </span>
+          <p class="mt-4 text-white/60 font-bold">
+            تم الإنشاء في {{ formatDate(shipment.createdAt) }}
+          </p>
         </div>
-        <div
-          class="absolute -bottom-24 -left-24 w-64 h-64 bg-primary-green/10 rounded-full blur-3xl pointer-events-none">
+
+        <div class="flex gap-4">
+          <div class="px-6 py-4 bg-white/10 rounded-xl text-center">
+            <p class="text-xs text-white/40 font-black">COD</p>
+            <p class="text-2xl font-black text-accent-gold">
+              {{ shipment.packages[0].shipmentCost || 0 }} ج.م
+            </p>
+          </div>
+          <div class="px-6 py-4 bg-white/10 rounded-xl text-center">
+            <p class="text-xs text-white/40 font-black">الوزن</p>
+            <p class="text-2xl font-black text-blue-400">
+              {{ shipment.packages[0].weight || 0 }} كجم
+            </p>
+          </div>
         </div>
 
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative z-10">
-          <div class="flex items-center gap-6">
-            <div
-              class="w-20 h-20 lg:w-24 lg:h-24 rounded-[2rem] bg-gradient-to-br from-primary-green to-secondary-teal flex items-center justify-center shadow-xl shadow-primary-green/20 rotate-3 group-hover:rotate-0 transition-transform duration-500">
-              <i class="bi bi-box-seam text-4xl lg:text-5xl"></i>
-<div class="min-h-screen bg-[#f8fafc] pb-12">
-  <!-- Top Navigation / Breadcrumb -->
-  <div
-    class="flex items-center justify-between p-6 lg:px-12 bg-white/50 backdrop-blur-md sticky top-0 z-30 border-b border-gray-100">
-    <div class="flex items-center gap-4">
-      <a routerLink="/supplier/dashboard"
-        class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-primary-dark hover:text-primary-green hover:shadow-md transition-all">
-        <i class="bi bi-arrow-right text-lg"></i>
-      </a>
-      <div>
-        <h1 class="text-xl font-black text-primary-dark">تفاصيل الشحنة</h1>
-        <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">Shipment Management</p>
       </div>
     </div>
-    <div class="flex items-center gap-3">
-      <button
-        class="px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-black text-gray-700 hover:bg-gray-50 transition-all flex items-center gap-2">
-        <i class="bi bi-printer"></i>
-        <span>طباعة بوليصة الشحن</span>
+
+    <!-- Route -->
+    <div class="bg-white rounded-[2rem] p-8 border">
+      <h3 class="text-xl font-black mb-6">مسار الشحنة</h3>
+
+      <div class="space-y-6">
+        <div>
+          <p class="text-xs font-black text-primary-green">نقطة الاستلام</p>
+          <p class="font-black">{{ shipment.source }}</p>
+          <p *ngIf="shipment.pickupLat && shipment.pickupLng" class="text-xs text-gray-500">
+            {{ shipment.pickupLat }}, {{ shipment.pickupLng }}
+          </p>
+        </div>
+
+        <div>
+          <p class="text-xs font-black text-blue-600">جهة الوصول</p>
+          <p class="font-black">
+            {{ shipment.packages[0].destination || '-' }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Package Details -->
+    <div class="bg-white rounded-[2rem] p-8 border">
+      <h3 class="text-xl font-black mb-6">معلومات المحتويات</h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <p class="text-xs text-gray-400 font-black">الوصف</p>
+          <p class="font-black">{{ shipment.packages[0].description || '-' }}</p>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-400 font-black">الأولوية</p>
+          <span class="px-4 py-1 rounded-lg text-xs font-black"
+            [ngClass]="getPriorityClass(shipment.priority || 'normal')">
+            {{ shipment.priority || 'normal' }}
+          </span>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-400 font-black">الأبعاد</p>
+          <p class="font-black">{{ shipment.packages[0].dimensions || 'غير محددة' }}</p>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-400 font-black">تاريخ متوقع</p>
+          <p class="font-black">
+            {{ formatDate(shipment.packages[0].expireDate || shipment.createdAt) }}
+          </p>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-400 font-black">قابلة للكسر</p>
+          <p class="font-black text-gray-400">لا</p>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-400 font-black">تتطلب توقيع</p>
+          <p class="font-black text-gray-400">لا</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer -->
+    <div class="bg-white rounded-[2rem] p-8 border">
+      <h3 class="text-xl font-black mb-6">بيانات العميل</h3>
+
+      <div class="space-y-4">
+        <div>
+          <p class="text-xs text-gray-400 font-black">الاسم</p>
+          <p class="font-black">
+            {{ shipment.packages[0].receiverName || 'عميل' }}
+          </p>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-400 font-black">رقم الهاتف</p>
+          <p class="font-black">
+            {{ shipment.packages[0].receiverPhone || 'غير متوفر' }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Financial -->
+    <div class="bg-white rounded-[2rem] p-8 border">
+      <h3 class="text-xl font-black mb-6">الملخص المالي</h3>
+
+      <div class="flex justify-between">
+        <span class="font-black">الإجمالي</span>
+        <span class="font-black text-accent-gold">
+          {{ shipment.packages[0].shipmentCost || 0 }} ج.م
+        </span>
+      </div>
+    </div>
+
+    <!-- Delete -->
+    <div class="bg-red-50 border border-red-200 rounded-[2rem] p-8 text-center">
+      <p class="text-sm font-bold text-red-600 mb-4">
+        هل ترغب في إزالة هذه الشحنة نهائياً؟
+      </p>
+      <button (click)="deleteShipment()"
+        class="w-full py-3 bg-red-600 text-white font-black rounded-xl hover:bg-red-700">
+        حذف الشحنة
       </button>
     </div>
-  </div>
 
-  <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-32">
-    <div class="w-16 h-16 border-4 border-primary-green border-t-transparent rounded-full animate-spin"></div>
-    <p class="mt-6 text-gray-500 font-bold">جاري جلب تفاصيل الشحنة...</p>
-  </div>
-
-  <div *ngIf="!isLoading && shipment"
-    class="max-w-7xl mx-auto px-6 lg:px-12 mt-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-
-    <!-- 3D Card Header -->
-    <div class="relative group">
-      <div
-        class="absolute inset-0 bg-primary-green/20 rounded-[2.5rem] blur-2xl group-hover:bg-primary-green/30 transition-all duration-700 -z-10 translate-y-4">
-      </div>
-
-      <div class="bg-primary-dark rounded-[2.5rem] p-8 lg:p-12 text-white relative overflow-hidden">
-        <div
-          class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-white/5 to-transparent pointer-events-none">
-        </div>
-        <div
-          class="absolute -bottom-24 -left-24 w-64 h-64 bg-primary-green/10 rounded-full blur-3xl pointer-events-none">
-        </div>
-
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative z-10">
-          <div class="flex items-center gap-6">
-            <div
-              class="w-20 h-20 lg:w-24 lg:h-24 rounded-[2rem] bg-gradient-to-br from-primary-green to-secondary-teal flex items-center justify-center shadow-xl shadow-primary-green/20 rotate-3 group-hover:rotate-0 transition-transform duration-500">
-              <i class="bi bi-box-seam text-4xl lg:text-5xl"></i>
-            </div>
-            <div>
-              <div class="flex items-center gap-4 mb-2">
-                <h2 class="text-3xl lg:text-5xl font-black">#{{ shipment.id }}</h2>
-                <span
-                  class="px-5 py-1.5 rounded-full text-sm font-black uppercase tracking-tighter border-2 border-white/20 bg-white/10 backdrop-blur-md">
-                  {{ getStatusText(shipment.packages[0].status) }}
-                </span>
-              </div>
-              <p class="text-white/60 font-bold flex items-center gap-2">
-                <i class="bi bi-calendar-check text-primary-green"></i>
-                تم الإنشاء في {{ formatDate(shipment.createdAt) }}
-              </p>
-              <div class="flex items-center gap-4 mb-2">
-                <h2 class="text-3xl lg:text-5xl font-black">#{{ shipment.id }}</h2>
-                <span
-                  class="px-5 py-1.5 rounded-full text-sm font-black uppercase tracking-tighter border-2 border-white/20 bg-white/10 backdrop-blur-md">
-                  {{ getStatusText(shipment.packages[0].status) }}
-                </span>
-              </div>
-              <p class="text-white/60 font-bold flex items-center gap-2">
-                <i class="bi bi-calendar-check text-primary-green"></i>
-                تم الإنشاء في {{ formatDate(shipment.createdAt) }}
-              </p>
-            </div>
-          </div>
-
-          <div class="flex flex-wrap gap-4">
-            <div
-              class="px-6 py-4 bg-white/10 backdrop-blur-md rounded-[1.5rem] border border-white/10 text-center min-w-[140px]">
-              <p class="text-[10px] text-white/40 font-black uppercase tracking-widest mb-1">إجمالي COD</p>
-              <p class="text-2xl font-black text-accent-gold">{{ shipment.packages[0].shipmentCost }} ج.م</p>
-            </div>
-            <div
-              class="px-6 py-4 bg-white/10 backdrop-blur-md rounded-[1.5rem] border border-white/10 text-center min-w-[140px]">
-              <p class="text-[10px] text-white/40 font-black uppercase tracking-widest mb-1">الوزن الكلي</p>
-              <p class="text-2xl font-black text-blue-400">{{ shipment.packages[0].weight }} كجم</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Details Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-      <!-- Right Side: Order Info -->
-      <div class="lg:col-span-2 space-y-8">
-
-        <!-- Pickup & Destination 3D Step View -->
-        <div class="bg-white rounded-[2.25rem] p-8 shadow-sm border border-gray-100 relative overflow-hidden">
-          <h3 class="text-xl font-black text-primary-dark mb-8 flex items-center gap-3">
-            <i class="bi bi-geo-alt-fill text-primary-green"></i>
-            مسار الشحنة
-          </h3>
-
-          <div class="relative space-y-12">
-            <!-- Line connector -->
-            <div
-              class="absolute right-7 top-10 bottom-10 w-0.5 bg-gradient-to-b from-primary-green via-gray-100 to-blue-500">
-            </div>
-
-            <div class="relative flex items-start gap-8 pr-16 group/step">
-              <div
-                class="absolute right-4 top-1 w-6 h-6 rounded-lg bg-primary-green shadow-lg shadow-primary-green/30 flex items-center justify-center z-10 scale-125">
-                <div class="w-2 h-2 rounded-full bg-white animate-ping"></div>
-          <div class="flex flex-wrap gap-4">
-            <div
-              class="px-6 py-4 bg-white/10 backdrop-blur-md rounded-[1.5rem] border border-white/10 text-center min-w-[140px]">
-              <p class="text-[10px] text-white/40 font-black uppercase tracking-widest mb-1">إجمالي COD</p>
-              <p class="text-2xl font-black text-accent-gold">{{ shipment.packages[0].shipmentCost }} ج.م</p>
-            </div>
-            <div
-              class="px-6 py-4 bg-white/10 backdrop-blur-md rounded-[1.5rem] border border-white/10 text-center min-w-[140px]">
-              <p class="text-[10px] text-white/40 font-black uppercase tracking-widest mb-1">الوزن الكلي</p>
-              <p class="text-2xl font-black text-blue-400">{{ shipment.packages[0].weight }} كجم</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Details Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-      <!-- Right Side: Order Info -->
-      <div class="lg:col-span-2 space-y-8">
-
-        <!-- Pickup & Destination 3D Step View -->
-        <div class="bg-white rounded-[2.25rem] p-8 shadow-sm border border-gray-100 relative overflow-hidden">
-          <h3 class="text-xl font-black text-primary-dark mb-8 flex items-center gap-3">
-            <i class="bi bi-geo-alt-fill text-primary-green"></i>
-            مسار الشحنة
-          </h3>
-
-          <div class="relative space-y-12">
-            <!-- Line connector -->
-            <div
-              class="absolute right-7 top-10 bottom-10 w-0.5 bg-gradient-to-b from-primary-green via-gray-100 to-blue-500">
-            </div>
-
-            <div class="relative flex items-start gap-8 pr-16 group/step">
-              <div
-                class="absolute right-4 top-1 w-6 h-6 rounded-lg bg-primary-green shadow-lg shadow-primary-green/30 flex items-center justify-center z-10 scale-125">
-                <div class="w-2 h-2 rounded-full bg-white animate-ping"></div>
-              </div>
-              <div
-                class="flex-1 p-6 rounded-2xl bg-primary-green/5 border border-primary-green/10 group-hover/step:-translate-x-2 transition-transform">
-                <p class="text-[10px] font-black text-primary-green uppercase tracking-widest mb-2">نقطة الاستلام</p>
-                <h4 class="text-lg font-black text-primary-dark mb-1">{{ shipment.source }}</h4>
-                <div class="flex items-center gap-2 text-xs text-gray-500 font-bold" *ngIf="shipment.pickupLat">
-                  <i class="bi bi-pin-map"></i>
-                  <span>إحداثيات: {{ shipment.pickupLat }}, {{ shipment.pickupLng }}</span>
-                </div>
-              <div
-                class="flex-1 p-6 rounded-2xl bg-primary-green/5 border border-primary-green/10 group-hover/step:-translate-x-2 transition-transform">
-                <p class="text-[10px] font-black text-primary-green uppercase tracking-widest mb-2">نقطة الاستلام</p>
-                <h4 class="text-lg font-black text-primary-dark mb-1">{{ shipment.source }}</h4>
-                <div class="flex items-center gap-2 text-xs text-gray-500 font-bold" *ngIf="shipment.pickupLat">
-                  <i class="bi bi-pin-map"></i>
-                  <span>إحداثيات: {{ shipment.pickupLat }}, {{ shipment.pickupLng }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="relative flex items-start gap-8 pr-16 group/step">
-            <div class="relative flex items-start gap-8 pr-16 group/step">
-              <div
-                class="absolute right-4 top-1 w-6 h-6 rounded-lg bg-blue-500 shadow-lg shadow-blue-500/30 flex items-center justify-center z-10 scale-125">
-                <i class="bi bi-flag-fill text-[10px] text-white"></i>
-                class="absolute right-4 top-1 w-6 h-6 rounded-lg bg-blue-500 shadow-lg shadow-blue-500/30 flex items-center justify-center z-10 scale-125">
-                <i class="bi bi-flag-fill text-[10px] text-white"></i>
-              </div>
-              <div
-                class="flex-1 p-6 rounded-2xl bg-blue-50 border border-blue-100/50 group-hover/step:-translate-x-2 transition-transform">
-                <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">جهة الوصول</p>
-                <h4 class="text-lg font-black text-primary-dark mb-1">{{ shipment.packages[0].destination }}</h4>
-                <div class="flex items-center gap-2 text-xs text-gray-500 font-bold" *ngIf="shipment.packages[0].lat">
-                  <i class="bi bi-pin-map"></i>
-                  <span>إحداثيات: {{ shipment.packages[0].lat }}, {{ shipment.packages[0].lng }}</span>
-                </div>
-              <div
-                class="flex-1 p-6 rounded-2xl bg-blue-50 border border-blue-100/50 group-hover/step:-translate-x-2 transition-transform">
-                <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">جهة الوصول</p>
-                <h4 class="text-lg font-black text-primary-dark mb-1">{{ shipment.packages[0].destination }}</h4>
-                <div class="flex items-center gap-2 text-xs text-gray-500 font-bold" *ngIf="shipment.packages[0].lat">
-                  <i class="bi bi-pin-map"></i>
-                  <span>إحداثيات: {{ shipment.packages[0].lat }}, {{ shipment.packages[0].lng }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Package Details -->
-        <div class="bg-white rounded-[2.25rem] p-8 shadow-sm border border-gray-100">
-          <h3 class="text-xl font-black text-primary-dark mb-8 flex items-center gap-3">
-            <i class="bi bi-info-circle-fill text-accent-gold"></i>
-            معلومات المحتويات
-          </h3>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">الوصف</span>
-              <p class="text-primary-dark font-black">{{ shipment.packages[0].description }}</p>
-            </div>
-            <div class="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">الأولوية</span>
-              <span class="px-4 py-1 rounded-lg text-xs font-black" [ngClass]="getPriorityClass(shipment.priority)">
-                {{ shipment.priority }}
-              </span>
-            </div>
-            <div class="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">الأبعاد</span>
-              <p class="text-primary-dark font-black text-sm">{{ shipment.packages[0].dimensions || 'غير محددة' }}</p>
-            </div>
-            <div class="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">تاريخ انتهاء
-                الصلاحية المتوقع</span>
-              <p class="text-primary-dark font-black text-sm">{{ formatDate(shipment.packages[0].expireDate) }}</p>
-            </div>
-            <div class="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">خيارات
-                إضافية</span>
-              <div class="space-y-2 mt-2">
-                <div class="flex items-center gap-2">
-                  <div class="w-5 h-5 rounded flex items-center justify-center"
-                    [ngClass]="shipment.packages[0].fragile ? 'bg-amber-100 text-amber-600' : 'bg-gray-200 text-gray-400'">
-                    <i class="bi" [ngClass]="shipment.packages[0].fragile ? 'bi-check-lg' : 'bi-x-lg'"></i>
-                  </div>
-                  <span class="text-xs font-bold"
-                    [ngClass]="shipment.packages[0].fragile ? 'text-primary-dark' : 'text-gray-400'">قابلة للكسر</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-5 h-5 rounded flex items-center justify-center"
-                    [ngClass]="shipment.packages[0].requiresSignature ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-400'">
-                    <i class="bi" [ngClass]="shipment.packages[0].requiresSignature ? 'bi-check-lg' : 'bi-x-lg'"></i>
-                  </div>
-                  <span class="text-xs font-bold"
-                    [ngClass]="shipment.packages[0].requiresSignature ? 'text-primary-dark' : 'text-gray-400'">تتطلب
-                    توقيع</span>
-                </div>
-              </div>
-            </div>
-            <div class="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">ملاحظات
-                إضافية</span>
-              <p class="text-primary-dark font-bold text-sm leading-relaxed">{{ shipment.packages[0].notes || 'لا توجد
-                ملاحظات' }}</p>
-            </div>
-        <!-- Package Details -->
-        <div class="bg-white rounded-[2.25rem] p-8 shadow-sm border border-gray-100">
-          <h3 class="text-xl font-black text-primary-dark mb-8 flex items-center gap-3">
-            <i class="bi bi-info-circle-fill text-accent-gold"></i>
-            معلومات المحتويات
-          </h3>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">الوصف</span>
-              <p class="text-primary-dark font-black">{{ shipment.packages[0].description }}</p>
-            </div>
-            <div class="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">الأولوية</span>
-              <span class="px-4 py-1 rounded-lg text-xs font-black" [ngClass]="getPriorityClass(shipment.priority)">
-                {{ shipment.priority }}
-              </span>
-            </div>
-            <div class="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">الأبعاد</span>
-              <p class="text-primary-dark font-black text-sm">{{ shipment.packages[0].dimensions || 'غير محددة' }}</p>
-            </div>
-            <div class="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">تاريخ انتهاء
-                الصلاحية المتوقع</span>
-              <p class="text-primary-dark font-black text-sm">{{ formatDate(shipment.packages[0].expireDate) }}</p>
-            </div>
-            <div class="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">خيارات
-                إضافية</span>
-              <div class="space-y-2 mt-2">
-                <div class="flex items-center gap-2">
-                  <div class="w-5 h-5 rounded flex items-center justify-center"
-                    [ngClass]="shipment.packages[0].fragile ? 'bg-amber-100 text-amber-600' : 'bg-gray-200 text-gray-400'">
-                    <i class="bi" [ngClass]="shipment.packages[0].fragile ? 'bi-check-lg' : 'bi-x-lg'"></i>
-                  </div>
-                  <span class="text-xs font-bold"
-                    [ngClass]="shipment.packages[0].fragile ? 'text-primary-dark' : 'text-gray-400'">قابلة للكسر</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-5 h-5 rounded flex items-center justify-center"
-                    [ngClass]="shipment.packages[0].requiresSignature ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-400'">
-                    <i class="bi" [ngClass]="shipment.packages[0].requiresSignature ? 'bi-check-lg' : 'bi-x-lg'"></i>
-                  </div>
-                  <span class="text-xs font-bold"
-                    [ngClass]="shipment.packages[0].requiresSignature ? 'text-primary-dark' : 'text-gray-400'">تتطلب
-                    توقيع</span>
-                </div>
-              </div>
-            </div>
-            <div class="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">ملاحظات
-                إضافية</span>
-              <p class="text-primary-dark font-bold text-sm leading-relaxed">{{ shipment.packages[0].notes || 'لا توجد
-                ملاحظات' }}</p>
-            </div>
-        <!-- Package Details -->
-        <div class="bg-white rounded-[2.25rem] p-8 shadow-sm border border-gray-100">
-          <h3 class="text-xl font-black text-primary-dark mb-8 flex items-center gap-3">
-            <i class="bi bi-info-circle-fill text-accent-gold"></i>
-            معلومات المحتويات
-          </h3>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">الوصف</span>
-              <p class="text-primary-dark font-black">{{ shipment.packages[0].description }}</p>
-            </div>
-            <div class="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">الأولوية</span>
-              <span class="px-4 py-1 rounded-lg text-xs font-black" [ngClass]="getPriorityClass(shipment.priority)">
-                {{ shipment.priority }}
-              </span>
-            </div>
-            <div class="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">الأبعاد</span>
-              <p class="text-primary-dark font-black text-sm">{{ shipment.packages[0].dimensions || 'غير محددة' }}</p>
-            </div>
-            <div class="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">تاريخ انتهاء
-                الصلاحية المتوقع</span>
-              <p class="text-primary-dark font-black text-sm">{{ formatDate(shipment.packages[0].expireDate) }}</p>
-            </div>
-            <div class="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">خيارات
-                إضافية</span>
-              <div class="space-y-2 mt-2">
-                <div class="flex items-center gap-2">
-                  <div class="w-5 h-5 rounded flex items-center justify-center"
-                    [ngClass]="shipment.packages[0].fragile ? 'bg-amber-100 text-amber-600' : 'bg-gray-200 text-gray-400'">
-                    <i class="bi" [ngClass]="shipment.packages[0].fragile ? 'bi-check-lg' : 'bi-x-lg'"></i>
-                  </div>
-                  <span class="text-xs font-bold"
-                    [ngClass]="shipment.packages[0].fragile ? 'text-primary-dark' : 'text-gray-400'">قابلة للكسر</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-5 h-5 rounded flex items-center justify-center"
-                    [ngClass]="shipment.packages[0].requiresSignature ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-400'">
-                    <i class="bi" [ngClass]="shipment.packages[0].requiresSignature ? 'bi-check-lg' : 'bi-x-lg'"></i>
-                  </div>
-                  <span class="text-xs font-bold"
-                    [ngClass]="shipment.packages[0].requiresSignature ? 'text-primary-dark' : 'text-gray-400'">تتطلب
-                    توقيع</span>
-                </div>
-              </div>
-            </div>
-            <div class="p-6 rounded-2xl bg-gray-50 border border-gray-100">
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">ملاحظات
-                إضافية</span>
-              <p class="text-primary-dark font-bold text-sm leading-relaxed">{{ shipment.packages[0].notes || 'لا توجد
-                ملاحظات' }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Left Side: Customer & Actions -->
-      <div class="space-y-8">
-
-        <!-- Customer Card -->
-        <div class="bg-white rounded-[2.25rem] p-8 shadow-sm border border-gray-100">
-          <div class="text-center mb-6">
-            <div
-              class="w-20 h-20 rounded-full bg-gradient-to-br from-primary-green/10 to-secondary-teal/10 flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-md text-primary-green">
-              <i class="bi bi-person-fill text-3xl"></i>
-            </div>
-            <h4 class="text-xl font-black text-primary-dark">بيانات العميل</h4>
-          </div>
-      <!-- Left Side: Customer & Actions -->
-      <div class="space-y-8">
-
-        <!-- Customer Card -->
-        <div class="bg-white rounded-[2.25rem] p-8 shadow-sm border border-gray-100">
-          <div class="text-center mb-6">
-            <div
-              class="w-20 h-20 rounded-full bg-gradient-to-br from-primary-green/10 to-secondary-teal/10 flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-md text-primary-green">
-              <i class="bi bi-person-fill text-3xl"></i>
-            </div>
-            <h4 class="text-xl font-black text-primary-dark">بيانات العميل</h4>
-          </div>
-
-          <div class="space-y-4">
-            <!-- Name Row -->
-            <div
-              class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100 group hover:border-primary-green transition-all">
-              <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-primary-green">
-                <i class="bi bi-person text-lg"></i>
-              </div>
-              <div class="flex-1 text-right">
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">اسم العميل</p>
-                <p class="font-black text-primary-dark">{{ shipment.packages[0].receiverName || 'غير متوفر' }}</p>
-              </div>
-            </div>
-          <div class="space-y-4">
-            <!-- Name Row -->
-            <div
-              class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100 group hover:border-primary-green transition-all">
-              <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-primary-green">
-                <i class="bi bi-person text-lg"></i>
-              </div>
-              <div class="flex-1 text-right">
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">اسم العميل</p>
-                <p class="font-black text-primary-dark">{{ shipment.packages[0].receiverName || 'غير متوفر' }}</p>
-              </div>
-            </div>
-
-      <!-- Left Side: Customer & Actions -->
-      <div class="space-y-8">
-
-        <!-- Customer Card -->
-        <div class="bg-white rounded-[2.25rem] p-8 shadow-sm border border-gray-100">
-          <div class="text-center mb-6">
-            <div
-              class="w-20 h-20 rounded-full bg-gradient-to-br from-primary-green/10 to-secondary-teal/10 flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-md text-primary-green">
-              <i class="bi bi-person-fill text-3xl"></i>
-            </div>
-            <h4 class="text-xl font-black text-primary-dark">بيانات العميل</h4>
-          </div>
-      <!-- Left Side: Customer & Actions -->
-      <div class="space-y-8">
-
-        <!-- Customer Card -->
-        <div class="bg-white rounded-[2.25rem] p-8 shadow-sm border border-gray-100">
-          <div class="text-center mb-6">
-            <div
-              class="w-20 h-20 rounded-full bg-gradient-to-br from-primary-green/10 to-secondary-teal/10 flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-md text-primary-green">
-              <i class="bi bi-person-fill text-3xl"></i>
-            </div>
-            <h4 class="text-xl font-black text-primary-dark">بيانات العميل</h4>
-          </div>
-
-          <div class="space-y-4">
-            <!-- Name Row -->
-            <div
-              class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100 group hover:border-primary-green transition-all">
-              <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-primary-green">
-                <i class="bi bi-person text-lg"></i>
-              </div>
-              <div class="flex-1 text-right">
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">اسم العميل</p>
-                <p class="font-black text-primary-dark">{{ shipment.packages[0].receiverName || 'غير متوفر' }}</p>
-              </div>
-            </div>
-          <div class="space-y-4">
-            <!-- Name Row -->
-            <div
-              class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100 group hover:border-primary-green transition-all">
-              <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-primary-green">
-                <i class="bi bi-person text-lg"></i>
-              </div>
-              <div class="flex-1 text-right">
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">اسم العميل</p>
-                <p class="font-black text-primary-dark">{{ shipment.packages[0].receiverName || 'غير متوفر' }}</p>
-              </div>
-            </div>
-
-            <!-- Phone Row -->
-            <div
-              class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100 group hover:border-primary-green transition-all">
-              <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-primary-green">
-                <i class="bi bi-telephone text-lg"></i>
-              </div>
-              <div class="flex-1 text-right">
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">رقم الهاتف</p>
-                <p class="font-black text-primary-dark">{{ shipment.packages[0].receiverPhone || 'غير متوفر' }}</p>
-              </div>
-              <a *ngIf="shipment.packages[0].receiverPhone && shipment.packages[0].receiverPhone !== '-'"
-                [href]="'tel:' + shipment.packages[0].receiverPhone"
-                class="w-10 h-10 rounded-xl bg-primary-green text-white flex items-center justify-center hover:scale-110 transition-transform shadow-lg shadow-primary-green/20">
-                <i class="bi bi-phone"></i>
-              </a>
-            <!-- Phone Row -->
-            <div
-              class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100 group hover:border-primary-green transition-all">
-              <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-primary-green">
-                <i class="bi bi-telephone text-lg"></i>
-              </div>
-              <div class="flex-1 text-right">
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">رقم الهاتف</p>
-                <p class="font-black text-primary-dark">{{ shipment.packages[0].receiverPhone || 'غير متوفر' }}</p>
-              </div>
-              <a *ngIf="shipment.packages[0].receiverPhone && shipment.packages[0].receiverPhone !== '-'"
-                [href]="'tel:' + shipment.packages[0].receiverPhone"
-                class="w-10 h-10 rounded-xl bg-primary-green text-white flex items-center justify-center hover:scale-110 transition-transform shadow-lg shadow-primary-green/20">
-                <i class="bi bi-phone"></i>
-              </a>
-            </div>
-
-            <!-- Customer ID Row -->
-            <div
-              class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100 group hover:border-primary-green transition-all">
-              <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-primary-green">
-                <i class="bi bi-hash text-lg"></i>
-              </div>
-              <div class="flex-1 text-right">
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">رقم العميل (ID)</p>
-                <p class="font-black text-primary-dark">{{ shipment.packages[0].customerID || '-' }}</p>
-              </div>
-
-            <!-- Customer ID Row -->
-            <div
-              class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100 group hover:border-primary-green transition-all">
-              <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-primary-green">
-                <i class="bi bi-hash text-lg"></i>
-              </div>
-              <div class="flex-1 text-right">
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">رقم العميل (ID)</p>
-                <p class="font-black text-primary-dark">{{ shipment.packages[0].customerID || '-' }}</p>
-              </div>
-            </div>
-
-            <!-- Email (Optional) -->
-            <div *ngIf="shipment.packages[0].receiverEmail"
-              class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100">
-              <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-gray-400">
-                <i class="bi bi-envelope text-lg"></i>
-              </div>
-              <div class="flex-1 text-right">
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">البريد الإلكتروني</p>
-                <p class="font-bold text-gray-600 text-sm">{{ shipment.packages[0].receiverEmail }}</p>
-              </div>
-
-            <!-- Email (Optional) -->
-            <div *ngIf="shipment.packages[0].receiverEmail"
-              class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100">
-              <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-gray-400">
-                <i class="bi bi-envelope text-lg"></i>
-              </div>
-              <div class="flex-1 text-right">
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">البريد الإلكتروني</p>
-                <p class="font-bold text-gray-600 text-sm">{{ shipment.packages[0].receiverEmail }}</p>
-              </div>
-            <!-- Email (Optional) -->
-            <div *ngIf="shipment.packages[0].receiverEmail"
-              class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100">
-              <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-gray-400">
-                <i class="bi bi-envelope text-lg"></i>
-              </div>
-              <div class="flex-1 text-right">
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">البريد الإلكتروني</p>
-                <p class="font-bold text-gray-600 text-sm">{{ shipment.packages[0].receiverEmail }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Financial Summary -->
-        <div class="bg-white rounded-[2.25rem] p-8 shadow-sm border border-gray-100">
-          <h3 class="text-lg font-black text-primary-dark mb-6">الملخص المالي</h3>
-          <div class="space-y-4">
-            <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-500 font-bold">رسوم التوصيل</span>
-              <span class="font-black text-primary-dark">{{ shipment.packages[0].deliveryFee }} ج.م</span>
-        <!-- Financial Summary -->
-        <div class="bg-white rounded-[2.25rem] p-8 shadow-sm border border-gray-100">
-          <h3 class="text-lg font-black text-primary-dark mb-6">الملخص المالي</h3>
-          <div class="space-y-4">
-            <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-500 font-bold">رسوم التوصيل</span>
-              <span class="font-black text-primary-dark">{{ shipment.packages[0].deliveryFee }} ج.م</span>
-            </div>
-            <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-500 font-bold">قيمة التحصيل (COD)</span>
-              <span class="font-black text-primary-green">{{ shipment.packages[0].shipmentCost }} ج.م</span>
-            </div>
-            <div class="pt-4 border-t border-gray-100 flex items-center justify-between">
-              <span class="font-black text-primary-dark">الإجمالي</span>
-              <span class="text-xl font-black text-accent-gold">{{ shipment.packages[0].shipmentCost +
-                shipment.packages[0].deliveryFee }} ج.م</span>
-            <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-500 font-bold">قيمة التحصيل (COD)</span>
-              <span class="font-black text-primary-green">{{ shipment.packages[0].shipmentCost }} ج.م</span>
-            </div>
-            <div class="pt-4 border-t border-gray-100 flex items-center justify-between">
-              <span class="font-black text-primary-dark">الإجمالي</span>
-              <span class="text-xl font-black text-accent-gold">{{ shipment.packages[0].shipmentCost +
-                shipment.packages[0].deliveryFee }} ج.م</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3D Progress Visual -->
-        <div class="bg-[#1a1c1e] rounded-[2.25rem] p-8 text-white shadow-xl">
-          <h3 class="text-lg font-black mb-6">حالة التوصيل</h3>
-
-          <div class="space-y-6">
-            <div class="flex items-center gap-4">
-              <div
-                class="w-8 h-8 rounded-lg bg-primary-green/20 text-primary-green flex items-center justify-center font-black">
-                1</div>
-              <div class="flex-1">
-                <p class="text-sm font-black">تم تأكيد الطلب</p>
-                <div class="w-full h-1 bg-white/10 rounded-full mt-2">
-                  <div class="w-full h-full bg-primary-green rounded-full"></div>
-        <!-- 3D Progress Visual -->
-        <div class="bg-[#1a1c1e] rounded-[2.25rem] p-8 text-white shadow-xl">
-          <h3 class="text-lg font-black mb-6">حالة التوصيل</h3>
-
-          <div class="space-y-6">
-            <div class="flex items-center gap-4">
-              <div
-                class="w-8 h-8 rounded-lg bg-primary-green/20 text-primary-green flex items-center justify-center font-black">
-                1</div>
-              <div class="flex-1">
-                <p class="text-sm font-black">تم تأكيد الطلب</p>
-                <div class="w-full h-1 bg-white/10 rounded-full mt-2">
-                  <div class="w-full h-full bg-primary-green rounded-full"></div>
-                </div>
-              </div>
-              </div>
-            </div>
-            <div class="flex items-center gap-4">
-              <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-500 flex items-center justify-center font-black">2
-              </div>
-              <div class="flex-1">
-                <p class="text-sm font-black">جاري تحضير الشحنة</p>
-                <div class="w-full h-1 bg-white/10 rounded-full mt-2">
-                  <div class="w-full h-full bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
-            <div class="flex items-center gap-4">
-              <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-500 flex items-center justify-center font-black">2
-              </div>
-              <div class="flex-1">
-                <p class="text-sm font-black">جاري تحضير الشحنة</p>
-                <div class="w-full h-1 bg-white/10 rounded-full mt-2">
-                  <div class="w-full h-full bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
-              </div>
-            </div>
-            <div class="flex items-center gap-4">
-              <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-500 flex items-center justify-center font-black">2
-              </div>
-              <div class="flex-1">
-                <p class="text-sm font-black">جاري تحضير الشحنة</p>
-                <div class="w-full h-1 bg-white/10 rounded-full mt-2">
-                  <div class="w-full h-full bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
-              </div>
-            </div>
-            <div class="flex items-center gap-4">
-              <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-500 flex items-center justify-center font-black">2
-              </div>
-              <div class="flex-1">
-                <p class="text-sm font-black">جاري تحضير الشحنة</p>
-                <div class="w-full h-1 bg-white/10 rounded-full mt-2">
-                  <div class="w-full h-full bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center gap-4 opacity-30">
-              <div class="w-8 h-8 rounded-lg bg-white/20 text-white flex items-center justify-center font-black">3</div>
-              <div class="flex-1">
-                <p class="text-sm font-black text-white/50">في الطريق للتسليم</p>
-                <div class="w-full h-1 bg-white/10 rounded-full mt-2"></div>
-              </div>
-            </div>
-            <div class="flex items-center gap-4 opacity-30">
-              <div class="w-8 h-8 rounded-lg bg-white/20 text-white flex items-center justify-center font-black">3</div>
-              <div class="flex-1">
-                <p class="text-sm font-black text-white/50">في الطريق للتسليم</p>
-                <div class="w-full h-1 bg-white/10 rounded-full mt-2"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Quick Actions Card -->
-        <div class="bg-red-50 border border-red-200 rounded-[2rem] p-8 text-center">
-        <div class="bg-red-50 border border-red-200 rounded-[2rem] p-8 text-center">
-          <p class="text-sm font-bold text-red-600 mb-4">هل ترغب في إزالة هذه الشحنة نهائياً؟</p>
-          <button (click)="deleteShipment()"
-            class="w-full py-3 bg-red-600 text-white font-black rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-600/20">
-            حذف الشحنة
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 </div>

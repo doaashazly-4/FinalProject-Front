@@ -515,33 +515,42 @@ export class CreateShipmentComponent implements OnInit, AfterViewInit, OnDestroy
       next: (response: any) => {
         this.isSubmitting = false;
 
+        // Backend returns: { message, requestNumber }
+        const requestNumber = response?.requestNumber;
         const requestId = response?.id;
         const firstPackageId = response?.packages?.[0]?.id;
 
-        if (!requestId) {
-          console.error('Request ID missing', response);
+        // Safe fallbacks
+        
+
+        if (!requestNumber) {
+          console.error('Request number missing from response', response);
           return;
         }
 
-        // Prefer package ID if exists, fallback to request ID
-        this.createdId = firstPackageId ?? requestId;
-        this.createdTrackingNumber = String(this.createdId);
+        // 🔒 SINGLE SOURCE OF TRUTH
+        this.createdId = requestNumber;
+        this.createdTrackingNumber = String(requestNumber);
 
+        // User feedback
+        this.statusMessage = `✅ تم إنشاء الطلب بنجاح — رقم الطلب #${requestNumber}`;
+
+        // Show success modal (existing UI)
         this.showSuccessModal = true;
-
-        // OPTION A: Package ID is the tracking reference
-        this.createdTrackingNumber = String(firstPackageId);
-        this.createdId = firstPackageId;
-
-        this.showSuccessModal = true;
+        // Auto-navigate to shipments page
+        setTimeout(() => {
+          this.router.navigate(['/supplier/shipments']);
+        }, 1200);
       },
 
       error: (err) => {
         this.isSubmitting = false;
         console.error('Error creating shipment:', err);
+        this.statusMessage = '❌ حدث خطأ أثناء إنشاء الطلب';
       }
     });
   }
+
 
   markAllAsTouched(): void {
     Object.keys(this.shipmentForm.controls).forEach(key => {

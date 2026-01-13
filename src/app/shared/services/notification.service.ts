@@ -188,7 +188,7 @@ export class NotificationService {
 
   private playSound(soundPath: string) {
     try {
-      const audio = new Audio(soundPath);
+      const audio = new Audio('assets/sounds/ringtone-you-would-be-glad-to-know.ogg');
       audio.volume = 0.5;
       audio.play().catch(() => { /* Ignore autoplay restrictions */ });
     } catch (e) {

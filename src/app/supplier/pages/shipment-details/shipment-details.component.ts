@@ -70,49 +70,61 @@ export class ShipmentDetailsComponent implements OnInit {
             this.loadMockData();
         }
     }
+    private mapPackageStatus(status: number): string {
+        const map: Record<number, string> = {
+            0: 'pending',
+            1: 'created',
+            2: 'assigned',
+            3: 'in_transit',
+            4: 'ready_for_pickup',
+            5: 'delivered',
+            6: 'cancelled'
+        };
+        return map[status] || 'pending';
+    }
 
     loadShipmentData(id: string): void {
         this.isLoading = true;
 
-        // Fetch explanation non-blocking
+        // Fetch explanation non-blocking (UNCHANGED)
         this.dataService.getAssignmentExplanation(id).subscribe({
             next: (explanation) => this.explanation = explanation,
             error: () => this.explanation = null
         });
 
         this.dataService.getParcelById(id).subscribe({
-            next: (parcel: Parcel) => {
-                console.log('Received parcel data mapped:', parcel);
+            next: (res: any) => {
+                console.log('Received shipment response:', res);
+
                 this.shipment = {
-                    id: String(parcel.trackingNumber || parcel.id || ''),
-                    source: String(parcel.pickupAddress || parcel.source || ''),
-                    pickupLat: Number(parcel.pickupLat || 0),
-                    pickupLng: Number(parcel.pickupLng || 0),
-                    priority: String(parcel.priority || 'normal'),
-                    createdAt: String(parcel.createdAt || new Date().toISOString()),
-                    packages: [
-                        {
-                            description: String(parcel.description || ''),
-                            weight: Number(parcel.weight || 0),
-                            dimensions: String(parcel.dimensions || ''),
-                            fragile: Boolean(parcel.isFragile),
-                            requiresSignature: Boolean(parcel.requiresSignature),
-                            expireDate: String(parcel.estimatedDelivery || parcel.createdAt || new Date().toISOString()),
-                            shipmentCost: Number(parcel.codAmount || 0),
-                            deliveryFee: Number(parcel.deliveryFee || 0),
-                            destination: String(parcel.deliveryAddress || ''),
-                            lat: Number(parcel.destinationLat || 0),
-                            lng: Number(parcel.destinationLng || 0),
-                            notes: String(parcel.notes || ''),
-                            receiverName: String(parcel.receiverName || 'عميل'),
-                            receiverPhone: String(parcel.receiverPhone || '-'),
-                            receiverEmail: String(parcel.receiverEmail || ''),
-                            customerID: String(parcel.customerID || '-'),
-                            status: String(parcel.status || 'pending'),
-                            isExpanded: false
-                        }
-                    ]
+                    id: String(res.id),
+                    source: String(res.source || ''),
+                    pickupLat: Number(res.pickupLat || 0),
+                    pickupLng: Number(res.pickupLng || 0),
+                    priority: res.isUrgent ? 'urgent' : 'normal',
+                    createdAt: String(res.createdAt || new Date().toISOString()),
+                    packages: res.packages.map((p: any) => ({
+                        description: String(p.description || ''),
+                        weight: Number(p.weight || 0),
+                        dimensions: '',                 // not provided by API
+                        fragile: false,                 // not provided by API
+                        requiresSignature: false,       // not provided by API
+                        expireDate: res.createdAt,      // fallback
+                        shipmentCost: Number(p.shipmentCost || 0),
+                        deliveryFee: 0,                 // not provided by API
+                        destination: String(p.destination || ''),
+                        lat: 0,                         // not provided by API
+                        lng: 0,                         // not provided by API
+                        notes: '',                      // not provided by API
+                        receiverName: 'عميل',           // guest customer
+                        receiverPhone: String(p.receiverPhone || '-'),
+                        receiverEmail: '',
+                        customerID: '-',
+                        status: this.mapPackageStatus(p.status),
+                        isExpanded: false
+                    }))
                 };
+
                 console.log('Formatted shipment object for view:', this.shipment);
                 this.isLoading = false;
             },
