@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, map } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { NotificationService } from '../../shared/services/notification.service';
+import { NotificationHubService, DeliveryEvent } from '../../shared/services/notification-hub.service';
 
 
 // Delivery interfaces for Receiver module
@@ -132,7 +134,51 @@ export class CustomerDataService {
   private apiUrl = `${environment.apiUrl}/Customer`;
 
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private notificationService: NotificationService,
+    private hubService: NotificationHubService
+  ) {
+    // Listen for delivery events and show notifications
+    this.hubService.deliveryEvent$.subscribe((event: DeliveryEvent) => {
+      this.handleDeliveryEvent(event);
+    });
+  }
+
+  private handleDeliveryEvent(event: DeliveryEvent): void {
+    switch (event.type) {
+      case 'courier_assigned':
+        this.notificationService.notifyCourierAssigned({
+          courierName: event.courierName,
+          requestId: event.requestId
+        });
+        break;
+      case 'delivery_started':
+        this.notificationService.notifyDeliveryStarted({
+          courierName: event.courierName,
+          requestId: event.requestId
+        });
+        break;
+      case 'out_for_delivery':
+        this.notificationService.notifyOutForDelivery({
+          courierName: event.courierName
+        });
+        break;
+      case 'otp_requested':
+        this.notificationService.notifyOTPRequired({});
+        break;
+      case 'delivered':
+        this.notificationService.notifyDeliveryCompleted({
+          requestId: event.requestId
+        });
+        break;
+      case 'failed':
+        this.notificationService.notifyDeliveryFailed({
+          reason: event.message
+        });
+        break;
+    }
+  }
 
   private getCustomerId(): string {
     const id = localStorage.getItem('customer_id');
@@ -198,7 +244,7 @@ export class CustomerDataService {
     // Handle nested packages structure from create-shipment payload
     const pkg = (data.packages && data.packages.length > 0) ? data.packages[0] : (data.package || {});
 
-    // Map numeric status to string
+    // Map status (backend now returns string like "Pending", "Assigned", etc.)
     const mapStatus = (s: any): DeliveryStatus => {
       if (typeof s === 'number') {
         switch (s) {
@@ -213,28 +259,41 @@ export class CustomerDataService {
           default: return 'pending';
         }
       }
-      return (s || 'pending').toString().toLowerCase() as DeliveryStatus;
+      // Handle string statuses from backend
+      const statusStr = (s || 'pending').toString().toLowerCase();
+      const statusMap: Record<string, DeliveryStatus> = {
+        'pending': 'pending',
+        'assigned': 'assigned',
+        'outfordelivery': 'out_for_delivery',
+        'out_for_delivery': 'out_for_delivery',
+        'delivered': 'delivered',
+        'failed': 'failed_delivery',
+        'cancelled': 'cancelled'
+      };
+      return statusMap[statusStr] || 'pending';
     };
 
     return {
       id: (data.id || data.requestId || data.ID || pkg.id)?.toString() || '',
       trackingNumber: (data.trackingNumber || data.requestId || data.id || data.ID)?.toString() || '',
-      description: pkg.description || data.description || 'شحنة واردة',
-      senderName: data.source || data.senderName || data.Source || 'المورد',
+      // Use new backend fields directly
+      description: data.description || pkg.description || 'شحنة واردة',
+      senderName: data.supplierName || data.source || data.senderName || data.Source || 'المورد',
       senderPhone: data.senderPhone || '',
-      pickupAddress: data.source || data.pickupAddress || data.Source || '',
-      deliveryAddress: pkg.destination || data.deliveryAddress || data.Destination || '',
+      pickupAddress: data.source || data.Source || data.pickupAddress || '',
+      deliveryAddress: data.destination || data.Destination || pkg.destination || data.deliveryAddress || '',
       status: mapStatus(data.status || pkg.status),
       estimatedDelivery: pkg.expireDate ? new Date(pkg.expireDate) : (data.estimatedDelivery ? new Date(data.estimatedDelivery) : undefined),
-      actualDelivery: data.actualDelivery ? new Date(data.actualDelivery) : undefined,
-      createdAt: new Date(data.createDate || data.createdAt || new Date()),
-      weight: pkg.weight || data.weight || 0,
-      courierName: data.courier?.name || data.courierName,
-      courierPhone: data.courier?.phone || data.courierPhone,
-      isFragile: pkg.fragile || pkg.isFragile || data.isFragile || false,
+      actualDelivery: data.deliveredAt ? new Date(data.deliveredAt) : undefined,
+      createdAt: new Date(data.createdAt || data.createDate || new Date()),
+      weight: data.weight || pkg.weight || 0,
+      // Courier info from new backend fields
+      courierName: data.courierName || data.courier?.name,
+      courierPhone: data.courierPhone || data.courier?.phone || data.receiverPhone,
+      isFragile: data.fragile || pkg.fragile || pkg.isFragile || data.isFragile || false,
       requiresSignature: pkg.requiresSignature || data.requiresSignature || false,
-      deliveryFee: pkg.shipmentCost || data.deliveryFee || data.codAmount || 0,
-      notes: pkg.notes || data.notes || '',
+      deliveryFee: data.shipmentCost || pkg.shipmentCost || data.deliveryFee || data.codAmount || 0,
+      notes: data.notes || pkg.notes || data.shipmentNotes || '',
       deliveryOTP: data.deliveryOTP || data.otp,
       otpVerified: data.otpVerified || false
     };

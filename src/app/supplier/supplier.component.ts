@@ -5,6 +5,7 @@ import { AuthService } from '../shared/services/auth.service';
 import { SupplierDataService } from './services/supplier-data.service';
 import { LynxTalismanComponent } from '../shared/components/lynx-talisman/lynx-talisman.component';
 import { LynxExplanationComponent } from '../shared/components/lynx-explanation/lynx-explanation.component';
+import { ToastNotificationsComponent } from '../shared/components/toast-notifications/toast-notifications.component';
 
 interface NavItem {
   path: string;
@@ -16,7 +17,7 @@ interface NavItem {
 @Component({
   selector: 'app-supplier',
   standalone: true,
-  imports: [CommonModule, RouterModule, LynxTalismanComponent, LynxExplanationComponent],
+  imports: [CommonModule, RouterModule, LynxTalismanComponent, LynxExplanationComponent, ToastNotificationsComponent],
   templateUrl: './supplier.component.html',
   styleUrl: './supplier.component.css'
 })

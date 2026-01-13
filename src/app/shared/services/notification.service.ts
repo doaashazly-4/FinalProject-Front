@@ -140,6 +140,116 @@ export class NotificationService {
     });
   }
 
+  // ================= NEW DELIVERY EVENT NOTIFICATIONS =================
+
+  /**
+   * Notify when a new request is created by supplier (for couriers)
+   */
+  notifyNewRequest(data: { requestId: string | number; description?: string; source?: string; destination?: string; priority?: string }) {
+    const isUrgent = data.priority === 'urgent';
+    this.showNotification({
+      title: isUrgent ? '🚨 طلب عاجل جديد!' : '📦 طلب جديد متاح',
+      message: `${data.description || 'شحنة جديدة'} من ${data.source || 'المورد'}`,
+      type: isUrgent ? 'warning' : 'info',
+      icon: isUrgent ? 'bi-exclamation-triangle-fill' : 'bi-box-seam',
+      sound: 'assets/sounds/notification.mp3',
+      duration: isUrgent ? 10000 : 6000
+    });
+  }
+
+  /**
+   * Notify when a courier is assigned (for customers & suppliers)
+   */
+  notifyCourierAssigned(data: { courierName?: string; requestId?: string | number }) {
+    this.showNotification({
+      title: '🚴 تم تعيين المندوب',
+      message: `${data.courierName || 'مندوب'} سيقوم بتوصيل طلبك`,
+      type: 'success',
+      icon: 'bi-person-check',
+      duration: 6000
+    });
+  }
+
+  /**
+   * Notify when delivery starts (for customers & suppliers)
+   */
+  notifyDeliveryStarted(data: { courierName?: string; requestId?: string | number }) {
+    this.showNotification({
+      title: '🚚 المندوب بدأ التوصيل',
+      message: `${data.courierName || 'المندوب'} بدأ رحلة التوصيل`,
+      type: 'info',
+      icon: 'bi-truck',
+      duration: 5000
+    });
+  }
+
+  /**
+   * Notify when courier is out for delivery / nearby
+   */
+  notifyOutForDelivery(data: { courierName?: string }) {
+    this.showNotification({
+      title: '📍 المندوب قريب منك!',
+      message: 'استعد لاستلام طلبك - المندوب في منطقتك',
+      type: 'warning',
+      icon: 'bi-geo-alt-fill',
+      sound: 'assets/sounds/notification.mp3',
+      duration: 8000
+    });
+  }
+
+  /**
+   * Notify when OTP is required (for customers)
+   */
+  notifyOTPRequired(data: { otp?: string }) {
+    this.showNotification({
+      title: '🔐 رمز التسليم مطلوب',
+      message: data.otp ? `رمز التسليم: ${data.otp}` : 'أعط المندوب رمز التسليم',
+      type: 'warning',
+      icon: 'bi-shield-lock-fill',
+      duration: 0 // Persistent until dismissed
+    });
+  }
+
+  /**
+   * Notify when delivery is completed (for all users)
+   */
+  notifyDeliveryCompleted(data: { requestId?: string | number }) {
+    this.showNotification({
+      title: '✅ تم التسليم بنجاح!',
+      message: 'شكراً لاستخدامك Lynx Delivery',
+      type: 'success',
+      icon: 'bi-check-circle-fill',
+      sound: 'assets/sounds/notification.mp3',
+      duration: 6000
+    });
+  }
+
+  /**
+   * Notify when delivery fails
+   */
+  notifyDeliveryFailed(data: { reason?: string }) {
+    this.showNotification({
+      title: '❌ فشل التوصيل',
+      message: data.reason || 'تعذر إتمام التوصيل',
+      type: 'error',
+      icon: 'bi-x-circle-fill',
+      duration: 8000
+    });
+  }
+
+  /**
+   * Notify supplier when request is created successfully
+   */
+  notifyRequestCreated(data: { requestId: string | number; description?: string }) {
+    this.showNotification({
+      title: '📦 تم إنشاء الطلب',
+      message: `طلب #${data.requestId} - ${data.description || 'شحنة جديدة'}`,
+      type: 'success',
+      icon: 'bi-check-lg',
+      duration: 5000
+    });
+  }
+
   // ================= DEMO SIMULATION =================
 
   /**

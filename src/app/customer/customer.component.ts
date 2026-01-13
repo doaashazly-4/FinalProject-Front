@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../shared/services/auth.service';
+import { ToastNotificationsComponent } from '../shared/components/toast-notifications/toast-notifications.component';
 
 @Component({
   selector: 'app-customer-shell',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, ToastNotificationsComponent],
   templateUrl: './customer.component.html',
   styleUrl: './customer.component.css'
 })

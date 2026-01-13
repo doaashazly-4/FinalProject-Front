@@ -5,6 +5,8 @@ import { AssignmentObservation } from '../../models/assignment-observation.model
 
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { NotificationService } from '../../shared/services/notification.service';
+import { NotificationHubService } from '../../shared/services/notification-hub.service';
 
 
 
@@ -145,6 +147,7 @@ export interface AvailableCarrier {
 export interface AssignCarrierDTO {
   orderId: string;
   carrierId: string;
+  carrierName?: string; // For display in notifications
   notes?: string;
 }
 
@@ -300,7 +303,11 @@ export class SupplierDataService {
   private customerCache: { data: Customer[], timestamp: number } | null = null;
   private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private notificationService: NotificationService,
+    private hubService: NotificationHubService
+  ) { }
 
   // ================= SMART CREATE SHIPMENT (FR1, FR2, FR3) =================
 
@@ -496,9 +503,28 @@ export class SupplierDataService {
   // ================= CREATE REQUEST =================
 
   createParcel(dto: CreateRequestDTO): Observable<any> {
+    return this.http.post(`${this.apiUrl}/CreateRequest`, dto).pipe(
+      tap((response: any) => {
+        // Notify supplier that request was created successfully
+        this.notificationService.notifyRequestCreated({
+          requestId: response?.id || response?.requestId || 'جديد',
+          description: dto.packages?.[0]?.description || 'شحنة جديدة'
+        });
 
-
-    return this.http.post(`${this.apiUrl}/CreateRequest`, dto);
+        // Trigger local event for couriers (will be broadcast via SignalR if available)
+        this.hubService.triggerLocalEvent({
+          type: dto.priority === 'urgent' ? 'urgent_request' : 'new_request',
+          requestId: response?.id || response?.requestId || 0,
+          description: dto.packages?.[0]?.description,
+          priority: dto.priority as 'normal' | 'urgent',
+          source: dto.source,
+          destination: dto.packages?.[0]?.destination,
+          receiverName: dto.packages?.[0]?.receiverName,
+          receiverPhone: dto.packages?.[0]?.receiverPhone,
+          timestamp: new Date()
+        });
+      })
+    );
   }
 
   // ================= READY FOR PICKUP =================
@@ -513,6 +539,23 @@ export class SupplierDataService {
     return this.http.post(
       `${this.apiUrl}/AssignCourier/${dto.orderId}`,
       { courierId: dto.carrierId }
+    ).pipe(
+      tap((response: any) => {
+        // Notify all parties about courier assignment
+        this.notificationService.notifyCourierAssigned({
+          courierName: dto.carrierName || 'مندوب',
+          requestId: dto.orderId
+        });
+
+        // Trigger event for all users
+        this.hubService.triggerLocalEvent({
+          type: 'courier_assigned',
+          requestId: dto.orderId,
+          courierName: dto.carrierName,
+          timestamp: new Date(),
+          message: `تم تعيين المندوب ${dto.carrierName || 'مندوب'} للطلب #${dto.orderId}`
+        });
+      })
     );
   }
 

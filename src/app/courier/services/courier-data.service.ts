@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { NotificationService } from '../../shared/services/notification.service';
+import { NotificationHubService } from '../../shared/services/notification-hub.service';
 
 /* ===================== MODELS ===================== */
 
@@ -105,7 +107,11 @@ export interface CourierTicket {
 export class CourierDataService {
   private apiUrl = `${environment.apiUrl}/Courier`;
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private notificationService: NotificationService,
+    private hubService: NotificationHubService
+  ) { }
 
   private mapBackendJob(job: any): DeliveryJob {
     // DEBUG: Log raw job data from API to understand structure
@@ -244,7 +250,24 @@ export class CourierDataService {
   /* ===================== JOB ACTIONS ===================== */
 
   acceptJob(jobId: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/AcceptPackage/${jobId}`, {});
+    return this.http.post(`${this.apiUrl}/AcceptPackage/${jobId}`, {}).pipe(
+      tap(() => {
+        // Notify supplier and customer that courier has been assigned
+        this.notificationService.showNotification({
+          title: '✅ تم قبول المهمة',
+          message: `تم قبول الطلب #${jobId} بنجاح`,
+          type: 'success',
+          icon: 'bi-check-circle',
+          duration: 4000
+        });
+        this.hubService.triggerLocalEvent({
+          type: 'courier_assigned',
+          requestId: jobId,
+          timestamp: new Date(),
+          message: `تم قبول الطلب #${jobId}`
+        });
+      })
+    );
   }
 
   rejectJob(jobId: number, reason?: string): Observable<any> {
@@ -262,18 +285,51 @@ export class CourierDataService {
   }
 
   startDelivery(jobId: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/StartDelivery/${jobId}`, {});
+    return this.http.post(`${this.apiUrl}/StartDelivery/${jobId}`, {}).pipe(
+      tap(() => {
+        // Notify all parties that delivery has started
+        this.notificationService.notifyDeliveryStarted({ requestId: jobId });
+        this.hubService.triggerLocalEvent({
+          type: 'delivery_started',
+          requestId: jobId,
+          timestamp: new Date(),
+          message: `المندوب بدأ التوصيل للطلب #${jobId}`
+        });
+      })
+    );
   }
 
   deliverPackage(jobId: number, notes: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/DeliverPackage/${jobId}`, {
       notes
-    });
+    }).pipe(
+      tap(() => {
+        // Notify all parties that delivery is complete
+        this.notificationService.notifyDeliveryCompleted({ requestId: jobId });
+        this.hubService.triggerLocalEvent({
+          type: 'delivered',
+          requestId: jobId,
+          timestamp: new Date(),
+          message: `تم تسليم الطلب #${jobId} بنجاح`
+        });
+      })
+    );
   }
 
   verifyDeliveryOTP(jobId: number, otp: string): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post(`${this.apiUrl}/VerifyOTP/${jobId}`, JSON.stringify(otp), { headers });
+    return this.http.post(`${this.apiUrl}/VerifyOTP/${jobId}`, JSON.stringify(otp), { headers }).pipe(
+      tap(() => {
+        // OTP verified - delivery complete
+        this.notificationService.notifyDeliveryCompleted({ requestId: jobId });
+        this.hubService.triggerLocalEvent({
+          type: 'delivered',
+          requestId: jobId,
+          timestamp: new Date(),
+          message: `تم التحقق من OTP وتسليم الطلب #${jobId}`
+        });
+      })
+    );
   }
 
   // ✅ Restore updateJobStatus as a facade for various endpoints
