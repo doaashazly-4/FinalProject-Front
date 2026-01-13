@@ -22,11 +22,17 @@
 
     <!-- Navigation -->
     <nav class="space-y-1">
-      <a *ngFor="let item of navItems" [routerLink]="item.path" routerLinkActive="sidebar-link-active"
-        class="sidebar-link">
-        <i class="bi text-lg" [ngClass]="item.icon"></i>
-        <span>{{ item.label }}</span>
-      </a>
+      <ng-container *ngFor="let item of navItems">
+        <a *ngIf="item.path !== 'support'" [routerLink]="item.path" routerLinkActive="sidebar-link-active"
+          class="sidebar-link">
+          <i class="bi text-lg" [ngClass]="item.icon"></i>
+          <span>{{ item.label }}</span>
+        </a>
+        <button *ngIf="item.path === 'support'" (click)="openSupportChat()" class="sidebar-link w-full text-right">
+          <i class="bi text-lg" [ngClass]="item.icon"></i>
+          <span>{{ item.label }}</span>
+        </button>
+      </ng-container>
     </nav>
 
     <!-- Footer -->
@@ -81,11 +87,18 @@
       </div>
 
       <nav class="space-y-1">
-        <a *ngFor="let item of navItems" [routerLink]="item.path" routerLinkActive="sidebar-link-active"
-          (click)="closeMobileMenu()" class="sidebar-link">
-          <i class="bi text-lg" [ngClass]="item.icon"></i>
-          <span>{{ item.label }}</span>
-        </a>
+        <ng-container *ngFor="let item of navItems">
+          <a *ngIf="item.path !== 'support'" [routerLink]="item.path" routerLinkActive="sidebar-link-active"
+            (click)="closeMobileMenu()" class="sidebar-link">
+            <i class="bi text-lg" [ngClass]="item.icon"></i>
+            <span>{{ item.label }}</span>
+          </a>
+          <button *ngIf="item.path === 'support'" (click)="openSupportChat(); closeMobileMenu()"
+            class="sidebar-link w-full text-right">
+            <i class="bi text-lg" [ngClass]="item.icon"></i>
+            <span>{{ item.label }}</span>
+          </button>
+        </ng-container>
       </nav>
 
       <div class="mt-8 pt-6 border-t border-white/10 space-y-3">
@@ -114,5 +127,15 @@
   <!-- Main Content -->
   <main class="p-6 lg:p-8 min-h-full">
     <router-outlet></router-outlet>
+     <!-- Support Chat Floating Button -->
+<button
+  (click)="openSupportChat()"
+  class="fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full
+         bg-primary-green text-white shadow-xl
+         flex items-center justify-center
+         hover:scale-110 transition">
+
+  <i class="bi bi-headset text-xl"></i>
+</button>
   </main>
 </div>

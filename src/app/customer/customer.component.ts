@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../shared/services/auth.service';
+import { ChatService } from '../shared/services/chat.service';
 
 @Component({
   selector: 'app-customer-shell',
@@ -24,7 +25,11 @@ export class CustomerComponent {
   userName: string = '';
   isMobileMenuOpen = false;
 
-  constructor(private auth: AuthService, private router: Router) {
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private chatService: ChatService
+  ) {
     const user = this.auth.getCurrentUser();
     this.userName = user.userName || user.email?.split('@')[0] || 'Receiver';
   }
@@ -40,5 +45,9 @@ export class CustomerComponent {
   logout(): void {
     this.auth.logout();
     this.router.navigate(['/home']);
+  }
+
+  openSupportChat(): void {
+    this.chatService.triggerChat('admin_support_id', 'Lynx Support');
   }
 }

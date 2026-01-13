@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CourierDataService, DeliveryJob, JobStatus } from '../../services/courier-data.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-my-jobs',
@@ -16,9 +17,10 @@ export class MyJobsComponent implements OnInit {
   filter: 'all' | 'active' | 'completed' = 'active';
   isLoading = true;
 
-  constructor(private dataService: CourierDataService) {}
+  constructor(private dataService: CourierDataService, private router: Router) {}
 
   ngOnInit(): void {
+    
     this.loadJobs();
   }
 
@@ -153,5 +155,6 @@ export class MyJobsComponent implements OnInit {
       minute: '2-digit'
     });
   }
-}
 
+ 
+}

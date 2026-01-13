@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ChatService } from '../../../shared/services/chat.service';
+
 import { SupplierDataService, SupplierOrderRow } from '../../services/supplier-data.service';
 
 @Component({
@@ -35,7 +37,7 @@ export class SupplierOrdersComponent implements OnInit {
     totalRevenue: 0
   };
 
-  constructor(private dataService: SupplierDataService) {}
+  constructor(private dataService: SupplierDataService, private chatService: ChatService) {}
 
   ngOnInit(): void {
     this.loadOrders();

@@ -39,7 +39,7 @@ export class ChatPageComponent implements OnInit, OnDestroy, AfterViewChecked {
         }
 
         this.subs.add(
-            this.chatService.getConversations().subscribe(convs => {
+            this.chatService.getConversations().subscribe((convs: ChatConversation[]) => {
                 this.conversations = convs;
             })
         );
@@ -55,7 +55,7 @@ export class ChatPageComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     selectConversation(conv: ChatConversation): void {
         this.selectedConversation = conv;
-        this.chatService.getMessages(conv.id).subscribe(msgs => {
+        this.chatService.getMessages(conv.id).subscribe((msgs: ChatMessage[]) => {
             this.messages = msgs;
         });
         // Mark as read logic would go here
@@ -64,11 +64,11 @@ export class ChatPageComponent implements OnInit, OnDestroy, AfterViewChecked {
     sendMessage(): void {
         if (!this.newMessageText.trim() || !this.selectedConversation) return;
 
+        const partner = this.getPartner(this.selectedConversation);
         this.chatService.sendMessage(
-            this.selectedConversation.id,
-            this.newMessageText,
             this.currentUser.id,
-            this.currentUser.name
+            partner.id,
+            this.newMessageText
         );
 
         this.newMessageText = '';

@@ -1,7 +1,18 @@
-
 <app-notifications></app-notifications>
 <app-navbar *ngIf="showNavbar"></app-navbar>
-<main [class]="showNavbar ? 'min-h-screen pt-20 relative z-10 block overflow-visible bg-gray-50' : 'min-h-screen relative z-10 block overflow-visible'">
+
+<main
+  [class]="showNavbar ? 'min-h-screen pt-20 relative z-10 block overflow-visible bg-gray-50' : 'min-h-screen relative z-10 block overflow-visible'">
   <router-outlet></router-outlet>
 </main>
+
 <app-footer *ngIf="showFooter"></app-footer>
+
+<!-- 💬 Floating Support Button -->
+<button class="support-btn" (click)="openSupportChat()" *ngIf="showNavbar">
+  <i class="fas fa-headset"></i>
+  <span>Support</span>
+</button>
+
+<!-- 💬 Chat Modal Component -->
+<app-chat #globalChat></app-chat>

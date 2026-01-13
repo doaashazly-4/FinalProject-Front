@@ -1,0 +1,29 @@
+<div class="chat-page" *ngIf="receiverId; else noCourier">
+
+  <h2 class="chat-header">{{ receiverName }}</h2>
+
+  <div id="messagesContainer" class="messages-container">
+    <div *ngFor="let msg of messages" 
+         [ngClass]="msg.senderId === 'current_user_id' ? 'message sent' : 'message received'">
+      <div class="message-content">
+        {{ msg.messageText }}
+      </div>
+      <div class="message-meta">
+        {{ msg.senderId === 'current_user_id' ? 'أنت' : receiverName }}
+        - {{ msg.createdAt | date:'shortTime' }}
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-input">
+    <input type="text" [(ngModel)]="newMessage" placeholder="اكتب رسالتك هنا..." (keyup.enter)="sendMessage()"/>
+    <button (click)="sendMessage()">إرسال</button>
+  </div>
+
+</div>
+
+<ng-template #noCourier>
+  <div class="no-courier">
+    <p>لم يتم تعيين مندوب بعد لعرض هذه المحادثة.</p>
+  </div>
+</ng-template>

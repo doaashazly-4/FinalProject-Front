@@ -1,18 +1,45 @@
-<div class="chat-container">
+<div class="chat-overlay" *ngIf="isOpen" (click)="closeChat()">
+  <div class="chat-container" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="user-info">
+        <div class="avatar">
+          {{ receiverName.charAt(0) }}
+        </div>
+        <div class="details">
+          <h3>{{ receiverName }}</h3>
+          <p class="status" [class.online]="true">Online</p>
+        </div>
+      </div>
+      <button class="close-btn" (click)="closeChat()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
 
-  <div class="messages" #messagesContainer>
-    <div *ngFor="let msg of messages" 
-         class="message" 
-         [ngClass]="{'user': msg.sender === 'user', 'support': msg.sender === 'support'}">
-      <p>{{ msg.text }}</p>
-      <img *ngIf="msg.imageUrl" [src]="msg.imageUrl" alt="attached image" />
+    <!-- Messages -->
+    <div class="chat-messages" #scrollMe>
+      <div *ngIf="messages.length === 0" class="empty-state">
+        <i class="fas fa-comments"></i>
+        <p>No messages yet. Say hi!</p>
+      </div>
+
+      <div *ngFor="let msg of messages" class="message-wrapper" [class.sent]="msg.senderId === currentUserId"
+        [class.received]="msg.senderId !== currentUserId">
+        <div class="message-bubble">
+          <p>{{ msg.messageText }}</p>
+          <span class="message-time">{{ formatDate(msg.createdAt) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer / Input -->
+    <div class="chat-footer">
+      <div class="input-wrapper">
+        <input type="text" [(ngModel)]="newMessage" (keyup.enter)="send()" placeholder="Type your message...">
+        <button class="send-btn" (click)="send()" [disabled]="!newMessage.trim()">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
     </div>
   </div>
-
-  <div class="chat-input">
-    <input type="text" placeholder="اكتب رسالتك..." [(ngModel)]="messageText" />
-    <input type="file" (change)="onImageSelected($event)" />
-    <button (click)="onSend()">إرسال</button>
-  </div>
-
 </div>

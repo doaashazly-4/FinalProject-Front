@@ -10,10 +10,51 @@
   @apply block w-full min-h-full;
 }
 
-.main-content router-outlet + * {
+.main-content router-outlet+* {
   @apply block w-full min-h-full visible opacity-100;
 }
 
+
 app-main {
   @apply block w-full visible opacity-100;
+}
+
+.support-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 50px;
+  box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3);
+  cursor: pointer;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
+}
+
+.support-btn:hover {
+  transform: scale(1.05) translateY(-5px);
+  box-shadow: 0 15px 30px rgba(46, 204, 113, 0.4);
+}
+
+.support-btn i {
+  font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+  .support-btn span {
+    display: none;
+  }
+
+  .support-btn {
+    padding: 15px;
+    bottom: 20px;
+    right: 20px;
+  }
 }

@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
+import { ChatComponent } from './shared/components/chat/chat.component';
 import { filter } from 'rxjs/operators';
 import { OfflineService } from './courier/services/offline.service';
 import { NotificationsComponent } from './shared/notifications/notifications.component';
@@ -10,11 +11,12 @@ import { NotificationsComponent } from './shared/notifications/notifications.com
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, NavbarComponent, FooterComponent , NotificationsComponent],
+  imports: [CommonModule, RouterOutlet, NavbarComponent, FooterComponent, NotificationsComponent, ChatComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
+  @ViewChild('globalChat') chatComponent!: ChatComponent;
   title = 'Lynx';
   showNavbar = true;
   showFooter = true;
@@ -281,5 +283,10 @@ export class AppComponent implements OnInit {
    */
   async startPushNotifications(): Promise<void> {
     await this.initPushNotifications();
+  }
+
+  // 💬 CHAT INTEGRATION
+  openSupportChat() {
+    this.chatComponent.openChat('admin_support_id', 'Lynx Support');
   }
 }

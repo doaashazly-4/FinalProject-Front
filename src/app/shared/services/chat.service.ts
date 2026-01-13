@@ -1,112 +1,141 @@
 import { Injectable } from '@angular/core';
+import * as signalR from '@microsoft/signalr';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { ChatConversation, ChatMessage, ChatParticipant } from '../models/chat.models';
+import { environment } from '../../../environments/environment';
+import { ChatConversation, ChatMessage } from '../models/chat.models';
+
+export interface Message {
+  id?: number;
+  senderId: string;
+  receiverId: string;
+  orderId?: string;
+  messageText: string;
+  senderName?: string;
+  status?: string;
+  createdAt?: string;
+}
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
 export class ChatService {
-    private conversationsSubject = new BehaviorSubject<ChatConversation[]>([]);
-    private messagesSubject = new BehaviorSubject<ChatMessage[]>([]);
+  private hubConnection!: signalR.HubConnection;
+  private messagesSource = new BehaviorSubject<Message[]>([]);
+  public messages$ = this.messagesSource.asObservable();
 
-    constructor() {
-        this.loadMockData();
+  public connectionStatus = new BehaviorSubject<'Connected' | 'Disconnected' | 'Connecting'>('Disconnected');
+
+  private chatTrigger = new BehaviorSubject<{ receiverId: string, receiverName: string, orderId?: string } | null>(null);
+  public chatTrigger$ = this.chatTrigger.asObservable();
+  
+
+  constructor() { }
+
+  public triggerChat(receiverId: string, receiverName: string, orderId?: string, ) {
+    this.chatTrigger.next({ receiverId, receiverName, orderId,  });
+  }
+
+  public async startConnection() {
+    if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
+      return;
     }
 
-    getConversations(): Observable<ChatConversation[]> {
-        return this.conversationsSubject.asObservable();
+    // 🔹 إنشاء HubConnection مرة واحدة فقط
+    this.hubConnection = new signalR.HubConnectionBuilder()
+      .withUrl(environment.chatHubUrl, {
+        accessTokenFactory: () => localStorage.getItem('lynx_token') || ''
+      })
+      .withAutomaticReconnect()
+      .build();
+
+    this.connectionStatus.next('Connecting');
+
+    try {
+      await this.hubConnection.start();
+      console.log('SignalR Connected');
+      this.connectionStatus.next('Connected');
+      this.registerHandlers();
+    } catch (err) {
+      console.error('Error connecting SignalR: ', err);
+      this.connectionStatus.next('Disconnected');
+    }
+  }
+
+  private registerHandlers() {
+    // استقبال رسالة جديدة
+    this.hubConnection.on('ReceiveMessage', (message: Message) => {
+      const current = this.messagesSource.getValue();
+      this.messagesSource.next([...current, message]);
+    });
+
+    // استقبال المحادثة بالكامل
+    this.hubConnection.on('ReceiveConversation', (messages: Message[]) => {
+      this.messagesSource.next(messages);
+    });
+  }
+
+  // إرسال رسالة
+  public async sendMessage(senderId: string, receiverId: string, messageText: string, orderId?: string) {
+    // 🔹 تأكد من الاتصال قبل الإرسال
+    if (!this.hubConnection || this.hubConnection.state !== signalR.HubConnectionState.Connected) {
+      console.warn('SignalR not connected. Trying to start connection...');
+      await this.startConnection();
     }
 
-    getMessages(conversationId: string): Observable<ChatMessage[]> {
-        // In a real app, this would fetch from an API based on conversationId
-        return this.messagesSubject.asObservable();
+    if (this.hubConnection.state !== signalR.HubConnectionState.Connected) {
+      console.error('Cannot send message: SignalR still not connected');
+      return;
     }
 
-    sendMessage(conversationId: string, content: string, senderId: string, senderName: string): void {
-        const newMessage: ChatMessage = {
-            id: Math.random().toString(36).substring(7),
-            senderId,
-            senderName,
-            content,
-            timestamp: new Date(),
-            isRead: false,
-            type: 'text'
-        };
+    try {
+      await this.hubConnection.invoke('SendMessage', senderId, receiverId, messageText, orderId);
+    } catch (err) {
+      console.error('Error sending message: ', err);
+    }
+  }
 
-        const currentMessages = this.messagesSubject.value;
-        this.messagesSubject.next([...currentMessages, newMessage]);
-
-        // Update last message in conversation
-        const currentConversations = this.conversationsSubject.value;
-        const conversationIndex = currentConversations.findIndex(c => c.id === conversationId);
-        if (conversationIndex !== -1) {
-            currentConversations[conversationIndex].lastMessage = newMessage;
-            this.conversationsSubject.next([...currentConversations]);
-        }
+  // جلب المحادثة بين طرفين
+  public async getConversation(user1Id: string, user2Id: string, orderId?: string) {
+    if (!this.hubConnection || this.hubConnection.state !== signalR.HubConnectionState.Connected) {
+      await this.startConnection();
     }
 
-    private loadMockData(): void {
-        const mockParticipants: ChatParticipant[] = [
-            { id: 'courier-1', name: 'أحمد مندوب', role: 'courier', isOnline: true },
-            { id: 'customer-1', name: 'سارة عميل', role: 'customer', isOnline: false },
-            { id: 'supplier-1', name: 'متجر الأنوار', role: 'supplier', isOnline: true }
-        ];
-
-        const mockConversations: ChatConversation[] = [
-            {
-                id: 'conv-1',
-                participants: [mockParticipants[0], mockParticipants[2]],
-                unreadCount: 2,
-                type: 'direct',
-                lastMessage: {
-                    id: 'm1',
-                    senderId: 'courier-1',
-                    senderName: 'أحمد مندوب',
-                    content: 'أنا قريب من موقع الاستلام الآن',
-                    timestamp: new Date(),
-                    isRead: false,
-                    type: 'text'
-                }
-            },
-            {
-                id: 'conv-2',
-                participants: [mockParticipants[1], mockParticipants[2]],
-                unreadCount: 0,
-                type: 'direct',
-                lastMessage: {
-                    id: 'm2',
-                    senderId: 'customer-1',
-                    senderName: 'سارة عميل',
-                    content: 'متى سيصل الطلب؟',
-                    timestamp: new Date(Date.now() - 3600000),
-                    isRead: true,
-                    type: 'text'
-                }
-            }
-        ];
-
-        this.conversationsSubject.next(mockConversations);
-
-        // Initial messages for the first conversation
-        this.messagesSubject.next([
-            {
-                id: 'm01',
-                senderId: 'supplier-1',
-                senderName: 'متجر الأنوار',
-                content: 'مرحباً أحمد، الطلب جاهز للتسليم',
-                timestamp: new Date(Date.now() - 7200000),
-                isRead: true,
-                type: 'text'
-            },
-            {
-                id: 'm1',
-                senderId: 'courier-1',
-                senderName: 'أحمد مندوب',
-                content: 'أنا قريب من موقع الاستلام الآن',
-                timestamp: new Date(),
-                isRead: false,
-                type: 'text'
-            }
-        ]);
+    try {
+      if (orderId) {
+        await this.hubConnection.invoke('GetOrderConversation', user1Id, user2Id, orderId);
+      } else {
+        await this.hubConnection.invoke('GetConversation', user1Id, user2Id);
+      }
+    } catch (err) {
+      console.error('Error getting conversation: ', err);
     }
+  }
+
+  public stopConnection() {
+    if (this.hubConnection) {
+      this.hubConnection.stop();
+      this.connectionStatus.next('Disconnected');
+    }
+  }
+
+  // Compatibility methods for ChatPageComponent
+  public getConversations(): Observable<ChatConversation[]> {
+    return of([]); // TODO: Implement server-side fetching
+  }
+
+  public getMessages(conversationId: string): Observable<ChatMessage[]> {
+    return of([]); // TODO: Implement server-side fetching
+  }
+
+  private activeReceiverId!: string;
+
+setActiveChat(receiverId: string) {
+  this.activeReceiverId = receiverId;
 }
+
+
+}
+
+
+  
+

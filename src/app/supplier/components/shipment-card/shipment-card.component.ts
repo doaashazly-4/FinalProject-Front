@@ -2,6 +2,8 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Parcel } from '../../services/supplier-data.service';
+import { Router } from '@angular/router';
+
 
 @Component({
     selector: 'app-shipment-card',
@@ -15,6 +17,7 @@ export class ShipmentCardComponent {
     @Input() index: number = 0;
     @Input() showActions: boolean = true;
     @Input() compact: boolean = false;
+    
 
     @Output() onTrack = new EventEmitter<Parcel>();
     @Output() onEdit = new EventEmitter<Parcel>();
@@ -22,8 +25,11 @@ export class ShipmentCardComponent {
     @Output() onDetails = new EventEmitter<Parcel>();
     @Output() onMarkReady = new EventEmitter<Parcel>();
     @Output() onAssign = new EventEmitter<Parcel>();
+    @Output() onChat = new EventEmitter<Parcel>();
 
     isExpanded = false;
+    constructor(private router: Router) { }
+
 
     toggleExpand(event: Event): void {
         event.stopPropagation();
@@ -122,4 +128,17 @@ export class ShipmentCardComponent {
         event.stopPropagation();
         this.onAssign.emit(this.parcel);
     }
+
+    chatWithCarrier(event: Event): void {
+        event.stopPropagation();
+        this.onChat.emit(this.parcel);
+    }
+
+   openChatWithCourier(parcel: any) {
+  if (!parcel.courierId) return; // نتأكد إن فيه مندوب معين
+  this.router.navigate(['/chat', parcel.courierId], {
+    queryParams: { name: parcel.courierName, parcelId: parcel.id }
+  });
+}
+
 }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../shared/services/auth.service';
 import { SupplierDataService } from './services/supplier-data.service';
+import { ChatService } from '../shared/services/chat.service';
 
 interface NavItem {
   path: string;
@@ -38,7 +39,8 @@ export class SupplierComponent implements OnInit {
   constructor(
     private auth: AuthService,
     private router: Router,
-    private supplierData: SupplierDataService
+    private supplierData: SupplierDataService,
+    private chatService: ChatService
   ) {
     const user = this.auth.getCurrentUser();
     this.userName = user.userName || user.email?.split('@')[0] || 'المُرسل';
@@ -82,4 +84,10 @@ export class SupplierComponent implements OnInit {
     this.auth.logout();
     this.router.navigate(['/home']);
   }
+
+  openSupportChat(): void {
+    this.chatService.triggerChat('admin_support_id', 'Lynx Support');
+  }
+
+
 }

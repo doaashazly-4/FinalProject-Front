@@ -16,7 +16,7 @@ export class DashboardIconsModule { }
 @Component({
   selector: 'app-supplier-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, ShipmentCardComponent, DashboardIconsModule],
+  imports: [CommonModule, RouterModule, DashboardIconsModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
@@ -164,6 +164,7 @@ export class SupplierDashboardComponent implements OnInit {
     ];
     return colors[index % colors.length];
   }
+  
 
   getStatLabel(label: string): string {
     return label;

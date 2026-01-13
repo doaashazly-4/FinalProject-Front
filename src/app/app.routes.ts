@@ -76,6 +76,18 @@ export const routes: Routes = [
       import('./admin/admin.routes')
         .then(m => m.ADMIN_ROUTES)
   },
+  
+  {
+  path: 'chat/support',
+  loadComponent: () => import('./shared/components/chat/chat.component').then(m => m.ChatComponent),
+  data: { type: 'support' }
+},
+{
+  path: 'chat/:courierId',
+  loadComponent: () =>
+    import('./shared/components/chat/chat.component').then(m => m.ChatComponent)
+},
+
 
   { path: '**', redirectTo: 'home' }
 ];

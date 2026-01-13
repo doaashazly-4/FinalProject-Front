@@ -7,7 +7,8 @@
     <div class="filters">
       <button class="chip" [class.active]="filter === 'الكل'" (click)="filter = 'الكل'">الكل</button>
       <button class="chip" [class.active]="filter === 'جديد'" (click)="filter = 'جديد'">جديد</button>
-      <button class="chip" [class.active]="filter === 'جارٍ التسليم'" (click)="filter = 'جارٍ التسليم'">جارٍ التسليم</button>
+      <button class="chip" [class.active]="filter === 'جارٍ التسليم'" (click)="filter = 'جارٍ التسليم'">جارٍ
+        التسليم</button>
       <button class="chip" [class.active]="filter === 'مكتمل'" (click)="filter = 'مكتمل'">مكتمل</button>
       <button class="chip" [class.active]="filter === 'مؤجل'" (click)="filter = 'مؤجل'">مؤجل</button>
     </div>
@@ -29,9 +30,9 @@
       </div>
       <div class="actions">
         <button class="ghost">تفاصيل</button>
+        <button class="ghost" (click)="openChat(job)"><i class="bi bi-chat-dots"></i> دردشة</button>
         <button class="primary">بدء التوصيل</button>
       </div>
     </div>
   </div>
 </div>
-

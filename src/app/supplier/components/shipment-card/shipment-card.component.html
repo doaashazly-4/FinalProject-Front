@@ -93,6 +93,13 @@
                 <i class="bi bi-check2-circle ml-1"></i> جاهز للاستلام
             </button>
 
+                 <!-- Chat with Carrier Button -->
+            <button *ngIf="parcel.courierId" (click)="openChatWithCourier(parcel)"
+    class="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-xs hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200">
+    <i class="bi bi-chat-dots ml-1"></i> دردشة مع المندوب
+</button>
+             
+
             <button *ngIf="parcel.status === 'ready_for_pickup'" (click)="assign($event)"
                 class="w-full py-2.5 bg-blue-500 text-white rounded-xl font-bold text-xs hover:bg-blue-600 transition-all shadow-md">
                 <i class="bi bi-person-plus ml-1"></i> تعيين مندوب
@@ -103,6 +110,7 @@
                 class="w-full py-2 text-xs font-bold text-red-500 bg-red-50 rounded-xl hover:bg-red-100 transition-colors">
                 <i class="bi bi-trash3 ml-1"></i> إلغاء الطلب
             </button>
+
         </div>
 
         <!-- Expandable Trigger -->

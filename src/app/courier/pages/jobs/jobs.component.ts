@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CourierDataService, CourierJob } from '../../services/courier-data.service';
+import { CourierDataService, DeliveryJob as CourierJob } from '../../services/courier-data.service';
+import { ChatService } from '../../../shared/services/chat.service';
 
 @Component({
   selector: 'app-courier-jobs',
@@ -14,7 +15,10 @@ export class CourierJobsComponent implements OnInit {
   filter = 'الكل';
   isLoading = true;
 
-  constructor(private data: CourierDataService) {}
+  constructor(
+    private data: CourierDataService,
+    private chatService: ChatService
+  ) { }
 
   ngOnInit(): void {
     this.loadJobs();
@@ -22,8 +26,8 @@ export class CourierJobsComponent implements OnInit {
 
   loadJobs(): void {
     this.isLoading = true;
-    this.data.getJobs().subscribe({
-      next: (jobs) => {
+    this.data.getMyJobs().subscribe({
+      next: (jobs: CourierJob[]) => {
         this.jobs = jobs;
         this.isLoading = false;
       },
@@ -38,5 +42,11 @@ export class CourierJobsComponent implements OnInit {
   filteredJobs(): CourierJob[] {
     if (this.filter === 'الكل') return this.jobs;
     return this.jobs.filter(j => j.status === this.filter);
+  }
+
+  openChat(job: any): void {
+    // Assuming senderId or supplierId exists, fallback to senderPhone if not
+    const supplierId = job.senderId || job.supplierId || job.senderPhone;
+    this.chatService.triggerChat(supplierId, job.senderName || 'Supplier', job.id);
   }
 }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { SupplierDataService, Parcel, ParcelStatus, AvailableCarrier } from '../../services/supplier-data.service';
+import { ChatService } from '../../../shared/services/chat.service';
 
 import { ShipmentCardComponent } from '../../components/shipment-card/shipment-card.component';
 
@@ -52,7 +53,8 @@ export class ShipmentsComponent implements OnInit {
 
   constructor(
     private dataService: SupplierDataService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private chatService: ChatService
   ) { }
 
   ngOnInit(): void {
@@ -316,5 +318,11 @@ export class ShipmentsComponent implements OnInit {
 
   canCancel(parcel: Parcel): boolean {
     return ['pending', 'ready_for_pickup'].includes(parcel.status);
+  }
+
+  openChat(parcel: Parcel): void {
+    if (parcel.courierId) {
+      this.chatService.triggerChat(parcel.courierId, parcel.courierName || 'Carrier', parcel.id);
+    }
   }
 }

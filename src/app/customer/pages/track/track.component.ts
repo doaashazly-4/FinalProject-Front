@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { CustomerDataService, IncomingDelivery, DeliveryStatus, CarrierLocation } from '../../services/customer-data.service';
 import { Subscription, interval } from 'rxjs';
+import { ChatService } from '../../../shared/services/chat.service';
 
 interface StatusStep {
   status: DeliveryStatus;
@@ -40,8 +41,9 @@ export class CustomerTrackComponent implements OnInit, OnDestroy {
 
   constructor(
     private dataService: CustomerDataService,
-    private route: ActivatedRoute
-  ) {}
+    private route: ActivatedRoute,
+    private chatService: ChatService
+  ) { }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -80,67 +82,67 @@ export class CustomerTrackComponent implements OnInit, OnDestroy {
   // }
 
   search() {
-  this.searchPerformed = true;
-  this.error = '';
-  this.selectedDelivery = null;
+    this.searchPerformed = true;
+    this.error = '';
+    this.selectedDelivery = null;
 
-  if (!this.trackingNumber) {
-    this.error = 'من فضلك أدخل رقم التتبع';
-    return;
-  }
-
-  // ⚠️ Backend expects packageId (number)
-  const packageId = Number(this.trackingNumber);
-
-  if (isNaN(packageId)) {
-    this.error = 'رقم التتبع غير صالح حالياً (يجب أن يكون رقم)';
-    return;
-  }
-
-  this.isLoading = true;
-
-  this.dataService.trackPackage(packageId).subscribe({
-    next: (data) => {
-      this.selectedDelivery = data;
-      this.isLoading = false;
-    },
-    error: () => {
-      this.error = 'لم يتم العثور على الشحنة';
-      this.isLoading = false;
+    if (!this.trackingNumber) {
+      this.error = 'من فضلك أدخل رقم التتبع';
+      return;
     }
-  });
-}
-  
-  mapBackendPackage(pkg: any) {
-  return {
-    id: pkg.id,
-    trackingNumber: `PKG-${pkg.id}`, // temporary
-    description: 'شحنة قيد التتبع',
-    senderName: 'غير محدد',
-    pickupAddress: '',
-    deliveryAddress: '',
-    status: this.mapStatus(pkg.status),
-    createdAt: new Date(),
-    weight: 0,
-    courierName: pkg.courier ? `Courier #${pkg.courier.id}` : null,
-    courierPhone: null,
-    isFragile: false,
-    requiresSignature: false
-  };
-}
 
-mapStatus(status: number | string): any {
-  // adapt if enum is numeric
-  switch (status) {
-    case 0: return 'pending';
-    case 1: return 'assigned';
-    case 2: return 'picked_up';
-    case 3: return 'in_transit';
-    case 4: return 'out_for_delivery';
-    case 5: return 'delivered';
-    default: return 'pending';
+    // ⚠️ Backend expects packageId (number)
+    const packageId = Number(this.trackingNumber);
+
+    if (isNaN(packageId)) {
+      this.error = 'رقم التتبع غير صالح حالياً (يجب أن يكون رقم)';
+      return;
+    }
+
+    this.isLoading = true;
+
+    this.dataService.trackPackage(packageId).subscribe({
+      next: (data) => {
+        this.selectedDelivery = data;
+        this.isLoading = false;
+      },
+      error: () => {
+        this.error = 'لم يتم العثور على الشحنة';
+        this.isLoading = false;
+      }
+    });
   }
-}
+
+  mapBackendPackage(pkg: any) {
+    return {
+      id: pkg.id,
+      trackingNumber: `PKG-${pkg.id}`, // temporary
+      description: 'شحنة قيد التتبع',
+      senderName: 'غير محدد',
+      pickupAddress: '',
+      deliveryAddress: '',
+      status: this.mapStatus(pkg.status),
+      createdAt: new Date(),
+      weight: 0,
+      courierName: pkg.courier ? `Courier #${pkg.courier.id}` : null,
+      courierPhone: null,
+      isFragile: false,
+      requiresSignature: false
+    };
+  }
+
+  mapStatus(status: number | string): any {
+    // adapt if enum is numeric
+    switch (status) {
+      case 0: return 'pending';
+      case 1: return 'assigned';
+      case 2: return 'picked_up';
+      case 3: return 'in_transit';
+      case 4: return 'out_for_delivery';
+      case 5: return 'delivered';
+      default: return 'pending';
+    }
+  }
 
   loadDeliveryById(id: string): void {
     this.isLoading = true;
@@ -162,7 +164,7 @@ mapStatus(status: number | string): any {
   private loadFromMock(): void {
     this.dataService.getDeliveries().subscribe({
       next: (deliveries) => {
-        const found = deliveries.find(d => 
+        const found = deliveries.find(d =>
           d.trackingNumber.toLowerCase() === this.trackingNumber.toLowerCase() ||
           d.id === this.trackingNumber
         );
@@ -189,7 +191,7 @@ mapStatus(status: number | string): any {
   getStatusProgress(): number {
     if (!this.selectedDelivery) return 0;
     if (['cancelled', 'failed_delivery', 'returned'].includes(this.selectedDelivery.status)) return 0;
-    
+
     const currentIndex = this.statusSteps.findIndex(s => s.status === this.selectedDelivery!.status);
     return ((currentIndex + 1) / this.statusSteps.length) * 100;
   }
@@ -289,6 +291,20 @@ mapStatus(status: number | string): any {
         }
       }
     });
+  }
+
+  chatWithSender(): void {
+    if (this.selectedDelivery) {
+      const senderId = (this.selectedDelivery as any).senderId || this.selectedDelivery.senderPhone || 'supplier';
+      this.chatService.triggerChat(senderId, this.selectedDelivery.senderName || 'Supplier', this.selectedDelivery.id);
+    }
+  }
+
+  chatWithCourier(): void {
+    if (this.selectedDelivery) {
+      const courierId = (this.selectedDelivery as any).courierId || this.selectedDelivery.courierPhone || 'courier';
+      this.chatService.triggerChat(courierId, this.selectedDelivery.courierName || 'Courier', this.selectedDelivery.id);
+    }
   }
 }
 
