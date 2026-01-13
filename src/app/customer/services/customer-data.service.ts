@@ -185,11 +185,61 @@ export class CustomerDataService {
       throw new Error('Customer phone not found');
     }
 
-    return this.http.get<IncomingDelivery[]>(
+    return this.http.get<any[]>(
       `${this.apiUrl}/MyOrders`,
       { params: { phoneNumber: phone } }
+    ).pipe(
+      map(orders => orders.map(order => this.mapToDelivery(order)))
     );
   }
+
+  // Map API response to IncomingDelivery interface
+  private mapToDelivery(data: any): IncomingDelivery {
+    // Handle nested packages structure from create-shipment payload
+    const pkg = (data.packages && data.packages.length > 0) ? data.packages[0] : (data.package || {});
+
+    // Map numeric status to string
+    const mapStatus = (s: any): DeliveryStatus => {
+      if (typeof s === 'number') {
+        switch (s) {
+          case 0: return 'pending';
+          case 1: return 'assigned';
+          case 2: return 'picked_up';
+          case 3: return 'in_transit';
+          case 4: return 'out_for_delivery';
+          case 5: return 'delivered';
+          case 6: return 'failed_delivery';
+          case 7: return 'cancelled';
+          default: return 'pending';
+        }
+      }
+      return (s || 'pending').toString().toLowerCase() as DeliveryStatus;
+    };
+
+    return {
+      id: (data.id || data.requestId || data.ID || pkg.id)?.toString() || '',
+      trackingNumber: (data.trackingNumber || data.requestId || data.id || data.ID)?.toString() || '',
+      description: pkg.description || data.description || 'شحنة واردة',
+      senderName: data.source || data.senderName || data.Source || 'المورد',
+      senderPhone: data.senderPhone || '',
+      pickupAddress: data.source || data.pickupAddress || data.Source || '',
+      deliveryAddress: pkg.destination || data.deliveryAddress || data.Destination || '',
+      status: mapStatus(data.status || pkg.status),
+      estimatedDelivery: pkg.expireDate ? new Date(pkg.expireDate) : (data.estimatedDelivery ? new Date(data.estimatedDelivery) : undefined),
+      actualDelivery: data.actualDelivery ? new Date(data.actualDelivery) : undefined,
+      createdAt: new Date(data.createDate || data.createdAt || new Date()),
+      weight: pkg.weight || data.weight || 0,
+      courierName: data.courier?.name || data.courierName,
+      courierPhone: data.courier?.phone || data.courierPhone,
+      isFragile: pkg.fragile || pkg.isFragile || data.isFragile || false,
+      requiresSignature: pkg.requiresSignature || data.requiresSignature || false,
+      deliveryFee: pkg.shipmentCost || data.deliveryFee || data.codAmount || 0,
+      notes: pkg.notes || data.notes || '',
+      deliveryOTP: data.deliveryOTP || data.otp,
+      otpVerified: data.otpVerified || false
+    };
+  }
+
 
 
 

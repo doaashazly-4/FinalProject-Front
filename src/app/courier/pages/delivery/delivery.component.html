@@ -3,12 +3,21 @@
   <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
+      <a routerLink="/courier/my-jobs"
+        class="inline-flex items-center gap-2 text-gray-500 hover:text-primary-green transition-colors mb-2">
+        <i class="bi bi-arrow-right"></i>
+        <span>العودة لمهامي</span>
+      </a>
       <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">
         طلب #{{ job.id }}
       </h1>
     </div>
 
-    <span class="px-3 py-1 rounded-full text-sm font-bold bg-indigo-100 text-indigo-700">
+    <span class="px-4 py-2 rounded-full text-sm font-bold shadow-sm" [ngClass]="{
+      'bg-blue-100 text-blue-700 border border-blue-200': job.status === 'assigned',
+      'bg-orange-100 text-orange-700 border border-orange-200': job.status === 'out_for_delivery',
+      'bg-green-100 text-green-700 border border-green-200': job.status === 'delivered'
+    }">
       {{
       job.status === 'assigned'
       ? 'جاهز للبدء'
@@ -19,85 +28,157 @@
     </span>
   </div>
 
-  <!-- Route Info -->
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
+  <!-- Main Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-    <h2 class="text-lg font-bold">مسار التوصيل</h2>
-
-    <!-- Pickup & Dropoff Addresses -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-
-      <!-- Pickup -->
-      <div class="p-4 bg-gray-50 rounded-xl space-y-2">
-        <p class="text-xs text-gray-500">الاستلام من</p>
-        <p class="font-medium text-gray-800">
-          {{ job.pickupAddress || 'غير متوفر' }}
-        </p>
-        <button (click)="navigateToPickup()" class="w-full py-2 bg-blue-500 text-white rounded-lg font-bold">
-          تنقل إلى الاستلام
-        </button>
+    <!-- Route Info Card - Takes 2 columns -->
+    <div class="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-5 border-b border-gray-100 bg-gradient-to-l from-blue-50 to-indigo-50">
+        <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+          <i class="bi bi-map text-blue-600"></i>
+          مسار التوصيل
+        </h2>
       </div>
 
-      <!-- Dropoff -->
-      <div class="p-4 bg-gray-50 rounded-xl space-y-2">
-        <p class="text-xs text-gray-500">التسليم إلى</p>
-        <p class="font-medium text-gray-800">
-          {{ job.dropoffAddress || 'غير متوفر' }}
-        </p>
-        <button (click)="navigateToDropoff()" class="w-full py-2 bg-green-500 text-white rounded-lg font-bold">
-          تنقل إلى التسليم
-        </button>
-      </div>
+      <div class="p-5 space-y-4">
+        <!-- Pickup & Dropoff Addresses Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Pickup -->
+          <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-3">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <i class="bi bi-circle text-blue-600"></i>
+              </div>
+              <p class="text-[10px] font-bold text-gray-400 uppercase">الاستلام من</p>
+            </div>
+            <p class="font-medium text-gray-800">
+              {{ job.pickupAddress || 'غير متوفر' }}
+            </p>
+            <button (click)="navigateToPickup()"
+              class="w-full py-2.5 bg-blue-500 text-white rounded-xl font-bold text-sm hover:bg-blue-600 transition-all">
+              <i class="bi bi-navigation ml-1"></i> تنقل إلى الاستلام
+            </button>
+          </div>
 
-    </div>
+          <!-- Dropoff -->
+          <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-3">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                <i class="bi bi-geo-alt-fill text-green-600"></i>
+              </div>
+              <p class="text-[10px] font-bold text-gray-400 uppercase">التسليم إلى</p>
+            </div>
+            <p class="font-medium text-gray-800">
+              {{ job.dropoffAddress || 'غير متوفر' }}
+            </p>
+            <button (click)="navigateToDropoff()"
+              class="w-full py-2.5 bg-green-500 text-white rounded-xl font-bold text-sm hover:bg-green-600 transition-all">
+              <i class="bi bi-navigation ml-1"></i> تنقل إلى التسليم
+            </button>
+          </div>
+        </div>
 
-    <!-- Combined Route Map -->
-    <div class="w-full h-[350px] rounded-xl overflow-hidden border">
-      <iframe *ngIf="getRouteMapUrl(
-          job.pickupLat,
-          job.pickupLng,
-          job.destinationLat,
-          job.destinationLng
-        )" [src]="getRouteMapUrl(
-          job.pickupLat,
-          job.pickupLng,
-          job.destinationLat,
-          job.destinationLng
-        )" class="w-full h-full" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
-      </iframe>
+        <!-- Combined Route Map -->
+        <div class="w-full h-[350px] rounded-2xl overflow-hidden border border-gray-200">
+          <iframe *ngIf="getRouteMapUrl(
+              job.pickupLat,
+              job.pickupLng,
+              job.destinationLat,
+              job.destinationLng
+            )" [src]="getRouteMapUrl(
+              job.pickupLat,
+              job.pickupLng,
+              job.destinationLat,
+              job.destinationLng
+            )" class="w-full h-full" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
 
-      <div *ngIf="!job.pickupLat && !job.destinationLat"
-        class="flex items-center justify-center h-full text-gray-500 bg-gray-100">
-        <div class="text-center">
-          <i class="bi bi-map-fill text-4xl mb-2 text-gray-400"></i>
-          <p>الخريطة غير متاحة لهذا المسار</p>
+          <div *ngIf="!job.pickupLat && !job.destinationLat"
+            class="flex items-center justify-center h-full text-gray-500 bg-gray-100">
+            <div class="text-center">
+              <i class="bi bi-map-fill text-4xl mb-2 text-gray-400"></i>
+              <p>الخريطة غير متاحة لهذا المسار</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-  </div>
+    <!-- Actions & Details Panel -->
+    <div class="space-y-6">
 
-  <!-- Actions -->
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
+      <!-- Order Details Card -->
+      <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-5 border-b border-gray-100 bg-gray-50/50">
+          <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+            <i class="bi bi-info-circle text-primary-green"></i>
+            تفاصيل الطلب
+          </h2>
+        </div>
+        <div class="p-5 space-y-4">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="p-3 bg-gray-50 rounded-2xl border border-gray-100">
+              <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">رقم الطلب</p>
+              <p class="font-black text-primary-dark">#{{ job.id }}</p>
+            </div>
+            <div class="p-3 bg-gray-50 rounded-2xl border border-gray-100">
+              <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">المستلم</p>
+              <p class="font-black text-gray-800 text-sm">{{ job.customerName }}</p>
+            </div>
+          </div>
 
-    <!-- Start Delivery -->
-    <button *ngIf="job.status === 'assigned'" (click)="startDelivery()"
-      class="w-full py-4 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold">
-      <i class="bi bi-truck ml-2"></i>
-      بدء التوصيل
-    </button>
+          <div class="p-3 bg-gray-50 rounded-2xl border border-gray-100">
+            <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">الهاتف</p>
+            <p class="text-sm text-gray-700">{{ job.customerPhone || 'غير متوفر' }}</p>
+          </div>
+        </div>
+      </div>
 
-    <!-- Request OTP -->
-    <button *ngIf="job.status === 'out_for_delivery' && job.awaitingOTP" (click)="openConfirmDelivery()"
-      class="w-full py-3 bg-orange-500 text-white rounded-xl font-bold">
-      طلب رمز OTP
-    </button>
+      <!-- Actions Card -->
+      <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-5 border-b border-gray-100 bg-gradient-to-l from-green-50 to-emerald-50">
+          <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
+            <i class="bi bi-lightning-charge text-primary-green"></i>
+            الإجراءات
+          </h2>
+        </div>
+        <div class="p-5 space-y-3">
+          <!-- Start Delivery -->
+          <button *ngIf="job.status === 'assigned'" (click)="startDelivery()"
+            class="w-full py-4 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold shadow-green hover:shadow-green-lg transition-all">
+            <i class="bi bi-truck ml-2"></i>
+            بدء التوصيل
+          </button>
 
-    <!-- Delivered -->
-    <div *ngIf="job.status === 'delivered'" class="p-4 bg-green-100 text-green-700 rounded-xl text-center font-bold">
-      🎉 تم تسليم الطلب بنجاح
+          <!-- Request OTP -->
+          <button *ngIf="job.status === 'out_for_delivery' && job.awaitingOTP" (click)="openConfirmDelivery()"
+            class="w-full py-4 bg-orange-500 text-white rounded-xl font-bold hover:bg-orange-600 transition-all shadow-md">
+            <i class="bi bi-key ml-2"></i>
+            طلب رمز OTP
+          </button>
+
+          <!-- Delivered Status -->
+          <div *ngIf="job.status === 'delivered'"
+            class="p-4 bg-green-100 text-green-700 rounded-2xl text-center font-bold border border-green-200">
+            <i class="bi bi-check-circle-fill ml-2"></i>
+            🎉 تم تسليم الطلب بنجاح
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Tips -->
+      <div class="bg-gradient-to-br from-primary-dark to-primary-dark-light rounded-3xl p-5 text-white">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-lg bg-accent-gold/20 flex items-center justify-center">
+            <i class="bi bi-lightbulb text-accent-gold"></i>
+          </div>
+          <h3 class="font-bold">نصيحة</h3>
+        </div>
+        <p class="text-white/80 text-sm leading-relaxed">
+          تأكد من التواصل مع المستلم قبل وصولك لضمان تسليم سلس وسريع.
+        </p>
+      </div>
     </div>
-
   </div>
 
 </div>
@@ -118,7 +199,7 @@
 </div>
 
 <!-- Error -->
-<div *ngIf="error" class="p-4 bg-red-100 text-red-700 rounded-xl mt-4">
+<div *ngIf="error" class="p-4 bg-red-100 text-red-700 rounded-xl mt-4 border border-red-200">
   {{ error }}
 </div>
 

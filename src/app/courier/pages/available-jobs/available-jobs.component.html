@@ -14,7 +14,7 @@
   </div>
 
   <!-- Info Banner -->
-  <div class="bg-gradient-to-l from-blue-50 to-cyan-50 rounded-2xl p-4 border border-blue-100">
+  <div class="bg-gradient-to-l from-blue-50 to-cyan-50 rounded-3xl p-4 border border-blue-100">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
         <i class="bi bi-info-circle text-blue-600"></i>
@@ -31,14 +31,13 @@
     <div class="text-center">
       <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-green border-t-transparent mx-auto mb-4">
       </div>
-
       <p class="text-gray-500">جاري البحث عن المهام...</p>
     </div>
   </div>
 
   <!-- Empty State -->
   <div *ngIf="!isLoading && jobs.length === 0"
-    class="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
+    class="bg-white rounded-3xl p-12 shadow-sm border border-gray-100 text-center">
     <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
       <i class="bi bi-inbox text-gray-400 text-4xl"></i>
     </div>
@@ -50,60 +49,83 @@
     </button>
   </div>
 
-  <!-- Jobs List -->
-  <div *ngIf="!isLoading && jobs.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+  <!-- Jobs Grid - Cards like supplier shipment cards -->
+  <div *ngIf="!isLoading && jobs.length > 0"
+    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     <div *ngFor="let job of jobs"
-      class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-primary-green/30 transition-all duration-300">
-      <div class="p-5">
-        <!-- Header -->
-        <div class="flex items-start justify-between mb-4">
+      class="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col h-full">
+
+      <!-- Card Header -->
+      <div class="p-5 border-b border-gray-100 relative">
+        <div class="flex justify-between items-start mb-4">
+          <span class="text-xs font-black text-gray-300 uppercase tracking-widest">#{{ job.id }}</span>
+          <div
+            class="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-100 text-blue-700 border border-blue-200 shadow-sm">
+            <i class="bi bi-clock"></i>
+            متاح
+          </div>
+        </div>
+        <h3 class="text-lg font-black text-primary-dark line-clamp-2 group-hover:text-primary-green transition-colors">
+          📦 {{ job.description }}
+        </h3>
+        <p class="text-sm text-gray-500 font-medium mt-1 flex items-center gap-1">
+          <i class="bi bi-geo-alt text-red-400"></i>
+          {{ job.dropoffAddress }}
+        </p>
+      </div>
+
+      <!-- Price & Customer -->
+      <div class="flex items-center justify-between p-5 py-3 bg-gray-50/50">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-gray-400">
+            <i class="bi bi-person-fill"></i>
+          </div>
           <div>
-            <h3 class="font-bold text-primary-dark text-lg">طلب #{{ job.id }}</h3>
-            <p class="text-gray-600">{{ job.description }}</p>
+            <p class="text-[10px] font-bold text-gray-400 uppercase leading-none">المستلم</p>
+            <p class="text-xs font-black text-gray-700">{{ job.customerName }}</p>
           </div>
-          <div class="text-left">
-            <p class="text-2xl font-black text-primary-green">{{ job.shipmentCost }}</p>
-            <p class="text-xs text-gray-500">جنيه مصري</p>
+        </div>
+        <div class="text-left">
+          <p class="text-[10px] font-bold text-gray-400 uppercase leading-none">الأجر</p>
+          <p class="text-xl font-black text-primary-green">{{ job.shipmentCost }}</p>
+        </div>
+      </div>
+
+      <!-- Details Grid -->
+      <div class="p-5 space-y-3 flex-grow">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="p-3 bg-gray-50 rounded-2xl border border-gray-100">
+            <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">الوزن</p>
+            <p class="font-black text-gray-800">{{ job.weight }} كجم</p>
+          </div>
+          <div class="p-3 bg-gray-50 rounded-2xl border border-gray-100">
+            <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">الهاتف</p>
+            <button *ngIf="job.receiverPhone" (click)="callSender(job.receiverPhone, $event)"
+              class="text-xs font-bold text-blue-600 hover:underline">
+              <i class="bi bi-telephone ml-1"></i>{{ job.receiverPhone }}
+            </button>
+            <span *ngIf="!job.receiverPhone" class="text-xs text-gray-500">غير متوفر</span>
           </div>
         </div>
 
-        <!-- Route -->
-        <div class="p-4 bg-gray-50 rounded-xl mb-4">
-          <div class="flex items-start gap-3 mb-3">
-            <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-1">
-              <i class="bi bi-circle text-blue-600 text-xs"></i>
+        <!-- Route Info -->
+        <div class="p-3 bg-gray-50 rounded-2xl border border-gray-100">
+          <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">مسار الشحنة</p>
+          <div class="flex items-center gap-2 text-xs">
+            <div class="flex items-center gap-1 text-blue-600">
+              <i class="bi bi-circle"></i>
+              <span class="truncate max-w-[100px]">{{ job.pickupAddress }}</span>
             </div>
-            <div class="flex-1">
-              <p class="text-xs text-gray-500">الاستلام من</p>
-              <p class="font-medium text-primary-dark text-sm">{{ job.pickupAddress }}</p>
-            </div>
-          </div>
-          <div class="border-r-2 border-dashed border-gray-300 h-3 mr-3 mb-3"></div>
-          <div class="flex items-start gap-3">
-            <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-1">
-              <i class="bi bi-geo-alt-fill text-green-600 text-xs"></i>
-            </div>
-            <div class="flex-1">
-              <p class="text-xs text-gray-500">التسليم إلى</p>
-              <p class="font-medium text-primary-dark text-sm">{{ job.dropoffAddress }}</p>
-              <p class="text-xs text-gray-500 mt-1">{{ job.customerName }}</p>
-              <button (click)="callSender(job.receiverPhone, $event)" class="text-xs text-blue-600 hover:underline mt-1"
-                *ngIf="job.receiverPhone">
-                <i class="bi bi-telephone ml-1"></i>{{ job.receiverPhone }}
-              </button>
+            <i class="bi bi-arrow-left text-gray-400"></i>
+            <div class="flex items-center gap-1 text-green-600">
+              <i class="bi bi-geo-alt-fill"></i>
+              <span class="truncate max-w-[100px]">{{ job.dropoffAddress }}</span>
             </div>
           </div>
         </div>
 
-        <!-- Details -->
-        <div class="flex flex-wrap gap-2 mb-4">
-          <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium">
-            <i class="bi bi-box ml-1"></i>{{ job.weight }} كجم
-          </span>
-        </div>
-
-        <!-- ✅ ADDED: Package Status Bar (READ-ONLY FOR NOW) -->
-        <div class="mb-4">
+        <!-- Status Bar -->
+        <div class="p-3 bg-gray-50 rounded-2xl border border-gray-100">
           <div class="flex items-center justify-between text-xs text-gray-500 mb-2">
             <span>الحالة</span>
             <span class="font-semibold text-primary-dark">{{ job.status }}</span>
@@ -125,27 +147,25 @@
             <span>تم التسليم</span>
           </div>
         </div>
+      </div>
 
-        <!-- Action -->
+      <!-- Actions -->
+      <div class="p-5 pt-0 mt-auto">
         <div class="flex gap-2">
           <button (click)="acceptJob(job)"
-            class="flex-1 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white rounded-xl font-bold">
-            <i class="bi bi-check-circle ml-2"></i>
-            قبول
+            class="flex-1 py-2.5 bg-primary-green text-white rounded-xl font-bold text-xs shadow-lg shadow-primary-green/20 hover:shadow-primary-green/40 hover:-translate-y-0.5 transition-all">
+            <i class="bi bi-check-circle ml-1"></i> قبول
           </button>
-
-          <button (click)="onRejectClick(job)" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold">
-            <i class="bi bi-x-circle ml-2"></i>
-            رفض
+          <button (click)="onRejectClick(job)"
+            class="flex-1 py-2.5 bg-red-500 text-white rounded-xl font-bold text-xs hover:bg-red-600 transition-all">
+            <i class="bi bi-x-circle ml-1"></i> رفض
           </button>
         </div>
-
       </div>
     </div>
   </div>
 
   <!-- Reject Reason Modal -->
-
   <app-reject-reason-modal [isVisible]="showRejectModal" (onConfirm)="handleRejectConfirm($event)"
     (onCancel)="handleRejectCancel()">
   </app-reject-reason-modal>

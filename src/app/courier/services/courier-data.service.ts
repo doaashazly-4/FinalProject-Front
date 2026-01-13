@@ -59,6 +59,10 @@ export interface CourierEarnings {
   thisMonth: number;
   pending: number;
   totalEarned: number;
+  // API response fields
+  totalEarnings?: number;
+  deliveredCount?: number;
+  lastDeliveryDate?: string;
 }
 
 export interface CourierLocationDto {
@@ -103,9 +107,10 @@ export class CourierDataService {
 
   constructor(private http: HttpClient) { }
 
-  /* ===================== NORMALIZER (CORE FIX) ===================== */
-
   private mapBackendJob(job: any): DeliveryJob {
+    // DEBUG: Log raw job data from API to understand structure
+    console.log('🚚 Raw job data from API:', job);
+
     const statusMap: Record<number | string, JobStatus> = {
       0: 'available',
       1: 'accepted',
@@ -116,6 +121,8 @@ export class CourierDataService {
       6: 'failed',
       7: 'returned',
 
+      Pending: 'available',
+      Available: 'available',
       Assigned: 'accepted',
       PickupInProgress: 'picked_up',
       InTransit: 'in_transit',
@@ -125,35 +132,69 @@ export class CourierDataService {
       Cancelled: 'returned'
     };
 
-    return {
-      id: job.id,
-      description: job.description ?? job.requestDescription ?? `طلب توصيل #${job.id}`,
-      weight: job.weight ?? 0,
-      shipmentCost: job.shipmentCost ?? job.codAmount ?? 0,
-      pickupAddress: job.pickupAddress ?? job.pickupLocation ?? 'عنوان الاستلام غير متوفر',
-      dropoffAddress: job.dropoffAddress ?? job.destination ?? 'عنوان التسليم غير متوفر',
-      // Compatibility mappings
-      deliveryAddress: job.dropoffAddress ?? job.destination ?? 'عنوان التسليم غير متوفر',
-      trackingNumber: job.trackingNumber ?? String(job.id),
-      receiverName: job.customerName ?? job.customer?.user?.userName ?? 'عميل',
-      customerPhone: job.receiverPhone ?? job.customer?.user?.phoneNumber ?? '',
-      codAmount: job.shipmentCost ?? job.codAmount ?? 0,
-      items: job.items ?? 'طرد قياسي',
-      notes: job.notes ?? '',
-      estimatedDelivery: job.estimatedDelivery ? new Date(job.estimatedDelivery) : new Date(),
-      courierEarning: job.courierEarning ?? 50, // Mock value if missing
+    // Handle nested packages structure from create-shipment payload OR flat package structure
+    const pkg = (job.packages && job.packages.length > 0)
+      ? job.packages[0]
+      : (job.package || job.request?.packages?.[0] || {});
 
-      pickupLat: job.pickupLat ?? 0,
-      pickupLng: job.pickupLng ?? 0,
-      destinationLat: job.destinationLat ?? 0,
-      destinationLng: job.destinationLng ?? 0,
-      customerName: job.customerName ?? job.customer?.user?.userName ?? 'عميل',
-      receiverPhone: job.receiverPhone ?? job.customer?.user?.phoneNumber ?? '',
-      status: statusMap[job.status] ?? 'available',
+    // Also check request object for additional data
+    const req = job.request || {};
+
+    const result: DeliveryJob = {
+      id: job.id || job.Id || job.packageId || job.requestId || job.ID || 0,
+      description: pkg.description || job.description || req.description || job.Description || `طلب توصيل #${job.id || job.requestId}`,
+      weight: pkg.weight || job.weight || req.weight || job.Weight || 0,
+      shipmentCost: pkg.shipmentCost || job.shipmentCost || job.ShipmentCost || job.codAmount || req.codAmount || 0,
+
+      // Pickup address - try multiple sources
+      pickupAddress: req.source || job.source || job.Source || job.pickupAddress || job.PickupAddress ||
+        req.pickupAddress || pkg.pickupAddress ||
+        (job.pickupLat && job.pickupLng ? `موقع: ${job.pickupLat?.toFixed(4)}, ${job.pickupLng?.toFixed(4)}` : 'عنوان الاستلام غير متوفر'),
+
+      // Dropoff address - try multiple sources  
+      dropoffAddress: pkg.destination || job.destination || job.Destination || job.dropoffAddress ||
+        job.deliveryAddress || req.destination ||
+        (job.destinationLat && job.destinationLng ? `موقع: ${job.destinationLat?.toFixed(4)}, ${job.destinationLng?.toFixed(4)}` : 'عنوان التسليم غير متوفر'),
+
+      // Compatibility mappings
+      deliveryAddress: pkg.destination || job.destination || job.Destination || job.dropoffAddress ||
+        job.deliveryAddress || req.destination ||
+        (job.destinationLat && job.destinationLng ? `موقع: ${job.destinationLat?.toFixed(4)}, ${job.destinationLng?.toFixed(4)}` : 'عنوان التسليم غير متوفر'),
+      trackingNumber: job.trackingNumber || job.TrackingNumber || String(job.id || job.requestId),
+
+      // Customer info - try multiple sources
+      receiverName: pkg.receiverName || job.receiverName || job.ReceiverName || job.customerName ||
+        req.receiverName || job.customer?.user?.userName || job.customer?.name || 'عميل',
+      customerPhone: pkg.receiverPhone || job.receiverPhone || job.ReceiverPhone || job.customerPhone ||
+        req.receiverPhone || job.customer?.user?.phoneNumber || job.customer?.phone || '',
+
+      codAmount: pkg.shipmentCost || job.shipmentCost || job.codAmount || job.CodAmount || req.codAmount || 0,
+      items: job.items ?? 'طرد قياسي',
+      notes: pkg.notes || job.notes || req.notes || job.Notes || '',
+      estimatedDelivery: pkg.expireDate ? new Date(pkg.expireDate) :
+        (job.estimatedDelivery ? new Date(job.estimatedDelivery) :
+          (job.expireDate ? new Date(job.expireDate) : new Date())),
+      courierEarning: job.courierEarning || job.CourierEarning || 50,
+
+      pickupLat: job.pickupLat || job.PickupLat || req.pickupLat || 0,
+      pickupLng: job.pickupLng || job.PickupLng || req.pickupLng || 0,
+      destinationLat: pkg.lat || job.destinationLat || job.DestinationLat || job.lat || req.lat || 0,
+      destinationLng: pkg.lng || job.destinationLng || job.DestinationLng || job.lng || req.lng || 0,
+
+      customerName: pkg.receiverName || job.receiverName || job.ReceiverName || job.customerName ||
+        req.receiverName || job.customer?.user?.userName || job.customer?.name || 'عميل',
+      receiverPhone: pkg.receiverPhone || job.receiverPhone || job.ReceiverPhone || job.customerPhone ||
+        req.receiverPhone || job.customer?.user?.phoneNumber || job.customer?.phone || '',
+      status: statusMap[job.status] ?? statusMap[job.Status] ?? 'available',
       awaitingOTP: false,
-      otp: job.courier?.deliveryOTP // Map OTP from courier object
+      otp: job.courier?.deliveryOTP || job.deliveryOTP || job.otp
     };
+
+    console.log('🚚 Mapped job result:', result);
+    return result;
   }
+
+
 
   /* ===================== DASHBOARD ===================== */
 
@@ -162,7 +203,20 @@ export class CourierDataService {
   }
 
   getEarnings(): Observable<CourierEarnings> {
-    return this.http.get<CourierEarnings>(`${this.apiUrl}/Earnings`);
+    return this.http.get<any>(`${this.apiUrl}/Earnings`).pipe(
+      map(data => ({
+        // Map API response to UI expected format
+        today: data.totalEarnings || 0,  // Use totalEarnings as today's display
+        thisWeek: data.totalEarnings || 0, // Backend doesn't split by week, using total
+        thisMonth: data.totalEarnings || 0, // Backend doesn't split by month, using total
+        pending: 0, // Not provided by backend
+        totalEarned: data.totalEarnings || 0,
+        // Keep original API fields
+        totalEarnings: data.totalEarnings,
+        deliveredCount: data.deliveredCount,
+        lastDeliveryDate: data.lastDeliveryDate
+      }))
+    );
   }
 
   /* ===================== JOBS ===================== */

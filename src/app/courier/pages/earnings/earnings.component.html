@@ -11,62 +11,54 @@
   </div>
 
   <div *ngIf="!isLoading && earnings" class="space-y-6">
-    <!-- Main Stats -->
+    <!-- Main Stats - Updated to show actual API data -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-gradient-to-br from-primary-green to-secondary-teal rounded-2xl p-6 text-white">
+      <!-- Today's Earnings (Total Earnings) -->
+      <div class="bg-gradient-to-br from-primary-green to-secondary-teal rounded-3xl p-6 text-white">
         <div class="flex items-center justify-between mb-4">
           <p class="text-white/80">أرباح اليوم</p>
           <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
             <i class="bi bi-calendar-day text-xl"></i>
           </div>
         </div>
-        <p class="text-4xl font-black">{{ earnings.today }}</p>
+        <p class="text-4xl font-black">{{ earnings.totalEarnings || earnings.today || 0 }}</p>
         <p class="text-white/70 text-sm">جنيه مصري</p>
       </div>
 
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+      <!-- This Week (using total as API doesn't split) -->
+      <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
         <div class="flex items-center justify-between mb-4">
           <p class="text-gray-500">هذا الأسبوع</p>
           <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
             <i class="bi bi-calendar-week text-blue-600 text-xl"></i>
           </div>
         </div>
-        <p class="text-3xl font-black text-primary-dark">{{ earnings.thisWeek }}</p>
+        <p class="text-3xl font-black text-primary-dark">{{ earnings.thisWeek || 0 }}</p>
         <p class="text-gray-500 text-sm">جنيه مصري</p>
       </div>
 
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+      <!-- This Month (using total as API doesn't split) -->
+      <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
         <div class="flex items-center justify-between mb-4">
           <p class="text-gray-500">هذا الشهر</p>
           <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
             <i class="bi bi-calendar-month text-purple-600 text-xl"></i>
           </div>
         </div>
-        <p class="text-3xl font-black text-primary-dark">{{ earnings.thisMonth }}</p>
+        <p class="text-3xl font-black text-primary-dark">{{ earnings.thisMonth || 0 }}</p>
         <p class="text-gray-500 text-sm">جنيه مصري</p>
       </div>
     </div>
 
-    <!-- Secondary Stats -->
+    <!-- Secondary Stats - Show deliveredCount and lastDeliveryDate -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-gray-500 text-sm">أرباح معلقة</p>
-            <p class="text-2xl font-black text-yellow-600 mt-1">{{ earnings.pending }} ج.م</p>
-            <p class="text-xs text-gray-500 mt-2">ستُضاف بعد إتمام المهام</p>
-          </div>
-          <div class="w-16 h-16 rounded-2xl bg-yellow-100 flex items-center justify-center">
-            <i class="bi bi-hourglass-split text-yellow-600 text-2xl"></i>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+      <!-- Total Earnings -->
+      <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-gray-500 text-sm">إجمالي الأرباح</p>
-            <p class="text-2xl font-black text-primary-dark mt-1">{{ earnings.totalEarned }} ج.م</p>
+            <p class="text-2xl font-black text-primary-dark mt-1">{{ earnings.totalEarnings || earnings.totalEarned || 0
+              }} ج.م</p>
             <p class="text-xs text-gray-500 mt-2">منذ بداية العمل</p>
           </div>
           <div class="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center">
@@ -74,20 +66,48 @@
           </div>
         </div>
       </div>
+
+      <!-- Delivered Count -->
+      <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-500 text-sm">عدد التوصيلات</p>
+            <p class="text-2xl font-black text-blue-600 mt-1">{{ earnings.deliveredCount || 0 }}</p>
+            <p class="text-xs text-gray-500 mt-2">إجمالي الشحنات المُسلَّمة</p>
+          </div>
+          <div class="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center">
+            <i class="bi bi-box-seam text-blue-600 text-2xl"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Last Delivery Info -->
+    <div *ngIf="earnings.lastDeliveryDate" class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center flex-shrink-0">
+          <i class="bi bi-check-circle text-green-600 text-2xl"></i>
+        </div>
+        <div>
+          <p class="text-gray-500 text-sm">آخر توصيل ناجح</p>
+          <p class="text-lg font-bold text-primary-dark">{{ earnings.lastDeliveryDate | date:'EEEE, d MMMM yyyy - h:mm
+            a':'':'ar' }}</p>
+        </div>
+      </div>
     </div>
 
     <!-- Info Card -->
-    <div class="bg-gradient-to-l from-blue-50 to-cyan-50 rounded-2xl p-5 border border-blue-100">
+    <div class="bg-gradient-to-l from-blue-50 to-cyan-50 rounded-3xl p-5 border border-blue-100">
       <div class="flex items-center gap-4">
         <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
           <i class="bi bi-info-circle text-blue-600 text-xl"></i>
         </div>
         <div>
           <h3 class="font-bold text-blue-800">كيف تزيد أرباحك؟</h3>
-          <p class="text-blue-600 text-sm mt-1">أكمل المزيد من المهام واحصل على تقييمات عالية لزيادة فرصك في الحصول على مهام أكثر</p>
+          <p class="text-blue-600 text-sm mt-1">أكمل المزيد من المهام واحصل على تقييمات عالية لزيادة فرصك في الحصول على
+            مهام أكثر</p>
         </div>
       </div>
     </div>
   </div>
 </div>
-

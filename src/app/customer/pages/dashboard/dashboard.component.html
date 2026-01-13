@@ -5,20 +5,25 @@
       <h1 class="text-2xl lg:text-3xl font-black text-primary-dark">لوحة تحكم المُستلم</h1>
       <p class="text-gray-600 mt-1">تابع شحناتك الواردة من هنا</p>
     </div>
+    <a routerLink="/customer/track"
+      class="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-br from-primary-green to-secondary-teal text-white font-bold rounded-xl shadow-green hover:shadow-green-lg transition-all">
+      <i class="bi bi-geo-alt"></i>
+      <span>تتبع شحنة</span>
+    </a>
   </div>
 
-  <!-- Stats Cards -->
+  <!-- Stats Cards Grid - Same style as supplier cards -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
     <div *ngFor="let stat of stats; let i = index"
-      class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+      class="group bg-white rounded-3xl p-5 shadow-sm border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
       <div class="flex items-center gap-4">
         <div class="w-14 h-14 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-md"
           [ngClass]="getStatIconBg(i)">
           <i class="bi text-white text-2xl" [ngClass]="stat.icon"></i>
         </div>
         <div class="flex-1">
-          <p class="text-sm text-gray-500 font-medium">{{ stat.label }}</p>
-          <div class="flex items-baseline gap-2 mt-1">
+          <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">{{ stat.label }}</p>
+          <div class="flex items-baseline gap-2">
             <span class="text-2xl font-black text-primary-dark">{{ stat.value }}</span>
             <span *ngIf="stat.trend" class="text-xs font-bold text-green-500">{{ stat.trend }}</span>
           </div>
@@ -29,7 +34,7 @@
 
   <!-- Active Deliveries Alert -->
   <div *ngIf="activeDeliveries.length > 0"
-    class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-5 border border-blue-100">
+    class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-3xl p-5 border border-blue-100">
     <div class="flex items-start gap-4">
       <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
         <i class="bi bi-truck text-blue-600 text-xl animate-pulse"></i>
@@ -53,8 +58,8 @@
 
   <!-- Main Content Grid -->
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-    <!-- Recent Deliveries -->
-    <div class="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <!-- Recent Deliveries Section -->
+    <div class="xl:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="p-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
         <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
           <i class="bi bi-box-seam text-primary-green"></i>
@@ -81,82 +86,87 @@
           <p class="text-gray-500">ستظهر هنا الشحنات المرسلة إليك</p>
         </div>
 
-        <!-- Deliveries List -->
-        <div *ngIf="!isLoading && recentDeliveries.length > 0" class="space-y-3">
+        <!-- Deliveries Grid - Cards like supplier shipment cards -->
+        <div *ngIf="!isLoading && recentDeliveries.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div *ngFor="let delivery of recentDeliveries"
-            class="p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-primary-green/30 hover:shadow-md transition-all duration-200">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div class="flex items-start gap-3">
-                <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                  [ngClass]="delivery.status === 'out_for_delivery' ? 'bg-cyan-100' : 'bg-primary-green/10'">
-                  <i class="bi"
-                    [ngClass]="delivery.status === 'out_for_delivery' ? 'bi-geo-alt-fill text-cyan-600 animate-pulse' : 'bi-box-seam text-primary-green'"></i>
-                </div>
-                <div>
-                  <p class="font-bold text-primary-dark">{{ delivery.trackingNumber }}</p>
-                  <p class="text-sm text-gray-600">{{ delivery.description }}</p>
-                  <p class="text-xs text-gray-500 mt-1">من: {{ delivery.senderName }}</p>
+            class="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden"
+            [ngClass]="{'border-cyan-200 bg-cyan-50/30': delivery.status === 'out_for_delivery'}">
+
+            <!-- Near Delivery Alert -->
+            <div *ngIf="delivery.status === 'out_for_delivery'"
+              class="p-3 bg-gradient-to-l from-cyan-500 to-blue-500 text-white flex items-center gap-3">
+              <i class="bi bi-geo-alt-fill animate-bounce"></i>
+              <span class="font-semibold text-sm">المندوب قريب منك!</span>
+            </div>
+
+            <!-- Card Header -->
+            <div class="p-5 border-b border-gray-100">
+              <div class="flex justify-between items-start mb-4">
+                <span class="text-xs font-black text-gray-300 uppercase tracking-widest">{{ delivery.trackingNumber
+                  }}</span>
+                <div [ngClass]="getStatusClass(delivery.status)"
+                  class="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-transparent shadow-sm">
+                  {{ getStatusText(delivery.status) }}
                 </div>
               </div>
-              <div class="flex items-center gap-3">
-                <span class="px-3 py-1 rounded-full text-xs font-bold border"
-                  [ngClass]="getStatusClass(delivery.status)">
-                  {{ getStatusText(delivery.status) }}
-                </span>
-                <a [routerLink]="['/customer/order', delivery.id]"
-                  class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-primary-green hover:text-white flex items-center justify-center transition-colors">
-                  <i class="bi bi-arrow-left text-sm"></i>
-                </a>
+              <h3
+                class="text-lg font-black text-primary-dark line-clamp-2 group-hover:text-primary-green transition-colors">
+                📦 {{ delivery.description }}
+              </h3>
+              <p class="text-sm text-gray-500 font-medium mt-1">من: {{ delivery.senderName }}</p>
+            </div>
+
+            <!-- Courier Info (if assigned) -->
+            <div *ngIf="delivery.courierName && delivery.status !== 'delivered'"
+              class="flex items-center justify-between p-5 py-3 bg-blue-50/50 border-b border-gray-100">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                  <i class="bi bi-truck"></i>
+                </div>
+                <div>
+                  <p class="text-[10px] font-bold text-gray-400 uppercase leading-none">المندوب</p>
+                  <p class="text-xs font-black text-blue-700">{{ delivery.courierName }}</p>
+                </div>
+              </div>
+              <button *ngIf="delivery.courierPhone" (click)="callCourier(delivery.courierPhone)"
+                class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-xs font-bold hover:bg-blue-200 transition-colors">
+                <i class="bi bi-telephone ml-1"></i> اتصال
+              </button>
+            </div>
+
+            <!-- OTP Section -->
+            <div *ngIf="delivery.deliveryOTP && !delivery.otpVerified"
+              class="p-4 bg-yellow-50 border-b border-yellow-200">
+              <p class="text-xs font-semibold text-yellow-800 mb-1">رمز الاستلام (OTP)</p>
+              <div class="flex items-center justify-between">
+                <span class="text-2xl font-black tracking-widest text-yellow-900">{{ delivery.deliveryOTP }}</span>
+                <span class="text-xs text-yellow-700">أعطه للمندوب عند التسليم</span>
               </div>
             </div>
 
-            <!-- Courier info for active deliveries -->
-            <div *ngIf="delivery.courierName && delivery.status !== 'delivered'"
-              class="mt-3 pt-3 border-t border-gray-200 flex items-center justify-between">
-              <div class="flex items-center gap-2 text-sm">
-                <i class="bi bi-truck text-blue-600"></i>
-                <span class="text-gray-600">المندوب: <strong class="text-primary-dark">{{ delivery.courierName
-                    }}</strong></span>
-              </div>
-              <button *ngIf="delivery.courierPhone" (click)="callCourier(delivery.courierPhone)"
-                class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors">
-                <i class="bi bi-telephone ml-1"></i>
-                اتصال
-              </button>
+            <!-- OTP Verified -->
+            <div *ngIf="delivery.otpVerified"
+              class="p-3 bg-green-50 border-b border-green-200 text-sm font-semibold text-green-800">
+              ✔️ تم تأكيد الاستلام
+            </div>
 
-              <!-- 🔐 OTP Section (Customer) -->
-              <div *ngIf="delivery.deliveryOTP && !delivery.otpVerified"
-                class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
-                <p class="text-sm font-semibold text-yellow-800 mb-1">
-                  رمز الاستلام (OTP)
-                </p>
-
-                <div class="flex items-center justify-between">
-                  <span class="text-2xl font-black tracking-widest text-yellow-900">
-                    {{ delivery.deliveryOTP }}
-                  </span>
-                  <span class="text-xs text-yellow-700">
-                    أعطه للمندوب عند التسليم
-                  </span>
-                </div>
-              </div>
-
-              <!-- ✅ OTP Verified -->
-              <div *ngIf="delivery.otpVerified"
-                class="mt-3 p-3 bg-green-50 border border-green-200 rounded-xl text-sm font-semibold text-green-800">
-                ✔️ تم تأكيد الاستلام
-              </div>
-
+            <!-- Actions -->
+            <div class="p-5">
+              <a [routerLink]="['/customer/order', delivery.id]"
+                class="flex items-center justify-center gap-2 w-full py-2.5 bg-primary-green text-white rounded-xl font-bold text-sm shadow-lg shadow-primary-green/20 hover:shadow-primary-green/40 hover:-translate-y-0.5 transition-all">
+                <i class="bi bi-geo-alt"></i>
+                تتبع الشحنة
+              </a>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Quick Actions & Info -->
+    <!-- Side Panel -->
     <div class="space-y-6">
       <!-- Quick Actions -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="p-5 border-b border-gray-100 bg-gray-50/50">
           <h2 class="text-lg font-bold text-primary-dark flex items-center gap-2">
             <i class="bi bi-lightning-charge text-accent-gold"></i>
@@ -165,7 +175,7 @@
         </div>
         <div class="p-4 grid grid-cols-2 gap-3">
           <a routerLink="/customer/track"
-            class="flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-primary-green to-secondary-teal rounded-xl text-white hover:shadow-lg transition-all duration-300 group">
+            class="flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-primary-green to-secondary-teal rounded-2xl text-white hover:shadow-lg transition-all duration-300 group">
             <div
               class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
               <i class="bi bi-geo-alt text-xl"></i>
@@ -174,7 +184,7 @@
           </a>
 
           <a routerLink="/customer/deliveries"
-            class="flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl text-white hover:shadow-lg transition-all duration-300 group">
+            class="flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl text-white hover:shadow-lg transition-all duration-300 group">
             <div
               class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
               <i class="bi bi-list-ul text-xl"></i>
@@ -183,7 +193,7 @@
           </a>
 
           <a routerLink="/customer/profile"
-            class="flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl text-white hover:shadow-lg transition-all duration-300 group">
+            class="flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl text-white hover:shadow-lg transition-all duration-300 group">
             <div
               class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
               <i class="bi bi-person text-xl"></i>
@@ -192,7 +202,7 @@
           </a>
 
           <a routerLink="/customer/support"
-            class="flex flex-col items-center gap-2 p-4 bg-gray-100 border border-gray-200 rounded-xl text-primary-dark hover:border-primary-green hover:shadow-lg transition-all duration-300 group">
+            class="flex flex-col items-center gap-2 p-4 bg-gray-100 border border-gray-200 rounded-2xl text-primary-dark hover:border-primary-green hover:shadow-lg transition-all duration-300 group">
             <div
               class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center group-hover:scale-110 transition-transform">
               <i class="bi bi-headset text-xl"></i>
@@ -203,7 +213,7 @@
       </div>
 
       <!-- Tips Card -->
-      <div class="bg-gradient-to-br from-primary-dark to-primary-dark-light rounded-2xl p-5 text-white">
+      <div class="bg-gradient-to-br from-primary-dark to-primary-dark-light rounded-3xl p-5 text-white">
         <div class="flex items-center gap-3 mb-4">
           <div class="w-10 h-10 rounded-lg bg-accent-gold/20 flex items-center justify-center">
             <i class="bi bi-lightbulb text-accent-gold"></i>
@@ -219,20 +229,22 @@
         </a>
       </div>
 
-      <!-- Delivery Notification Preferences -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-        <h3 class="font-bold text-primary-dark mb-3 flex items-center gap-2">
-          <i class="bi bi-bell text-primary-green"></i>
-          إشعارات التوصيل
-        </h3>
-        <div class="space-y-3">
+      <!-- Notification Preferences -->
+      <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-5 border-b border-gray-100 bg-gray-50/50">
+          <h3 class="font-bold text-primary-dark flex items-center gap-2">
+            <i class="bi bi-bell text-primary-green"></i>
+            إشعارات التوصيل
+          </h3>
+        </div>
+        <div class="p-4 space-y-3">
           <label
-            class="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+            class="flex items-center justify-between p-3 bg-gray-50 rounded-2xl cursor-pointer hover:bg-gray-100 transition-colors border border-gray-100">
             <span class="text-sm text-gray-700">إشعار عند قرب المندوب</span>
             <input type="checkbox" checked class="w-5 h-5 rounded text-primary-green">
           </label>
           <label
-            class="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+            class="flex items-center justify-between p-3 bg-gray-50 rounded-2xl cursor-pointer hover:bg-gray-100 transition-colors border border-gray-100">
             <span class="text-sm text-gray-700">رسالة SMS عند التسليم</span>
             <input type="checkbox" checked class="w-5 h-5 rounded text-primary-green">
           </label>
