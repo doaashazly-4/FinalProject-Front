@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CourierDataService, CourierTicket } from '../../services/courier-data.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-courier-support',
@@ -16,7 +17,10 @@ export class CourierSupportComponent implements OnInit {
   isLoading = true;
   isSubmitting = false;
 
-  constructor(private data: CourierDataService) {}
+  constructor(
+    private data: CourierDataService,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit(): void {
     this.loadTickets();
@@ -44,11 +48,19 @@ export class CourierSupportComponent implements OnInit {
       const file = input.files[0];
       if (this.newTicket.photos.length < 3) {
         if (!file.type.startsWith('image/')) {
-          alert('يرجى اختيار صورة فقط');
+          this.notificationService.showNotification({
+            title: '⚠️ تنبيه',
+            message: 'يرجى اختيار صورة فقط',
+            type: 'warning'
+          });
           return;
         }
         if (file.size > 5 * 1024 * 1024) {
-          alert('حجم الصورة كبير جداً (الحد الأقصى 5MB)');
+          this.notificationService.showNotification({
+            title: '⚠️ تنبيه',
+            message: 'حجم الصورة كبير جداً (الحد الأقصى 5MB)',
+            type: 'warning'
+          });
           return;
         }
         this.newTicket.photos.push(file);
@@ -58,7 +70,11 @@ export class CourierSupportComponent implements OnInit {
         };
         reader.readAsDataURL(file);
       } else {
-        alert('يمكنك إضافة 3 صور كحد أقصى');
+        this.notificationService.showNotification({
+          title: '⚠️ تنبيه',
+          message: 'يمكنك إضافة 3 صور كحد أقصى',
+          type: 'warning'
+        });
       }
     }
   }
@@ -83,12 +99,16 @@ export class CourierSupportComponent implements OnInit {
 
   submitTicket() {
     if (!this.newTicket.subject || !this.newTicket.message) {
-      alert('يرجى إدخال العنوان والرسالة');
+      this.notificationService.showNotification({
+        title: '⚠️ تنبيه',
+        message: 'يرجى إدخال العنوان والرسالة',
+        type: 'warning'
+      });
       return;
     }
-    
+
     this.isSubmitting = true;
-    
+
     // Create FormData for file upload
     const formData = new FormData();
     formData.append('subject', this.newTicket.subject);
@@ -96,14 +116,18 @@ export class CourierSupportComponent implements OnInit {
     this.newTicket.photos.forEach((photo, index) => {
       formData.append(`photo${index}`, photo);
     });
-    
-    this.data.createTicket({ 
+
+    this.data.createTicket({
       subject: this.newTicket.subject,
       message: this.newTicket.message,
       photos: this.newTicket.photoPreviews
     }).subscribe({
       next: () => {
-        alert('تم إرسال التذكرة، سنتواصل معك قريباً');
+        this.notificationService.showNotification({
+          title: '✅ تم الإرسال',
+          message: 'تم إرسال التذكرة، سنتواصل معك قريباً',
+          type: 'success'
+        });
         this.newTicket = { subject: '', message: '', photos: [], photoPreviews: [] };
         this.isSubmitting = false;
         this.loadTickets();
@@ -122,7 +146,11 @@ export class CourierSupportComponent implements OnInit {
         this.tickets.unshift(newTicket);
         this.newTicket = { subject: '', message: '', photos: [], photoPreviews: [] };
         this.isSubmitting = false;
-        alert('تم إرسال التذكرة، سنتواصل معك قريباً');
+        this.notificationService.showNotification({
+          title: '✅ تم الإرسال',
+          message: 'تم إرسال التذكرة، سنتواصل معك قريباً',
+          type: 'success'
+        });
       }
     });
   }
@@ -167,3 +195,4 @@ export class CourierSupportComponent implements OnInit {
     ];
   }
 }
+

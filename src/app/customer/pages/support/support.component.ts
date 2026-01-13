@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomerDataService, SupportTicket } from '../../services/customer-data.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-customer-support',
@@ -15,7 +16,10 @@ export class CustomerSupportComponent implements OnInit {
   newTicket = { subject: '', message: '' };
   isLoading = true;
 
-  constructor(private data: CustomerDataService) {}
+  constructor(
+    private data: CustomerDataService,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit(): void {
     this.loadTickets();
@@ -39,13 +43,23 @@ export class CustomerSupportComponent implements OnInit {
 
   submitTicket() {
     if (!this.newTicket.subject || !this.newTicket.message) {
-      alert('يرجى إدخال العنوان والرسالة');
+      this.notificationService.showNotification({
+        title: '⚠️ تنبيه',
+        message: 'يرجى إدخال العنوان والرسالة',
+        type: 'warning',
+        icon: 'bi-exclamation-triangle'
+      });
       return;
     }
-    
+
     this.data.createTicket({ subject: this.newTicket.subject, message: this.newTicket.message }).subscribe({
       next: () => {
-        alert('تم إرسال التذكرة، سنتواصل معك قريباً');
+        this.notificationService.showNotification({
+          title: '✅ تم الإرسال',
+          message: 'تم إرسال التذكرة، سنتواصل معك قريباً',
+          type: 'success',
+          icon: 'bi-check-circle-fill'
+        });
         this.newTicket = { subject: '', message: '' };
         this.loadTickets();
       },
@@ -62,7 +76,12 @@ export class CustomerSupportComponent implements OnInit {
         };
         this.tickets.unshift(newTicket);
         this.newTicket = { subject: '', message: '' };
-        alert('تم إرسال التذكرة، سنتواصل معك قريباً');
+        this.notificationService.showNotification({
+          title: '✅ تم الإرسال',
+          message: 'تم إرسال التذكرة، سنتواصل معك قريباً',
+          type: 'success',
+          icon: 'bi-check-circle-fill'
+        });
       }
     });
   }
@@ -106,3 +125,4 @@ export class CustomerSupportComponent implements OnInit {
     ];
   }
 }
+

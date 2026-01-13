@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CourierDataService, DeliveryJob } from '../../services/courier-data.service';
 import { RejectReasonModalComponent } from '../../../shared/components/reject-reason-modal/reject-reason-modal.component';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-available-jobs',
@@ -18,7 +19,10 @@ export class AvailableJobsComponent implements OnInit {
   showRejectModal = false;
   rejectingJob: DeliveryJob | null = null;
 
-  constructor(private dataService: CourierDataService) { }
+  constructor(
+    private dataService: CourierDataService,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit(): void {
     this.loadJobs();
@@ -51,12 +55,22 @@ export class AvailableJobsComponent implements OnInit {
   acceptJob(job: DeliveryJob): void {
     this.dataService.acceptJob(job.id).subscribe({
       next: () => {
-        alert('تم قبول المهمة بنجاح! ستجدها في قسم مهامي.');
+        this.notificationService.showNotification({
+          title: '✅ تم قبول المهمة',
+          message: 'ستجدها في قسم مهامي',
+          type: 'success',
+          icon: 'bi-check-circle-fill'
+        });
         this.jobs = this.jobs.filter(j => j.id !== job.id);
       },
       error: (err) => {
         console.error(err);
-        alert('حدث خطأ أثناء قبول المهمة');
+        this.notificationService.showNotification({
+          title: '❌ خطأ',
+          message: 'حدث خطأ أثناء قبول المهمة',
+          type: 'error',
+          icon: 'bi-x-circle-fill'
+        });
       }
     });
   }
@@ -65,10 +79,20 @@ export class AvailableJobsComponent implements OnInit {
     this.dataService.startDelivery(job.id).subscribe({
       next: () => {
         job.status = 'out_for_delivery';
-        alert('تم بدء التوصيل');
+        this.notificationService.showNotification({
+          title: '🚚 تم بدء التوصيل',
+          message: 'توجه لاستلام الشحنة',
+          type: 'info',
+          icon: 'bi-truck'
+        });
       },
       error: () => {
-        alert('حدث خطأ أثناء بدء التوصيل');
+        this.notificationService.showNotification({
+          title: '❌ خطأ',
+          message: 'حدث خطأ أثناء بدء التوصيل',
+          type: 'error',
+          icon: 'bi-x-circle-fill'
+        });
       }
     });
   }
@@ -83,13 +107,23 @@ export class AvailableJobsComponent implements OnInit {
     this.dataService.rejectJob(this.rejectingJob.id, reason).subscribe({
       next: () => {
         this.jobs = this.jobs.filter(j => j.id !== this.rejectingJob!.id);
-        alert('تم رفض المهمة.');
+        this.notificationService.showNotification({
+          title: 'تم رفض المهمة',
+          message: 'تم إزالة المهمة من قائمتك',
+          type: 'info',
+          icon: 'bi-dash-circle'
+        });
         this.showRejectModal = false;
         this.rejectingJob = null;
       },
       error: (err) => {
         console.error('Error rejecting job:', err);
-        alert('حدث خطأ أثناء رفض المهمة');
+        this.notificationService.showNotification({
+          title: '❌ خطأ',
+          message: 'حدث خطأ أثناء رفض المهمة',
+          type: 'error',
+          icon: 'bi-x-circle-fill'
+        });
         this.showRejectModal = false;
         this.rejectingJob = null;
       }

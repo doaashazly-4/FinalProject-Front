@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { SupplierDataService, Parcel } from '../../services/supplier-data.service';
 import { LynxTalismanComponent } from '../../../shared/components/lynx-talisman/lynx-talisman.component';
 import { AssignmentObservation } from '../../../models/assignment-observation.model';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 
 interface PackageDetail {
@@ -59,7 +60,8 @@ export class ShipmentDetailsComponent implements OnInit {
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private dataService: SupplierDataService
+        private dataService: SupplierDataService,
+        private notificationService: NotificationService
     ) { }
 
     ngOnInit(): void {
@@ -173,31 +175,37 @@ export class ShipmentDetailsComponent implements OnInit {
         pkg.isExpanded = !pkg.isExpanded;
     }
 
+    showDeleteConfirmModal = false;
+
     deleteShipment(): void {
         if (!this.shipment) return;
+        this.showDeleteConfirmModal = true;
+    }
 
-        const confirmMsg = 'هل أنت متأكد من حذف هذه الشحنة نهائياً؟ سيؤدي هذا لإزالتها من قاعدة البيانات.';
-        if (confirm(confirmMsg)) {
-            this.isLoading = true;
-            this.dataService.cancelParcel(this.shipment.id).subscribe({
-                next: () => {
-                    console.log('Shipment deleted successfully');
-                    this.router.navigate(['/supplier/shipments']);
-                },
-                error: (err: any) => {
-                    console.error('Error during shipment deletion:', err);
-
-                    // Check for database constraint error in the 500 response
-                    if (err.status === 500 && err.error?.includes('REFERENCE constraint')) {
-                        alert('فشل الحذف بسبب وجود محتويات (Packages) مرتبطة بهذه الشحنة. يجب تفعيل الحذف التلقائي (Cascade Delete) في خادم قاعدة البيانات أو حذف المحتويات أولاً.');
-                    } else {
-                        alert('حدث خطأ أثناء محاولة حذف الشحنة. يرجى مراجعة سجلات النظام.');
-                    }
-
-                    this.isLoading = false;
+    confirmDeleteShipment(): void {
+        if (!this.shipment) return;
+        this.showDeleteConfirmModal = false;
+        this.isLoading = true;
+        this.dataService.cancelParcel(this.shipment.id).subscribe({
+            next: () => {
+                console.log('Shipment deleted successfully');
+                this.notificationService.showNotification({ title: '✅ تم', message: 'تم حذف الشحنة بنجاح', type: 'success' });
+                this.router.navigate(['/supplier/shipments']);
+            },
+            error: (err: any) => {
+                console.error('Error during shipment deletion:', err);
+                if (err.status === 500 && err.error?.includes('REFERENCE constraint')) {
+                    this.notificationService.showNotification({ title: '❌ خطأ', message: 'فشل الحذف بسبب وجود محتويات مرتبطة. يجب حذف المحتويات أولاً.', type: 'error', duration: 8000 });
+                } else {
+                    this.notificationService.showNotification({ title: '❌ خطأ', message: 'حدث خطأ أثناء حذف الشحنة', type: 'error' });
                 }
-            });
-        }
+                this.isLoading = false;
+            }
+        });
+    }
+
+    cancelDeleteShipment(): void {
+        this.showDeleteConfirmModal = false;
     }
 
     get filteredPackages(): PackageDetail[] {

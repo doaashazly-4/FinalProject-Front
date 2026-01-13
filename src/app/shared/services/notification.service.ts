@@ -46,7 +46,7 @@ export class NotificationService {
       message: `${title}: ${message}`,
       type: 'lynx',
       icon: 'bi-stars',
-      sound: 'assets/sounds/notification.mp3',
+      sound: 'assets/sounds/ringtone-you-would-be-glad-to-know.ogg',
       duration: 5000
     });
   }
@@ -131,11 +131,17 @@ export class NotificationService {
     };
 
     const config = messages[phase.phase];
+
+    // Add sound for important phases
+    const soundPhases = ['nearby', 'arrived', 'otp_required', 'delivered'];
+    const shouldPlaySound = soundPhases.includes(phase.phase);
+
     this.showNotification({
       title: config.title,
       message: config.message,
       type: config.type,
       icon: config.icon,
+      sound: shouldPlaySound ? 'assets/sounds/ringtone-you-would-be-glad-to-know.ogg' : undefined,
       duration: phase.phase === 'otp_required' ? 0 : 6000 // OTP notification stays
     });
   }
@@ -152,7 +158,7 @@ export class NotificationService {
       message: `${data.description || 'شحنة جديدة'} من ${data.source || 'المورد'}`,
       type: isUrgent ? 'warning' : 'info',
       icon: isUrgent ? 'bi-exclamation-triangle-fill' : 'bi-box-seam',
-      sound: 'assets/sounds/notification.mp3',
+      sound: 'assets/sounds/ringtone-you-would-be-glad-to-know.ogg',
       duration: isUrgent ? 10000 : 6000
     });
   }
@@ -192,7 +198,7 @@ export class NotificationService {
       message: 'استعد لاستلام طلبك - المندوب في منطقتك',
       type: 'warning',
       icon: 'bi-geo-alt-fill',
-      sound: 'assets/sounds/notification.mp3',
+      sound: 'assets/sounds/ringtone-you-would-be-glad-to-know.ogg',
       duration: 8000
     });
   }
@@ -219,7 +225,7 @@ export class NotificationService {
       message: 'شكراً لاستخدامك Lynx Delivery',
       type: 'success',
       icon: 'bi-check-circle-fill',
-      sound: 'assets/sounds/notification.mp3',
+      sound: 'assets/sounds/ringtone-you-would-be-glad-to-know.ogg',
       duration: 6000
     });
   }

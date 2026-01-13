@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupplierDataService } from '../../services/supplier-data.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-supplier-settings',
@@ -102,7 +103,10 @@ export class SettingsComponent implements OnInit {
   changedFields: string[] = [];
   isLoading = false;
 
-  constructor(private dataService: SupplierDataService) { }
+  constructor(
+    private dataService: SupplierDataService,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit(): void {
     this.loadSettings();
@@ -149,7 +153,7 @@ export class SettingsComponent implements OnInit {
 
       this.isLoading = false;
       this.changedFields = [];
-      alert('✅ تم حفظ الإعدادات بنجاح');
+      this.notificationService.showNotification({ title: '✅ تم الحفظ', message: 'تم حفظ الإعدادات بنجاح', type: 'success' });
     }, 1000);
   }
 
@@ -217,7 +221,7 @@ export class SettingsComponent implements OnInit {
       };
 
       this.changedFields = [];
-      alert('تم إعادة تعيين الإعدادات');
+      this.notificationService.showNotification({ title: '✅ تم', message: 'تم إعادة تعيين الإعدادات', type: 'info' });
     }
   }
 
@@ -281,10 +285,10 @@ export class SettingsComponent implements OnInit {
             this.themeSettings = importedSettings.themeSettings;
           }
 
-          alert('✅ تم استيراد الإعدادات بنجاح');
+          this.notificationService.showNotification({ title: '✅ تم', message: 'تم استيراد الإعدادات بنجاح', type: 'success' });
         }
       } catch (error) {
-        alert('❌ ملف غير صالح. يرجى التأكد من صحة الملف.');
+        this.notificationService.showNotification({ title: '❌ خطأ', message: 'ملف غير صالح. يرجى التأكد من صحة الملف.', type: 'error' });
       }
     };
     reader.readAsText(file);

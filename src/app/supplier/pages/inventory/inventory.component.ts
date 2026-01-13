@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { SupplierDataService, SupplierProduct } from '../../services/supplier-data.service';
 import { forkJoin } from 'rxjs';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-supplier-inventory',
@@ -41,7 +42,10 @@ export class InventoryComponent implements OnInit {
 
   categories: string[] = [];
 
-  constructor(private data: SupplierDataService) { }
+  constructor(
+    private data: SupplierDataService,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit(): void {
     this.loadInventory();
@@ -119,18 +123,18 @@ export class InventoryComponent implements OnInit {
   // تحديث كمية المنتج
   updateQuantity(productId: string, newQuantity: number): void {
     if (newQuantity < 0) {
-      alert('الكمية لا يمكن أن تكون سالبة');
+      this.notificationService.showNotification({ title: '⚠️ تنبيه', message: 'الكمية لا يمكن أن تكون سالبة', type: 'warning' });
       return;
     }
 
     this.data.updateProductQuantity(productId, newQuantity).subscribe({
       next: () => {
         this.loadInventory();
-        alert('تم تحديث الكمية بنجاح');
+        this.notificationService.showNotification({ title: '✅ تم', message: 'تم تحديث الكمية بنجاح', type: 'success' });
       },
       error: (err) => {
         console.error('خطأ في تحديث الكمية:', err);
-        alert('حدث خطأ أثناء تحديث الكمية');
+        this.notificationService.showNotification({ title: '❌ خطأ', message: 'حدث خطأ أثناء تحديث الكمية', type: 'error' });
       }
     });
   }
@@ -173,6 +177,6 @@ export class InventoryComponent implements OnInit {
 
     // في التطبيق الحقيقي، هنا سيتم إنشاء وتحميل ملف Excel أو PDF
     console.log('تقرير المخزون:', reportData);
-    alert('تم تحميل تقرير المخزون (في النسخة الحقيقية سيتم تنزيل ملف)');
+    this.notificationService.showNotification({ title: '📊 تقرير', message: 'تم تحميل تقرير المخزون (تجريبي)', type: 'info' });
   }
 }

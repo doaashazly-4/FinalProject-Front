@@ -58,13 +58,14 @@ export class CustomerDashboardComponent implements OnInit {
   }
 
   loadOTPForDelivery(delivery: IncomingDelivery): void {
-    // Only fetch OTP when courier is on the way
-    if (delivery.status !== 'out_for_delivery') return;
+    // Only fetch OTP when courier is on the way or assigned
+    if (!['out_for_delivery', 'assigned', 'in_transit'].includes(delivery.status)) return;
 
     this.dataService.trackPackage(Number(delivery.id)).subscribe({
       next: (res) => {
-        delivery.deliveryOTP = res?.Courier?.DeliveryOTP;
-        delivery.otpVerified = res?.Courier?.OTPVerified;
+        // Handle both uppercase and lowercase field names from API
+        delivery.deliveryOTP = res?.deliveryOTP || res?.DeliveryOTP || res?.courier?.deliveryOTP || res?.Courier?.DeliveryOTP;
+        delivery.otpVerified = res?.otpVerified || res?.OTPVerified || res?.courier?.otpVerified || res?.Courier?.OTPVerified || false;
       },
       error: (err) => {
         console.error('Failed to load OTP', err);

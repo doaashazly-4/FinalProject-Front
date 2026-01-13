@@ -1,7 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { OfflineService } from '../.,/../../../services/offline.service'; 
+import { OfflineService } from '../.,/../../../services/offline.service';
+import { NotificationService } from '../../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-failed-delivery-proof',
@@ -36,12 +37,15 @@ export class FailedDeliveryProofComponent {
     { value: 'other', label: 'سبب آخر' }
   ];
 
-  constructor(private offlineService: OfflineService) {} // ✅ جديد
+  constructor(
+    private offlineService: OfflineService,
+    private notificationService: NotificationService
+  ) { }
 
   // الدوال الجديدة
   private checkAttemptsAndAutoReturn(): void {
     this.deliveryAttempts++;
-    
+
     if (this.deliveryAttempts >= this.maxAttempts) {
       this.shouldAutoReturn = true;
       console.log('🚨 تفعيل الإرجاع التلقائي');
@@ -51,11 +55,11 @@ export class FailedDeliveryProofComponent {
 
   private async executeAutoReturn(): Promise<void> {
     if (!this.job || !this.shouldAutoReturn) return;
-    
+
     console.log('📦 بدء عملية الإرجاع للمورد...');
-    
+
     const returnReason = `إرجاع تلقائي بعد ${this.maxAttempts} محاولات فاشلة - ${this.selectedReason}`;
-    
+
     // ✅ استخدام OfflineService
     await this.offlineService.saveReturnToSupplier(
       this.job.id,
@@ -66,9 +70,9 @@ export class FailedDeliveryProofComponent {
 
   private async notifySupplier(returnData: any): Promise<void> {
     if (this.supplierNotified) return;
-    
+
     console.log('📨 إرسال إشعار للمورد...');
-    
+
     this.supplierNotified = true;
     console.log('✅ تم إشعار المورد تلقائياً');
   }
@@ -80,11 +84,11 @@ export class FailedDeliveryProofComponent {
       const file = input.files[0];
       if (this.photos.length < 3) {
         if (!file.type.startsWith('image/')) {
-          alert('يرجى اختيار صورة فقط');
+          this.notificationService.showNotification({ title: '⚠️ تنبيه', message: 'يرجى اختيار صورة فقط', type: 'warning' });
           return;
         }
         if (file.size > 5 * 1024 * 1024) {
-          alert('حجم الصورة كبير جداً (الحد الأقصى 5MB)');
+          this.notificationService.showNotification({ title: '⚠️ تنبيه', message: 'حجم الصورة كبير جداً (الحد الأقصى 5MB)', type: 'warning' });
           return;
         }
         this.photos.push(file);
@@ -94,7 +98,7 @@ export class FailedDeliveryProofComponent {
         };
         reader.readAsDataURL(file);
       } else {
-        alert('يمكنك إضافة 3 صور كحد أقصى');
+        this.notificationService.showNotification({ title: '⚠️ تنبيه', message: 'يمكنك إضافة 3 صور كحد أقصى', type: 'warning' });
       }
     }
   }
@@ -119,12 +123,12 @@ export class FailedDeliveryProofComponent {
 
   async submitFailure(): Promise<void> {
     if (!this.selectedReason) {
-      alert('يرجى اختيار سبب الفشل');
+      this.notificationService.showNotification({ title: '⚠️ تنبيه', message: 'يرجى اختيار سبب الفشل', type: 'warning' });
       return;
     }
 
     if (this.photoPreviews.length === 0) {
-      alert('يرجى التقاط صورة واحدة على الأقل كدليل');
+      this.notificationService.showNotification({ title: '⚠️ تنبيه', message: 'يرجى التقاط صورة واحدة على الأقل كدليل', type: 'warning' });
       return;
     }
 
@@ -132,7 +136,7 @@ export class FailedDeliveryProofComponent {
 
     // ✅ التحقق من المحاولات (محدث)
     this.deliveryAttempts++;
-    
+
     if (this.deliveryAttempts >= this.maxAttempts) {
       this.shouldAutoReturn = true;
       console.log('🚨 تفعيل الإرجاع التلقائي');
@@ -159,9 +163,9 @@ export class FailedDeliveryProofComponent {
           this.photoPreviews,
           this.notes
         );
-        
+
         this.onSubmit.emit(failureData);
-        
+
       } else {
         await this.offlineService.saveFailedDelivery(
           this.job?.id,
@@ -169,8 +173,8 @@ export class FailedDeliveryProofComponent {
           this.photoPreviews,
           this.notes
         );
-        
-        alert('💾 تم حفظ تقرير الفشل، سيتم إرساله عند عودة الإنترنت');
+
+        this.notificationService.showNotification({ title: '💾 تم الحفظ', message: 'تم حفظ تقرير الفشل، سيتم إرساله عند عودة الإنترنت', type: 'info' });
         this.onSubmit.emit(failureData);
       }
 
@@ -181,7 +185,7 @@ export class FailedDeliveryProofComponent {
 
     } catch (error) {
       console.error('❌ فشل حفظ/إرسال التقرير:', error);
-      alert('حدث خطأ في حفظ التقرير، حاول مرة أخرى');
+      this.notificationService.showNotification({ title: '❌ خطأ', message: 'حدث خطأ في حفظ التقرير، حاول مرة أخرى', type: 'error' });
     } finally {
       this.isSubmitting = false;
     }
@@ -190,20 +194,18 @@ export class FailedDeliveryProofComponent {
   // ✅ دالة جديدة لمعالجة الإرجاع التلقائي
   private async handleAutoReturn(failureData: any): Promise<void> {
     const returnReason = `إرجاع تلقائي بعد ${this.maxAttempts} محاولات فاشلة - ${this.selectedReason}`;
-    
+
     try {
       await this.offlineService.saveReturnToSupplier(
         this.job?.id,
         returnReason,
         true
       );
-      
+
       console.log('📦 تم جدولة/إرسال الإرجاع للمورد');
-      
-      setTimeout(() => {
-        alert('⚠️ تم تفعيل الإرجاع التلقائي للمورد');
-      }, 500);
-      
+
+      this.notificationService.showNotification({ title: '⚠️ الإرجاع التلقائي', message: 'تم تفعيل الإرجاع التلقائي للمورد', type: 'warning' });
+
     } catch (error) {
       console.error('❌ فشل حفظ/إرسال الإرجاع:', error);
     }

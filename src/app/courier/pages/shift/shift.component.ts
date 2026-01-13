@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { CourierDataService } from '../../services/courier-data.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../shared/services/notification.service';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { Chart, registerables } from 'chart.js';
@@ -22,7 +23,8 @@ export class ShiftComponent implements OnInit {
 
   constructor(
     private courierService: CourierDataService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private notificationService: NotificationService
   ) { }
 
   ngOnInit(): void { }
@@ -76,7 +78,7 @@ export class ShiftComponent implements OnInit {
       }).then(() => console.log('تمت المشاركة'))
         .catch(err => console.error(err));
     } else {
-      alert('المشاركة غير مدعومة في المتصفح هذا');
+      this.notificationService.showNotification({ title: '⚠️ تنبيه', message: 'المشاركة غير مدعومة في هذا المتصفح', type: 'warning' });
     }
   }
 }

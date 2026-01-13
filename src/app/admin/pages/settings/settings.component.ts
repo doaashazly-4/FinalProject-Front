@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-admin-settings',
@@ -16,8 +17,15 @@ export class AdminSettingsComponent {
     defaultCity: 'القاهرة'
   };
 
+  constructor(private notificationService: NotificationService) { }
+
   save() {
-    alert('تم حفظ الإعدادات');
+    this.notificationService.showNotification({
+      title: '✅ تم الحفظ',
+      message: 'تم حفظ الإعدادات بنجاح',
+      type: 'success'
+    });
   }
 }
+
 

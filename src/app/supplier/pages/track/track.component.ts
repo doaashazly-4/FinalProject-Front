@@ -20,6 +20,7 @@ import { interval, Subscription, timer } from 'rxjs';
 import * as L from 'leaflet';
 import { AuthService } from '../../../shared/services/auth.service';
 import { SignalRService } from '../../../shared/services/signalr.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-track',
@@ -77,8 +78,8 @@ export class TrackComponent
     private dataService: SupplierDataService,
     private route: ActivatedRoute,
     private signalR: SignalRService,
-    private auth: AuthService
-    
+    private auth: AuthService,
+    private notificationService: NotificationService
   ) { }
 
   /* ================= INIT ================= */
@@ -103,11 +104,11 @@ export class TrackComponent
     });
 
     this.route.queryParams.subscribe(params => {
-    if (params['id']) {
-      this.trackingNumber = params['id'];
-      this.searchParcel();
-    }
-  });
+      if (params['id']) {
+        this.trackingNumber = params['id'];
+        this.searchParcel();
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -124,59 +125,59 @@ export class TrackComponent
 
   /* ================= SEARCH ================= */
 
- searchParcel(): void {
-  if (!this.trackingNumber.trim()) {
-    this.errorMessage = 'يرجى إدخال رقم التتبع';
-    return;
-  }
-
-  this.isSearching = true;
-  this.errorMessage = '';
-  this.parcel = null;
-  this.timeline = [];
-
-  // إيقاف أي تتبع سابق
-  this.stopLiveTracking();
-  this.destroyMap();
-
-  this.dataService.trackParcel(this.trackingNumber).subscribe({
-    next: (parcel) => {
-      this.parcel = parcel;
-      this.loadTimeline();
-      this.isSearching = false;
-
-      if (this.shouldShowLiveTracking()) {
-        setTimeout(() => {
-          // 1️⃣ إنشاء الخريطة
-          this.initMap();
-
-          // 2️⃣ تشغيل SignalR
-          const token = this.auth.getToken();
-          if (!token) return;
-
-       this.signalR.startConnection(token).then(() => {
-  if (this.parcel && this.parcel.id) {
-    this.signalR.joinOrderGroup(this.parcel.id);
-  }
-});
-
-
-
-          // 4️⃣ استقبال الموقع اللايف وتحديث الماركر
-          this.signalR.location$.subscribe(location => {
-            if (location) {
-              this.updateCarrierMarker(location.lat, location.lng);
-            }
-          });
-        }, 100);
-      }
-    },
-    error: () => {
-      this.errorMessage = 'لم يتم العثور على شحنة بهذا الرقم';
-      this.isSearching = false;
+  searchParcel(): void {
+    if (!this.trackingNumber.trim()) {
+      this.errorMessage = 'يرجى إدخال رقم التتبع';
+      return;
     }
-  });
-}
+
+    this.isSearching = true;
+    this.errorMessage = '';
+    this.parcel = null;
+    this.timeline = [];
+
+    // إيقاف أي تتبع سابق
+    this.stopLiveTracking();
+    this.destroyMap();
+
+    this.dataService.trackParcel(this.trackingNumber).subscribe({
+      next: (parcel) => {
+        this.parcel = parcel;
+        this.loadTimeline();
+        this.isSearching = false;
+
+        if (this.shouldShowLiveTracking()) {
+          setTimeout(() => {
+            // 1️⃣ إنشاء الخريطة
+            this.initMap();
+
+            // 2️⃣ تشغيل SignalR
+            const token = this.auth.getToken();
+            if (!token) return;
+
+            this.signalR.startConnection(token).then(() => {
+              if (this.parcel && this.parcel.id) {
+                this.signalR.joinOrderGroup(this.parcel.id);
+              }
+            });
+
+
+
+            // 4️⃣ استقبال الموقع اللايف وتحديث الماركر
+            this.signalR.location$.subscribe(location => {
+              if (location) {
+                this.updateCarrierMarker(location.lat, location.lng);
+              }
+            });
+          }, 100);
+        }
+      },
+      error: () => {
+        this.errorMessage = 'لم يتم العثور على شحنة بهذا الرقم';
+        this.isSearching = false;
+      }
+    });
+  }
 
 
   loadDemoParcel(): void {
@@ -219,7 +220,7 @@ export class TrackComponent
     // Start Simulation
     setTimeout(() => {
       this.initMap();
-    //  this.startSimulation();
+      //  this.startSimulation();
     }, 100);
   }
 
@@ -418,7 +419,7 @@ export class TrackComponent
       },
       error: () => {
         this.isSubmittingRating = false;
-        alert('حدث خطأ أثناء إرسال التقييم');
+        this.notificationService.showNotification({ title: '❌ خطأ', message: 'حدث خطأ أثناء إرسال التقييم', type: 'error' });
       }
     });
   }

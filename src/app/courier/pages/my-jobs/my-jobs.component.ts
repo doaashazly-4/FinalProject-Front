@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CourierDataService, DeliveryJob, JobStatus } from '../../services/courier-data.service';
 import { Router } from '@angular/router';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-my-jobs',
@@ -18,7 +19,11 @@ export class MyJobsComponent implements OnInit {
   filter: 'all' | 'active' | 'completed' = 'active';
   isLoading = true;
 
-  constructor(private dataService: CourierDataService, private router: Router) { }
+  constructor(
+    private dataService: CourierDataService,
+    private router: Router,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit(): void {
     this.loadJobs();
@@ -63,11 +68,14 @@ export class MyJobsComponent implements OnInit {
         this.dataService.pickupJob(job.id).subscribe({
           next: () => {
             job.status = 'picked_up';
-            // Removed pickedUpAt assignment as property is removed from interface
           },
           error: (err) => {
             console.error('Error updating job:', err);
-            alert('حدث خطأ أثناء تحديث حالة المهمة');
+            this.notificationService.showNotification({
+              title: '❌ خطأ',
+              message: 'حدث خطأ أثناء تحديث حالة المهمة',
+              type: 'error'
+            });
           }
         });
         break;
@@ -78,7 +86,11 @@ export class MyJobsComponent implements OnInit {
           },
           error: (err) => {
             console.error('Error updating job:', err);
-            alert('حدث خطأ أثناء تحديث حالة المهمة');
+            this.notificationService.showNotification({
+              title: '❌ خطأ',
+              message: 'حدث خطأ أثناء تحديث حالة المهمة',
+              type: 'error'
+            });
           }
         });
         break;
@@ -90,12 +102,15 @@ export class MyJobsComponent implements OnInit {
         }).subscribe({
           next: () => {
             job.status = 'delivered';
-            // Removed deliveredAt assignment as property is removed from interface
             this.applyFilter();
           },
           error: (err) => {
             console.error('Error completing job:', err);
-            alert('حدث خطأ أثناء إتمام المهمة');
+            this.notificationService.showNotification({
+              title: '❌ خطأ',
+              message: 'حدث خطأ أثناء إتمام المهمة',
+              type: 'error'
+            });
           }
         });
         break;
@@ -169,10 +184,19 @@ export class MyJobsComponent implements OnInit {
     this.dataService.startDelivery(job.id).subscribe({
       next: () => {
         job.status = 'out_for_delivery';
-        alert('تم بدء التوصيل');
+        this.notificationService.showNotification({
+          title: '🚚 تم بدء التوصيل',
+          message: 'توجه للعميل لتسليم الشحنة',
+          type: 'info',
+          icon: 'bi-truck'
+        });
       },
       error: () => {
-        alert('حدث خطأ أثناء بدء التوصيل');
+        this.notificationService.showNotification({
+          title: '❌ خطأ',
+          message: 'حدث خطأ أثناء بدء التوصيل',
+          type: 'error'
+        });
       }
     });
   }
@@ -180,9 +204,15 @@ export class MyJobsComponent implements OnInit {
   dropDelivery(job: any): void {
     job.awaitingOTP = true;
   }
+
   confirmOTP(job: any): void {
     if (!job.otp || job.otp.length !== 6) {
-      alert('يرجى إدخال رمز OTP صحيح');
+      this.notificationService.showNotification({
+        title: '⚠️ تنبيه',
+        message: 'يرجى إدخال رمز OTP صحيح (6 أرقام)',
+        type: 'warning',
+        icon: 'bi-exclamation-triangle'
+      });
       return;
     }
 
@@ -192,14 +222,24 @@ export class MyJobsComponent implements OnInit {
         job.awaitingOTP = false;
         job.otp = '';
         this.applyFilter();
-        alert('تم تسليم الشحنة بنجاح');
+        this.notificationService.showNotification({
+          title: '✅ تم تسليم الشحنة',
+          message: 'تم التحقق من OTP والتسليم بنجاح',
+          type: 'success',
+          icon: 'bi-check-circle-fill',
+          sound: 'assets/sounds/ringtone-you-would-be-glad-to-know.ogg'
+        });
       },
       error: () => {
-        alert('رمز OTP غير صحيح');
+        this.notificationService.showNotification({
+          title: '❌ رمز OTP غير صحيح',
+          message: 'يرجى التأكد من الرمز وإعادة المحاولة',
+          type: 'error',
+          icon: 'bi-x-circle-fill'
+        });
       }
     });
   }
-
-
 }
+
 

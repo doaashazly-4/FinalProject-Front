@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { SupplierDataService, SupplierProduct } from '../../services/supplier-data.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-supplier-products',
@@ -17,7 +18,7 @@ export class ProductsComponent implements OnInit {
   searchTerm: string = '';
   selectedCategory: string = 'all';
   isLoading = true;
-  
+
   stats = {
     total: 0,
     active: 0,
@@ -25,7 +26,13 @@ export class ProductsComponent implements OnInit {
     outOfStock: 0
   };
 
-  constructor(private data: SupplierDataService) {}
+  showDeleteConfirmModal = false;
+  deletingProductId: string | null = null;
+
+  constructor(
+    private data: SupplierDataService,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit(): void {
     this.loadProducts();
@@ -59,14 +66,14 @@ export class ProductsComponent implements OnInit {
   filterProducts(): void {
     this.filteredProducts = this.products.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                           product.description.toLowerCase().includes(this.searchTerm.toLowerCase());
+        product.description.toLowerCase().includes(this.searchTerm.toLowerCase());
       const matchesCategory = this.selectedCategory === 'all' || product.category === this.selectedCategory;
       return matchesSearch && matchesCategory;
     });
   }
 
   getStatusText(status: string): string {
-    const statusMap: {[key: string]: string} = {
+    const statusMap: { [key: string]: string } = {
       'active': 'نشط',
       'inactive': 'غير نشط',
       'pending': 'قيد المراجعة'
@@ -87,16 +94,30 @@ export class ProductsComponent implements OnInit {
   }
 
   deleteProduct(productId: string): void {
-    if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
-      this.data.deleteProduct(productId).subscribe({
-        next: () => {
-          this.loadProducts();
-        },
-        error: (err) => {
-          console.error('خطأ في حذف المنتج:', err);
-          alert('حدث خطأ أثناء حذف المنتج');
-        }
-      });
-    }
+    this.deletingProductId = productId;
+    this.showDeleteConfirmModal = true;
+  }
+
+  confirmDelete(): void {
+    if (!this.deletingProductId) return;
+    this.data.deleteProduct(this.deletingProductId).subscribe({
+      next: () => {
+        this.notificationService.showNotification({ title: '✅ تم', message: 'تم حذف المنتج بنجاح', type: 'success' });
+        this.loadProducts();
+        this.showDeleteConfirmModal = false;
+        this.deletingProductId = null;
+      },
+      error: (err) => {
+        console.error('خطأ في حذف المنتج:', err);
+        this.notificationService.showNotification({ title: '❌ خطأ', message: 'حدث خطأ أثناء حذف المنتج', type: 'error' });
+        this.showDeleteConfirmModal = false;
+        this.deletingProductId = null;
+      }
+    });
+  }
+
+  cancelDelete(): void {
+    this.showDeleteConfirmModal = false;
+    this.deletingProductId = null;
   }
 }

@@ -226,16 +226,27 @@ export class CustomerDataService {
 
   //========== Deliveries ==========
   getDeliveries(): Observable<IncomingDelivery[]> {
-    const phone = localStorage.getItem('customer_mobile');
-    if (!phone) {
-      throw new Error('Customer phone not found');
-    }
-
-    return this.http.get<any[]>(
-      `${this.apiUrl}/MyOrders`,
-      { params: { phoneNumber: phone } }
-    ).pipe(
-      map(orders => orders.map(order => this.mapToDelivery(order)))
+    // First try the authenticated /packages endpoint
+    return this.http.get<any[]>(`${this.apiUrl}/packages`).pipe(
+      map(packages => {
+        console.log('📦 Customer packages from API:', packages);
+        return packages.map(pkg => this.mapToDelivery(pkg));
+      }),
+      catchError((err) => {
+        console.warn('Failed to get packages via auth endpoint, trying phone fallback:', err);
+        // Fallback to phone-based endpoint for non-registered customers
+        const phone = localStorage.getItem('customer_mobile');
+        if (!phone) {
+          return of([]);
+        }
+        return this.http.get<any[]>(
+          `${this.apiUrl}/MyOrders`,
+          { params: { phoneNumber: phone } }
+        ).pipe(
+          map(orders => orders.map(order => this.mapToDelivery(order))),
+          catchError(() => of([]))
+        );
+      })
     );
   }
 

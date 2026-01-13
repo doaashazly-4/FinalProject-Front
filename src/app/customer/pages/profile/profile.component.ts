@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CustomerDataService, CustomerProfile } from '../../services/customer-data.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-customer-profile',
@@ -24,11 +25,13 @@ export class CustomerProfileComponent implements OnInit {
   isSaving = false;
   showUpgradeModal = false;
   isRequestingUpgrade = false;
+  showConfirmUpgradeModal = false;
 
   constructor(
     private data: CustomerDataService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit(): void {
     this.loadProfile();
@@ -52,40 +55,71 @@ export class CustomerProfileComponent implements OnInit {
     this.isSaving = true;
     this.data.updateProfile(this.profile).subscribe({
       next: () => {
-        alert('تم حفظ البيانات');
+        this.notificationService.showNotification({
+          title: '✅ تم الحفظ',
+          message: 'تم حفظ البيانات بنجاح',
+          type: 'success',
+          icon: 'bi-check-circle-fill'
+        });
         this.isSaving = false;
       },
       error: (err) => {
         console.error('Error saving profile:', err);
-        alert('حدث خطأ أثناء حفظ البيانات');
+        this.notificationService.showNotification({
+          title: '❌ خطأ',
+          message: 'حدث خطأ أثناء حفظ البيانات',
+          type: 'error',
+          icon: 'bi-x-circle-fill'
+        });
         this.isSaving = false;
       }
     });
   }
 
   requestSupplierUpgrade(): void {
-    if (confirm('هل تريد أن تصبح مُرسل؟ سيتم تحويلك إلى لوحة تحكم المُرسل.')) {
-      this.isRequestingUpgrade = true;
-      this.data.requestSupplierUpgrade().subscribe({
-        next: (response) => {
-          this.isRequestingUpgrade = false;
-          if (response.success) {
-            alert('تم قبول طلبك! سيتم تحويلك إلى لوحة تحكم المُرسل.');
-            // Switch to supplier role
-            this.router.navigate(['/supplier/dashboard']);
-          } else {
-            alert(response.message || 'حدث خطأ أثناء معالجة الطلب');
-          }
-        },
-        error: (err) => {
-          this.isRequestingUpgrade = false;
-          console.error('Error requesting upgrade:', err);
-          // For demo, redirect to supplier registration
-          if (confirm('سيتم تحويلك إلى صفحة التسجيل كـ مُرسل. هل تريد المتابعة؟')) {
-            this.router.navigate(['/register'], { queryParams: { role: 'supplier' } });
-          }
+    // Show upgrade modal instead of confirm()
+    this.showConfirmUpgradeModal = true;
+  }
+
+  confirmUpgrade(): void {
+    this.showConfirmUpgradeModal = false;
+    this.isRequestingUpgrade = true;
+    this.data.requestSupplierUpgrade().subscribe({
+      next: (response) => {
+        this.isRequestingUpgrade = false;
+        if (response.success) {
+          this.notificationService.showNotification({
+            title: '🎉 تم قبول طلبك!',
+            message: 'سيتم تحويلك إلى لوحة تحكم المُرسل',
+            type: 'success',
+            icon: 'bi-check-circle-fill',
+            sound: 'assets/sounds/ringtone-you-would-be-glad-to-know.ogg'
+          });
+          // Switch to supplier role
+          setTimeout(() => this.router.navigate(['/supplier/dashboard']), 1500);
+        } else {
+          this.notificationService.showNotification({
+            title: '⚠️ تنبيه',
+            message: response.message || 'حدث خطأ أثناء معالجة الطلب',
+            type: 'warning'
+          });
         }
-      });
-    }
+      },
+      error: (err) => {
+        this.isRequestingUpgrade = false;
+        console.error('Error requesting upgrade:', err);
+        this.notificationService.showNotification({
+          title: 'ℹ️ معلومات',
+          message: 'سيتم تحويلك إلى صفحة التسجيل كـ مُرسل',
+          type: 'info'
+        });
+        setTimeout(() => this.router.navigate(['/register'], { queryParams: { role: 'supplier' } }), 1500);
+      }
+    });
+  }
+
+  cancelUpgrade(): void {
+    this.showConfirmUpgradeModal = false;
   }
 }
+

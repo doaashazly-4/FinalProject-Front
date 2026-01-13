@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { CourierDataService, DeliveryJob, CourierStat, CourierEarnings, JobStatus } from '../../services/courier-data.service';
 import { PushNotificationService } from '../../../shared/services/push-notification.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 import { Observable } from 'rxjs';
 
 
@@ -37,7 +38,8 @@ export class CourierDashboardComponent implements OnInit {
   constructor(
     private dataService: CourierDataService,
     private pushService: PushNotificationService,
-    private router: Router
+    private router: Router,
+    private notificationService: NotificationService
   ) {
     window.addEventListener('online', () => {
       this.isOnline = true;
@@ -194,14 +196,14 @@ export class CourierDashboardComponent implements OnInit {
         this.activeJobs.push(job);
         if (this.orderTimers[job.id]) { clearTimeout(this.orderTimers[job.id]); delete this.orderTimers[job.id]; }
       },
-      error: (err) => { console.error(err); alert('حدث خطأ أثناء قبول المهمة'); }
+      error: (err) => { console.error(err); this.notificationService.showNotification({ title: '❌ خطأ', message: 'حدث خطأ أثناء قبول المهمة', type: 'error' }); }
     });
   }
 
   rejectJob(job: DeliveryJob, reason?: string): void {
     this.dataService.rejectJob(job.id, reason).subscribe({
       next: () => { this.availableJobs = this.availableJobs.filter(j => j.id !== job.id); },
-      error: (err) => { console.error(err); alert('حدث خطأ أثناء رفض المهمة'); }
+      error: (err) => { console.error(err); this.notificationService.showNotification({ title: '❌ خطأ', message: 'حدث خطأ أثناء رفض المهمة', type: 'error' }); }
     });
   }
 
@@ -356,7 +358,7 @@ export class CourierDashboardComponent implements OnInit {
         },
         error: (err) => {
           console.error('Delivery failed', err);
-          alert('فشل التحقق من رمز OTP');
+          this.notificationService.showNotification({ title: '❌ خطأ', message: 'فشل التحقق من رمز OTP', type: 'error' });
         }
       });
     } else if (this.selectedJobForProof) {

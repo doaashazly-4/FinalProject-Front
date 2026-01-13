@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { SupplierDataService, ReportSummary, DailyReport, Parcel } from '../../services/supplier-data.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-supplier-reports',
@@ -15,16 +16,16 @@ export class SupplierReportsComponent implements OnInit {
   reportSummary: ReportSummary | null = null;
   dailyReports: DailyReport[] = [];
   deliveredParcels: Parcel[] = [];
-  
+
   isLoading = true;
   selectedPeriod: 'today' | 'week' | 'month' = 'today';
-  
+
   periods: { value: 'today' | 'week' | 'month'; label: string }[] = [
     { value: 'today', label: 'اليوم' },
     { value: 'week', label: 'هذا الأسبوع' },
     { value: 'month', label: 'هذا الشهر' }
   ];
-  
+
   // Export Modal
   showExportModal = false;
   exportStartDate = '';
@@ -32,7 +33,10 @@ export class SupplierReportsComponent implements OnInit {
   exportFormat: 'pdf' | 'excel' | 'csv' = 'excel';
   isExporting = false;
 
-  constructor(private dataService: SupplierDataService) {}
+  constructor(
+    private dataService: SupplierDataService,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit(): void {
     this.setDefaultDates();
@@ -43,7 +47,7 @@ export class SupplierReportsComponent implements OnInit {
     const today = new Date();
     const weekAgo = new Date(today);
     weekAgo.setDate(weekAgo.getDate() - 7);
-    
+
     this.exportEndDate = today.toISOString().split('T')[0];
     this.exportStartDate = weekAgo.toISOString().split('T')[0];
   }
@@ -121,7 +125,7 @@ export class SupplierReportsComponent implements OnInit {
         a.download = `report-${this.exportStartDate}-to-${this.exportEndDate}.${this.exportFormat}`;
         a.click();
         window.URL.revokeObjectURL(url);
-        
+
         this.closeExportModal();
         this.isExporting = false;
       },
@@ -130,7 +134,7 @@ export class SupplierReportsComponent implements OnInit {
         // For demo, just close the modal
         this.closeExportModal();
         this.isExporting = false;
-        alert('تم إنشاء التقرير (تجريبي)');
+        this.notificationService.showNotification({ title: '✅ تم', message: 'تم إنشاء التقرير (تجريبي)', type: 'success' });
       }
     });
   }

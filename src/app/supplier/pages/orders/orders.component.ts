@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupplierDataService, SupplierOrderRow } from '../../services/supplier-data.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-supplier-orders',
@@ -16,7 +17,7 @@ export class SupplierOrdersComponent implements OnInit {
   filter = 'الكل';
   searchTerm = '';
   isLoading = true;
-  
+
   statuses = [
     { value: 'الكل', label: 'جميع الطلبات' },
     { value: 'pending', label: 'قيد الانتظار' },
@@ -35,7 +36,10 @@ export class SupplierOrdersComponent implements OnInit {
     totalRevenue: 0
   };
 
-  constructor(private dataService: SupplierDataService) {}
+  constructor(
+    private dataService: SupplierDataService,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit(): void {
     this.loadOrders();
@@ -72,7 +76,7 @@ export class SupplierOrdersComponent implements OnInit {
   applyFilters(): void {
     this.filteredOrders = this.orders.filter(order => {
       const matchesStatus = this.filter === 'الكل' || order.status === this.filter;
-      const matchesSearch = this.searchTerm === '' || 
+      const matchesSearch = this.searchTerm === '' ||
         order.customer.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         order.id.toLowerCase().includes(this.searchTerm.toLowerCase());
       return matchesStatus && matchesSearch;
@@ -96,7 +100,7 @@ export class SupplierOrdersComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error updating order status:', err);
-        alert('حدث خطأ أثناء تحديث حالة الطلب');
+        this.notificationService.showNotification({ title: '❌ خطأ', message: 'حدث خطأ أثناء تحديث حالة الطلب', type: 'error' });
       }
     });
   }

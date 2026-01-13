@@ -166,27 +166,47 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
   // ================= MAPPING =================
 
   mapBackendPackage(pkg: any): IncomingDelivery {
+    console.log('📦 Raw package data:', pkg);
+
     return {
-      id: String(pkg.id),
-      trackingNumber: `PKG-${pkg.id}`,
-      description: pkg.description ?? '—',
-      senderName: pkg.senderName || 'غير محدد',
-      senderPhone: pkg.senderPhone,
-      pickupAddress: pkg.pickupAddress || '—',
-      deliveryAddress: pkg.destination || pkg.deliveryAddress || '—',
-      status: this.mapStatus(pkg.status),
-      createdAt: new Date(pkg.createdAt || new Date()),
+      id: String(pkg.id || pkg.Id),
+      trackingNumber: `PKG-${pkg.id || pkg.Id}`,
+      // Use new backend fields
+      description: pkg.description || pkg.Description || '—',
+      senderName: pkg.supplierName || pkg.source || pkg.Source || 'غير محدد',
+      senderPhone: pkg.senderPhone || '',
+      pickupAddress: pkg.source || pkg.Source || pkg.pickupAddress || '—',
+      deliveryAddress: pkg.destination || pkg.Destination || pkg.deliveryAddress || '—',
+      status: this.mapStatus(pkg.status || pkg.Status),
+      createdAt: new Date(pkg.createdAt || pkg.CreatedAt || new Date()),
       estimatedDelivery: pkg.estimatedDelivery ? new Date(pkg.estimatedDelivery) : undefined,
-      weight: pkg.weight ?? 0,
-      courierName: pkg.courier ? `${pkg.courier.userName || 'Courier #' + pkg.courier.id}` : undefined,
-      courierPhone: pkg.courier?.phone,
-      notes: pkg.shipmentNotes ?? '',
-      deliveryOTP: pkg.deliveryOTP || pkg.courier?.deliveryOTP
+      weight: pkg.weight || pkg.Weight || 0,
+      // Courier info - new format has courierName/courierPhone or nested courier
+      courierName: pkg.courierName || (pkg.courier ? `${pkg.courier.userName || pkg.courier.name || 'Courier #' + pkg.courier.id}` : undefined),
+      courierPhone: pkg.courierPhone || pkg.courier?.phone || pkg.courier?.phoneNumber,
+      notes: pkg.notes || pkg.shipmentNotes || pkg.Notes || '',
+      // OTP - check multiple locations
+      deliveryOTP: pkg.deliveryOTP || pkg.DeliveryOTP || pkg.otp || pkg.courier?.deliveryOTP,
+      otpVerified: pkg.otpVerified || pkg.OTPVerified || pkg.courier?.otpVerified || false,
+      isFragile: pkg.fragile || pkg.Fragile || false,
+      deliveryFee: pkg.shipmentCost || pkg.ShipmentCost || 0
     };
   }
 
   mapStatus(status: number | string): DeliveryStatus {
-    if (typeof status === 'string') return status as DeliveryStatus;
+    if (typeof status === 'string') {
+      // Handle string status from backend
+      const statusMap: Record<string, DeliveryStatus> = {
+        'pending': 'pending',
+        'assigned': 'assigned',
+        'outfordelivery': 'out_for_delivery',
+        'out_for_delivery': 'out_for_delivery',
+        'delivered': 'delivered',
+        'failed': 'failed_delivery',
+        'cancelled': 'cancelled'
+      };
+      return statusMap[status.toLowerCase()] || 'pending';
+    }
 
     switch (status) {
       case 0: return 'pending';

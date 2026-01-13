@@ -75,8 +75,8 @@
     </p>
   </div>
 
-  <!-- 🔐 ENHANCED OTP SECTION -->
-  <div *ngIf="otp && delivery.status === 'out_for_delivery'"
+  <!-- 🔐 ENHANCED OTP SECTION - Show when OTP is available and delivery not yet complete -->
+  <div *ngIf="otp && delivery.status !== 'delivered' && delivery.status !== 'pending'"
     class="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-2xl p-6 text-center relative overflow-hidden">
 
     <!-- Animated Background -->
@@ -94,10 +94,11 @@
       </div>
 
       <h3 class="text-xl font-black text-yellow-900 mb-2">
-        المندوب في انتظارك! 🚴
+        {{ delivery.status === 'out_for_delivery' ? 'المندوب في انتظارك! 🚴' : 'رمز التسليم جاهز 🔐' }}
       </h3>
       <p class="text-yellow-700 text-sm mb-4">
-        أعطِ هذا الرمز للمندوب لتأكيد الاستلام
+        {{ delivery.status === 'out_for_delivery' ? 'أعطِ هذا الرمز للمندوب لتأكيد الاستلام' : 'ستحتاج هذا الرمز عند
+        وصول المندوب' }}
       </p>
 
       <!-- OTP Display -->
