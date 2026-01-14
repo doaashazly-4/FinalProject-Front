@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { BehaviorSubject } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,11 +11,11 @@ export class CourierSignalRService {
   private hubConnection!: signalR.HubConnection;
   public messages$ = new BehaviorSubject<any[]>([]);
 
-  constructor() {}
+  constructor() { }
 
   startConnection() {
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl('https://your-backend-url/chatHub')
+      .withUrl(`${environment.apiUrl}/CourierHub`)
       .withAutomaticReconnect()
       .build();
 
