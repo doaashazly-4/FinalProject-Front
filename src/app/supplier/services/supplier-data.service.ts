@@ -30,6 +30,16 @@ export type ParcelPriority = 'normal' | 'urgent';
 // Supplier tier categorization
 export type SupplierTier = 'prime' | 'plus' | 'platinum';
 
+// ===============================================
+// TIER PRICING STRATEGY
+// ===============================================
+// Extra fees added to base delivery price per request tier
+export const TIER_PRICING = {
+  prime: 0,      // No extra charge for standard requests
+  plus: 25,      // +25 EGP for supplier-assigned courier requests
+  platinum: 35   // +35 EGP for urgent requests
+} as const;
+
 export interface Parcel {
   id: string;
   trackingNumber: string;
@@ -61,9 +71,11 @@ export interface Parcel {
   carrierReview?: string;
   customerID?: string | number;
 
-  // Supplier categorization
+  // Supplier categorization & pricing
   supplierTier: SupplierTier;  // prime, plus, platinum
-  isAutoAssigned?: boolean;     // true if auto-assigned (platinum urgent)
+  tierFee: number;             // Extra fee based on tier (0, 25, or 35 EGP)
+  totalDeliveryFee: number;    // deliveryFee + tierFee
+  isAutoAssigned?: boolean;    // true if supplier explicitly assigned courier
 
   // Backend Raw Fields (for compatibility)
   source?: string;
@@ -460,24 +472,46 @@ export class SupplierDataService {
     const status = mapStatus(req.status || pkg.status);
 
     // Determine priority from isUrgent flag (API returns true/false)
-    const isUrgent = req.isUrgent === true || req.isUrgent === 'true';
+    // Determine priority from isUrgent flag - handle multiple data formats
+    const isUrgent =
+      req.isUrgent === true ||
+      req.isUrgent === 'true' ||
+      req.IsUrgent === true ||
+      req.is_urgent === true ||
+      req.priority === 'urgent' ||
+      req.Priority === 'Urgent' ||
+      pkg.isUrgent === true;
+
     const priority: ParcelPriority = isUrgent ? 'urgent' :
       (req.priority || req.Priority || 'normal').toLowerCase() as ParcelPriority;
+
+    // DEBUG: Log tier detection
+    console.log('🏷️ Tier Detection Debug:', {
+      requestId: req.id || req.requestId,
+      isUrgent,
+      rawIsUrgent: req.isUrgent,
+      rawPriority: req.priority,
+      courierId: req.courierId,
+      assignedCourierId: req.assignedCourierId,
+      supplierAssignedCourier: req.supplierAssignedCourier
+    });
 
     // ===============================================
     // REQUEST-ORIENTED TIER SYSTEM (not supplier-oriented)
     // ===============================================
     // - Prime:    Default request (created & submitted normally)
-    // - Plus:     Supplier explicitly chose/assigned a courier 
+    // - Plus:     Supplier explicitly chose/assigned a courier via "Assign Courier" button
     //             (still appears in available jobs with purple color, NOT auto-assigned)
     // - Platinum: Request marked as urgent (isUrgent = true)
     // ===============================================
 
-    // Check if supplier explicitly assigned a courier to this request
-    const hasAssignedCourier = !!(req.courierId || req.CourierId || req.assignedCourierId || pkg.courierId);
-
-    // Check if this was a supplier-initiated assignment (they chose a specific courier)
-    const isSupplierAssignment = hasAssignedCourier && !isUrgent;
+    // Check if supplier explicitly used "Assign Courier" feature
+    // This should be a specific flag, not just having a courierId (which could be from courier accepting)
+    const isSupplierAssignment =
+      req.supplierAssignedCourier === true ||
+      req.isAssignedBySupplier === true ||
+      req.assignmentType === 'supplier' ||
+      (req.assignedCourierId && !isUrgent); // fallback: has assigned courier but not urgent
 
     let supplierTier: SupplierTier = 'prime'; // Default: standard request
 
@@ -491,6 +525,13 @@ export class SupplierDataService {
       supplierTier = 'plus';
     }
     // else: Prime (default) - standard request shown normally
+
+    console.log('🏷️ Final Tier:', supplierTier, 'Priority:', priority);
+
+    // Calculate tier-based pricing
+    const tierFee = TIER_PRICING[supplierTier];
+    const baseDeliveryFee = req.deliveryFee || req.DeliveryFee || 0;
+    const totalDeliveryFee = baseDeliveryFee + tierFee;
 
     return {
       id: (req.requestId || req.id || req.ID)?.toString() || 'ID-' + Math.random().toString(36).substr(2, 9),
@@ -507,10 +548,12 @@ export class SupplierDataService {
       status: status as ParcelStatus,
       priority,
       supplierTier,
+      tierFee,               // Extra fee for tier (0, 25, or 35 EGP)
+      totalDeliveryFee,      // Base + tier fee
       isAutoAssigned: isSupplierAssignment, // True if supplier explicitly assigned a courier
       createdAt: req.createDate || req.createdAt || req.CreatedAt || new Date().toISOString(),
       updatedAt: req.updatedAt || req.UpdatedAt,
-      deliveryFee: req.deliveryFee || req.DeliveryFee || 0,
+      deliveryFee: baseDeliveryFee,
       codAmount: pkg.shipmentCost || req.codAmount || req.CodAmount || 0,
       isReadyForPickup: (status === 'ready_for_pickup') || req.isReadyForPickup || false,
       isFragile: pkg.fragile || req.isFragile || false,

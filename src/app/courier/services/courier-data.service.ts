@@ -8,6 +8,15 @@ import { NotificationHubService } from '../../shared/services/notification-hub.s
 
 /* ===================== MODELS ===================== */
 
+// ===============================================
+// TIER PRICING STRATEGY (same as supplier-data.service.ts)
+// ===============================================
+export const TIER_PRICING = {
+  prime: 0,      // No extra charge for standard requests
+  plus: 25,      // +25 EGP for supplier-assigned courier requests
+  platinum: 35   // +35 EGP for urgent requests
+} as const;
+
 export interface DeliveryJob {
   id: number;
   description: string;
@@ -36,9 +45,11 @@ export interface DeliveryJob {
   awaitingOTP?: boolean;
   otp?: string;
 
-  // Request categorization
+  // Request categorization & pricing
   priority: 'normal' | 'urgent';
   supplierTier: 'prime' | 'plus' | 'platinum';
+  tierFee: number;           // Extra fee based on tier (0, 25, or 35 EGP)
+  totalEarning: number;      // courierEarning + tierBonus for courier
   isAutoAssigned?: boolean;
 }
 
@@ -203,6 +214,8 @@ export class CourierDataService {
       // Priority and Tier mapping
       priority: (job.isUrgent === true || job.isUrgent === 'true' || req.isUrgent) ? 'urgent' : 'normal',
       supplierTier: this.determineRequestTier(job, req),
+      tierFee: TIER_PRICING[this.determineRequestTier(job, req)],
+      totalEarning: (job.courierEarning || job.CourierEarning || 50) + TIER_PRICING[this.determineRequestTier(job, req)],
       isAutoAssigned: this.isSupplierAssignment(job, req)
     };
 
@@ -222,20 +235,33 @@ export class CourierDataService {
    * - Platinum: Request marked as urgent (isUrgent = true)
    */
   private determineRequestTier(job: any, req: any): 'prime' | 'plus' | 'platinum' {
-    const isUrgent = job.isUrgent === true || job.isUrgent === 'true' || req?.isUrgent === true;
+    // Robust isUrgent check handling multiple API stylistic variations
+    const isUrgent =
+      job.isUrgent === true ||
+      job.isUrgent === 'true' ||
+      job.IsUrgent === true ||
+      req?.isUrgent === true ||
+      req?.isUrgent === 'true' ||
+      job.priority === 'urgent' ||
+      req?.priority === 'urgent';
 
     if (isUrgent) {
       // Platinum: Urgent request - highest priority
       return 'platinum';
     }
 
-    // Check if supplier explicitly assigned a courier (not urgent, but has courier designated)
-    const hasAssignedCourier = !!(job.courierId || job.CourierId || job.assignedCourierId || req?.courierId);
+    // Check if supplier explicitly assigned a courier (Plus tier characteristic)
+    // We check for extensive variations of "assigned" flags
+    const hasAssignedCourier =
+      !!(job.assignedCourierId || req?.assignedCourierId ||
+        job.supplierAssignedCourier === true || req?.supplierAssignedCourier === true);
 
-    if (hasAssignedCourier) {
+    // fallback: if regular courierId exists but it's clearly defined as supplier assignment
+    const explicitSupplierAssignment =
+      (!!(job.courierId || job.CourierId) && (job.assignmentType === 'supplier' || req?.assignmentType === 'supplier'));
+
+    if (hasAssignedCourier || explicitSupplierAssignment) {
       // Plus: Supplier chose to assign this request to a specific courier
-      // Note: This still appears in "available jobs" with distinctive purple styling
-      // Courier can accept or reject - it's NOT auto-assigned
       return 'plus';
     }
 
@@ -247,12 +273,14 @@ export class CourierDataService {
    * Check if courier was explicitly assigned by supplier (Plus tier behavior)
    */
   private isSupplierAssignment(job: any, req: any): boolean {
-    const isUrgent = job.isUrgent === true || job.isUrgent === 'true' || req?.isUrgent === true;
-    const hasAssignedCourier = !!(job.courierId || job.CourierId || job.assignedCourierId || req?.courierId);
-    // Supplier assignment = has courier but not urgent
-    return hasAssignedCourier && !isUrgent;
-  }
+    const isUrgent = this.determineRequestTier(job, req) === 'platinum';
+    if (isUrgent) return false;
 
+    return (
+      !!(job.assignedCourierId || req?.assignedCourierId || job.supplierAssignedCourier === true) ||
+      (!!(job.courierId || job.CourierId) && (job.assignmentType === 'supplier' || req?.assignmentType === 'supplier'))
+    );
+  }
 
 
   /* ===================== DASHBOARD ===================== */

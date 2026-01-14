@@ -204,15 +204,81 @@
       </div>
     </div>
 
-    <!-- Financial -->
-    <div class="bg-white rounded-[2rem] p-8 border">
-      <h3 class="text-xl font-black mb-6">الملخص المالي</h3>
-
-      <div class="flex justify-between">
-        <span class="font-black">الإجمالي</span>
-        <span class="font-black text-accent-gold">
-          {{ shipment.packages[0]?.shipmentCost || 0 }} ج.م
+    <!-- Financial Summary with Tier Pricing -->
+    <div class="bg-white rounded-[2rem] p-8 border" [ngClass]="{
+        'border-amber-200 bg-gradient-to-br from-amber-50/50 to-orange-50/50': shipment.supplierTier === 'platinum',
+        'border-purple-200 bg-gradient-to-br from-purple-50/50 to-indigo-50/50': shipment.supplierTier === 'plus'
+      }">
+      <h3 class="text-xl font-black mb-6 flex items-center gap-2">
+        <i class="bi bi-cash-stack"></i>
+        الملخص المالي
+        <!-- Tier Badge -->
+        <span *ngIf="shipment.supplierTier === 'platinum'"
+          class="px-3 py-1 text-xs font-black rounded-full bg-gradient-to-r from-amber-500 to-red-500 text-white">
+          بلاتينيوم 🔥
         </span>
+        <span *ngIf="shipment.supplierTier === 'plus'"
+          class="px-3 py-1 text-xs font-black rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white">
+          بلس ⚡
+        </span>
+      </h3>
+
+      <div class="space-y-4">
+        <!-- COD Amount -->
+        <div class="flex justify-between items-center py-3 border-b border-gray-100">
+          <span class="text-gray-600 font-semibold">قيمة الشحنة (COD)</span>
+          <span class="font-black text-gray-800">
+            {{ shipment.packages[0]?.shipmentCost || 0 }} ج.م
+          </span>
+        </div>
+
+        <!-- Base Delivery Fee -->
+        <div class="flex justify-between items-center py-3 border-b border-gray-100">
+          <span class="text-gray-600 font-semibold">رسوم التوصيل الأساسية</span>
+          <span class="font-black text-gray-800">
+            {{ shipment.packages[0]?.deliveryFee || 0 }} ج.م
+          </span>
+        </div>
+
+        <!-- Tier Fee (only show if applicable) -->
+        <div *ngIf="shipment.supplierTier !== 'prime' && shipment.supplierTier"
+          class="flex justify-between items-center py-3 border-b-2" [ngClass]="{
+            'border-amber-200': shipment.supplierTier === 'platinum',
+            'border-purple-200': shipment.supplierTier === 'plus'
+          }">
+          <div class="flex items-center gap-2">
+            <span class="font-semibold" [ngClass]="{
+                'text-amber-700': shipment.supplierTier === 'platinum',
+                'text-purple-700': shipment.supplierTier === 'plus'
+              }">
+              {{ shipment.supplierTier === 'platinum' ? 'رسوم الطلب العاجل (بلاتينيوم)' : 'رسوم التعيين المباشر (بلس)'
+              }}
+            </span>
+            <i class="bi" [ngClass]="{
+                'bi-lightning-charge-fill text-amber-500': shipment.supplierTier === 'platinum',
+                'bi-person-check-fill text-purple-500': shipment.supplierTier === 'plus'
+              }"></i>
+          </div>
+          <span class="font-black px-3 py-1 rounded-lg" [ngClass]="{
+              'bg-amber-100 text-amber-700': shipment.supplierTier === 'platinum',
+              'bg-purple-100 text-purple-700': shipment.supplierTier === 'plus'
+            }">
+            {{ shipment.supplierTier === 'platinum' ? '+35' : '+25' }} ج.م
+          </span>
+        </div>
+
+        <!-- Total -->
+        <div class="flex justify-between items-center pt-4">
+          <span class="text-lg font-black">الإجمالي</span>
+          <span class="text-2xl font-black" [ngClass]="{
+              'text-amber-600': shipment.supplierTier === 'platinum',
+              'text-purple-600': shipment.supplierTier === 'plus',
+              'text-accent-gold': shipment.supplierTier === 'prime' || !shipment.supplierTier
+            }">
+            {{ (shipment.packages[0]?.shipmentCost || 0) + (shipment.packages[0]?.deliveryFee || 0) +
+            (shipment.supplierTier === 'platinum' ? 35 : shipment.supplierTier === 'plus' ? 25 : 0) }} ج.م
+          </span>
+        </div>
       </div>
     </div>
 
