@@ -35,6 +35,11 @@ export interface DeliveryJob {
   status: JobStatus;
   awaitingOTP?: boolean;
   otp?: string;
+
+  // Request categorization
+  priority: 'normal' | 'urgent';
+  supplierTier: 'prime' | 'plus' | 'platinum';
+  isAutoAssigned?: boolean;
 }
 
 export type JobStatus =
@@ -193,11 +198,59 @@ export class CourierDataService {
         req.receiverPhone || job.customer?.user?.phoneNumber || job.customer?.phone || '',
       status: statusMap[job.status] ?? statusMap[job.Status] ?? 'available',
       awaitingOTP: false,
-      otp: job.courier?.deliveryOTP || job.deliveryOTP || job.otp
+      otp: job.courier?.deliveryOTP || job.deliveryOTP || job.otp,
+
+      // Priority and Tier mapping
+      priority: (job.isUrgent === true || job.isUrgent === 'true' || req.isUrgent) ? 'urgent' : 'normal',
+      supplierTier: this.determineRequestTier(job, req),
+      isAutoAssigned: this.isSupplierAssignment(job, req)
     };
 
     console.log('🚚 Mapped job result:', result);
     return result;
+  }
+
+  /**
+   * REQUEST-ORIENTED TIER SYSTEM (not supplier-oriented)
+   * =====================================================
+   * Tier is determined by REQUEST characteristics, not supplier subscription level.
+   * This allows for flexible profitability control per request.
+   * 
+   * - Prime:    Default request (created & submitted normally)
+   * - Plus:     Supplier explicitly chose/assigned a courier 
+   *             (still shows in available jobs with purple color, NOT auto-assigned)
+   * - Platinum: Request marked as urgent (isUrgent = true)
+   */
+  private determineRequestTier(job: any, req: any): 'prime' | 'plus' | 'platinum' {
+    const isUrgent = job.isUrgent === true || job.isUrgent === 'true' || req?.isUrgent === true;
+
+    if (isUrgent) {
+      // Platinum: Urgent request - highest priority
+      return 'platinum';
+    }
+
+    // Check if supplier explicitly assigned a courier (not urgent, but has courier designated)
+    const hasAssignedCourier = !!(job.courierId || job.CourierId || job.assignedCourierId || req?.courierId);
+
+    if (hasAssignedCourier) {
+      // Plus: Supplier chose to assign this request to a specific courier
+      // Note: This still appears in "available jobs" with distinctive purple styling
+      // Courier can accept or reject - it's NOT auto-assigned
+      return 'plus';
+    }
+
+    // Prime: Default - standard request
+    return 'prime';
+  }
+
+  /**
+   * Check if courier was explicitly assigned by supplier (Plus tier behavior)
+   */
+  private isSupplierAssignment(job: any, req: any): boolean {
+    const isUrgent = job.isUrgent === true || job.isUrgent === 'true' || req?.isUrgent === true;
+    const hasAssignedCourier = !!(job.courierId || job.CourierId || job.assignedCourierId || req?.courierId);
+    // Supplier assignment = has courier but not urgent
+    return hasAssignedCourier && !isUrgent;
   }
 
 

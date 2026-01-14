@@ -1,21 +1,63 @@
-<div class="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col h-full"
-    [dir]="'rtl'">
+<!-- Card with tier-based styling -->
+<div class="group rounded-3xl shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col h-full"
+    [dir]="'rtl'" [ngClass]="{
+        'bg-gradient-to-br from-amber-50 via-red-50 to-orange-50 border-2 border-amber-400 ring-2 ring-amber-300/50': parcel.supplierTier === 'platinum',
+        'bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 border-2 border-purple-400 ring-2 ring-purple-300/50': parcel.supplierTier === 'plus',
+        'bg-white border border-gray-100': parcel.supplierTier === 'prime' || !parcel.supplierTier
+    }">
 
-    <!-- Package Header -->
-    <div class="p-5 border-b border-gray-100 relative">
+    <!-- Tier Badge - Floating -->
+    <div *ngIf="parcel.supplierTier === 'platinum'" class="absolute -top-1 -right-1 z-30">
+        <div
+            class="bg-gradient-to-r from-amber-500 via-red-500 to-orange-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg animate-pulse flex items-center gap-1">
+            <i class="bi bi-lightning-charge-fill"></i>
+            طلب عاجل
+        </div>
+    </div>
+    <div *ngIf="parcel.supplierTier === 'plus'" class="absolute -top-1 -right-1 z-30">
+        <div
+            class="bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
+            <i class="bi bi-person-check-fill"></i>
+            تعيين مباشر
+        </div>
+    </div>
+
+    <!-- Package Header with tier-specific styling -->
+    <div class="p-5 border-b relative" [ngClass]="{
+            'border-amber-200 bg-gradient-to-r from-amber-100/50 to-orange-100/50': parcel.supplierTier === 'platinum',
+            'border-purple-200 bg-gradient-to-r from-purple-100/50 to-indigo-100/50': parcel.supplierTier === 'plus',
+            'border-gray-100': parcel.supplierTier === 'prime' || !parcel.supplierTier
+        }">
         <div class="flex justify-between items-start mb-4">
-            <span class="text-xs font-black text-gray-300 uppercase tracking-widest">{{ parcel.trackingNumber }}</span>
+            <span class="text-xs font-black uppercase tracking-widest" [ngClass]="{
+                    'text-amber-600': parcel.supplierTier === 'platinum',
+                    'text-purple-600': parcel.supplierTier === 'plus',
+                    'text-gray-300': parcel.supplierTier === 'prime' || !parcel.supplierTier
+                }">{{ parcel.trackingNumber }}</span>
             <div [ngClass]="getStatusClass(parcel.status)"
                 class="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-transparent shadow-sm">
                 <i class="bi" [ngClass]="getStatusIcon(parcel.status)"></i>
                 {{ getStatusText(parcel.status) }}
             </div>
         </div>
-        <h3 class="text-lg font-black text-primary-dark line-clamp-2 group-hover:text-primary-green transition-colors">
-            📦 {{ parcel.description }}
+        <h3 class="text-lg font-black line-clamp-2 transition-colors" [ngClass]="{
+                'text-amber-900 group-hover:text-amber-600': parcel.supplierTier === 'platinum',
+                'text-purple-900 group-hover:text-purple-600': parcel.supplierTier === 'plus',
+                'text-primary-dark group-hover:text-primary-green': parcel.supplierTier === 'prime' || !parcel.supplierTier
+            }">
+            {{ parcel.supplierTier === 'platinum' ? '🔥' : parcel.supplierTier === 'plus' ? '⚡' : '📦' }} {{
+            parcel.description }}
         </h3>
-        <p class="text-sm text-gray-500 font-medium mt-1 flex items-center gap-1">
-            <i class="bi bi-geo-alt text-red-400"></i>
+        <p class="text-sm font-medium mt-1 flex items-center gap-1" [ngClass]="{
+                'text-amber-700': parcel.supplierTier === 'platinum',
+                'text-purple-700': parcel.supplierTier === 'plus',
+                'text-gray-500': parcel.supplierTier === 'prime' || !parcel.supplierTier
+            }">
+            <i class="bi bi-geo-alt" [ngClass]="{
+                'text-red-500': parcel.supplierTier === 'platinum',
+                'text-purple-400': parcel.supplierTier === 'plus',
+                'text-red-400': parcel.supplierTier === 'prime' || !parcel.supplierTier
+            }"></i>
             {{ parcel.deliveryAddress }}
         </p>
         <div class="absolute top-16 left-5 z-20">
@@ -58,19 +100,56 @@
             </div>
         </div>
 
-        <!-- Priority and Date -->
+        <!-- Priority/Tier and Date -->
         <div class="flex gap-3">
-            <div class="flex-1 p-3 bg-gray-50 rounded-2xl border border-gray-100">
-                <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">الأولوية</p>
-                <div class="flex items-center gap-1">
-                    <span class="w-2 h-2 rounded-full"
-                        [ngClass]="parcel.priority === 'urgent' ? 'bg-red-500' : 'bg-blue-500'"></span>
-                    <span class="text-xs font-black">{{ parcel.priority === 'urgent' ? 'عاجل' : 'عادي' }}</span>
+            <!-- Tier & Priority Display -->
+            <div class="flex-1 p-3 rounded-2xl border" [ngClass]="{
+                    'bg-gradient-to-r from-amber-100 to-orange-100 border-amber-300': parcel.supplierTier === 'platinum',
+                    'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300': parcel.supplierTier === 'plus',
+                    'bg-gray-50 border-gray-100': parcel.supplierTier === 'prime' || !parcel.supplierTier
+                }">
+                <p class="text-[10px] font-bold uppercase mb-1" [ngClass]="{
+                        'text-amber-600': parcel.supplierTier === 'platinum',
+                        'text-purple-600': parcel.supplierTier === 'plus',
+                        'text-gray-400': parcel.supplierTier === 'prime' || !parcel.supplierTier
+                    }">الفئة / الأولوية</p>
+                <div class="flex items-center gap-2">
+                    <!-- Tier Badge -->
+                    <span class="px-2 py-0.5 rounded-full text-[9px] font-black" [ngClass]="{
+                            'bg-gradient-to-r from-amber-500 to-red-500 text-white': parcel.supplierTier === 'platinum',
+                            'bg-gradient-to-r from-purple-500 to-indigo-500 text-white': parcel.supplierTier === 'plus',
+                            'bg-gray-200 text-gray-600': parcel.supplierTier === 'prime' || !parcel.supplierTier
+                        }">
+                        {{ parcel.supplierTier === 'platinum' ? 'بلاتينيوم ⚡' : parcel.supplierTier === 'plus' ? 'بلس
+                        🌟' : 'برايم' }}
+                    </span>
+                    <!-- Priority Indicator -->
+                    <span class="flex items-center gap-1 text-xs font-black" [ngClass]="{
+                            'text-red-600': parcel.priority === 'urgent',
+                            'text-gray-600': parcel.priority !== 'urgent'
+                        }">
+                        <span class="w-2 h-2 rounded-full animate-pulse"
+                            [ngClass]="parcel.priority === 'urgent' ? 'bg-red-500' : 'bg-blue-500'"></span>
+                        {{ parcel.priority === 'urgent' ? 'عاجل' : 'عادي' }}
+                    </span>
                 </div>
             </div>
-            <div class="flex-1 p-3 bg-gray-50 rounded-2xl border border-gray-100">
-                <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">التاريخ</p>
-                <p class="text-[10px] font-bold text-gray-700">{{ formatDate(parcel.createdAt) }}</p>
+            <!-- Date -->
+            <div class="flex-1 p-3 rounded-2xl border" [ngClass]="{
+                    'bg-amber-50 border-amber-200': parcel.supplierTier === 'platinum',
+                    'bg-purple-50 border-purple-200': parcel.supplierTier === 'plus',
+                    'bg-gray-50 border-gray-100': parcel.supplierTier === 'prime' || !parcel.supplierTier
+                }">
+                <p class="text-[10px] font-bold uppercase mb-1" [ngClass]="{
+                        'text-amber-600': parcel.supplierTier === 'platinum',
+                        'text-purple-600': parcel.supplierTier === 'plus',
+                        'text-gray-400': parcel.supplierTier === 'prime' || !parcel.supplierTier
+                    }">التاريخ</p>
+                <p class="text-[10px] font-bold" [ngClass]="{
+                        'text-amber-800': parcel.supplierTier === 'platinum',
+                        'text-purple-800': parcel.supplierTier === 'plus',
+                        'text-gray-700': parcel.supplierTier === 'prime' || !parcel.supplierTier
+                    }">{{ formatDate(parcel.createdAt) }}</p>
             </div>
         </div>
     </div>

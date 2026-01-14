@@ -79,6 +79,22 @@ export class ShipmentCardComponent {
         return priority === 'urgent' ? 'bg-red-500 text-white' : 'bg-blue-100 text-blue-600';
     }
 
+    getTierClass(tier: string): string {
+        switch (tier) {
+            case 'platinum': return 'bg-gradient-to-r from-amber-500 to-red-500 text-white';
+            case 'plus': return 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white';
+            default: return 'bg-gray-200 text-gray-600';
+        }
+    }
+
+    getTierText(tier: string): string {
+        switch (tier) {
+            case 'platinum': return 'بلاتينيوم ⚡';
+            case 'plus': return 'بلس 🌟';
+            default: return 'برايم';
+        }
+    }
+
     formatDate(dateStr: string | undefined): string {
         if (!dateStr) return '-';
         return new Date(dateStr).toLocaleString('ar-EG', {

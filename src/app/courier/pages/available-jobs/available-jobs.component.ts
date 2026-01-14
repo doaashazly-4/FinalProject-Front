@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { CourierDataService, DeliveryJob } from '../../services/courier-data.service';
 import { RejectReasonModalComponent } from '../../../shared/components/reject-reason-modal/reject-reason-modal.component';
 import { NotificationService } from '../../../shared/services/notification.service';
+import { NotificationHubService, DeliveryEvent } from '../../../shared/services/notification-hub.service';
 
 @Component({
   selector: 'app-available-jobs',
@@ -12,20 +14,73 @@ import { NotificationService } from '../../../shared/services/notification.servi
   templateUrl: './available-jobs.component.html',
   styleUrls: ['./available-jobs.component.css']
 })
-export class AvailableJobsComponent implements OnInit {
+export class AvailableJobsComponent implements OnInit, OnDestroy {
   jobs: DeliveryJob[] = [];
   isLoading = true;
   isRefreshing = false;
   showRejectModal = false;
   rejectingJob: DeliveryJob | null = null;
 
+  private subscriptions: Subscription[] = [];
+
   constructor(
     private dataService: CourierDataService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private hubService: NotificationHubService
   ) { }
 
   ngOnInit(): void {
     this.loadJobs();
+    this.subscribeToNotifications();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
+  /**
+   * Subscribe to real-time notifications for new jobs
+   */
+  private subscribeToNotifications(): void {
+    // Start SignalR connection
+    this.hubService.startConnection();
+
+    // Listen for new request events (includes urgent & direct assignments)
+    const newRequestSub = this.hubService.newRequest$.subscribe((event: DeliveryEvent) => {
+      console.log('🔔 Received new request event:', event);
+
+      // Trigger tier-specific notification
+      if (event.type === 'urgent_request' || event.supplierTier === 'platinum') {
+        this.notificationService.notifyUrgentRequest({
+          requestId: event.requestId,
+          description: event.description,
+          source: event.source,
+          destination: event.destination
+        });
+      } else if (event.type === 'direct_assignment' || event.supplierTier === 'plus') {
+        this.notificationService.notifyDirectAssignment({
+          requestId: event.requestId,
+          description: event.description,
+          source: event.source,
+          destination: event.destination,
+          supplierName: event.supplierName
+        });
+      } else {
+        this.notificationService.notifyNewRequest({
+          requestId: event.requestId,
+          description: event.description,
+          source: event.source,
+          destination: event.destination,
+          priority: event.priority,
+          supplierTier: event.supplierTier
+        });
+      }
+
+      // Refresh jobs list to get the new job
+      this.refresh();
+    });
+
+    this.subscriptions.push(newRequestSub);
   }
 
   loadJobs(): void {
@@ -36,6 +91,30 @@ export class AvailableJobsComponent implements OnInit {
         this.jobs = jobs ?? []; // ✅ حماية إضافية
         this.isLoading = false;
         this.isRefreshing = false;
+
+        // Check for urgent/plus jobs and highlight them
+        const urgentJobs = this.jobs.filter(j => j.supplierTier === 'platinum');
+        const plusJobs = this.jobs.filter(j => j.supplierTier === 'plus');
+
+        if (urgentJobs.length > 0) {
+          this.notificationService.showNotification({
+            title: `🔥 ${urgentJobs.length} طلب عاجل متاح!`,
+            message: 'لديك طلبات عاجلة تنتظر الاستجابة',
+            type: 'warning',
+            icon: 'bi-lightning-charge-fill',
+            duration: 8000
+          });
+        }
+
+        if (plusJobs.length > 0) {
+          this.notificationService.showNotification({
+            title: `⚡ ${plusJobs.length} تعيين مباشر`,
+            message: 'موردون اختاروك للتوصيل',
+            type: 'info',
+            icon: 'bi-person-check-fill',
+            duration: 6000
+          });
+        }
       },
 
       error: (err) => {

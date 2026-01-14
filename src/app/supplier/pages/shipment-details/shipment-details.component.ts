@@ -35,6 +35,7 @@ interface ShipmentDetails {
     pickupLat: number;
     pickupLng: number;
     priority: string;
+    supplierTier: 'prime' | 'plus' | 'platinum';
     createdAt: string;
     packages: PackageDetail[];
 }
@@ -104,6 +105,7 @@ export class ShipmentDetailsComponent implements OnInit {
                     pickupLat: Number(res.pickupLat || 0),
                     pickupLng: Number(res.pickupLng || 0),
                     priority: res.isUrgent ? 'urgent' : 'normal',
+                    supplierTier: res.isUrgent ? 'platinum' : (res.courierId ? 'plus' : 'prime'),
                     createdAt: String(res.createdAt || new Date().toISOString()),
                     packages: res.packages.map((p: any) => ({
                         description: String(p.description || ''),
@@ -144,7 +146,8 @@ export class ShipmentDetailsComponent implements OnInit {
             source: "Cairo Industrial Zone, Warehouse B4",
             pickupLat: 30.0444,
             pickupLng: 31.2357,
-            priority: "high",
+            priority: "urgent",
+            supplierTier: 'platinum',
             createdAt: new Date().toISOString(),
             packages: [
                 {

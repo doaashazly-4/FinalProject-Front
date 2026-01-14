@@ -459,6 +459,39 @@ export class SupplierDataService {
 
     const status = mapStatus(req.status || pkg.status);
 
+    // Determine priority from isUrgent flag (API returns true/false)
+    const isUrgent = req.isUrgent === true || req.isUrgent === 'true';
+    const priority: ParcelPriority = isUrgent ? 'urgent' :
+      (req.priority || req.Priority || 'normal').toLowerCase() as ParcelPriority;
+
+    // ===============================================
+    // REQUEST-ORIENTED TIER SYSTEM (not supplier-oriented)
+    // ===============================================
+    // - Prime:    Default request (created & submitted normally)
+    // - Plus:     Supplier explicitly chose/assigned a courier 
+    //             (still appears in available jobs with purple color, NOT auto-assigned)
+    // - Platinum: Request marked as urgent (isUrgent = true)
+    // ===============================================
+
+    // Check if supplier explicitly assigned a courier to this request
+    const hasAssignedCourier = !!(req.courierId || req.CourierId || req.assignedCourierId || pkg.courierId);
+
+    // Check if this was a supplier-initiated assignment (they chose a specific courier)
+    const isSupplierAssignment = hasAssignedCourier && !isUrgent;
+
+    let supplierTier: SupplierTier = 'prime'; // Default: standard request
+
+    if (isUrgent) {
+      // Platinum: Urgent request (highest priority, marked with isUrgent flag)
+      supplierTier = 'platinum';
+    } else if (isSupplierAssignment) {
+      // Plus: Supplier explicitly chose to assign this request to a specific courier
+      // Note: This still appears in "available jobs" for the courier with distinctive purple styling
+      // The courier can accept or reject - it's NOT auto-assigned
+      supplierTier = 'plus';
+    }
+    // else: Prime (default) - standard request shown normally
+
     return {
       id: (req.requestId || req.id || req.ID)?.toString() || 'ID-' + Math.random().toString(36).substr(2, 9),
       trackingNumber: (req.trackingNumber || req.requestId || req.id || req.ID || req.RequestID)?.toString() || 'TRK-' + Math.random().toString(36).substr(2, 9),
@@ -472,7 +505,9 @@ export class SupplierDataService {
       receiverEmail: pkg.receiverEmail || req.receiverEmail || '',
       customerID: pkg.customerID || req.customerID || pkg.CustomerID || req.CustomerID || '-',
       status: status as ParcelStatus,
-      priority: (req.priority || req.Priority || 'normal').toLowerCase() as ParcelPriority,
+      priority,
+      supplierTier,
+      isAutoAssigned: isSupplierAssignment, // True if supplier explicitly assigned a courier
       createdAt: req.createDate || req.createdAt || req.CreatedAt || new Date().toISOString(),
       updatedAt: req.updatedAt || req.UpdatedAt,
       deliveryFee: req.deliveryFee || req.DeliveryFee || 0,

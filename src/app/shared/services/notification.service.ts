@@ -151,15 +151,94 @@ export class NotificationService {
   /**
    * Notify when a new request is created by supplier (for couriers)
    */
-  notifyNewRequest(data: { requestId: string | number; description?: string; source?: string; destination?: string; priority?: string }) {
-    const isUrgent = data.priority === 'urgent';
+  notifyNewRequest(data: { requestId: string | number; description?: string; source?: string; destination?: string; priority?: string; supplierTier?: string }) {
+    // Route to tier-specific notification
+    if (data.supplierTier === 'platinum' || data.priority === 'urgent') {
+      this.notifyUrgentRequest(data);
+    } else if (data.supplierTier === 'plus') {
+      this.notifyDirectAssignment(data);
+    } else {
+      // Prime tier - standard notification
+      this.showNotification({
+        title: '📦 طلب جديد متاح',
+        message: `${data.description || 'شحنة جديدة'} من ${data.source || 'المورد'}`,
+        type: 'info',
+        icon: 'bi-box-seam',
+        sound: 'assets/sounds/ringtone-you-would-be-glad-to-know.ogg',
+        duration: 6000
+      });
+    }
+  }
+
+  /**
+   * 🔥 Platinum Tier - URGENT REQUEST notification
+   * Platinum Request - URGENT notification
+   * Highest priority, persistent notification with attention-grabbing styling
+   * Note: Courier can still accept or reject, but request is marked as urgent
+   */
+  notifyUrgentRequest(data: { requestId: string | number; description?: string; source?: string; destination?: string }) {
     this.showNotification({
-      title: isUrgent ? '🚨 طلب عاجل جديد!' : '📦 طلب جديد متاح',
-      message: `${data.description || 'شحنة جديدة'} من ${data.source || 'المورد'}`,
-      type: isUrgent ? 'warning' : 'info',
-      icon: isUrgent ? 'bi-exclamation-triangle-fill' : 'bi-box-seam',
+      title: '🔥 طلب عاجل - بلاتينيوم!',
+      message: `⚡ طلب عاجل جديد #${data.requestId} - ${data.description || 'شحنة عاجلة'}`,
+      type: 'warning',
+      icon: 'bi-lightning-charge-fill',
       sound: 'assets/sounds/ringtone-you-would-be-glad-to-know.ogg',
-      duration: isUrgent ? 10000 : 6000
+      duration: 0 // Persistent - courier must acknowledge
+    });
+
+    // Also show a secondary reminder after 5 seconds
+    setTimeout(() => {
+      this.showNotification({
+        title: '⏰ تذكير: طلب عاجل ينتظر',
+        message: `الطلب #${data.requestId} يحتاج استجابة فورية!`,
+        type: 'error',
+        icon: 'bi-exclamation-triangle-fill',
+        duration: 8000
+      });
+    }, 5000);
+  }
+
+  /**
+   * Plus Request - DIRECT ASSIGNMENT notification
+   * Supplier explicitly chose this courier for the request
+   * Note: Still appears in available jobs - courier can accept or reject
+   */
+  notifyDirectAssignment(data: { requestId: string | number; description?: string; source?: string; destination?: string; supplierName?: string }) {
+    this.showNotification({
+      title: '⚡ طلب مخصص - بلس!',
+      message: `${data.supplierName || 'المورد'} اختارك لتوصيل الطلب #${data.requestId} - اضغط لقبوله`,
+      type: 'info',
+      icon: 'bi-person-check-fill',
+      sound: 'assets/sounds/ringtone-you-would-be-glad-to-know.ogg',
+      duration: 10000 // Stays longer than regular notifications
+    });
+  }
+
+  /**
+   * Notify courier when an urgent job is available in their area
+   */
+  notifyUrgentJobAvailable(data: { requestId: string | number; description?: string; reward?: number }) {
+    this.showNotification({
+      title: '🚨 مهمة عاجلة متاحة!',
+      message: `${data.description || 'طلب عاجل'} - الأجر: ${data.reward || 'عالي'}`,
+      type: 'warning',
+      icon: 'bi-lightning-fill',
+      sound: 'assets/sounds/ringtone-you-would-be-glad-to-know.ogg',
+      duration: 15000
+    });
+  }
+
+  /**
+   * Notify courier when they've been directly assigned by a supplier
+   */
+  notifyCourierDirectlyAssigned(data: { requestId: string | number; supplierName?: string; pickupAddress?: string }) {
+    this.showNotification({
+      title: '🎯 تم اختيارك للتوصيل!',
+      message: `${data.supplierName || 'المورد'} طلب منك استلام الشحنة من ${data.pickupAddress || 'عنوان الاستلام'}`,
+      type: 'success',
+      icon: 'bi-star-fill',
+      sound: 'assets/sounds/ringtone-you-would-be-glad-to-know.ogg',
+      duration: 12000
     });
   }
 

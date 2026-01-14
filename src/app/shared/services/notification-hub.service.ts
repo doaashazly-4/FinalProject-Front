@@ -4,13 +4,15 @@ import { environment } from '../../../environments/environment';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 export interface DeliveryEvent {
-  type: 'new_request' | 'urgent_request' | 'courier_assigned' | 'delivery_started' |
+  type: 'new_request' | 'urgent_request' | 'direct_assignment' | 'courier_assigned' | 'delivery_started' |
   'out_for_delivery' | 'otp_requested' | 'delivered' | 'failed';
   requestId: string | number;
   packageId?: string | number;
   description?: string;
   priority?: 'normal' | 'urgent';
+  supplierTier?: 'prime' | 'plus' | 'platinum';
   courierName?: string;
+  supplierName?: string;
   customerName?: string;
   receiverName?: string;
   receiverPhone?: string;
@@ -91,14 +93,32 @@ export class NotificationHubService {
   private registerEventHandlers(): void {
     if (!this.hubConnection) return;
 
-    // New Request Created (for couriers)
+    // New Request Created (for couriers) - with tier-based routing
     this.hubConnection.on('NewRequestCreated', (data: any) => {
       console.log('📦 New request notification:', data);
+
+      // Determine supplier tier from data
+      const isUrgent = data.isUrgent === true || data.priority === 'urgent';
+      const hasCourierId = !!data.courierId;
+
+      let supplierTier: 'prime' | 'plus' | 'platinum' = 'prime';
+      let eventType: DeliveryEvent['type'] = 'new_request';
+
+      if (isUrgent) {
+        supplierTier = 'platinum';
+        eventType = 'urgent_request';
+      } else if (hasCourierId) {
+        supplierTier = 'plus';
+        eventType = 'direct_assignment';
+      }
+
       const event: DeliveryEvent = {
-        type: data.priority === 'urgent' ? 'urgent_request' : 'new_request',
+        type: eventType,
         requestId: data.requestId || data.id,
         description: data.description,
-        priority: data.priority || 'normal',
+        priority: isUrgent ? 'urgent' : 'normal',
+        supplierTier,
+        supplierName: data.supplierName,
         source: data.source,
         destination: data.destination,
         receiverName: data.receiverName,
@@ -224,6 +244,7 @@ export class NotificationHubService {
     switch (event.type) {
       case 'new_request':
       case 'urgent_request':
+      case 'direct_assignment':
         this.newRequestSubject.next(event);
         break;
       case 'courier_assigned':

@@ -26,30 +26,62 @@
   <!-- Content -->
   <div *ngIf="!isLoading && shipment" class="max-w-7xl mx-auto px-6 lg:px-12 mt-8 space-y-8">
 
-    <!-- Header Card -->
-    <div class="bg-primary-dark rounded-[2.5rem] p-8 text-white">
+    <!-- Header Card with tier-based styling -->
+    <div class="rounded-[2.5rem] p-8 text-white relative overflow-hidden" [ngClass]="{
+        'bg-gradient-to-br from-amber-600 via-red-600 to-orange-600': shipment.supplierTier === 'platinum',
+        'bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600': shipment.supplierTier === 'plus',
+        'bg-primary-dark': shipment.supplierTier === 'prime' || !shipment.supplierTier
+      }">
+
+      <!-- Tier Badge -->
+      <div *ngIf="shipment.supplierTier === 'platinum'" class="absolute top-4 left-4 z-10">
+        <div
+          class="bg-white text-amber-600 text-xs font-black px-4 py-2 rounded-full shadow-lg animate-pulse flex items-center gap-2">
+          <i class="bi bi-lightning-charge-fill"></i>
+          بلاتينيوم - طلب عاجل
+        </div>
+      </div>
+      <div *ngIf="shipment.supplierTier === 'plus'" class="absolute top-4 left-4 z-10">
+        <div
+          class="bg-white text-purple-600 text-xs font-black px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
+          <i class="bi bi-person-check-fill"></i>
+          بلس - تعيين مباشر
+        </div>
+      </div>
+
       <div class="flex flex-col lg:flex-row justify-between gap-8">
 
         <div>
           <h2 class="text-4xl font-black mb-2">#{{ shipment.id }}</h2>
-          <span class="px-5 py-1.5 rounded-full text-sm font-black bg-white/10">
-            {{ getStatusText(shipment.packages[0]?.status || 'pending') }}
-          </span>
-          <p class="mt-4 text-white/60 font-bold">
+          <div class="flex items-center gap-3">
+            <span class="px-5 py-1.5 rounded-full text-sm font-black bg-white/20">
+              {{ getStatusText(shipment.packages[0]?.status || 'pending') }}
+            </span>
+            <span *ngIf="shipment.priority === 'urgent'"
+              class="px-4 py-1.5 rounded-full text-sm font-black bg-red-500 text-white animate-pulse flex items-center gap-1">
+              <i class="bi bi-lightning-charge-fill"></i>
+              عاجل
+            </span>
+          </div>
+          <p class="mt-4 text-white/70 font-bold">
             تم الإنشاء في {{ formatDate(shipment.createdAt) }}
           </p>
         </div>
 
         <div class="flex gap-4">
-          <div class="px-6 py-4 bg-white/10 rounded-xl text-center">
-            <p class="text-xs text-white/40 font-black">COD</p>
-            <p class="text-2xl font-black text-accent-gold">
+          <div class="px-6 py-4 bg-white/15 rounded-xl text-center">
+            <p class="text-xs text-white/50 font-black">COD</p>
+            <p class="text-2xl font-black" [ngClass]="{
+                'text-amber-200': shipment.supplierTier === 'platinum',
+                'text-purple-200': shipment.supplierTier === 'plus',
+                'text-accent-gold': shipment.supplierTier === 'prime' || !shipment.supplierTier
+              }">
               {{ shipment.packages[0]?.shipmentCost || 0 }} ج.م
             </p>
           </div>
-          <div class="px-6 py-4 bg-white/10 rounded-xl text-center">
-            <p class="text-xs text-white/40 font-black">الوزن</p>
-            <p class="text-2xl font-black text-blue-400">
+          <div class="px-6 py-4 bg-white/15 rounded-xl text-center">
+            <p class="text-xs text-white/50 font-black">الوزن</p>
+            <p class="text-2xl font-black text-blue-300">
               {{ shipment.packages[0]?.weight || 0 }} كجم
             </p>
           </div>
@@ -58,7 +90,12 @@
         <!-- Track Button -->
         <div class="mt-6 flex gap-3">
           <a [routerLink]="['/supplier/track']" [queryParams]="{id: shipment.id}"
-            class="flex-1 py-3 bg-primary-green text-white font-black rounded-xl text-center shadow-lg hover:bg-secondary-teal transition-all flex items-center justify-center gap-2">
+            class="flex-1 py-3 font-black rounded-xl text-center shadow-lg transition-all flex items-center justify-center gap-2"
+            [ngClass]="{
+              'bg-white text-amber-600 hover:bg-amber-100': shipment.supplierTier === 'platinum',
+              'bg-white text-purple-600 hover:bg-purple-100': shipment.supplierTier === 'plus',
+              'bg-primary-green text-white hover:bg-secondary-teal': shipment.supplierTier === 'prime' || !shipment.supplierTier
+            }">
             <i class="bi bi-geo-alt"></i>
             تتبع الشحنة
           </a>
@@ -100,11 +137,26 @@
         </div>
 
         <div>
-          <p class="text-xs text-gray-400 font-black">الأولوية</p>
-          <span class="px-4 py-1 rounded-lg text-xs font-black"
-            [ngClass]="getPriorityClass(shipment.priority || 'normal')">
-            {{ shipment.priority || 'normal' }}
-          </span>
+          <p class="text-xs text-gray-400 font-black">الفئة / الأولوية</p>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="px-3 py-1 rounded-full text-xs font-black" [ngClass]="{
+                'bg-gradient-to-r from-amber-500 to-red-500 text-white': shipment.supplierTier === 'platinum',
+                'bg-gradient-to-r from-purple-500 to-indigo-500 text-white': shipment.supplierTier === 'plus',
+                'bg-gray-200 text-gray-600': shipment.supplierTier === 'prime' || !shipment.supplierTier
+              }">
+              {{ shipment.supplierTier === 'platinum' ? 'بلاتينيوم ⚡' : shipment.supplierTier === 'plus' ? 'بلس 🌟' :
+              'برايم' }}
+            </span>
+            <span *ngIf="shipment.priority === 'urgent'"
+              class="px-3 py-1 rounded-full text-xs font-black bg-red-500 text-white flex items-center gap-1">
+              <i class="bi bi-lightning-charge-fill"></i>
+              عاجل
+            </span>
+            <span *ngIf="shipment.priority !== 'urgent'"
+              class="px-3 py-1 rounded-full text-xs font-black bg-blue-100 text-blue-600">
+              عادي
+            </span>
+          </div>
         </div>
 
         <div>
