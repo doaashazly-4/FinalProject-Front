@@ -66,7 +66,7 @@
   <div *ngIf="!isLoading && filteredParcels.length > 0"
     class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     <app-shipment-card *ngFor="let parcel of filteredParcels; let i = index" [parcel]="parcel" [index]="i"
-      (onMarkReady)="markReadyForPickup($event)" (onAssign)="openAssignModal($event)" (onDelete)="cancelOrder($event)">
+      (onTrack)="trackParcel($event)" (onMarkReady)="markReadyForPickup($event)" (onAssign)="openAssignModal($event)" (onDelete)="cancelOrder($event)">
     </app-shipment-card>
   </div>
 </div>

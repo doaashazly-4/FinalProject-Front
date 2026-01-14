@@ -27,6 +27,9 @@ export type ParcelStatus =
 
 export type ParcelPriority = 'normal' | 'urgent';
 
+// Supplier tier categorization
+export type SupplierTier = 'prime' | 'plus' | 'platinum';
+
 export interface Parcel {
   id: string;
   trackingNumber: string;
@@ -57,6 +60,10 @@ export interface Parcel {
   carrierRating?: number;
   carrierReview?: string;
   customerID?: string | number;
+
+  // Supplier categorization
+  supplierTier: SupplierTier;  // prime, plus, platinum
+  isAutoAssigned?: boolean;     // true if auto-assigned (platinum urgent)
 
   // Backend Raw Fields (for compatibility)
   source?: string;
@@ -562,16 +569,30 @@ export class SupplierDataService {
   // ================= TRACKING =================
 
   trackParcel(requestId: string): Observable<Parcel> {
-    return this.http.get<any>(`${this.apiUrl}/TrackOrder/${requestId}`).pipe(
-      map(res => ({
-        id: res.requestId,
-        trackingNumber: res.requestId,
-        status: res.status.toLowerCase(),
-        isReadyForPickup: false,
-        deliveryFee: 0,
-        codAmount: 0,
-        createdAt: new Date().toISOString()
-      }) as Parcel)
+    // First try to get full parcel data from the Request endpoint
+    return this.getParcelById(requestId).pipe(
+      catchError((err) => {
+        console.warn('Failed to get parcel from Request endpoint, trying TrackOrder:', err);
+        // Fallback to TrackOrder endpoint
+        return this.http.get<any>(`${this.apiUrl}/TrackOrder/${requestId}`).pipe(
+          map(res => ({
+            id: res.requestId || requestId,
+            trackingNumber: res.requestId || requestId,
+            description: res.description || 'شحنة',
+            weight: res.weight || 0,
+            pickupAddress: res.source || '',
+            deliveryAddress: res.destination || '',
+            receiverName: res.receiverName || 'عميل',
+            receiverPhone: res.receiverPhone || '-',
+            status: (res.status || 'pending').toString().toLowerCase() as any,
+            priority: (res.priority || 'normal').toLowerCase() as any,
+            isReadyForPickup: false,
+            deliveryFee: res.deliveryFee || 0,
+            codAmount: res.codAmount || res.shipmentCost || 0,
+            createdAt: res.createdAt || new Date().toISOString()
+          }) as Parcel)
+        );
+      })
     );
   }
 

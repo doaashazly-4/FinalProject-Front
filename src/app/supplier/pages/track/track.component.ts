@@ -172,8 +172,16 @@ export class TrackComponent
           }, 100);
         }
       },
-      error: () => {
-        this.errorMessage = 'لم يتم العثور على شحنة بهذا الرقم';
+      error: (err) => {
+        console.error('Error fetching parcel:', err);
+        // Fallback to demo mode with notification
+        this.notificationService.showNotification({
+          title: '⚠️ وضع العرض التجريبي',
+          message: 'تعذر جلب بيانات الشحنة. سيتم عرض بيانات تجريبية.',
+          type: 'warning',
+          duration: 5000
+        });
+        this.loadDemoParcel();
         this.isSearching = false;
       }
     });

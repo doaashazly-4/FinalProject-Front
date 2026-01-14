@@ -33,7 +33,7 @@
         <div>
           <h2 class="text-4xl font-black mb-2">#{{ shipment.id }}</h2>
           <span class="px-5 py-1.5 rounded-full text-sm font-black bg-white/10">
-            {{ getStatusText(shipment.packages[0].status || 'pending') }}
+            {{ getStatusText(shipment.packages[0]?.status || 'pending') }}
           </span>
           <p class="mt-4 text-white/60 font-bold">
             تم الإنشاء في {{ formatDate(shipment.createdAt) }}
@@ -44,15 +44,24 @@
           <div class="px-6 py-4 bg-white/10 rounded-xl text-center">
             <p class="text-xs text-white/40 font-black">COD</p>
             <p class="text-2xl font-black text-accent-gold">
-              {{ shipment.packages[0].shipmentCost || 0 }} ج.م
+              {{ shipment.packages[0]?.shipmentCost || 0 }} ج.م
             </p>
           </div>
           <div class="px-6 py-4 bg-white/10 rounded-xl text-center">
             <p class="text-xs text-white/40 font-black">الوزن</p>
             <p class="text-2xl font-black text-blue-400">
-              {{ shipment.packages[0].weight || 0 }} كجم
+              {{ shipment.packages[0]?.weight || 0 }} كجم
             </p>
           </div>
+        </div>
+
+        <!-- Track Button -->
+        <div class="mt-6 flex gap-3">
+          <a [routerLink]="['/supplier/track']" [queryParams]="{id: shipment.id}"
+            class="flex-1 py-3 bg-primary-green text-white font-black rounded-xl text-center shadow-lg hover:bg-secondary-teal transition-all flex items-center justify-center gap-2">
+            <i class="bi bi-geo-alt"></i>
+            تتبع الشحنة
+          </a>
         </div>
 
       </div>
@@ -74,7 +83,7 @@
         <div>
           <p class="text-xs font-black text-blue-600">جهة الوصول</p>
           <p class="font-black">
-            {{ shipment.packages[0].destination || '-' }}
+            {{ shipment.packages[0]?.destination || '-' }}
           </p>
         </div>
       </div>
@@ -87,7 +96,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <p class="text-xs text-gray-400 font-black">الوصف</p>
-          <p class="font-black">{{ shipment.packages[0].description || '-' }}</p>
+          <p class="font-black">{{ shipment.packages[0]?.description || '-' }}</p>
         </div>
 
         <div>
@@ -100,13 +109,13 @@
 
         <div>
           <p class="text-xs text-gray-400 font-black">الأبعاد</p>
-          <p class="font-black">{{ shipment.packages[0].dimensions || 'غير محددة' }}</p>
+          <p class="font-black">{{ shipment.packages[0]?.dimensions || 'غير محددة' }}</p>
         </div>
 
         <div>
           <p class="text-xs text-gray-400 font-black">تاريخ متوقع</p>
           <p class="font-black">
-            {{ formatDate(shipment.packages[0].expireDate || shipment.createdAt) }}
+            {{ formatDate(shipment.packages[0]?.expireDate || shipment.createdAt) }}
           </p>
         </div>
 
@@ -130,14 +139,14 @@
         <div>
           <p class="text-xs text-gray-400 font-black">الاسم</p>
           <p class="font-black">
-            {{ shipment.packages[0].receiverName || 'عميل' }}
+            {{ shipment.packages[0]?.receiverName || 'عميل' }}
           </p>
         </div>
 
         <div>
           <p class="text-xs text-gray-400 font-black">رقم الهاتف</p>
           <p class="font-black">
-            {{ shipment.packages[0].receiverPhone || 'غير متوفر' }}
+            {{ shipment.packages[0]?.receiverPhone || 'غير متوفر' }}
           </p>
         </div>
       </div>
@@ -150,7 +159,7 @@
       <div class="flex justify-between">
         <span class="font-black">الإجمالي</span>
         <span class="font-black text-accent-gold">
-          {{ shipment.packages[0].shipmentCost || 0 }} ج.م
+          {{ shipment.packages[0]?.shipmentCost || 0 }} ج.م
         </span>
       </div>
     </div>

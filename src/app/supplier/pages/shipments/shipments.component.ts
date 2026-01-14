@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { SupplierDataService, Parcel, ParcelStatus, AvailableCarrier } from '../../services/supplier-data.service';
 
 import { ShipmentCardComponent } from '../../components/shipment-card/shipment-card.component';
@@ -52,7 +52,8 @@ export class ShipmentsComponent implements OnInit {
 
   constructor(
     private dataService: SupplierDataService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -232,6 +233,11 @@ export class ShipmentsComponent implements OnInit {
   closeDetailsModal(): void {
     this.showDetailsModal = false;
     this.detailsParcel = null;
+  }
+
+  // Track Parcel
+  trackParcel(parcel: Parcel): void {
+    this.router.navigate(['/supplier/track'], { queryParams: { id: parcel.trackingNumber } });
   }
 
   // Cancel Order
